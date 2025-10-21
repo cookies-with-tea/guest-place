@@ -1,2 +1,3 @@
-# guest-place
-A project to train and improve your skills
+## Guest Place
+
+A project to train and improve your skills.
