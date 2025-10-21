@@ -6,6 +6,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/image'],
+  components: {
+    global: false,
+    dirs: [],
+  },
   alias: {
     '@': fileURLToPath(new URL('./app', import.meta.url)),
     '#shared': fileURLToPath(new URL('./app/shared', import.meta.url)),

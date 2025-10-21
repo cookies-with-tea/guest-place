@@ -37,7 +37,6 @@
 
 <script setup lang="ts">
 import {UiButton} from '#shared/ui';
-
 </script>
 
 <style lang="scss" scoped>
