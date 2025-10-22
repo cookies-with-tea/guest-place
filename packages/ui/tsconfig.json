@@ -1,5 +1,13 @@
 {
 	"extends": "../../packages/typescript-config/base",
-	"include": ["src/**/*", "index.ts", "vue-shim.d.ts"],
+	"include": [
+		"src/**/*",
+		"index.ts",
+		"vue-shim.d.ts",
+		"vite.config.ts",
+		"public/**/*",
+		"public/**/*",
+		"vite-svg-sprite-inline-plugin.ts"
+	],
 	"exclude": ["node_modules", "dist"]
 }

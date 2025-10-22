@@ -12,6 +12,9 @@ export default defineConfig({
 			exposes: {
 				'./TranslationsRoutes': './src/app/router/index.ts',
 			},
+			remotes: {
+				'@admin-panel/ui': 'http://localhost:3003/assets/remoteEntry.js',
+			},
 			shared: ['vue', 'vue-router'],
 		}),
 	],
