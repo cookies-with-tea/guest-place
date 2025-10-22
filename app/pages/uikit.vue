@@ -1,23 +1,23 @@
 <template>
-	<div class="ui-kit">
-		<div class="box">
-			<div class="column">
-				<UiButton> Hi </UiButton>
+  <div class="ui-kit">
+    <div class="box">
+      <div class="column">
+        <UiButton> Hi </UiButton>
 
-				<UiButton> Hi </UiButton>
+        <UiButton> Hi </UiButton>
 
-				<UiButton> Hi </UiButton>
-			</div>
+        <UiButton> Hi </UiButton>
+      </div>
 
-			<div class="column">
-				<UiButton> Hi 2 </UiButton>
+      <div class="column">
+        <UiButton> Hi 2 </UiButton>
 
-				<UiButton> Hi 2 </UiButton>
+        <UiButton> Hi 2 </UiButton>
 
-				<UiButton> Hi 2 </UiButton>
-			</div>
-		</div>
-	</div>
+        <UiButton> Hi 2 </UiButton>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
