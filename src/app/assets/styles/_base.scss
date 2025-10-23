@@ -1,0 +1,15 @@
+@use 'helpers/mixins/variables';
+@use 'variables' as *;
+
+:root {
+  @include variables.generate-css-vars($theme-light);
+}
+
+[data-theme='dark'] {
+  @include variables.generate-css-vars($theme-dark);
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
