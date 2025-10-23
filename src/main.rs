@@ -34,6 +34,7 @@ struct AppState {
     crate::user::handlers::create,
     crate::user::handlers::get_all,
     crate::user::handlers::get_one,
+    crate::user::handlers::delete_one,
     crate::media::handlers::create,
     crate::media::handlers::get_all,
   ),

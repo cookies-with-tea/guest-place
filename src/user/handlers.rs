@@ -1,9 +1,9 @@
 use crate::core::dto::ApiResponse;
-use crate::core::error::{format_error, internal_error};
 use crate::user::dto::{CreateUserDTO, User, UserResponseDTO};
+use crate::core::response::{into_api_response, error_map};
 use crate::AppState;
 use axum::extract::{Path, State};
-use axum::routing::{get, post};
+use axum::routing::{get, post, delete};
 use sqlx::query_as;
 use uuid::Uuid;
 
@@ -37,35 +37,43 @@ fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error>
 async fn create(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<CreateUserDTO>,
-) -> Result<StatusCode, (StatusCode, String)> {
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     if let Some(phone) = &payload.phone {
-        let existing_user =
-            sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM education_user WHERE phone = $1")
-                .bind(phone)
-                .fetch_one(&state.pool)
-                .await
-                .map_err(|_| {
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        "Ошибка запроса к базе данных".to_string(),
-                    )
-                })?;
+        let existing_user = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM education_user WHERE phone = $1")
+            .bind(phone)
+            .fetch_one(&state.pool)
+            .await;
 
-        if existing_user > 0 {
-            return Err((
-                StatusCode::CONFLICT,
-                "Пользователь с таким номером телефона уже существует".to_string(),
-            ));
+        match existing_user {
+            Ok(count) if count > 0 => {
+                return into_api_response(
+                    StatusCode::CONFLICT,
+                    None,
+                    Some(error_map("phone", "Пользователь с таким номером телефона уже существует")),
+                    Some(vec!["Конфликт: пользователь уже существует".to_string()]),
+                );
+            }
+            Err(_) => {
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Ошибка запроса к базе данных")),
+                    Some(vec!["Не удалось проверить существование пользователя".to_string()]),
+                );
+            }
+            _ => {}
         }
     }
 
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
         Err(_) => {
-            return Err((
+            return into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Ошибка хеширования пароля".to_string(),
-            ))
+                None,
+                Some(error_map("password", "Ошибка хеширования пароля")),
+                Some(vec!["Не удалось обработать пароль".to_string()]),
+            );
         }
     };
 
@@ -74,105 +82,83 @@ async fn create(
             first_name, second_name, last_name, phone, birth_date, password_hash
         ) VALUES ($1, $2, $3, $4, $5, $6)",
     )
-        .bind(&payload.first_name)
-        .bind(&payload.second_name)
-        .bind(&payload.last_name)
-        .bind(&payload.phone)
-        .bind(&payload.birth_date)
-        .bind(&password_hash)
-        .execute(&state.pool)
-        .await;
+    .bind(&payload.first_name)
+    .bind(&payload.second_name)
+    .bind(&payload.last_name)
+    .bind(&payload.phone)
+    .bind(&payload.birth_date)
+    .bind(&password_hash)
+    .execute(&state.pool)
+    .await;
 
     match result {
-        Ok(_) => Ok(StatusCode::CREATED),
-        Err(_) => Err((
+        Ok(_) => into_api_response(
+            StatusCode::CREATED,
+            None,
+            None,
+            Some(vec!["Пользователь успешно создан".to_string()]),
+        ),
+        Err(_) => into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
-            "Ошибка создания пользователя".to_string(),
-        )),
+            None,
+            Some(error_map("database", "Ошибка создания пользователя")),
+            Some(vec!["Не удалось создать пользователя".to_string()]),
+        ),
     }
 }
 
 #[utoipa::path(
-  get,
-  path = "/api/v1/user",
-  responses(
-        (status = 200, description = "Успешное получение списка пользователей", body = ApiResponse<Vec<User>>),
-        (status = 500, description = "Ошибка базы данных")
-  ),
-  tag = "User",
-  operation_id = "get_all_users",
+    get,
+    path = "/api/v1/user",
+    responses(
+        (status = 200, description = "Успешное получение списка пользователей", body = ApiResponse<Vec<UserResponseDTO>>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<Vec<UserResponseDTO>>)
+    ),
+    tag = "User",
+    operation_id = "get_all_users",
 )]
 async fn get_all(
-    state: State<Arc<AppState>>,
-) -> Result<Json<ApiResponse<Vec<UserResponseDTO>>>, (StatusCode, Json<ApiResponse<()>>)> {
-    match query_as::<_, UserResponseDTO>("
-        SELECT
-            uuid,
-            first_name,
-            second_name,
-            last_name,
-            phone,
-            avatar,
-            birth_date,
-            created_at
-        FROM education_user
-    ")
-        .fetch_all(&state.pool)
-        .await
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ApiResponse<Vec<UserResponseDTO>>>, (StatusCode, Json<ApiResponse<Vec<UserResponseDTO>>>)> {
+    match query_as::<_, UserResponseDTO>(
+        "SELECT uuid, first_name, second_name, last_name, phone, avatar, birth_date, created_at FROM education_user"
+    )
+    .fetch_all(&state.pool)
+    .await
     {
-        Ok(users) => {
-            let response = ApiResponse {
-                data: Some(users),
-                errors: None,
-                messages: None,
-            };
-            Ok(Json(response))
-        }
-        Err(_) => {
-            let errors = format_error(
-                "database",
-                vec![
-                    "Database connection failed".to_string(),
-                    "Check your query or database status".to_string(),
-                ],
-            );
-
-            let response = ApiResponse {
-                data: None,
-                errors: Some(errors),
-                messages: Some(vec!["An error occurred while fetching users.".to_string()]),
-            };
-            Err((StatusCode::INTERNAL_SERVER_ERROR, Json(response)))
-        }
+        Ok(users) => into_api_response(StatusCode::OK, Some(users), None, None),
+        Err(_) => into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("database", "Ошибка получения списка пользователей")),
+            Some(vec!["Не удалось загрузить пользователей".to_string()]),
+        ),
     }
 }
 
 #[utoipa::path(
-  get,
-  path = "/api/v1/user/{uuid}",
-  params(
-        ("uuid" = Uuid, Path, description = "UUID пользователя")
-  ),
-  responses(
-        (status = 200, description = "Успешное получение пользователя", body = UserResponseDTO),
-        (status = 404, description = "Пользователь не найден"),
-        (status = 500, description = "Ошибка базы данных")
-  ),
-  tag = "User",
-  operation_id = "get_user_by_uuid",
+    get,
+    path = "/api/v1/user/{uuid}",
+    params(("uuid" = Uuid, Path, description = "UUID пользователя")),
+    responses(
+        (status = 200, description = "Успешное получение пользователя", body = ApiResponse<UserResponseDTO>),
+        (status = 404, description = "Пользователь не найден", body = ApiResponse<UserResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<UserResponseDTO>)
+    ),
+    tag = "User",
+    operation_id = "get_user_by_uuid",
 )]
 async fn get_one(
     State(state): State<Arc<AppState>>,
     Path(uuid): Path<Uuid>,
-) -> Result<Json<UserResponseDTO>, (StatusCode, String)> {
+) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
     let result = sqlx::query_as::<_, User>("SELECT * FROM education_user WHERE uuid = $1")
         .bind(uuid)
         .fetch_optional(&state.pool)
-        .await
-        .map_err(internal_error)?;
+        .await;
 
     match result {
-        Some(user) => {
+        Ok(Some(user)) => {
             let user_response = UserResponseDTO {
                 uuid: user.uuid,
                 first_name: user.first_name,
@@ -183,26 +169,95 @@ async fn get_one(
                 birth_date: user.birth_date,
                 created_at: user.created_at,
             };
-
-            Ok(Json(user_response))
+            into_api_response(StatusCode::OK, Some(user_response), None, None)
         }
-        None => Err((StatusCode::NOT_FOUND, "Пользователь не найден.".to_string())),
+        Ok(None) => into_api_response(
+            StatusCode::NOT_FOUND,
+            None,
+            Some(error_map("user", "Пользователь не найден")),
+            Some(vec!["Пользователь с указанным UUID отсутствует".to_string()]),
+        ),
+        Err(_) => into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("database", "Ошибка базы данных")),
+            Some(vec!["Не удалось получить пользователя".to_string()]),
+        ),
     }
 }
-/*async fn delete_user(Path(id): Path<i32>, state: Arc<AppState>) -> StatusCode {
-    let _ = sqlx::query("DELETE FROM education_user WHERE id = $1")
-        .bind(id)
-        .execute(&state.pool)
-        .await
-        .map_err(internal_error)
-        .unwrap();
 
-    StatusCode::OK
-}*/
+#[utoipa::path(
+    delete,
+    path = "/api/v1/user/{uuid}",
+    params(("uuid" = Uuid, Path, description = "UUID пользователя")),
+    responses(
+        (status = 200, description = "Успешное получение пользователя", body = ApiResponse<UserResponseDTO>),
+        (status = 404, description = "Пользователь не найден", body = ApiResponse<UserResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<UserResponseDTO>)
+    ),
+    tag = "User",
+    operation_id = "delete_user_by_uuid",
+)]
+async fn delete_one(
+    State(state): State<Arc<AppState>>,
+    Path(uuid): Path<Uuid>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    // Сначала проверим, существует ли пользователь
+    let exists = sqlx::query_scalar::<_, bool>(
+        "SELECT EXISTS(SELECT 1 FROM education_user WHERE uuid = $1)"
+    )
+    .bind(uuid)
+    .fetch_one(&state.pool)
+    .await;
+
+    match exists {
+        Ok(true) => {
+            // Пользователь существует — удаляем
+            let result = sqlx::query("DELETE FROM education_user WHERE uuid = $1")
+                .bind(uuid)
+                .execute(&state.pool)
+                .await;
+
+            match result {
+                Ok(_) => into_api_response(
+                    StatusCode::OK,
+                    None,
+                    None,
+                    Some(vec!["Пользователь успешно удалён".to_string()]),
+                ),
+                Err(_) => into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Ошибка при удалении пользователя")),
+                    Some(vec!["Не удалось удалить пользователя".to_string()]),
+                ),
+            }
+        }
+        Ok(false) => {
+            // Пользователь не найден
+            into_api_response(
+                StatusCode::NOT_FOUND,
+                None,
+                Some(error_map("user", "Пользователь не найден")),
+                Some(vec!["Пользователь с указанным UUID отсутствует".to_string()]),
+            )
+        }
+        Err(_) => {
+            // Ошибка при проверке существования
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", "Ошибка запроса к базе данных")),
+                Some(vec!["Не удалось проверить существование пользователя".to_string()]),
+            )
+        }
+    }
+}
 
 pub fn routing() -> OpenApiRouter<Arc<AppState>> {
     OpenApiRouter::new()
         .route("/", post(create))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))
+        .route("/{uuid}", delete(delete_one))
 }
