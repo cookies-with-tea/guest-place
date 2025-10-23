@@ -1,6 +1,6 @@
 use crate::auth::dto::{AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO};
 use crate::core::dto::ApiResponse;
-use crate::core::error::{api_error, api_response, internal_error};
+use crate::core::response::{error_map, into_api_response};
 use crate::user::dto::User;
 use crate::AppState;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
@@ -62,8 +62,8 @@ pub fn generate_refresh_token(user_id: Uuid) -> (String, i64) {
     request_body = AuthRequestDTO,
     responses(
         (status = 200, description = "Успешная авторизация", body = ApiResponse<AuthResponseDTO>),
-        (status = 401, description = "Неверный логин или пароль"),
-        (status = 500, description = "Ошибка базы данных")
+        (status = 401, description = "Неверный логин или пароль", body = ApiResponse<AuthResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<AuthResponseDTO>)
     ),
     tag = "Auth"
 )]
@@ -78,42 +78,45 @@ pub async fn login(
     {
         Ok(Some(user)) => user,
         Ok(None) => {
-            return api_error(
-                "auth",
-                "Неверный логин или пароль",
+            return into_api_response(
                 StatusCode::UNAUTHORIZED,
-            )
+                None,
+                Some(error_map("auth", "Неверный логин или пароль")),
+                Some(vec!["Проверьте правильность введённых данных".to_string()]),
+            );
         }
         Err(_) => {
-            return api_error(
-                "database",
-                "Ошибка запроса к базе данных",
+            return into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-            )
+                None,
+                Some(error_map("database", "Ошибка запроса к базе данных")),
+                Some(vec!["Не удалось найти пользователя".to_string()]),
+            );
         }
     };
 
     if !verify_password(&payload.password, &user.password_hash) {
-        return api_error(
-            "auth",
-            "Неверный логин или пароль",
+        return into_api_response(
             StatusCode::UNAUTHORIZED,
+            None,
+            Some(error_map("auth", "Неверный логин или пароль")),
+            Some(vec!["Проверьте правильность введённых данных".to_string()]),
         );
     }
 
     let (access_token, access_expires_in) = generate_access_token(user.uuid);
     let (refresh_token, refresh_expires_in) = generate_refresh_token(user.uuid);
 
-    // DEBT: Изменить 7 days на данные из env.
+    // Сохраняем refresh token в БД
     let _ = sqlx::query(
         "INSERT INTO refresh_token (user_id, token, expires_at) VALUES ($1, $2, NOW() + INTERVAL '7 days')",
     )
-        .bind(user.uuid)
-        .bind(&refresh_token)
-        .execute(&state.pool)
-        .await;
+    .bind(user.uuid)
+    .bind(&refresh_token)
+    .execute(&state.pool)
+    .await;
 
-    api_response(
+    into_api_response(
         StatusCode::OK,
         Some(AuthResponseDTO {
             access_token,
@@ -131,51 +134,62 @@ pub async fn login(
     path = "/api/v1/auth/refresh",
     request_body = AuthRefreshTokenDTO,
     responses(
-        (status = 200, description = "Успешное обновление токена", body = AuthResponseDTO),
-        (status = 401, description = "Refresh-токен недействителен или истек"),
-        (status = 500, description = "Ошибка базы данных")
+        (status = 200, description = "Успешное обновление токена", body = ApiResponse<AuthResponseDTO>),
+        (status = 401, description = "Refresh-токен недействителен или истек", body = ApiResponse<AuthResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<AuthResponseDTO>)
     ),
     tag = "Auth"
 )]
 pub async fn refresh(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<AuthRefreshTokenDTO>,
-) -> Result<Json<AuthResponseDTO>, StatusCode> {
-    let result =
-        sqlx::query("SELECT user_id FROM refresh_token WHERE token = $1 AND expires_at > NOW()")
-            .bind(&payload.refresh_token)
-            .fetch_optional(&state.pool)
-            .await
-            .map_err(|e| {
-                eprintln!("Ошибка при поиске refresh_token: {:?}", e);
-                internal_error(e)
-            })
-            .unwrap();
+) -> Result<Json<ApiResponse<AuthResponseDTO>>, (StatusCode, Json<ApiResponse<AuthResponseDTO>>)> {
+    let result = sqlx::query("SELECT user_id FROM refresh_token WHERE token = $1 AND expires_at > NOW()")
+        .bind(&payload.refresh_token)
+        .fetch_optional(&state.pool)
+        .await;
 
-    match result {
-        Some(row) => {
-            let user_id: Uuid = row.get("user_id");
-            let (new_access_token, access_expires_in) = generate_access_token(user_id);
-            let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id);
-
-            let _ = sqlx::query("UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '7 days' WHERE user_id = $2")
-                .bind(&new_refresh_token)
-                .bind(user_id)
-                .execute(&state.pool)
-                .await;
-
-            Ok(Json(AuthResponseDTO {
-                access_token: new_access_token,
-                access_expires_in,
-                refresh_token: new_refresh_token,
-                refresh_expires_in,
-            }))
+    let user_id = match result {
+        Ok(Some(row)) => row.get("user_id"),
+        Ok(None) => {
+            return into_api_response(
+                StatusCode::UNAUTHORIZED,
+                None,
+                Some(error_map("auth", "Refresh-токен недействителен или истёк")),
+                Some(vec!["Пожалуйста, войдите снова".to_string()]),
+            );
         }
-        None => {
-            eprintln!("Ошибка: refresh_token не найден или просрочен.");
-            Err(StatusCode::UNAUTHORIZED)
+        Err(_) => {
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", "Ошибка при проверке refresh-токена")),
+                Some(vec!["Не удалось обновить токен".to_string()]),
+            );
         }
-    }
+    };
+
+    let (new_access_token, access_expires_in) = generate_access_token(user_id);
+    let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id);
+
+    // Обновляем refresh token в БД
+    let _ = sqlx::query("UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '7 days' WHERE user_id = $2")
+        .bind(&new_refresh_token)
+        .bind(user_id)
+        .execute(&state.pool)
+        .await;
+
+    into_api_response(
+        StatusCode::OK,
+        Some(AuthResponseDTO {
+            access_token: new_access_token,
+            access_expires_in,
+            refresh_token: new_refresh_token,
+            refresh_expires_in,
+        }),
+        None,
+        Some(vec!["Токен успешно обновлён".to_string()]),
+    )
 }
 
 #[utoipa::path(
@@ -191,15 +205,26 @@ pub async fn refresh(
 async fn logout(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<AuthResponseDTO>,
-) -> StatusCode {
-    let _ = sqlx::query("DELETE FROM refresh_token WHERE token = $1")
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM refresh_token WHERE token = $1")
         .bind(&payload.refresh_token)
         .execute(&state.pool)
-        .await
-        .map_err(internal_error)
-        .unwrap();
+        .await;
 
-    StatusCode::OK
+    match result {
+        Ok(_) => into_api_response(
+            StatusCode::OK,
+            None,
+            None,
+            Some(vec!["Выход выполнен успешно".to_string()]),
+        ),
+        Err(_) => into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("database", "Ошибка при удалении refresh-токена")),
+            Some(vec!["Не удалось завершить сеанс".to_string()]),
+        ),
+    }
 }
 
 pub fn routing() -> OpenApiRouter<Arc<AppState>> {

@@ -1,33 +1,40 @@
 use crate::core::app::AppConfig;
 use crate::core::dto::ApiResponse;
-use crate::core::error::internal_error;
-use crate::media::dto::{CreateMediaDTO, MediaItemDTO, MediaItemFromDb, MediaUploadResponseDTO};
+use crate::media::dto::{
+  CreateMediaDTO,
+  MediaItemDTO,
+  MediaItemFromDb,
+  MediaUploadResponseDTO,
+};
+use crate::core::response::{error_map, into_api_response};
 use crate::AppState;
 use axum::routing::{get, post};
 use axum::{
-  extract::{Multipart, State},
-  http::StatusCode,
-  Json,
+    extract::{Multipart, State},
+    http::StatusCode,
+    Json,
 };
-use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
+use std::{fs, path::PathBuf, sync::Arc};
 use utoipa_axum::router::OpenApiRouter;
 use uuid::Uuid;
 
+// --- UPLOAD MEDIA ---
 #[utoipa::path(
-  post,
-  path = "/api/v1/media",
-  tag = "Media",
-  request_body(content = CreateMediaDTO, content_type = "multipart/form-data"),
-  responses(
+    post,
+    path = "/api/v1/media",
+    tag = "Media",
+    request_body(content = CreateMediaDTO, content_type = "multipart/form-data"),
+    responses(
         (status = 201, description = "Media uploaded successfully", body = ApiResponse<MediaUploadResponseDTO>),
-        (status = 500, description = "Internal server error")
-  ),
-  operation_id = "upload_media",
+        (status = 400, description = "Invalid file or content type", body = ApiResponse<MediaUploadResponseDTO>),
+        (status = 500, description = "Internal server error", body = ApiResponse<MediaUploadResponseDTO>)
+    ),
+    operation_id = "upload_media",
 )]
 pub async fn create(
     State(state): State<Arc<AppState>>,
     mut multipart: Multipart,
-) -> (StatusCode, Json<ApiResponse<MediaUploadResponseDTO>>) {
+) -> Result<Json<ApiResponse<MediaUploadResponseDTO>>, (StatusCode, Json<ApiResponse<MediaUploadResponseDTO>>)> {
     let mut file_name = String::new();
     let mut data = Vec::new();
     let mut content_type = None;
@@ -54,16 +61,11 @@ pub async fn create(
     let content_type = match content_type {
         Some(ct) if !ct.is_empty() => ct,
         _ => {
-            return (
+            return into_api_response(
                 StatusCode::BAD_REQUEST,
-                Json(ApiResponse {
-                    data: None,
-                    errors: Some(HashMap::from([(
-                        "content_type".to_string(),
-                        vec!["Unable to determine content type from file".to_string()],
-                    )])),
-                    messages: Some(vec!["Failed to upload media".to_string()]),
-                }),
+                None,
+                Some(error_map("content_type", "Unable to determine content type from file")),
+                Some(vec!["Failed to upload media".to_string()]),
             );
         }
     };
@@ -73,16 +75,11 @@ pub async fn create(
     } else if content_type.starts_with("video/") {
         "video"
     } else {
-        return (
+        return into_api_response(
             StatusCode::BAD_REQUEST,
-            Json(ApiResponse {
-                data: None,
-                errors: Some(HashMap::from([(
-                    "content_type".to_string(),
-                    vec!["Unsupported media type".to_string()],
-                )])),
-                messages: Some(vec!["Failed to upload media".to_string()]),
-            }),
+            None,
+            Some(error_map("content_type", "Unsupported media type")),
+            Some(vec!["Only images and videos are allowed".to_string()]),
         );
     };
 
@@ -96,18 +93,34 @@ pub async fn create(
     let relative_path = format!("media/{}/{}.{}", media_type, uuid, extension);
     let save_path = PathBuf::from(&relative_path);
 
-    fs::create_dir_all(save_path.parent().unwrap()).unwrap();
-    fs::write(&save_path, &data).unwrap();
+    if let Err(e) = fs::create_dir_all(save_path.parent().unwrap()) {
+        eprintln!("FS error (mkdir): {:?}", e);
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("filesystem", "Failed to create upload directory")),
+            Some(vec!["Server configuration error".to_string()]),
+        );
+    }
 
-    // Сформировать абсолютный путь
-    let config = AppConfig::new(); // Или передай в состояние
+    if let Err(e) = fs::write(&save_path, &data) {
+        eprintln!("FS error (write): {:?}", e);
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("filesystem", "Failed to save file")),
+            Some(vec!["Could not write file to disk".to_string()]),
+        );
+    }
+
+    let config = AppConfig::new();
     let full_url = format!(
         "{}/{}",
         config.public_url.trim_end_matches('/'),
         &relative_path
     );
 
-    let _ = sqlx::query(
+    let db_result = sqlx::query(
         "INSERT INTO media (uuid, media_type, url, title, alt) VALUES ($1, $2::media_type, $3, $4, $5)",
     )
     .bind(uuid)
@@ -116,39 +129,45 @@ pub async fn create(
     .bind(title)
     .bind(alt)
     .execute(&state.pool)
-    .await
-    .map_err(|e| {
-        eprintln!("DB error: {:?}", e);
-        internal_error(e)
-    })
-    .unwrap();
+    .await;
 
-    (
+    if let Err(e) = db_result {
+        eprintln!("DB error: {:?}", e);
+        // Опционально: удалить файл, если запись в БД не удалась
+        let _ = fs::remove_file(&save_path);
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map("database", "Failed to save media record")),
+            Some(vec!["Could not register file in database".to_string()]),
+        );
+    }
+
+    into_api_response(
         StatusCode::CREATED,
-        Json(ApiResponse {
-            data: Some(MediaUploadResponseDTO {
-                uuid: uuid.to_string(),
-                url: full_url,
-            }),
-            errors: None,
-            messages: Some(vec!["Media uploaded successfully".to_string()]),
+        Some(MediaUploadResponseDTO {
+            uuid: uuid.to_string(),
+            url: full_url,
         }),
+        None,
+        Some(vec!["Media uploaded successfully".to_string()]),
     )
 }
 
+// --- GET ALL MEDIA ---
 #[utoipa::path(
-  get,
-  path = "/api/v1/media",
-  tag = "Media",
-  responses(
+    get,
+    path = "/api/v1/media",
+    tag = "Media",
+    responses(
         (status = 200, description = "List of media", body = ApiResponse<Vec<MediaItemDTO>>),
-        (status = 500, description = "Internal server error")
-  ),
-  operation_id = "get_all_media"
+        (status = 500, description = "Internal server error", body = ApiResponse<Vec<MediaItemDTO>>)
+    ),
+    operation_id = "get_all_media"
 )]
 pub async fn get_all(
     State(state): State<Arc<AppState>>,
-) -> (StatusCode, Json<ApiResponse<Vec<MediaItemDTO>>>) {
+) -> Result<Json<ApiResponse<Vec<MediaItemDTO>>>, (StatusCode, Json<ApiResponse<Vec<MediaItemDTO>>>)> {
     let rows = sqlx::query_as::<_, MediaItemFromDb>(
         r#"
         SELECT uuid, media_type, url, title, alt
@@ -157,34 +176,41 @@ pub async fn get_all(
         "#,
     )
     .fetch_all(&state.pool)
-    .await
-    .map_err(|e| {
-        eprintln!("DB error: {:?}", e);
-        internal_error(e)
-    })
-    .unwrap();
+    .await;
 
-    let media_list = rows
-        .into_iter()
-        .map(|row| MediaItemDTO {
-            uuid: row.uuid.to_string(),
-            url: row.url,
-            title: row.title,
-            alt: row.alt,
-            media_type: row.media_type,
-        })
-        .collect();
+    match rows {
+        Ok(db_items) => {
+            let media_list = db_items
+                .into_iter()
+                .map(|row| MediaItemDTO {
+                    uuid: row.uuid.to_string(),
+                    url: row.url,
+                    title: row.title,
+                    alt: row.alt,
+                    media_type: row.media_type,
+                })
+                .collect();
 
-    (
-        StatusCode::OK,
-        Json(ApiResponse {
-            data: Some(media_list),
-            errors: None,
-            messages: Some(vec!["Media fetched successfully".to_string()]),
-        }),
-    )
+            into_api_response(
+                StatusCode::OK,
+                 Some(media_list),
+                None,
+                Some(vec!["Media fetched successfully".to_string()]),
+            )
+        }
+        Err(e) => {
+            eprintln!("DB error: {:?}", e);
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", "Failed to fetch media list")),
+                Some(vec!["Could not retrieve media records".to_string()]),
+            )
+        }
+    }
 }
 
+// --- ROUTING ---
 pub fn routing() -> OpenApiRouter<Arc<AppState>> {
     OpenApiRouter::new()
         .route("/", post(create))
