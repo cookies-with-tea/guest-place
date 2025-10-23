@@ -4,6 +4,14 @@ Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduct
 
 ## Setup
 
+Node - v22.21.0
+Использовать pnpm
+
+После клонирования использовать
+```cmd
+pnpm dev
+```
+
 Make sure to install dependencies:
 
 ```bash
