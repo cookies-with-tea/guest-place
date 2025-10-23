@@ -1,0 +1,44 @@
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+use uuid::Uuid;
+
+#[derive(Deserialize, ToSchema)]
+#[allow(unused)]
+pub struct CreateMediaDTO {
+    title: Option<String>,
+    alt: Option<String>,
+    #[schema(format = Binary, content_media_type = "application/octet-stream")]
+    file: String,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct MediaUploadResponseDTO {
+    pub(crate) uuid: String,
+    pub(crate) url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct MediaItemDTO {
+  pub uuid: String,
+  pub url: String,
+  pub title: Option<String>,
+  pub alt: Option<String>,
+  pub media_type: MediaType,
+}
+
+#[derive(sqlx::FromRow, Debug)]
+pub struct MediaItemFromDb {
+  pub uuid: uuid::Uuid,
+  pub url: String,
+  pub title: Option<String>,
+  pub alt: Option<String>,
+  pub media_type: MediaType,
+}
+
+// DEBT: Перепроверить все enum'ы. Сделать в виде image вместо Image
+#[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
+#[sqlx(type_name = "media_type", rename_all = "lowercase")]
+pub enum MediaType {
+  Image,
+  Video,
+}
