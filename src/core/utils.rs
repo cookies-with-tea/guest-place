@@ -1,4 +1,4 @@
-use crate::core::dto::ImageDTO;
+use crate::core::dto::MediaDTO;
 use crate::AppState;
 use sqlx::Row;
 use std::sync::Arc;
@@ -9,7 +9,7 @@ pub async fn get_media(
   table_name: &str,
   entity_uuid_column: &str,
   entity_uuid: &Uuid,
-) -> Result<Option<ImageDTO>, sqlx::Error> {
+) -> Result<Option<MediaDTO>, sqlx::Error> {
   let query = format!(
     "SELECT m.url, m.alt, m.title
          FROM {} em
@@ -23,7 +23,7 @@ pub async fn get_media(
     .bind(entity_uuid)
     .fetch_optional(&state.pool)
     .await?
-    .map(|row| ImageDTO {
+    .map(|row| MediaDTO {
       url: row.get("url"),
       alt: row.get("alt"),
       title: row.get("title"),
@@ -35,7 +35,7 @@ pub async fn get_media(
 pub async fn get_media_by_uuid(
   state: &Arc<AppState>,
   media_uuid: Option<Uuid>
-) -> Result<Option<ImageDTO>, sqlx::Error> {
+) -> Result<Option<MediaDTO>, sqlx::Error> {
   // Если UUID не передан (None), сразу возвращаем None
   if let Some(uuid) = media_uuid {
     // Запрос для получения медиа-данных по UUID
@@ -46,7 +46,7 @@ pub async fn get_media_by_uuid(
       .bind(uuid)
       .fetch_optional(&state.pool)
       .await?
-      .map(|row| ImageDTO {
+      .map(|row| MediaDTO {
         url: row.get("url"),
         alt: row.get("alt"),
         title: row.get("title"),

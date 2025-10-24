@@ -133,7 +133,7 @@ pub async fn create(
 
     if let Err(e) = db_result {
         eprintln!("DB error: {:?}", e);
-        // Опционально: удалить файл, если запись в БД не удалась
+        // удалить файл, если запись в БД не удалась
         let _ = fs::remove_file(&save_path);
         return into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -210,7 +210,6 @@ pub async fn get_all(
     }
 }
 
-// --- ROUTING ---
 pub fn routing() -> OpenApiRouter<Arc<AppState>> {
     OpenApiRouter::new()
         .route("/", post(create))

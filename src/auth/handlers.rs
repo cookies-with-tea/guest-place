@@ -56,6 +56,13 @@ pub fn generate_refresh_token(user_id: Uuid) -> (String, i64) {
     generate_token(user_id, lifetime)
 }
 
+fn get_lifetime_token() -> String {
+  return env::var("REFRESH_TOKEN_TTL_MINUTES")
+      .unwrap_or_else(|_| "10080".to_string()) // 10080 = 7 дней
+      .parse()
+      .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer");
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/auth/login",
@@ -109,10 +116,12 @@ pub async fn login(
 
     // Сохраняем refresh token в БД
     let _ = sqlx::query(
-        "INSERT INTO refresh_token (user_id, token, expires_at) VALUES ($1, $2, NOW() + INTERVAL '7 days')",
+        "INSERT INTO refresh_token (user_id, token, expires_at) \
+         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)",
     )
     .bind(user.uuid)
     .bind(&refresh_token)
+    .bind(get_lifetime_token())
     .execute(&state.pool)
     .await;
 
@@ -172,12 +181,15 @@ pub async fn refresh(
     let (new_access_token, access_expires_in) = generate_access_token(user_id);
     let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id);
 
-    // Обновляем refresh token в БД
-    let _ = sqlx::query("UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '7 days' WHERE user_id = $2")
-        .bind(&new_refresh_token)
-        .bind(user_id)
-        .execute(&state.pool)
-        .await;
+    // Обновляем refresh token в БД с динамическим TTL
+    let _ = sqlx::query(
+        "UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '1 minute' * $2 WHERE user_id = $3"
+    )
+    .bind(&new_refresh_token)
+    .bind(get_lifetime_token())
+    .bind(user_id)
+    .execute(&state.pool)
+    .await;
 
     into_api_response(
         StatusCode::OK,

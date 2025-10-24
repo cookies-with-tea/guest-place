@@ -1,0 +1,14 @@
+{
+  "user": {
+    "created": "User successfully created",
+    "deleted": "User successfully deleted",
+    "not_found": "User not found",
+    "phone_exists": "User with this phone number already exists",
+    "db_error": "Database error",
+    "password_hash_error": "Password hashing error",
+    "check_exists_error": "Failed to check user existence"
+  },
+  "general": {
+    "internal_error": "Internal server error"
+  }
+}

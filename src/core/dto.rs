@@ -39,9 +39,8 @@ pub struct IconTextDTO {
     pub description: Option<String>,
 }
 
-// DEBT: Переименовать. ImageDTO используется не только для изображений.
 #[derive(Serialize, Deserialize, Debug, FromRow, ToSchema)]
-pub struct ImageDTO {
+pub struct MediaDTO {
     pub(crate) url: String,
     pub(crate) alt: Option<String>,
     pub(crate) title: Option<String>,
@@ -60,23 +59,4 @@ pub struct AttractionDTO {
     pub(crate) title: String,
     pub(crate) subtitle: Option<String>,
     pub(crate) items: Vec<IconTextDTO>,
-}
-
-// DEBT: Улучшить и использовать
-impl<T: serde::Serialize> ApiResponse<T> {
-  pub fn success(data: T) -> Self {
-    ApiResponse {
-      data: Some(data),
-      errors: None,
-      messages: None,
-    }
-  }
-
-  pub fn error(messages: Vec<String>) -> Self {
-    ApiResponse {
-      data: None,
-      errors: None,
-      messages: Some(messages),
-    }
-  }
 }

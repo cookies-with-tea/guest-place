@@ -1,7 +1,6 @@
 BEGIN;
 
--- DEBT: Добавить icon
-CREATE TYPE media_type AS ENUM ('video', 'image');
+CREATE TYPE media_type AS ENUM ('video', 'image', 'icon');
 
 CREATE TABLE IF NOT EXISTS "media"
 (

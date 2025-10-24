@@ -5,7 +5,7 @@ mod user;
 
 use crate::core::app::AppConfig;
 use crate::core::db::create_pool;
-use axum::http::{HeaderName, Method};
+use axum::http::{HeaderName, HeaderValue, Method};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use std::time::Duration;
@@ -72,17 +72,25 @@ async fn main() {
 
     let shared_state = Arc::new(AppState { pool: pool.clone() });
 
-    // DEBT: Вынести в env
+    let allowed_origins: Vec<HeaderValue> = std::env::var("CORS_ALLOWED_ORIGINS")
+        .unwrap_or_default()
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(|origin| {
+            origin
+                .parse()
+                .expect("Invalid origin in CORS_ALLOWED_ORIGINS")
+        })
+        .collect();
+
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::list(vec![
-            "http://localhost:8000".parse().unwrap(),
-            "http://localhost:5500".parse().unwrap(),
-            "http://127.0.0.1:5500".parse().unwrap(),
-        ]))
+        .allow_origin(AllowOrigin::list(allowed_origins))
         .allow_methods(AllowMethods::list(vec![
             Method::POST,
             Method::GET,
             Method::PUT,
+            Method::PATCH,
             Method::DELETE,
         ]))
         .allow_headers(AllowHeaders::list(vec![
