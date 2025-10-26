@@ -26,6 +26,9 @@ importers:
       '@admin-panel/typescript-config':
         specifier: workspace:*
         version: link:packages/typescript-config
+      '@originjs/vite-plugin-federation':
+        specifier: ^1.4.1
+        version: 1.4.1
       '@types/jsdom':
         specifier: ^21.1.7
         version: 21.1.7
@@ -41,6 +44,9 @@ importers:
       cypress:
         specifier: ^15.3.0
         version: 15.5.0
+      enquirer:
+        specifier: ^2.4.1
+        version: 2.4.1
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)
@@ -181,6 +187,49 @@ importers:
         specifier: ^3.1.0
         version: 3.1.1(typescript@5.9.3)
 
+  apps/admin-statistics:
+    dependencies:
+      '@admin-panel/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@admin-panel/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      vue:
+        specifier: ^3.5.22
+        version: 3.5.22(typescript@5.9.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.3(vue@3.5.22(typescript@5.9.3))
+    devDependencies:
+      '@admin-panel/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@admin-panel/prettier-config':
+        specifier: workspace:*
+        version: link:../../packages/prettier-config
+      '@admin-panel/stylelint-config':
+        specifier: workspace:*
+        version: link:../../packages/stylelint-config
+      '@admin-panel/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: ^24.6.0
+        version: 24.9.1
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.1
+        version: 6.0.1(vite@7.1.12(@types/node@24.9.1)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.1.7
+        version: 7.1.12(@types/node@24.9.1)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.1.1(typescript@5.9.3)
+
   apps/admin-translations:
     dependencies:
       '@admin-panel/ui':
@@ -192,7 +241,19 @@ importers:
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.3(vue@3.5.22(typescript@5.9.3))
     devDependencies:
+      '@admin-panel/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@admin-panel/prettier-config':
+        specifier: workspace:*
+        version: link:../../packages/prettier-config
+      '@admin-panel/stylelint-config':
+        specifier: workspace:*
+        version: link:../../packages/stylelint-config
       '@admin-panel/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -910,6 +971,11 @@ packages:
   '@one-ini/wasm@0.1.1':
     resolution:
       { integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw== }
+
+  '@originjs/vite-plugin-federation@1.4.1':
+    resolution:
+      { integrity: sha512-Uo08jW5pj1t58OUKuZNkmzcfTN2pqeVuAWCCiKf/75/oll4Efq4cHOqSE1FXMlvwZNGDziNdDyBbQ5IANem3CQ== }
+    engines: { node: '>=14.0.0', pnpm: '>=7.0.1' }
 
   '@parcel/watcher-android-arm64@2.5.1':
     resolution:
@@ -2920,6 +2986,11 @@ packages:
     resolution:
       { integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w== }
 
+  magic-string@0.27.0:
+    resolution:
+      { integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA== }
+    engines: { node: '>=12' }
+
   magic-string@0.30.19:
     resolution:
       { integrity: sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw== }
@@ -4759,6 +4830,11 @@ snapshots:
 
   '@one-ini/wasm@0.1.1': {}
 
+  '@originjs/vite-plugin-federation@1.4.1':
+    dependencies:
+      estree-walker: 3.0.3
+      magic-string: 0.27.0
+
   '@parcel/watcher-android-arm64@2.5.1':
     optional: true
 
@@ -6453,6 +6529,10 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  magic-string@0.27.0:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.5.5
 
   magic-string@0.30.19:
     dependencies:

@@ -1,6 +1,13 @@
 {
-	"extends": "@admin-panel/typescript-config/node",
-	"include": ["vite.config.*"],
+	"extends": "../../packages/typescript-config/node.json",
+	"include": [
+		"vite.config.*",
+		"vitest.config.*",
+		"cypress.config.*",
+		"nightwatch.conf.*",
+		"playwright.config.*",
+		"eslint.config.*"
+	],
 	"compilerOptions": {
 		"noEmit": true,
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",

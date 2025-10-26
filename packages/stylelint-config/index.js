@@ -415,7 +415,7 @@ export default {
 		'@stylistic/no-missing-end-of-source-newline': null,
 		'@stylistic/at-rule-name-newline-after': null,
 
-		'@stylistic/indentation': 2,
+		'@stylistic/indentation': 'tab',
 		'@stylistic/max-empty-lines': 1,
 		'@stylistic/no-eol-whitespace': true,
 		'@stylistic/block-opening-brace-space-before': 'always',

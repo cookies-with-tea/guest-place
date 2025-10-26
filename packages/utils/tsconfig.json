@@ -1,5 +1,5 @@
 {
-	"extends": "@admin-panel/typescript-config/base",
+	"extends": "../../packages/typescript-config/base",
 	"include": ["src/**/*", "index.ts"],
 	"exclude": ["node_modules", "dist"]
 }

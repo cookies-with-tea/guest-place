@@ -1,5 +1,5 @@
 {
-	"extends": "@admin-panel/typescript-config/base",
-	"include": ["src/**/*", "index.ts"],
+	"extends": "../../packages/typescript-config/base",
+	"include": ["src/**/*", "index.ts", "vue-shim.d.ts"],
 	"exclude": ["node_modules", "dist"]
 }
