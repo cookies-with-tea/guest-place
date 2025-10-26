@@ -34,7 +34,7 @@ export default defineConfig({
 		cssCodeSplit: false,
 	},
 	server: {
-		port: 3001,
+		port: 3002,
 		cors: true,
 	},
 })

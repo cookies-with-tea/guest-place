@@ -3,12 +3,12 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"main": "base.js",
+	"main": "base.json",
 	"exports": {
-		".": "./base.js",
-		"./vue": "./vue.js",
-		"./node": "./node.js",
-		"./vitest": "./vitest.js"
+		".": "./base.json",
+		"./vue": "./vue.json",
+		"./node": "./node.json",
+		"./vitest": "./vitest.json"
 	},
 	"dependencies": {
 		"@tsconfig/node22": "^22.0.2",

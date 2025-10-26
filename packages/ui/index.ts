@@ -1,3 +1,3 @@
-import UiButton from './src/button'
+import UiButton from './src/ui-button'
 
 export { UiButton }
