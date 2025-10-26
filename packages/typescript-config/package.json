@@ -1,0 +1,20 @@
+{
+	"name": "@admin-panel/typescript-config",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"main": "index.js",
+	"exports": {
+		".": "./base.json",
+		"./vue": "./vue.json",
+		"./node": "./node.json",
+		"./vitest": "./vitest.json"
+	},
+	"dependencies": {
+		"@tsconfig/node22": "^22.0.2",
+		"@vue/tsconfig": "^0.8.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}

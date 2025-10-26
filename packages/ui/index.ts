@@ -1,5 +1,3 @@
-import UiButton from "./src/button";
+import UiButton from './src/button'
 
-export {
-    UiButton,
-}
+export { UiButton }

@@ -1,5 +1,5 @@
 <template>
-  <button class="remote-button">
-    <slot />
-  </button>
+	<button class="remote-button">
+		<slot />
+	</button>
 </template>

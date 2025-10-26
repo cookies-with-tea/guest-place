@@ -1,13 +1,15 @@
 {
-  "name": "@admin-panel/ui",
-  "version": "1.0.0",
-  "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "scripts": {
-    "lint": "eslint ."
-  },
-  "devDependencies": {
-    "vue": "^3.5.22"
-  }
+	"name": "@admin-panel/ui",
+	"version": "1.0.0",
+	"private": true,
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"scripts": {
+		"lint": "eslint ."
+	},
+	"devDependencies": {
+		"@admin-panel/eslint-config": "workspace:*",
+		"@admin-panel/typescript-config": "workspace:*",
+		"vue": "^3.5.22"
+	}
 }
