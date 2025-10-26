@@ -4,7 +4,7 @@ import { createApp } from 'vue'
 
 // import 'virtual:svg-icons-register'
 
-import '@admin-panel/ui/styles/index.scss';
+import '@admin-panel/ui/styles'
 
 const app = createApp(App)
 

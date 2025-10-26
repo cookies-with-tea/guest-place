@@ -6,26 +6,24 @@
 			"outputs": ["dist/**", "storybook-static/**"],
 			"dependsOn": ["^build"]
 		},
-  	"lint": {
-      "dependsOn": ["^lint"]
-    },
+		"lint": {
+			"dependsOn": ["^lint"]
+		},
 		"dev": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"cache": false,
 			"persistent": true
 		},
-	 "clean": {
-      "cache": false
-    },
-    "preview-storybook": {
-       "dependsOn": [
-         "^build"
-       ],
-       "cache": false
-     },
-     "storybook": {
-      "cache": false,
-      "persistent": true
-    }
+		"clean": {
+			"cache": false
+		},
+		"preview-storybook": {
+			"dependsOn": ["^build"],
+			"cache": false
+		},
+		"storybook": {
+			"cache": false,
+			"persistent": true
+		}
 	}
 }

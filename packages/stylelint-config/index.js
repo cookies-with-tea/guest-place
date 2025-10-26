@@ -2,7 +2,7 @@
 export default {
 	extends: ['stylelint-config-standard', 'stylelint-config-recommended-vue'],
 	plugins: ['stylelint-scss', 'stylelint-order', '@stylistic/stylelint-plugin'],
-	ignoreFiles: ['**/dist/**', '**/node_modules/**'],
+	ignoreFiles: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/storybook-static/**'],
 	overrides: [
 		{ files: ['**/*.scss'], customSyntax: 'postcss-scss' },
 		{ files: ['**/*.vue'], customSyntax: 'postcss-html' },

@@ -27,7 +27,7 @@
 		"prettier:fix": "prettier --write .",
 		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
 		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
-	 	"storybook": "turbo run storybook --filter=docs",
+		"storybook": "turbo run storybook --filter=docs",
 		"preview-storybook": "turbo run preview-storybook"
 	},
 	"dependencies": {

@@ -1,5 +1,7 @@
 import { globalIgnores } from 'eslint/config'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import storybook from 'eslint-plugin-storybook'
+
 import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
 
@@ -13,7 +15,7 @@ export default defineConfigWithVueTs(
 		files: ['**/*.{ts,mts,tsx,vue}'],
 	},
 
-	globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+	globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/storybook-static/**']),
 
 	pluginVue.configs['flat/essential'],
 	vueTsConfigs.recommended,
@@ -90,6 +92,11 @@ export default defineConfigWithVueTs(
 	{
 		...pluginVitest.configs.recommended,
 		files: ['src/**/__tests__/*'],
+	},
+
+	{
+		...storybook.configs.recommended,
+		files: ['src/**/*.stories.{js,jsx,ts,tsx}'],
 	},
 
 	{

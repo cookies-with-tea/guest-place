@@ -1,42 +1,43 @@
-import type { StorybookConfig } from '@storybook/vue3-vite';
+import type { StorybookConfig } from '@storybook/vue3-vite'
 
-import { join, dirname, resolve } from "path"
+import { join, dirname, resolve } from 'path'
 
 /**
-* This function is used to resolve the absolute path of a package.
-* It is needed in projects that use Yarn PnP or are set up within a monorepo.
-*/
+ * This function is used to resolve the absolute path of a package.
+ * It is needed in projects that use Yarn PnP or are set up within a monorepo.
+ */
 function getAbsolutePath(value: string): any {
-  return dirname(require.resolve(join(value, 'package.json')))
+	return dirname(require.resolve(join(value, 'package.json')))
 }
+
 const config: StorybookConfig = {
-	stories: ["../stories/*.stories.ts", "../stories/**/*.stories.ts"],
+	stories: ['../stories/*.stories.ts', '../stories/**/*.stories.ts'],
 
-  addons: [
-    getAbsolutePath('@chromatic-com/storybook'),
-    getAbsolutePath('@storybook/addon-docs'),
-    getAbsolutePath("@storybook/addon-a11y"),
-    getAbsolutePath("@storybook/addon-vitest"),
-  ],
+	addons: [
+		getAbsolutePath('@chromatic-com/storybook'),
+		getAbsolutePath('@storybook/addon-docs'),
+		getAbsolutePath('@storybook/addon-a11y'),
+		getAbsolutePath('@storybook/addon-vitest'),
+	],
 
-  framework: {
-    "name": getAbsolutePath('@storybook/vue3-vite'),
-    "options": {}
-  },
+	framework: {
+		name: getAbsolutePath('@storybook/vue3-vite'),
+		options: {},
+	},
 
-  core: {},
+	core: {},
 
-  async viteFinal(config, { configType }) {
-		console.log(__dirname, resolve(__dirname, '../../../packages/ui'));
-      return {
-        ...config,
-        define: { 'process.env': {} },
-        resolve: {
-          alias: {
-            '@admin-panel/ui': resolve(__dirname, '../../../packages/ui'),
-          },
-        },
-      };
-    },
-};
-export default config;
+	async viteFinal(config) {
+		return {
+			...config,
+			define: { 'process.env': {} },
+			resolve: {
+				alias: {
+					'@admin-panel/ui': resolve(__dirname, '../../../packages/ui'),
+				},
+			},
+		}
+	},
+}
+
+export default config
