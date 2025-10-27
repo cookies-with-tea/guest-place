@@ -1,0 +1,15 @@
+@use '../../variables' as *;
+
+@mixin addFont($font-name, $font-type: 'Regular', $font-weight: 400, $font-style: 'normal') {
+	// stylelint-disable at-rule-descriptor-value-no-unknown
+	@font-face {
+		src: url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff2') format('woff2'),
+			url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff') format('woff'),
+			url($fonts-path + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
+		font-family: $font-name;
+		font-weight: $font-weight;
+		font-style: $font-style;
+		font-display: swap;
+	}
+	// stylelint-enable at-rule-descriptor-value-no-unknown
+}

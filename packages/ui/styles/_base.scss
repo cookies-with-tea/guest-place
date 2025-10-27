@@ -1,13 +1,18 @@
 @use 'reset';
-@use 'helpers/mixins/variables';
+@use 'helpers/mixins/variables' as mVariables;
 @use 'variables' as *;
+@use 'fonts';
 
 :root {
-	@include variables.generate-css-vars($theme-light);
+	@include mVariables.generate-css-vars($theme-light);
 }
 
 [data-theme='dark'] {
-	@include variables.generate-css-vars($theme-dark);
+	@include mVariables.generate-css-vars($theme-dark);
+}
+
+html {
+	font-family: 'Inter', sans-serif;
 }
 
 body {
