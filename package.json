@@ -8,7 +8,10 @@
 	"author": "miirsery",
 	"scripts": {
 		"build": "turbo run build",
-		"build:project": "node scripts/choose-project.js",
+		"build:project": "node scripts/choose-project.js build",
+		"dev:project": "node scripts/choose-project.js dev",
+		"lint:project": "node scripts/choose-project.js lint",
+		"clean:project": "node scripts/choose-project.js clean",
 		"dev": "turbo run dev --parallel",
 		"test": "vitest",
 		"clean": "turbo run clean && rm -rf node_modules",

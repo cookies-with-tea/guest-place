@@ -6,7 +6,15 @@
 	"scripts": {
 		"dev": "vite --port 3001",
 		"build": "vue-tsc -b && vite build",
-		"preview": "vite preview --port 3001"
+		"preview": "vite preview --port 3001",
+		"eslint": "eslint . --ext .ts,.js,.vue",
+		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
+		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix"
 	},
 	"dependencies": {
 		"@admin-panel/ui": "workspace:*",
