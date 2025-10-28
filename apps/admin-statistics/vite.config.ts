@@ -11,7 +11,7 @@ export default defineConfig({
 			filename: 'remoteEntry.js',
 			exposes: {
 				'./StatisticsApp': './src/main.ts',
-				'./StatisticsRoutes': './src/router/index.ts',
+				'./StatisticsRoutes': './src/app/router/index.ts',
 			},
 			shared: ['vue', 'vue-router'],
 		}),

@@ -13,6 +13,7 @@
 		"lint:project": "node scripts/choose-project.js lint",
 		"clean:project": "node scripts/choose-project.js clean",
 		"dev": "turbo run dev --parallel",
+		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
 		"test": "vitest",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"test:unit": "vitest",
@@ -68,13 +69,13 @@
 	},
 	"lint-staged": {
 		"*.{js,ts,vue}": [
-			"eslint --fix"
+			"eslint . --ext .ts,.js,.vue"
 		],
 		"*.{css,scss,postcss,vue}": [
-			"stylelint --fix"
+			"stylelint \"**/*.{vue,css,scss,postcss}\""
 		],
 		"*": [
-			"prettier --write --ignore-unknown"
+			"prettier --check ."
 		]
 	},
 	"packageManager": "pnpm@9.0.6"

@@ -7,11 +7,11 @@ export default defineConfig({
 	plugins: [
 		vue(),
 		federation({
-			name: 'statistics',
+			name: 'translations',
 			filename: 'remoteEntry.js',
 			exposes: {
-				'./StatisticsApp': './src/main.ts',
-				'./StatisticsRoutes': './src/router/index.ts',
+				'./TranslationsApp': './src/main.ts',
+				'./TranslationsRoutes': './src/app/router/index.ts',
 			},
 			shared: ['vue', 'vue-router'],
 		}),

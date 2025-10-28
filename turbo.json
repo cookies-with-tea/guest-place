@@ -24,6 +24,10 @@
 		"storybook": {
 			"cache": false,
 			"persistent": true
+		},
+		"preview": {
+			"dependsOn": ["build"],
+			"cache": false
 		}
 	}
 }

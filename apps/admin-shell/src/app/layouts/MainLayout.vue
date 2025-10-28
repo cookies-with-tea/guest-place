@@ -2,6 +2,7 @@
 	<div class="main-layout">
 		<div class="main-layout__content-wrapper">
 			<div class="main-layout__content">
+        <header>host header</header>
 				<router-view />
 			</div>
 		</div>

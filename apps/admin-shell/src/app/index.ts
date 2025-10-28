@@ -1,10 +1,12 @@
 import App from './App.vue'
-import { router } from './router'
+import { initRouter } from './router'
 import { createApp } from 'vue'
 
 // import 'virtual:svg-icons-register'
 
-import '@admin-panel/ui/styles'
+import '@admin-panel/ui/styles/index.scss'
+
+const router = await initRouter()
 
 const app = createApp(App)
 
