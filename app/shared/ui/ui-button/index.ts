@@ -8,7 +8,7 @@ export default UiButton
 //     url('PoiretOne-Regular.woff') format('woff'),
 //     url('PoiretOne-Regular.ttf') format('truetype');
 //   font-weight: normal;
-//   font-style: normal;
+//   font-styles: normal;
 //   font-display: swap;
 // }
 
@@ -18,7 +18,7 @@ export default UiButton
 //     url('Raleway-Regular.woff') format('woff'),
 //     url('Raleway-Regular.ttf') format('truetype');
 //   font-weight: 400;
-//   font-style: normal;
+//   font-styles: normal;
 //   font-display: swap;
 // }
 
@@ -28,7 +28,7 @@ export default UiButton
 //     url('Raleway-Medium.woff') format('woff'),
 //     url('Raleway-Medium.ttf') format('truetype');
 //   font-weight: 500;
-//   font-style: normal;
+//   font-styles: normal;
 //   font-display: swap;
 // }
 
@@ -38,6 +38,6 @@ export default UiButton
 //     url('Raleway-Bold.woff') format('woff'),
 //     url('Raleway-Bold.ttf') format('truetype');
 //   font-weight: 700;
-//   font-style: normal;
+//   font-styles: normal;
 //   font-display: swap;
 // }

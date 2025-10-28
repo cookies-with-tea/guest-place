@@ -52,10 +52,10 @@
   },
   "lint-staged": {
     "*.{js,ts,vue}": [
-      "eslint ."
+      "eslint . --ext .ts,.js,.vue"
     ],
     "*.{css,scss,postcss,vue}": [
-      "stylelint"
+      "stylelint \"**/*.{vue,css,scss,postcss}\""
     ],
     "*": [
       "prettier --check ."
