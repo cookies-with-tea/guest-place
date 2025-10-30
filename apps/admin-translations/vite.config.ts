@@ -10,7 +10,6 @@ export default defineConfig({
 			name: 'translations',
 			filename: 'remoteEntry.js',
 			exposes: {
-				'./TranslationsApp': './src/main.ts',
 				'./TranslationsRoutes': './src/app/router/index.ts',
 			},
 			shared: ['vue', 'vue-router'],

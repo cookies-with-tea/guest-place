@@ -1,5 +1,5 @@
 <template>
-	<h1>Main</h1>
+	<h1>Main Shell page</h1>
 
 	<UiButton>Click me</UiButton>
 </template>

@@ -25,21 +25,6 @@ const loadRemoteRoutes = async () => {
   return routes
 }
 
-const shellRoutes = [
-  {
-    path: '/',
-    name: 'Layout',
-    component: MainLayout,
-    children: [
-      {
-        name: 'Main',
-        path: '/',
-        component: () => import('#pages/main-page'),
-      },
-    ],
-  },
-]
-
 // Создаём роутер с локальными + remote роутами
 export const initRouter = async () => {
   const remoteRoutes = await loadRemoteRoutes()

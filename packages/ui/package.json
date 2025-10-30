@@ -15,7 +15,8 @@
 		"src/"
 	],
 	"scripts": {
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test:unit": "vitest"
 	},
 	"devDependencies": {
 		"@admin-panel/eslint-config": "workspace:*",

@@ -92,6 +92,19 @@ export default defineConfigWithVueTs(
 	{
 		...pluginVitest.configs.recommended,
 		files: ['src/**/__tests__/*'],
+		rules: {
+      ...pluginVitest.configs.recommended.rules,
+    },
+		settings: {
+      vitest: {
+        typecheck: true,
+      },
+    },
+		languageOptions: {
+      globals: {
+        ...pluginVitest.environments.env.globals,
+      },
+    },
 	},
 
 	{
@@ -102,6 +115,9 @@ export default defineConfigWithVueTs(
 	{
 		...pluginCypress.configs.recommended,
 		files: ['cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/support/**/*.{js,ts,jsx,tsx}'],
+		extends: [
+      pluginCypress.configs.globals,
+    ],
 	},
 	skipFormatting
 )
