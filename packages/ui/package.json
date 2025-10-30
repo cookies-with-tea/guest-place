@@ -1,0 +1,26 @@
+{
+	"name": "@admin-panel/ui",
+	"version": "1.0.0",
+	"private": true,
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"style": "./styles/index.scss",
+	"exports": {
+		".": "./index.ts",
+		"./styles/index.scss": "./styles/index.scss"
+	},
+	"files": [
+		"index.ts",
+		"styles/",
+		"src/"
+	],
+	"scripts": {
+		"lint": "eslint .",
+		"test:unit": "vitest"
+	},
+	"devDependencies": {
+		"@admin-panel/eslint-config": "workspace:*",
+		"@admin-panel/typescript-config": "workspace:*",
+		"vue": "^3.5.22"
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"name": "@admin-panel/stylelint-config",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"main": "index.js",
+	"exports": {
+		".": "./index.js"
+	},
+	"dependencies": {
+		"@stylistic/stylelint-plugin": "^4.0.0",
+		"postcss-html": "^1.8.0",
+		"postcss-scss": "^4.0.9",
+		"stylelint-config-recess-order": "^7.4.0",
+		"stylelint-config-recommended-vue": "^1.6.1",
+		"stylelint-config-standard-scss": "^16.0.0",
+		"stylelint-order": "^7.0.0",
+		"stylelint-scss": "^6.12.1"
+	},
+	"peerDependencies": {
+		"stylelint": "^16.0.0"
+	}
+}

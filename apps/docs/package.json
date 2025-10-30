@@ -1,0 +1,38 @@
+{
+	"name": "docs",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"storybook": "storybook dev -p 6006",
+		"build": "storybook build --docs",
+		"preview-storybook": "serve storybook-static",
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "eslint ./stories/*.stories.ts --max-warnings 0"
+	},
+	"dependencies": {
+		"@admin-panel/ui": "workspace:*",
+		"@admin-panel/utils": "workspace:*",
+		"vue": "^3.5.22"
+	},
+	"devDependencies": {
+		"@admin-panel/eslint-config": "workspace:*",
+		"@admin-panel/prettier-config": "workspace:*",
+		"@admin-panel/stylelint-config": "workspace:*",
+		"@admin-panel/typescript-config": "workspace:*",
+		"@chromatic-com/storybook": "4.1.1",
+		"@storybook/addon-a11y": "9.1.15",
+		"@storybook/addon-docs": "9.1.15",
+		"@storybook/addon-vitest": "9.1.15",
+		"@storybook/vue3-vite": "9.1.15",
+		"@types/node": "^24.6.0",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"@vue/tsconfig": "^0.8.1",
+		"eslint-plugin-storybook": "9.1.15",
+		"serve": "^14.2.5",
+		"storybook": "9.1.15",
+		"typescript": "~5.9.3",
+		"vite": "^7.1.7",
+		"vue-tsc": "^3.1.0"
+	}
+}
