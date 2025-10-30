@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import UiButton from '../ui/UiButton.vue'
 
@@ -9,8 +9,11 @@ describe('UiButton', () => {
 		})
 
 		expect(wrapper.text()).toContain('Click me')
+
 		expect(wrapper.classes()).toContain('ui-button')
+
 		expect(wrapper.classes()).toContain('ui-button--primary')
+
 		expect(wrapper.classes()).toContain('ui-button--l')
 	})
 
@@ -20,8 +23,7 @@ describe('UiButton', () => {
 		})
 
 		expect(wrapper.classes()).toContain('ui-button--secondary')
+
 		expect(wrapper.classes()).toContain('ui-button--m')
 	})
 })
-
-

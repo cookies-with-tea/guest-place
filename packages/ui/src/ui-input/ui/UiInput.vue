@@ -18,7 +18,7 @@ interface IProps {
 	size?: 'm' | 'l'
 }
 
-const props = withDefaults(defineProps<IProps>(), {
+withDefaults(defineProps<IProps>(), {
 	modelValue: '',
 	placeholder: '',
 	type: 'text',
@@ -31,6 +31,7 @@ const emit = defineEmits<{
 
 function onInput(event: Event) {
 	const target = event.target as HTMLInputElement
+
 	emit('update:modelValue', target.value)
 }
 </script>
@@ -39,15 +40,15 @@ function onInput(event: Event) {
 .ui-input {
 	width: 100%;
 }
+
 .ui-input__control {
 	width: 100%;
-	padding: 10px 12px;
 	border: 1px solid #d0d5dd;
 	border-radius: 8px;
+	padding: 10px 12px;
 }
+
 .ui-input__control--m {
 	padding: 8px 10px;
 }
 </style>
-
-

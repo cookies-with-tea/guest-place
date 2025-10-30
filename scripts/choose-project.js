@@ -28,11 +28,9 @@ if (!TURBO_TASKS.includes(command)) {
 }
 
 try {
-	// Получаем список всех workspace-пакетов
 	const output = execSync('pnpm ls -r --json', { encoding: 'utf8' })
 	const packages = JSON.parse(output)
 
-	// Фильтруем только apps/
 	const appProjects = packages.filter((pkg) => {
 		const relativePath = path.relative(process.cwd(), pkg.path)
 
@@ -59,9 +57,6 @@ try {
 			console.log(`\n🚀 Запуск "${command}" для: ${projectName}`)
 
 			let turboCmd = `pnpm turbo run ${command} --filter=${projectName}`
-
-			// Для dev не нужен --parallel при фильтрации одного проекта
-			// (оставим как есть — turbo сам решит)
 
 			execSync(turboCmd, {
 				stdio: 'inherit',

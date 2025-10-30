@@ -15,7 +15,14 @@ export default defineConfigWithVueTs(
 		files: ['**/*.{ts,mts,tsx,vue}'],
 	},
 
-	globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/storybook-static/**']),
+	globalIgnores([
+		'**/dist/**',
+		'**/dist-ssr/**',
+		'**/coverage/**',
+		'**/storybook-static/**',
+		'scripts/**',
+		'**/cypress/**', // TODO: Убрать игнор.
+	]),
 
 	pluginVue.configs['flat/essential'],
 	vueTsConfigs.recommended,
@@ -63,9 +70,19 @@ export default defineConfigWithVueTs(
 					ignoreUrls: true,
 				},
 			],
+			'no-console': 'error',
+			indent: [
+				'error',
+				2,
+				{
+					SwitchCase: 1,
+				},
+			],
+			'vue/html-indent': ['error', 2],
 
 			// Vue rules
 			'vue/no-v-html': 'off',
+			'vue/require-v-for-key': 'warn',
 			'vue/multi-word-component-names': 'off',
 			'vue/require-default-prop': 'off',
 			'vue/no-side-effects-in-computed-properties': 'off',
@@ -82,6 +99,16 @@ export default defineConfigWithVueTs(
 					math: 'always',
 				},
 			],
+			'vue/max-attributes-per-line': [
+				'error',
+				{
+					singleline: 2,
+					multiline: {
+						max: 2,
+						allowFirstLine: false,
+					},
+				},
+			],
 
 			'@typescript-eslint/no-var-requires': 'off',
 			'@typescript-eslint/ban-ts-comment': 'off',
@@ -93,18 +120,18 @@ export default defineConfigWithVueTs(
 		...pluginVitest.configs.recommended,
 		files: ['src/**/__tests__/*'],
 		rules: {
-      ...pluginVitest.configs.recommended.rules,
-    },
+			...pluginVitest.configs.recommended.rules,
+		},
 		settings: {
-      vitest: {
-        typecheck: true,
-      },
-    },
+			vitest: {
+				typecheck: true,
+			},
+		},
 		languageOptions: {
-      globals: {
-        ...pluginVitest.environments.env.globals,
-      },
-    },
+			globals: {
+				...pluginVitest.environments.env.globals,
+			},
+		},
 	},
 
 	{
@@ -114,10 +141,12 @@ export default defineConfigWithVueTs(
 
 	{
 		...pluginCypress.configs.recommended,
-		files: ['cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/support/**/*.{js,ts,jsx,tsx}'],
-		extends: [
-      pluginCypress.configs.globals,
-    ],
+		files: [
+			'cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}',
+			'cypress/support/**/*.{js,ts,jsx,tsx}',
+			'src/**/__tests__/**/*.cy.{js,ts}',
+		],
+		extends: [pluginCypress.configs.globals],
 	},
 	skipFormatting
 )
