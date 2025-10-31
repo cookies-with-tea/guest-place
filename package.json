@@ -52,7 +52,7 @@
 		"@admin-panel/typescript-config": "workspace:*",
 		"@originjs/vite-plugin-federation": "^1.4.1",
 		"@types/jsdom": "^21.1.7",
-		"@types/node": "^24.9.1",
+		"@types/node": "^24.9.2",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vue/test-utils": "^2.4.6",
 		"cypress": "^15.3.0",
