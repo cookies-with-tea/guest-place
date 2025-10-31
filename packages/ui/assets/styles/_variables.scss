@@ -1,0 +1,31 @@
+$fonts-path: '../fonts';
+
+$theme-light: (
+	color-surface: #fff,
+	color-bg: #f4f5f9,
+	color-bg-2: #e7e7f4,
+	color-border: #dbdcde,
+	color-primary: #6e39cb,
+	color-text: #3a3541,
+	color-text-button: #fff,
+	color-text-secondary: #89868d,
+	color-text-disabled: #b4b2b7,
+);
+
+$theme-dark: (
+	color-surface: #1e1e24,
+	color-bg: #121218,
+	color-bg-2: #25252f,
+	color-border: #353542,
+	color-primary: #a377e3,
+	color-text: #e6e4ea,
+	color-text-button: #e6e4ea,
+	color-text-secondary: #a0a0b0,
+	color-text-disabled: #6b6b7a,
+);
+
+$breakpoints: (
+	desk: 1920,
+	tab: 1440,
+	mobi: 568,
+);

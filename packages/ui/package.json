@@ -1,26 +1,38 @@
 {
 	"name": "@admin-panel/ui",
-	"version": "1.0.0",
 	"private": true,
+	"version": "1.0.0",
+	"type": "module",
 	"main": "./index.ts",
 	"types": "./index.ts",
 	"style": "./styles/index.scss",
 	"exports": {
 		".": "./index.ts",
-		"./styles/index.scss": "./styles/index.scss"
+		"./assets/styles/index.scss": "./assets/styles/index.scss"
 	},
 	"files": [
 		"index.ts",
-		"styles/",
+		"assets/styles/",
 		"src/"
 	],
 	"scripts": {
+		"dev": "vite --port 4176",
+		"build": "vue-tsc -b && vite build",
+		"preview": "vite preview --port 3003",
 		"lint": "eslint .",
 		"test:unit": "vitest"
+	},
+	"dependencies": {
+		"svgo": "^4.0.0",
+		"vue": "^3.5.22"
 	},
 	"devDependencies": {
 		"@admin-panel/eslint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
+		"@pivanov/vite-plugin-svg-sprite": "^3.1.5",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"vite": "^7.1.7",
+		"vite-svg-sprite-wrapper": "^1.5.0",
 		"vue": "^3.5.22"
 	}
 }

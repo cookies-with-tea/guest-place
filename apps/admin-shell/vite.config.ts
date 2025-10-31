@@ -15,6 +15,7 @@ export default defineConfig({
 			remotes: {
 				statistics: 'http://localhost:3001/assets/remoteEntry.js',
 				translations: 'http://localhost:3002/assets/remoteEntry.js',
+				'@admin-panel/ui': 'http://localhost:3003/assets/remoteEntry.js',
 			},
 			shared: ['vue', 'vue-router'],
 		}),

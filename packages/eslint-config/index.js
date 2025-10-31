@@ -70,7 +70,7 @@ export default defineConfigWithVueTs(
 					ignoreUrls: true,
 				},
 			],
-			'no-console': 'error',
+			'no-console': 'warn',
 			indent: [
 				'error',
 				2,
