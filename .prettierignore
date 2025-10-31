@@ -5,3 +5,5 @@ storybook-static
 
 # Ignore all HTML files:
 *.html
+
+pnpm-lock.yaml
