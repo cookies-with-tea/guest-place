@@ -1,21 +1,21 @@
 @use 'reset';
-@use 'helpers/mixins/variables' as mVariables;
-@use 'variables' as *;
+@use 'helpers/mixins/color' as color;
+@use 'helpers/variables/colors' as *;
 @use 'fonts';
 
 :root {
-  @include mVariables.generate-css-vars($theme-light);
+	@include color.generate-css-vars($theme-light);
 }
 
 [data-theme='dark'] {
-  @include mVariables.generate-css-vars($theme-dark);
+	@include color.generate-css-vars($theme-dark);
 }
 
 html {
-  font-family: 'Inter', sans-serif;
+	font-family: 'Inter', sans-serif;
 }
 
 body {
-  color: var(--color-text);
-  background-color: var(--color-bg);
+	color: var(--color-text);
+	background-color: var(--color-bg);
 }

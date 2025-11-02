@@ -1,4 +1,1 @@
-@use 'style/reset';
-@use 'helpers/mixins/variables' as mVariables;
-@use 'style/variables' as *;
-@use 'fonts';
+@forward 'base';

@@ -1,36 +1,24 @@
-@use '../../variables' as *;
+@use '../variables/fonts' as *;
 @use 'sass:map';
 
-@mixin addFont($font-name, $font-type: 'Regular', $font-weight: null, $font-style: 'normal') {
-  $weight-map: (
-    'Thin': 100,
-    'ExtraLight': 200,
-    'Light': 300,
-    'Regular': 400,
-    'Medium': 500,
-    'SemiBold': 600,
-    'Bold': 700,
-    'ExtraBold': 800,
-    'Black': 900,
-  );
+@mixin addFont($font-name, $font-type: 'Regular', $font-style: 'normal') {
+	$font-weight: map.get($weight-map, $font-type);
 
-  $font-weight: map.get($weight-map, $font-type);
+	@if $font-weight == null {
+		$font-weight: 400;
+	}
 
-  @if $font-weight == null {
-    $font-weight: 400;
-  }
-
-  // prettier-ignore
-  /* stylelint-disable */
-  @font-face {
-    src:
-      url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff2') format('woff2'),
-      url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff') format('woff'),
-      url($fonts-path + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
-    font-family: $font-name;
-    font-weight: $font-weight;
-    font-style: $font-style;
-    font-display: swap;
-  }
-  /* stylelint-enable */
+	// prettier-ignore
+	/* stylelint-disable */
+	@font-face {
+		src:
+			url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff2') format('woff2'),
+			url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff') format('woff'),
+			url($fonts-path + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
+		font-family: $font-name;
+		font-weight: $font-weight;
+		font-style: $font-style;
+		font-display: swap;
+	}
+	/* stylelint-enable */
 }

@@ -1,7 +1,7 @@
 @function darken($color, $percent: 10) {
-  @return hsl(from $color h s calc(l - $percent));
+	@return hsl(from $color h s calc(l - $percent));
 }
 
 @function lighten($color, $percent: 10) {
-  @return hsl(from $color h s calc(l + $percent));
+	@return hsl(from $color h s calc(l + $percent));
 }
