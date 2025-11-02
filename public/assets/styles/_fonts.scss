@@ -1,4 +1,5 @@
 @use 'helpers/mixins/fonts';
 
-@include fonts.addFont('Inter', 'Regular');
-@include fonts.addFont('Inter', 'ExtraBold');
+@include fonts.addFont('Raleway', 'Bold');
+@include fonts.addFont('Raleway', 'Medium');
+@include fonts.addFont('Raleway', 'Regular');

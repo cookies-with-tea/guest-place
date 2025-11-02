@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     global: false,
     dirs: [],
   },
+  css: ['../public/assets/styles/index.scss'],
   alias: {
     '@': fileURLToPath(new URL('./app', import.meta.url)),
     '#shared': fileURLToPath(new URL('./app/shared', import.meta.url)),
