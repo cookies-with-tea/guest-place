@@ -21,21 +21,25 @@ $theme-light: (
 //TODO: актулизировать цвета под темную тему
 
 $theme-dark: (
-  bg-primary: #FFFFFF,
-  bg-primary-two: #0066CC,
-  bg-primary-three : #ECF4FD,
-  bg-primary-four: #F8BF95,
-  bg-primary-five: #EF8062,
-  bg-primary-six: #AAB9ED,
-  bg-primary-seven: #F8DA75,
+  color-white: #FFFFFF,
 
-  color-primary: #333333,
-  color-primary-two: #A0A0A4,
-  color-primary-three :#C6C6CC,
-  color-primary-four: #C6C6CC,
-  color-primary-blue: #0066CC,
+  color-accent: #0066CC,
+  color-accent-2: #ECF4FD,
+  color-accent-3: #AAB9ED,
 
-  btn-gradian-primary: conic-gradient(from 180deg at 50% 50%, #8E2DBC 0deg, #FFC5BD 120deg, #DB7AE3 240deg, #0066CC 360deg),
-  btn-border-primary: conic-gradient(from 180deg at 50% 50%, #8E2DBC 0deg, #FFC5BD 120deg, #DB7AE3 240deg, #0066CC 360deg),
-  btn-bg-primary: #764678,
+  color-orange: #EF8062,
+  color-orange-2: #F8BF95,
+
+  color-yellow: #F8DA75,
+
+  color-text-accent: #0066CC,
+  color-text-accent-2: #ECF4FD,
+  color-text-dark: #333333,
+  color-text-light: #A0A0A4,
+  color-text-ultralight :#C6C6CC,
+  color-text-accent: #C6C6CC,
+
+  shadow-md: 0px 4px 15px 0px #694E4B24,
+
+  gradient-main: conic-gradient(from 180deg at 50% 50%, #8E2DBC 0deg, #FFC5BD 120deg, #DB7AE3 240deg, #0066CC 360deg),
 );
