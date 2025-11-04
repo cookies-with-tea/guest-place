@@ -3,6 +3,7 @@
 @use 'helpers/variables/colors' as *;
 @use 'helpers/variables/fonts' as font;
 @use 'fonts';
+@use "helpers/mixins/typography" as c;
 
 :root {
 	@include color.generate-css-vars($theme-light);
