@@ -15,9 +15,9 @@
     /* stylelint-disable */
     @font-face {
       src:
-        url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff2') format('woff2'),
-        url($fonts-path + '/' + $font-name + '-' + $font-type + '.woff') format('woff'),
-        url($fonts-path + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
+        url($fonts-path + '/' + $font-name + '/' + $font-name + '-' + $font-type + '.woff2') format('woff2'),
+        url($fonts-path + '/' + $font-name + '/' + $font-name + '-' + $font-type + '.woff') format('woff'),
+        url($fonts-path + '/' + $font-name + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
       font-family: $font-name;
       font-weight: $font-weight;
       font-style: $font-style;

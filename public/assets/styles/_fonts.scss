@@ -1,5 +1,8 @@
 @use 'helpers/mixins/fonts';
+@use 'helpers/variables/fonts' as font;
 
-@include fonts.addFont('Raleway', 'Bold');
-@include fonts.addFont('Raleway', 'Medium');
-@include fonts.addFont('Raleway', 'Regular');
+@include fonts.addFont(font.$font-family-raleway, 'Bold');
+@include fonts.addFont(font.$font-family-raleway, 'Medium');
+@include fonts.addFont(font.$font-family-raleway, 'Regular');
+
+@include fonts.addFont(font.$font-family-poiret, 'Regular');

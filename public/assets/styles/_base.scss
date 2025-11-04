@@ -1,6 +1,7 @@
 @use 'reset';
 @use 'helpers/mixins/color' as color;
 @use 'helpers/variables/colors' as *;
+@use 'helpers/variables/fonts' as font;
 @use 'fonts';
 
 :root {
@@ -12,10 +13,10 @@
 }
 
 html {
-	font-family: 'Raleway', sans-serif;
+	font-family: font.$font-family-raleway, sans-serif;
 }
 
 body {
-	color: var(--color-text);
-	background-color: var(--color-bg);
+	color: var(--color-text-dark);
+	background-color: var(--color-white);
 }
