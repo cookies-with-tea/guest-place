@@ -1,20 +1,19 @@
 @use 'reset';
-@use 'helpers/mixins/color' as color;
+@use 'helpers/mixins/color' as *;
 @use 'helpers/variables/colors' as *;
-@use 'helpers/variables/fonts' as font;
+@use 'helpers/variables/fonts' as *;
 @use 'fonts';
-@use "helpers/mixins/typography" as c;
 
 :root {
-	@include color.generate-css-vars($theme-light);
+	@include generate-css-vars($theme-light);
 }
 
 [data-theme='dark'] {
-	@include color.generate-css-vars($theme-dark);
+	@include generate-css-vars($theme-dark);
 }
 
 html {
-	font-family: font.$font-family-raleway, sans-serif;
+	font-family: $font-family-raleway, sans-serif;
 }
 
 body {

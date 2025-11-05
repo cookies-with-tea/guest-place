@@ -1,7 +1,6 @@
 @use "sass:map";
 
 @mixin typography($size) {
-
   $font-size-map: (
     'h1': (
       'font-size': '68px',
@@ -49,8 +48,6 @@
       'line-height': '130%',
     ),
   );
-
-
 
   @each $name, $value in map.get($font-size-map, $size) {
     #{$name}: #{$value};
