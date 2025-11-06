@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     global: false,
     dirs: [],
   },
+  css: ['styles/index.scss'],
   alias: {
     '@': fileURLToPath(new URL('./app', import.meta.url)),
     '#shared': fileURLToPath(new URL('./app/shared', import.meta.url)),
@@ -17,7 +18,7 @@ export default defineNuxtConfig({
     '#features': fileURLToPath(new URL('./app/features', import.meta.url)),
     '#widgets': fileURLToPath(new URL('./app/widgets', import.meta.url)),
     '#pages': fileURLToPath(new URL('./app/pages', import.meta.url)),
-    '#fonts': fileURLToPath(new URL('./app/assets/fonts', import.meta.url)),
-    styles: fileURLToPath(new URL('./app/assets/styles', import.meta.url)),
+    '#fonts': fileURLToPath(new URL('./public/assets/fonts', import.meta.url)),
+    styles: fileURLToPath(new URL('./public/assets/styles', import.meta.url)),
   },
 })
