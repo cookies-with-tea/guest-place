@@ -1,5 +1,5 @@
 [package]
-name = "education-platform"
+name = "guest-platform"
 version = "0.1.0"
 edition = "2021"
 
@@ -24,6 +24,7 @@ utoipa-axum = { git = "https://github.com/juhaku/utoipa.git", rev = "ca6b2a5" }
 mime_guess = "2.0.5"
 futures = "0.3.31"
 num-format = "0.4.4"
+rust-i18n = "2"
 
 [profile.release]
 strip = true

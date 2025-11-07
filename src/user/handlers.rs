@@ -1,12 +1,13 @@
 use crate::core::dto::ApiResponse;
+use crate::core::response::{error_map, into_api_response};
 use crate::user::dto::{CreateUserDTO, User, UserResponseDTO};
-use crate::core::response::{into_api_response, error_map};
 use crate::AppState;
+use axum::Extension;
 use axum::extract::{Path, State};
-use axum::routing::{get, post, delete};
+use axum::routing::{delete, get, post};
+use rust_i18n::{t};
 use sqlx::query_as;
 use uuid::Uuid;
-
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
@@ -36,29 +37,35 @@ fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error>
 )]
 async fn create(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     Json(payload): Json<CreateUserDTO>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    if let Some(phone) = &payload.phone {
-        let existing_user = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM education_user WHERE phone = $1")
-            .bind(phone)
-            .fetch_one(&state.pool)
-            .await;
+  if let Some(phone) = &payload.phone {
+        let existing_user =
+            sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM education_user WHERE phone = $1")
+                .bind(phone)
+                .fetch_one(&state.pool)
+                .await;
 
         match existing_user {
             Ok(count) if count > 0 => {
+                let msg = t!("user.phone_exists", locale = &locale);
+
                 return into_api_response(
                     StatusCode::CONFLICT,
                     None,
-                    Some(error_map("phone", "Пользователь с таким номером телефона уже существует")),
-                    Some(vec!["Конфликт: пользователь уже существует".to_string()]),
+                    Some(error_map("phone", &msg)),
+                    Some(vec![msg]),
                 );
             }
             Err(_) => {
+                let msg = t!("errors.db_check_failed", locale = &locale);
+
                 return into_api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     None,
-                    Some(error_map("database", "Ошибка запроса к базе данных")),
-                    Some(vec!["Не удалось проверить существование пользователя".to_string()]),
+                    Some(error_map("database", &msg)),
+                    Some(vec![msg]),
                 );
             }
             _ => {}
@@ -96,7 +103,7 @@ async fn create(
             StatusCode::CREATED,
             None,
             None,
-            Some(vec!["Пользователь успешно создан".to_string()]),
+            Some(vec![t!("user.created", locale = &locale).to_string()]),
         ),
         Err(_) => into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -119,7 +126,10 @@ async fn create(
 )]
 async fn get_all(
     State(state): State<Arc<AppState>>,
-) -> Result<Json<ApiResponse<Vec<UserResponseDTO>>>, (StatusCode, Json<ApiResponse<Vec<UserResponseDTO>>>)> {
+) -> Result<
+    Json<ApiResponse<Vec<UserResponseDTO>>>,
+    (StatusCode, Json<ApiResponse<Vec<UserResponseDTO>>>),
+> {
     match query_as::<_, UserResponseDTO>(
         "SELECT uuid, first_name, second_name, last_name, phone, avatar, birth_date, created_at FROM education_user"
     )
@@ -202,9 +212,8 @@ async fn delete_one(
     State(state): State<Arc<AppState>>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    // Сначала проверим, существует ли пользователь
     let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM education_user WHERE uuid = $1)"
+        "SELECT EXISTS(SELECT 1 FROM education_user WHERE uuid = $1)",
     )
     .bind(uuid)
     .fetch_one(&state.pool)
@@ -212,7 +221,6 @@ async fn delete_one(
 
     match exists {
         Ok(true) => {
-            // Пользователь существует — удаляем
             let result = sqlx::query("DELETE FROM education_user WHERE uuid = $1")
                 .bind(uuid)
                 .execute(&state.pool)
@@ -234,7 +242,6 @@ async fn delete_one(
             }
         }
         Ok(false) => {
-            // Пользователь не найден
             into_api_response(
                 StatusCode::NOT_FOUND,
                 None,
@@ -243,12 +250,13 @@ async fn delete_one(
             )
         }
         Err(_) => {
-            // Ошибка при проверке существования
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Ошибка запроса к базе данных")),
-                Some(vec!["Не удалось проверить существование пользователя".to_string()]),
+                Some(vec![
+                    "Не удалось проверить существование пользователя".to_string()
+                ]),
             )
         }
     }

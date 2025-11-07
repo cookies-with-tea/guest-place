@@ -1,11 +1,14 @@
+rust_i18n::i18n!("locales", fallback = "en");
+
 mod core;
 mod auth;
 mod media;
 mod user;
+mod middlewares;
 
-use crate::core::app::AppConfig;
+use crate::{core::app::AppConfig, middlewares::locale::locale_middleware};
 use crate::core::db::create_pool;
-use axum::http::{HeaderName, HeaderValue, Method};
+use axum::{http::{HeaderName, HeaderValue, Method}, middleware};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use std::time::Duration;
@@ -108,6 +111,7 @@ async fn main() {
         .nest("/api/v1/media", media::handlers::routing())
         .with_state(shared_state.clone())
         .nest_service("/media", media_service)
+        .layer(middleware::from_fn(locale_middleware))
         .split_for_parts();
 
     let router = router

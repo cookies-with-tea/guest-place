@@ -1,0 +1,10 @@
+user:
+  created: "ユーザーが正常に作成されました"
+  deleted: "ユーザーが正常に削除されました"
+  not_found: "ユーザーが見つかりません"
+  phone_exists: "この電話番号のユーザーは既に存在します"
+  password_hash_error: "パスワードのハッシュ処理エラー"
+  check_exists_error: "ユーザーの存在確認ができませんでした"
+general:
+  internal_error: "内部サーバーエラー"
+  db_error: "データベースエラー"
