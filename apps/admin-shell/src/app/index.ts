@@ -2,7 +2,7 @@ import App from './App.vue'
 import { initRouter } from './router'
 import { createApp } from 'vue'
 
-import '@admin-panel/ui/styles/index.scss'
+import '@admin-panel/ui/assets/styles/index.scss'
 
 const router = await initRouter()
 
