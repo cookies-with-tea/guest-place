@@ -402,32 +402,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
-name = "education-platform"
-version = "0.1.0"
-dependencies = [
- "argon2",
- "axum",
- "chrono",
- "dotenv",
- "futures",
- "jsonwebtoken",
- "mime_guess",
- "num-format",
- "rand 0.9.0",
- "rand_core 0.9.3",
- "serde",
- "serde_derive",
- "sqlx",
- "tokio",
- "tower-http",
- "tracing-subscriber",
- "utoipa",
- "utoipa-axum",
- "utoipa-swagger-ui",
- "uuid",
-]
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -660,6 +634,32 @@ name = "gimli"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
+
+[[package]]
+name = "guest-platform"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "axum",
+ "chrono",
+ "dotenv",
+ "futures",
+ "jsonwebtoken",
+ "mime_guess",
+ "num-format",
+ "rand 0.9.0",
+ "rand_core 0.9.3",
+ "serde",
+ "serde_derive",
+ "sqlx",
+ "tokio",
+ "tower-http",
+ "tracing-subscriber",
+ "utoipa",
+ "utoipa-axum",
+ "utoipa-swagger-ui",
+ "uuid",
+]
 
 [[package]]
 name = "hashbrown"

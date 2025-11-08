@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS education_user
 (
     uuid        UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
@@ -12,5 +10,3 @@ CREATE TABLE IF NOT EXISTS education_user
     avatar TEXT NOT NULL DEFAULT '',
     created_at  TIMESTAMP        NOT NULL DEFAULT NOW()
 );
-
-COMMIT;

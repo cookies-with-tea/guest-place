@@ -24,7 +24,6 @@ impl AppConfig {
 
         let db_config = DatabaseConfig::new();
 
-        // читаем PUBLIC_URL или формируем по умолчанию
         let public_url = env::var("PUBLIC_URL")
             .unwrap_or_else(|_| format!("http://{}:{}", app_host_str, app_port_str));
 

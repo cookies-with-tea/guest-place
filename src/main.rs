@@ -1,11 +1,14 @@
 mod core;
+mod i18n;
 mod auth;
 mod media;
 mod user;
+mod middlewares;
 
-use crate::core::app::AppConfig;
+use crate::i18n::I18nService;
+use crate::{core::app::AppConfig, middlewares::locale::locale_middleware};
 use crate::core::db::create_pool;
-use axum::http::{HeaderName, Method};
+use axum::{http::{HeaderName, HeaderValue, Method}, middleware};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use std::time::Duration;
@@ -23,6 +26,7 @@ use utoipa_swagger_ui::SwaggerUi;
 #[derive(Clone, Debug)]
 struct AppState {
     pool: Pool<Postgres>,
+    i18n: I18nService,
 }
 
 #[derive(OpenApi)]
@@ -37,12 +41,17 @@ struct AppState {
     crate::user::handlers::delete_one,
     crate::media::handlers::create,
     crate::media::handlers::get_all,
+    crate::i18n::handlers::create_or_update,
+    crate::i18n::handlers::get_all,
+    crate::i18n::handlers::delete_one,
+    crate::i18n::handlers::get_by_dict_key,
   ),
   modifiers(&SecurityAddon),
   tags(
         (name = "Auth", description = "Auth"),
         (name = "Media", description = "Media"),
         (name = "User", description = "User"),
+        (name = "I18n", description = "Translations management"),
   )
 )]
 struct ApiDoc;
@@ -70,19 +79,31 @@ async fn main() {
     let app_host = config.app_host.clone();
     let app_port = config.app_port.clone();
 
-    let shared_state = Arc::new(AppState { pool: pool.clone() });
+    let i18n = I18nService::new(pool.clone());
+    let shared_state = Arc::new(AppState {
+        pool: pool.clone(),
+        i18n,
+    });
 
-    // DEBT: Вынести в env
+    let allowed_origins: Vec<HeaderValue> = std::env::var("CORS_ALLOWED_ORIGINS")
+        .unwrap_or_default()
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(|origin| {
+            origin
+                .parse()
+                .expect("Invalid origin in CORS_ALLOWED_ORIGINS")
+        })
+        .collect();
+
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::list(vec![
-            "http://localhost:8000".parse().unwrap(),
-            "http://localhost:5500".parse().unwrap(),
-            "http://127.0.0.1:5500".parse().unwrap(),
-        ]))
+        .allow_origin(AllowOrigin::list(allowed_origins))
         .allow_methods(AllowMethods::list(vec![
             Method::POST,
             Method::GET,
             Method::PUT,
+            Method::PATCH,
             Method::DELETE,
         ]))
         .allow_headers(AllowHeaders::list(vec![
@@ -98,8 +119,10 @@ async fn main() {
         .nest("/api/v1/auth", auth::handlers::routing())
         .nest("/api/v1/user", user::handlers::routing())
         .nest("/api/v1/media", media::handlers::routing())
+        .nest("/api/v1/i18n", i18n::handlers::routing())
         .with_state(shared_state.clone())
         .nest_service("/media", media_service)
+        .layer(middleware::from_fn(locale_middleware))
         .split_for_parts();
 
     let router = router

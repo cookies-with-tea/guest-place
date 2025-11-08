@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use uuid::Uuid;
 
 #[derive(Deserialize, ToSchema)]
 #[allow(unused)]
@@ -35,10 +34,10 @@ pub struct MediaItemFromDb {
   pub media_type: MediaType,
 }
 
-// DEBT: Перепроверить все enum'ы. Сделать в виде image вместо Image
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
 #[sqlx(type_name = "media_type", rename_all = "lowercase")]
 pub enum MediaType {
   Image,
   Video,
+  Icon,
 }
