@@ -18,7 +18,6 @@ use std::{fs, path::PathBuf, sync::Arc};
 use utoipa_axum::router::OpenApiRouter;
 use uuid::Uuid;
 
-// --- UPLOAD MEDIA ---
 #[utoipa::path(
     post,
     path = "/api/v1/media",
@@ -154,7 +153,6 @@ pub async fn create(
     )
 }
 
-// --- GET ALL MEDIA ---
 #[utoipa::path(
     get,
     path = "/api/v1/media",

@@ -114,7 +114,6 @@ pub async fn login(
     let (access_token, access_expires_in) = generate_access_token(user.uuid);
     let (refresh_token, refresh_expires_in) = generate_refresh_token(user.uuid);
 
-    // Сохраняем refresh token в БД
     let _ = sqlx::query(
         "INSERT INTO refresh_token (user_id, token, expires_at) \
          VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)",
@@ -181,7 +180,6 @@ pub async fn refresh(
     let (new_access_token, access_expires_in) = generate_access_token(user_id);
     let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id);
 
-    // Обновляем refresh token в БД с динамическим TTL
     let _ = sqlx::query(
         "UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '1 minute' * $2 WHERE user_id = $3"
     )
