@@ -2,7 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 export const routes = [
 	{
-		path: '/translations',
+		path: '/',
+		redirect: '/en',
+	},
+	{
+		path: '/:locale(en|ru|fr|ja)/translations',
 		name: 'TranslationsDashboard',
 		component: () => import('#pages/TranslationsPage.vue'),
 	},

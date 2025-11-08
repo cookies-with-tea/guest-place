@@ -1,0 +1,5 @@
+{
+	"extends": "../typescript-config/base",
+	"include": ["src/**/*", "index.ts", "vite.config.ts", "env.d.ts", "vue-shim.d.ts"],
+	"exclude": ["node_modules", "dist"]
+}
