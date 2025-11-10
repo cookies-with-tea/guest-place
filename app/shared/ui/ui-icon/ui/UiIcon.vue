@@ -1,18 +1,12 @@
 <template>
-<!--  <svg-->
-<!--    class="app-icon"-->
-<!--    :class="iconClass"-->
-<!--    :width="props.width"-->
-<!--    :height="props.height"-->
-<!--    aria-hidden="true"-->
-<!--  >-->
-<!--    <use :href="symbolId" />-->
-<!--  </svg>-->
+  <svg class="app-icon" :class="iconClass" :width="props.width" :height="props.height" aria-hidden="true">
+    <use :href="symbolId" />
+  </svg>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { IconNamesType } from "../types";
+import type { IconNamesType } from '../types'
 
 const props = withDefaults(defineProps<Props>(), {
   prefix: 'icon',

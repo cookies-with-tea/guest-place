@@ -1,17 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath, URL } from 'node:url'
-import vue from '@vitejs/plugin-vue'
-import {typedIconPlugin} from "typed-icon-template";
-import * as path from "node:path";
-import {createSvgIconsPlugin} from "vite-plugin-svg-icons";
-
+import { typedIconPlugin } from 'typed-icon-template'
+import * as path from 'node:path'
+import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 const svgIconsConfig = createSvgIconsPlugin({
   iconDirs: [path.resolve(process.cwd(), './public/assets/icons')],
   symbolId: 'icon-[dir]-[name]',
   inject: 'body-first',
   customDomId: '__svg__icons__dom__',
-});
+})
 
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
@@ -28,11 +26,7 @@ export default defineNuxtConfig({
     dirs: [],
   },
   vite: {
-    plugins: [
-      vue(),
-      svgIconsConfig,
-      typedIconPluginConfig,
-    ],
+    plugins: [svgIconsConfig, typedIconPluginConfig],
   },
   css: ['styles/index.scss'],
   alias: {

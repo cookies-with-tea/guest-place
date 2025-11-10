@@ -1,5 +1,3 @@
-import 'virtual:svg-icons-register';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
+import 'virtual:svg-icons-register'
 
 export default defineNuxtPlugin(() => {})
