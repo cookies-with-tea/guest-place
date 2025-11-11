@@ -1,27 +1,13 @@
 <template>
   <div class="ui-kit">
-    <!--    <div class="box">-->
-    <!--      <div class="column">-->
-    <!--        <UiButton> Hi </UiButton>-->
+    <UiIcon style="color: #000" name="clear" width="50px" height="50px" />
 
-    <!--        <UiButton> Hi </UiButton>-->
-
-    <!--        <UiButton> Hi </UiButton>-->
-    <!--      </div>-->
-
-    <!--      <div class="column">-->
-    <!--        <UiButton> Hi 2 </UiButton>-->
-
-    <!--        <UiButton> Hi 2 </UiButton>-->
-
-    <!--        <UiButton> Hi 2 </UiButton>-->
-    <!--      </div>-->
-    <!--    </div>-->
+    <UiIcon style="color: #fff" name="eye-off" width="50px" height="50px" />
   </div>
 </template>
 
 <script setup lang="ts">
-// import { UiButton } from '#shared/ui'
+import { UiIcon } from '../shared/ui'
 </script>
 
 <style lang="scss" scoped>

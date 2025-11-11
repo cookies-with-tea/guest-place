@@ -1,5 +1,5 @@
 <template>
-  <svg class="app-icon" :class="iconClass" :width="props.width" :height="props.height" aria-hidden="true">
+  <svg class="ui-icon" :class="iconClass" :width="props.width" :height="props.height" aria-hidden="true">
     <use :href="symbolId" />
   </svg>
 </template>
@@ -26,12 +26,12 @@ type Props = {
 const symbolId = computed(() => `#${props.prefix}-${props.name}`)
 
 const iconClass = computed(() => {
-  return [{ 'reversed-icon': props.reverse }, `app-icon--${props.name}`]
+  return [{ 'reversed-icon': props.reverse }, `ui-icon--${props.name}`]
 })
 </script>
 
 <style scoped>
-.app-icon {
+.ui-icon {
   position: relative;
   display: inline-block;
   flex-shrink: 0;
