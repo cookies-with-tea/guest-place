@@ -2,20 +2,20 @@
   <div class="ui-kit">
     <div class="box">
       <div class="column">
-        <UiButton> Hi </UiButton>
+        <UiButton> Показать на карте </UiButton>
 
-        <UiButton> Hi </UiButton>
+        <!--        <UiButton> Hi </UiButton>-->
 
-        <UiButton> Hi </UiButton>
+        <!--        <UiButton> Hi </UiButton>-->
       </div>
 
-      <div class="column">
-        <UiButton> Hi 2 </UiButton>
+      <!--      <div class="column">-->
+      <!--        <UiButton> Hi 2 </UiButton>-->
 
-        <UiButton> Hi 2 </UiButton>
+      <!--        <UiButton> Hi 2 </UiButton>-->
 
-        <UiButton> Hi 2 </UiButton>
-      </div>
+      <!--        <UiButton> Hi 2 </UiButton>-->
+      <!--      </div>-->
     </div>
 
     <div class="box">
@@ -46,6 +46,7 @@ import { UiButton, UiIcon } from '../shared/ui'
 .column {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 
   > * {
     display: block;
