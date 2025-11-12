@@ -2,9 +2,9 @@
   <div class="ui-kit">
     <div class="box">
       <div class="column">
-        <UiButton> Показать на карте </UiButton>
+        <UiButton disabled> Показать на карте </UiButton>
 
-        <UiButton variant="secondary"> Показать на карте </UiButton>
+        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
 
         <!--        <UiButton> Hi </UiButton>-->
 

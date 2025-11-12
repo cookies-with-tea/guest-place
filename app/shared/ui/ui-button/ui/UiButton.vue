@@ -1,5 +1,5 @@
 <template>
-  <component :is="props.is" :class="classes">
+  <component :is="props.is" :class="classes" >
     <slot />
   </component>
 </template>
@@ -51,12 +51,20 @@ const classes = computed(() => {
   --ui-button-bg-color-purle: #764678;
   --ui-button-border-color-purle: #764678;
 
+  --ui-button-bg-color-disabled-grey: #e0e0e0;
+  --ui-button-color-disabled-grey: #9e9e9e;
+  --ui-button-border-color-disabled-grey: #bdbdbd;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50px;
   text-align: center;
   gap: 5px;
+
+  &[disabled] {
+    pointer-events: none;
+  }
 
   &--primary {
     --bg: var(--gradient-primary);
@@ -66,7 +74,22 @@ const classes = computed(() => {
     border-radius: 50px;
     color: var(--ui-button-color-white);
     background: var(--bg);
-    transition: background 0.3s ease, color 0.3s ease;
+    transition:
+      background 0.3s ease,
+      сolor 0.3s ease;
+
+    &[disabled] {
+      --bg: var(--ui-button-bg-color-disabled-grey);
+
+      color: var(--ui-button-color-disabled-grey);
+
+
+      &::before {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+        border: 2px solid var(--ui-button-border-color-disabled-grey);
+      }
+    }
 
     &::before {
       content: '';
@@ -75,8 +98,11 @@ const classes = computed(() => {
       background: var(--gradient-primary);
       transform: scale(0.96);
 
-      // Анимация появления
-      transition: opacity 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),  transform 1s cubic-bezier(0.18, 0.89, 0.32, 1.28), color 1s ease;
+      transition:
+        opacity 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+        transform 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+        color 1s ease;
+
       opacity: 0;
       z-index: -1;
       inset: -2px;
@@ -102,7 +128,20 @@ const classes = computed(() => {
     border-radius: 50px;
     color: var(--ui-button-color-black);
     background: var(--bg);
-    transition: background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28), color 1s ease;
+    transition:
+      background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+      color 1s ease;
+
+    &[disabled] {
+      --bg: transparent;
+
+      color: var(--ui-button-color-disabled-grey);
+
+      &::before {
+        background: var(--bg);
+        border: 2px solid var(--ui-button-border-color-disabled-grey);
+      }
+    }
 
     &::before {
       content: '';
