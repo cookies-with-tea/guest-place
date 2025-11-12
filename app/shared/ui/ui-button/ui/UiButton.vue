@@ -59,24 +59,65 @@ const classes = computed(() => {
   gap: 5px;
 
   &--primary {
-    //border: 2px solid transparent;
+    --bg: var(--gradient-primary);
 
+    position: relative;
+    border: none;
+    border-radius: 50px;
     color: var(--ui-button-color-white);
-    background: var(--gradient-primary);
+    background: var(--bg);
+    transition: background 0.3s ease, color 0.3s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      border-radius: 52px;
+      background: var(--gradient-primary);
+      transform: scale(0.96);
+
+      // Анимация появления
+      transition: opacity 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),  transform 1s cubic-bezier(0.18, 0.89, 0.32, 1.28), color 1s ease;
+      opacity: 0;
+      z-index: -1;
+      inset: -2px;
+    }
 
     &:hover {
-      border: 2px solid var(--gradient-primary);
-      background: transparent;
+      --bg: var(--color-white);
+
+      color: var(--ui-button-color-black);
+
+      &::before {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
   }
 
   &--secondary {
-    border: 2px solid #000;
+    --bg: var(--color-white);
 
-    //font-weight: 500;
-    //font-size: 14px;
-    //color: #000;
-    //background-color: transparent;
+    position: relative;
+    border: none;
+    border-radius: 50px;
+    color: var(--ui-button-color-black);
+    background: var(--bg);
+    transition: background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28), color 1s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      border-radius: 52px;
+      background: var(--gradient-primary);
+      z-index: -1;
+      inset: -2px;
+    }
+
+    &:hover {
+      --bg: var(--gradient-primary);
+
+      color: var(--ui-button-color-white);
+    }
   }
 
   &--lg {

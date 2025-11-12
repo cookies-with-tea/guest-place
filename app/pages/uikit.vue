@@ -4,6 +4,8 @@
       <div class="column">
         <UiButton> Показать на карте </UiButton>
 
+        <UiButton variant="secondary"> Показать на карте </UiButton>
+
         <!--        <UiButton> Hi </UiButton>-->
 
         <!--        <UiButton> Hi </UiButton>-->
