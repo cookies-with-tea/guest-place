@@ -1,5 +1,5 @@
 <template>
-  <component :is="props.is" :class="classes" >
+  <component :is="props.is" :class="classes">
     <slot />
   </component>
 </template>
@@ -50,7 +50,6 @@ const classes = computed(() => {
   --ui-button-color-black-hover: #333;
   --ui-button-bg-color-purle: #764678;
   --ui-button-border-color-purle: #764678;
-
   --ui-button-bg-color-disabled-grey: #e0e0e0;
   --ui-button-color-disabled-grey: #9e9e9e;
   --ui-button-border-color-disabled-grey: #bdbdbd;
@@ -78,31 +77,16 @@ const classes = computed(() => {
       background 0.3s ease,
       сolor 0.3s ease;
 
-    &[disabled] {
-      --bg: var(--ui-button-bg-color-disabled-grey);
-
-      color: var(--ui-button-color-disabled-grey);
-
-
-      &::before {
-        opacity: 1 !important;
-        transform: scale(1) !important;
-        border: 2px solid var(--ui-button-border-color-disabled-grey);
-      }
-    }
-
     &::before {
       content: '';
       position: absolute;
       border-radius: 52px;
       background: var(--gradient-primary);
       transform: scale(0.96);
-
       transition:
         opacity 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
         transform 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
         color 1s ease;
-
       opacity: 0;
       z-index: -1;
       inset: -2px;
@@ -116,6 +100,18 @@ const classes = computed(() => {
       &::before {
         transform: scale(1);
         opacity: 1;
+      }
+    }
+
+    &[disabled] {
+      --bg: var(--ui-button-bg-color-disabled-grey);
+
+      color: var(--ui-button-color-disabled-grey);
+
+      &::before {
+        border: 2px solid var(--ui-button-border-color-disabled-grey);
+        transform: scale(1) !important;
+        opacity: 1 !important;
       }
     }
   }
@@ -132,17 +128,6 @@ const classes = computed(() => {
       background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
       color 1s ease;
 
-    &[disabled] {
-      --bg: transparent;
-
-      color: var(--ui-button-color-disabled-grey);
-
-      &::before {
-        background: var(--bg);
-        border: 2px solid var(--ui-button-border-color-disabled-grey);
-      }
-    }
-
     &::before {
       content: '';
       position: absolute;
@@ -156,6 +141,17 @@ const classes = computed(() => {
       --bg: var(--gradient-primary);
 
       color: var(--ui-button-color-white);
+    }
+
+    &[disabled] {
+      --bg: transparent;
+
+      color: var(--ui-button-color-disabled-grey);
+
+      &::before {
+        border: 2px solid var(--ui-button-border-color-disabled-grey);
+        background: var(--bg);
+      }
     }
   }
 
