@@ -2,22 +2,22 @@
   <div class="ui-kit">
     <div class="box">
       <div class="column">
-        <UiButton disabled> Показать на карте </UiButton>
+        <UiButton> Показать на карте </UiButton>
 
-        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
-
-        <!--        <UiButton> Hi </UiButton>-->
-
-        <!--        <UiButton> Hi </UiButton>-->
+        <UiButton variant="secondary"> Показать на карте </UiButton>
       </div>
 
-      <!--      <div class="column">-->
-      <!--        <UiButton> Hi 2 </UiButton>-->
+      <div class="column">
+        <UiButton is="nuxt-link" to="/">
+          Это ссылка. кликни на меня ^_^
+        </UiButton>
 
-      <!--        <UiButton> Hi 2 </UiButton>-->
+        <UiButton> Hi 2 </UiButton>
 
-      <!--        <UiButton> Hi 2 </UiButton>-->
-      <!--      </div>-->
+        <nuxt-link to="/">
+          111
+        </nuxt-link>
+      </div>
     </div>
 
     <div class="box">
@@ -49,9 +49,5 @@ import { UiButton, UiIcon } from '../shared/ui'
   display: flex;
   flex-direction: column;
   gap: 20px;
-
-  > * {
-    display: block;
-  }
 }
 </style>

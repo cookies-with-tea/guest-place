@@ -1,5 +1,9 @@
 <template>
-  <component :is="props.is" :class="classes">
+  <component
+    :class="classes"
+    :is="props.is"
+    :type="buttonType"
+  >
     <slot />
   </component>
 </template>
@@ -14,34 +18,21 @@ interface IProps {
 
 const props = withDefaults(defineProps<IProps>(), {
   is: 'button',
-  type: 'button',
   variant: 'primary',
   size: 'md',
 })
 
-// const props = withDefaults(defineProps<Props>(), {
-//   is: 'button',
-//   size: 'md',
-//   variant: 'primary',
-//   borderRadius: '6',
-// })
-
-// type Props = {
-//   variant: 'primary'
-//   postfixIcon?: string,
-//   size?:  'md' | 'sm' ,
-//   tag?: 'button' | 'router-link',
-//   type?: 'button'
-//   borderRadius?: string | number,
-// }
-
 const classes = computed(() => {
-  return ['ui-button', `ui-button--${props.variant}`, `ui-button--${props.size}`]
+  return [
+    'ui-button',
+    `ui-button--${props.variant}`,
+    `ui-button--${props.size}`
+  ]
 })
 
-// const buttonType = computed(() => {
-//   return props.tag === 'button' ? (props.type || 'button') : undefined
-// })
+const buttonType = computed(() => {
+  return props.is === 'button' ? (props.type || 'button') : undefined
+})
 </script>
 
 <style lang="scss" scoped>
