@@ -8,15 +8,11 @@
       </div>
 
       <div class="column">
-        <UiButton is="nuxt-link" to="/">
-          Это ссылка. кликни на меня ^_^
-        </UiButton>
+        <UiButton is="nuxt-link" to="/"> Это ссылка. кликни на меня ^_^ </UiButton>
 
         <UiButton> Hi 2 </UiButton>
 
-        <nuxt-link to="/">
-          111
-        </nuxt-link>
+        <nuxt-link to="/"> 111 </nuxt-link>
       </div>
     </div>
 

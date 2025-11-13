@@ -1,14 +1,12 @@
 <template>
-  <component
-    :class="classes"
-    :is="props.is"
-    :type="buttonType"
-  >
+  <component :is="tagComponent" :class="classes" :type="buttonType">
     <slot />
   </component>
 </template>
 
 <script lang="ts" setup>
+import { NuxtLink } from '#components'
+
 interface IProps {
   is?: 'button' | 'nuxt-link'
   type?: 'button' | 'submit'
@@ -17,21 +15,20 @@ interface IProps {
 }
 
 const props = withDefaults(defineProps<IProps>(), {
-  is: 'button',
   variant: 'primary',
   size: 'md',
 })
 
 const classes = computed(() => {
-  return [
-    'ui-button',
-    `ui-button--${props.variant}`,
-    `ui-button--${props.size}`
-  ]
+  return ['ui-button', `ui-button--${props.variant}`, `ui-button--${props.size}`]
 })
 
 const buttonType = computed(() => {
-  return props.is === 'button' ? (props.type || 'button') : undefined
+  return props.is === 'button' ? props.type || 'button' : undefined
+})
+
+const tagComponent = computed(() => {
+  return props.is === 'nuxt-link' ? NuxtLink : 'button'
 })
 </script>
 
