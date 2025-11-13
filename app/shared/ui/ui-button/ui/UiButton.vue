@@ -18,7 +18,7 @@ interface IProps {
   tag?: 'button' | 'nuxt-link',
   type?: 'button' | 'submit',
   variant?: 'primary' | 'secondary' | 'text' | 'icon',
-  size?: 'md' | 'sm' | 'xs',
+  size?: 'lg' | 'md' | 'sm' | 'xs',
 }
 
 // 1. переименовать тег tag done!!!!
