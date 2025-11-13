@@ -1,5 +1,12 @@
 <template>
-  <component :is="tagComponent" :class="classes" :type="buttonType">
+  <component
+    :is="tagComponent"
+    class="ui-button"
+    :class="classes"
+    :type="buttonType"
+  >
+    <slot name="prefix-icon"/>
+
     <slot />
   </component>
 </template>
@@ -8,11 +15,14 @@
 import { NuxtLink } from '#components'
 
 interface IProps {
-  is?: 'button' | 'nuxt-link'
-  type?: 'button' | 'submit'
-  variant?: 'primary' | 'secondary'
-  size?: 'md' | 'sm' | 'xs'
+  is?: 'button' | 'nuxt-link',
+  type?: 'button' | 'submit',
+  variant?: 'primary' | 'secondary' | 'text',
+  size?: 'md' | 'sm' | 'xs',
 }
+
+// 1. переименовать тег tag
+// 2. дефолтные пропсы прокинуть type и tag
 
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
@@ -20,9 +30,13 @@ const props = withDefaults(defineProps<IProps>(), {
 })
 
 const classes = computed(() => {
-  return ['ui-button', `ui-button--${props.variant}`, `ui-button--${props.size}`]
+  return [
+    `ui-button--${props.variant}`,
+    { [`ui-button--${props.size}`]: props.variant !== 'text' }
+  ]
 })
 
+// 2. возможность сократить код
 const buttonType = computed(() => {
   return props.is === 'button' ? props.type || 'button' : undefined
 })
@@ -35,9 +49,13 @@ const tagComponent = computed(() => {
 <style lang="scss" scoped>
 .ui-button {
   --ui-button-color-white: #fff;
+  --ui-button-color-black: #333333;
   --ui-button-color-black-hover: #333;
+  --ui-button-color-blue-hover: #0066CC;
+
   --ui-button-bg-color-purle: #764678;
   --ui-button-border-color-purle: #764678;
+
   --ui-button-bg-color-disabled-grey: #e0e0e0;
   --ui-button-color-disabled-grey: #9e9e9e;
   --ui-button-border-color-disabled-grey: #bdbdbd;
@@ -51,6 +69,23 @@ const tagComponent = computed(() => {
 
   &[disabled] {
     pointer-events: none;
+  }
+
+  &--text {
+    //  body
+    color: var(--ui-button-color-black);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 135%;
+    transition: color 300ms ease;
+
+    &:hover {
+      color: var(--ui-button-color-blue-hover)
+    }
+
+    &[disabled] {
+      color: var(--ui-button-color-disabled-grey);
+    }
   }
 
   &--primary {

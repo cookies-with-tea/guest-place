@@ -18,6 +18,10 @@ const typedIconPluginConfig = typedIconPlugin({
 })
 
 export default defineNuxtConfig({
+  srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
+  dir: {
+    plugins: 'app/plugins' // ← относительно srcDir
+  },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module'],

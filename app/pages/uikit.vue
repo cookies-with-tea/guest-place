@@ -4,7 +4,7 @@
       <div class="column">
         <UiButton> Показать на карте </UiButton>
 
-        <UiButton variant="secondary"> Показать на карте </UiButton>
+        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
       </div>
 
       <div class="column">
@@ -13,6 +13,28 @@
         <UiButton> Hi 2 </UiButton>
 
         <nuxt-link to="/"> 111 </nuxt-link>
+      </div>
+
+      <div class="column">
+        <UiButton variant="text" disabled>
+          <template #prefix-icon>
+            <UiIcon name="house" width="26px" height="26px"/>
+          </template>
+
+          <template #default>
+            Показать рядом со мной
+          </template>
+        </UiButton>
+
+        <UiButton variant="text">
+          <template #prefix-icon>
+            <UiIcon name="house" width="26px" height="26px"/>
+          </template>
+
+          <template #default>
+            Показать рядом со мной
+          </template>
+        </UiButton>
       </div>
     </div>
 

@@ -8,20 +8,20 @@
 import { computed } from 'vue'
 import type { IconNamesType } from '../types'
 
-const props = withDefaults(defineProps<Props>(), {
-  prefix: 'icon',
-  width: '23px',
-  height: '24px',
-  reverse: false,
-})
-
-type Props = {
+interface Props {
   name: IconNamesType
   prefix?: string
   width?: string | number
   height?: string | number
   reverse?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  prefix: 'icon',
+  width: '23px',
+  height: '24px',
+  reverse: false,
+})
 
 const symbolId = computed(() => `#${props.prefix}-${props.name}`)
 
