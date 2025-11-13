@@ -15,13 +15,13 @@
 import { NuxtLink } from '#components'
 
 interface IProps {
-  is?: 'button' | 'nuxt-link',
+  tag?: 'button' | 'nuxt-link',
   type?: 'button' | 'submit',
-  variant?: 'primary' | 'secondary' | 'text',
+  variant?: 'primary' | 'secondary' | 'text' | 'icon',
   size?: 'md' | 'sm' | 'xs',
 }
 
-// 1. переименовать тег tag
+// 1. переименовать тег tag done!!!!
 // 2. дефолтные пропсы прокинуть type и tag
 
 const props = withDefaults(defineProps<IProps>(), {
@@ -32,17 +32,17 @@ const props = withDefaults(defineProps<IProps>(), {
 const classes = computed(() => {
   return [
     `ui-button--${props.variant}`,
-    { [`ui-button--${props.size}`]: props.variant !== 'text' }
+    {[`ui-button--${props.size}`]: props.variant !== 'text' && props.variant !== 'icon' }
   ]
 })
 
 // 2. возможность сократить код
 const buttonType = computed(() => {
-  return props.is === 'button' ? props.type || 'button' : undefined
+  return props.tag === 'button' ? props.type || 'button' : undefined
 })
 
 const tagComponent = computed(() => {
-  return props.is === 'nuxt-link' ? NuxtLink : 'button'
+  return props.tag === 'nuxt-link' ? NuxtLink : 'button'
 })
 </script>
 
@@ -71,12 +71,7 @@ const tagComponent = computed(() => {
     pointer-events: none;
   }
 
-  &--text {
-    //  body
-    color: var(--ui-button-color-black);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 135%;
+  &--icon, &--text {
     transition: color 300ms ease;
 
     &:hover {
@@ -86,6 +81,18 @@ const tagComponent = computed(() => {
     &[disabled] {
       color: var(--ui-button-color-disabled-grey);
     }
+  }
+
+  &--text {
+    //  body
+    color: var(--ui-button-color-black);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 135%;
+
+    //& > svg {
+    //  размеры иконки
+    //}
   }
 
   &--primary {

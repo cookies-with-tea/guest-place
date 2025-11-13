@@ -36,6 +36,16 @@
           </template>
         </UiButton>
       </div>
+
+      <div class="column">
+        <UiButton variant="icon" disabled>
+            <UiIcon name="house" width="26px" height="26px"/>
+        </UiButton>
+
+        <UiButton variant="icon">
+          <UiIcon name="house" width="26px" height="26px"/>
+        </UiButton>
+      </div>
     </div>
 
     <div class="box">
