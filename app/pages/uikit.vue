@@ -4,15 +4,15 @@
       <div class="column">
         <UiButton> Показать на карте </UiButton>
 
-        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
+        <UiButton variant="secondary"> Показать на карте </UiButton>
       </div>
 
       <div class="column">
+        <UiButton disabled> Показать на карте </UiButton>
+
+        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
+
         <UiButton tag="nuxt-link" to="/"> Это ссылка. кликни на меня ^_^ </UiButton>
-
-        <UiButton> Hi 2 </UiButton>
-
-        <nuxt-link to="/"> 111 </nuxt-link>
       </div>
 
       <div class="column">
