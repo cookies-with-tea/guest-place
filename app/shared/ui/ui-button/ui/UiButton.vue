@@ -82,9 +82,9 @@ const tagComponent = computed(() => {
 
     color: var(--ui-button-color-black);
 
-    //& svg {
-    //  font-size: 110px;
-    //}
+    &:deep(.ui-icon) {
+      font-size: 26px;
+    }
   }
 
   &--primary {
@@ -179,7 +179,7 @@ const tagComponent = computed(() => {
 
   &--lg,
   &--md {
-    @include typography(h8);
+    @include typography(body-sm);
   }
 
   &--sm,
