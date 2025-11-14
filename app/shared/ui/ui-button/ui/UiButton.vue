@@ -78,11 +78,8 @@ const tagComponent = computed(() => {
   }
 
   &--text {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 135%;
+    @include typography(body);
 
-    //  body
     color: var(--ui-button-color-black);
 
     //& svg {
@@ -180,41 +177,33 @@ const tagComponent = computed(() => {
     }
   }
 
+  &--lg,
+  &--md {
+    @include typography(h8);
+  }
+
+  &--sm,
+  &--xs {
+    @include typography(h6);
+  }
+
   &--lg {
     height: 62px;
-    font-weight: 700;
-
-    //TODO: Заменить на миксин типографии
-    font-size: 16px;
-    line-height: 100%;
     padding: 0 55px;
   }
 
   &--md {
     height: 62px;
-    font-weight: 700;
-
-    //TODO: Заменить на миксин типографии
-    font-size: 16px;
-    line-height: 100%;
     padding: 0 22px;
   }
 
   &--sm {
     height: 40px;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 100%;
     padding: 0 13px;
-
-    //TODO: Заменить на миксин типографии
   }
 
   &--xs {
     height: 40px;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 100%;
     padding: 0 20px;
   }
 }
