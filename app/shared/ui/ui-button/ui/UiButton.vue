@@ -68,12 +68,12 @@ const tagComponent = computed(() => {
   &--text {
     transition: color 300ms ease;
 
-    &:hover {
-      color: var(--ui-button-color-blue-hover);
-    }
-
     &[disabled] {
       color: var(--ui-button-color-disabled-grey);
+    }
+
+    @include hover {
+      color: var(--ui-button-color-blue-hover);
     }
   }
 
@@ -114,17 +114,6 @@ const tagComponent = computed(() => {
       inset: -2px;
     }
 
-    &:hover {
-      --bg: var(--color-white);
-
-      color: var(--ui-button-color-black);
-
-      &::before {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
     &[disabled] {
       --bg: var(--ui-button-bg-color-disabled-grey);
 
@@ -134,6 +123,17 @@ const tagComponent = computed(() => {
         border: 2px solid var(--ui-button-border-color-disabled-grey);
         transform: scale(1) !important;
         opacity: 1 !important;
+      }
+    }
+
+    @include hover {
+      --bg: var(--color-white);
+
+      color: var(--ui-button-color-black);
+
+      &::before {
+        transform: scale(1);
+        opacity: 1;
       }
     }
   }
@@ -159,12 +159,6 @@ const tagComponent = computed(() => {
       inset: -2px;
     }
 
-    &:hover {
-      --bg: var(--gradient-primary);
-
-      color: var(--ui-button-color-white);
-    }
-
     &[disabled] {
       --bg: transparent;
 
@@ -174,6 +168,12 @@ const tagComponent = computed(() => {
         border: 2px solid var(--ui-button-border-color-disabled-grey);
         background: var(--bg);
       }
+    }
+
+    @include hover {
+      --bg: var(--gradient-primary);
+
+      color: var(--ui-button-color-white);
     }
   }
 
