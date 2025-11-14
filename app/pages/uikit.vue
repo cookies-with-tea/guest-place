@@ -26,7 +26,7 @@
 
         <UiButton variant="text">
           <template #prefix-icon>
-            <UiIcon name="house" width="26px" height="26px" />
+            <UiIcon name="house" />
           </template>
 
           <template #default> Показать рядом со мной </template>

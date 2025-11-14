@@ -18,8 +18,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   prefix: 'icon',
-  width: '23px',
-  height: '24px',
+  width: '1em',
+  height: '1em',
   reverse: false,
 })
 
@@ -33,7 +33,7 @@ const iconClass = computed(() => {
 <style scoped>
 .ui-icon {
   position: relative;
-  display: inline-block;
+  display: flex;
   flex-shrink: 0;
   transition: transform 0.2s;
 }

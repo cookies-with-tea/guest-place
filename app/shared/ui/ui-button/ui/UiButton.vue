@@ -85,8 +85,8 @@ const tagComponent = computed(() => {
     //  body
     color: var(--ui-button-color-black);
 
-    //& > svg {
-    //  размеры иконки
+    //& svg {
+    //  font-size: 110px;
     //}
   }
 
