@@ -18,32 +18,28 @@
       <div class="column">
         <UiButton variant="text" disabled>
           <template #prefix-icon>
-            <UiIcon name="house" width="26px" height="26px"/>
+            <UiIcon name="house" width="26px" height="26px" />
           </template>
 
-          <template #default>
-            Показать рядом со мной
-          </template>
+          <template #default> Показать рядом со мной </template>
         </UiButton>
 
         <UiButton variant="text">
           <template #prefix-icon>
-            <UiIcon name="house" width="26px" height="26px"/>
+            <UiIcon name="house" width="26px" height="26px" />
           </template>
 
-          <template #default>
-            Показать рядом со мной
-          </template>
+          <template #default> Показать рядом со мной </template>
         </UiButton>
       </div>
 
       <div class="column">
         <UiButton variant="icon" disabled>
-            <UiIcon name="house" width="26px" height="26px"/>
+          <UiIcon name="house" width="26px" height="26px" />
         </UiButton>
 
         <UiButton variant="icon">
-          <UiIcon name="house" width="26px" height="26px"/>
+          <UiIcon name="house" width="26px" height="26px" />
         </UiButton>
       </div>
     </div>

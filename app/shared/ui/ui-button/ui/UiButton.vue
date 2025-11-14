@@ -1,11 +1,6 @@
 <template>
-  <component
-    :is="tagComponent"
-    class="ui-button"
-    :class="classes"
-    :type="buttonType"
-  >
-    <slot name="prefix-icon"/>
+  <component :is="tagComponent" class="ui-button" :class="classes" :type="buttonType">
+    <slot name="prefix-icon" />
 
     <slot />
   </component>
@@ -15,10 +10,10 @@
 import { NuxtLink } from '#components'
 
 interface IProps {
-  tag?: 'button' | 'nuxt-link',
-  type?: 'button' | 'submit',
-  variant?: 'primary' | 'secondary' | 'text' | 'icon',
-  size?: 'lg' | 'md' | 'sm' | 'xs',
+  tag?: 'button' | 'nuxt-link'
+  type?: 'button' | 'submit'
+  variant?: 'primary' | 'secondary' | 'text' | 'icon'
+  size?: 'lg' | 'md' | 'sm' | 'xs'
 }
 
 // 1. переименовать тег tag done!!!!
@@ -32,7 +27,7 @@ const props = withDefaults(defineProps<IProps>(), {
 const classes = computed(() => {
   return [
     `ui-button--${props.variant}`,
-    {[`ui-button--${props.size}`]: props.variant !== 'text' && props.variant !== 'icon' }
+    { [`ui-button--${props.size}`]: props.variant !== 'text' && props.variant !== 'icon' },
   ]
 })
 
@@ -49,13 +44,11 @@ const tagComponent = computed(() => {
 <style lang="scss" scoped>
 .ui-button {
   --ui-button-color-white: #fff;
-  --ui-button-color-black: #333333;
+  --ui-button-color-black: #333;
   --ui-button-color-black-hover: #333;
-  --ui-button-color-blue-hover: #0066CC;
-
+  --ui-button-color-blue-hover: #06c;
   --ui-button-bg-color-purle: #764678;
   --ui-button-border-color-purle: #764678;
-
   --ui-button-bg-color-disabled-grey: #e0e0e0;
   --ui-button-color-disabled-grey: #9e9e9e;
   --ui-button-border-color-disabled-grey: #bdbdbd;
@@ -71,11 +64,12 @@ const tagComponent = computed(() => {
     pointer-events: none;
   }
 
-  &--icon, &--text {
+  &--icon,
+  &--text {
     transition: color 300ms ease;
 
     &:hover {
-      color: var(--ui-button-color-blue-hover)
+      color: var(--ui-button-color-blue-hover);
     }
 
     &[disabled] {
@@ -84,11 +78,12 @@ const tagComponent = computed(() => {
   }
 
   &--text {
-    //  body
-    color: var(--ui-button-color-black);
     font-weight: 400;
     font-size: 14px;
     line-height: 135%;
+
+    //  body
+    color: var(--ui-button-color-black);
 
     //& > svg {
     //  размеры иконки
