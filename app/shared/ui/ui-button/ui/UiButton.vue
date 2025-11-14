@@ -16,7 +16,6 @@ interface IProps {
   size?: 'lg' | 'md' | 'sm' | 'xs'
 }
 
-// 1. переименовать тег tag done!!!!
 // 2. дефолтные пропсы прокинуть type и tag
 
 const props = withDefaults(defineProps<IProps>(), {
