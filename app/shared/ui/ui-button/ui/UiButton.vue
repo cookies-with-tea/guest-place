@@ -49,6 +49,7 @@ const tagComponent = computed(() => {
   --ui-button-disabled-bg-color: #e0e0e0;
   --ui-button-disabled-primary-color: #9e9e9e;
   --el-button-disabled-border-color: #bdbdbd;
+  --el-button-transition-primary: 0.3s;
 
   display: inline-flex;
   align-items: center;
@@ -87,7 +88,7 @@ const tagComponent = computed(() => {
 
   &--icon,
   &--text {
-    transition: color 0.3s ease;
+    transition: color var(--el-button-transition-primary) ease;
 
     &[disabled] {
       color: var(--ui-button-disabled-primary-color);
@@ -113,15 +114,15 @@ const tagComponent = computed(() => {
 
     color: var(--ui-button-primary-color);
     transition:
-      background 0.3s ease,
-      color 0.3s ease;
+      background var(--el-button-transition-primary) ease,
+      color var(--el-button-transition-primary) ease;
 
     &::before {
       transform: scale(0.96);
       transition:
-        opacity 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
-        transform 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
-        color 1s ease;
+        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
+        transform var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
+        color var(--el-button-transition-primary) ease;
       opacity: 0;
     }
 
