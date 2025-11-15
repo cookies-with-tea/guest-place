@@ -42,15 +42,13 @@ const tagComponent = computed(() => {
 
 <style lang="scss" scoped>
 .ui-button {
-  --ui-button-color-white: #fff;
-  --ui-button-color-black: #333;
-  --ui-button-color-black-hover: #333;
-  --ui-button-color-blue-hover: #06c;
-  --ui-button-bg-color-purle: #764678;
-  --ui-button-border-color-purle: #764678;
-  --ui-button-bg-color-disabled-grey: #e0e0e0;
-  --ui-button-color-disabled-grey: #9e9e9e;
-  --ui-button-border-color-disabled-grey: #bdbdbd;
+  --ui-button-primary-color: #fff;
+  --ui-button-secondary-color: #333;
+  --ui-button-secondary-color-hover: #333;
+  --ui-button-text-color-hover: #06c;
+  --ui-button-disabled-bg-color: #e0e0e0;
+  --ui-button-disabled-primary-color: #9e9e9e;
+  --el-button-disabled-border-color: #bdbdbd;
 
   display: inline-flex;
   align-items: center;
@@ -79,10 +77,10 @@ const tagComponent = computed(() => {
     }
 
     &[disabled] {
-      color: var(--ui-button-color-disabled-grey);
+      color: var(--ui-button-disabled-primary-color);
 
       &::before {
-        border: 2px solid var(--ui-button-border-color-disabled-grey);
+        border: 2px solid var(--el-button-disabled-border-color);
       }
     }
   }
@@ -92,18 +90,18 @@ const tagComponent = computed(() => {
     transition: color 300ms ease;
 
     &[disabled] {
-      color: var(--ui-button-color-disabled-grey);
+      color: var(--ui-button-disabled-primary-color);
     }
 
     @include hover {
-      color: var(--ui-button-color-blue-hover);
+      color: var(--ui-button-text-color-hover);
     }
   }
 
   &--text {
     @include typography(body);
 
-    color: var(--ui-button-color-black);
+    color: var(--ui-button-secondary-color);
 
     &:deep(.ui-icon) {
       font-size: 26px;
@@ -113,10 +111,10 @@ const tagComponent = computed(() => {
   &--primary {
     --bg: var(--gradient-primary);
 
-    color: var(--ui-button-color-white);
+    color: var(--ui-button-primary-color);
     transition:
       background 0.3s ease,
-      сolor 0.3s ease;
+      color 0.3s ease;
 
     &::before {
       transform: scale(0.96);
@@ -128,7 +126,7 @@ const tagComponent = computed(() => {
     }
 
     &[disabled] {
-      --bg: var(--ui-button-bg-color-disabled-grey);
+      --bg: var(--ui-button-disabled-bg-color);
 
       &::before {
         transform: scale(1) !important;
@@ -139,7 +137,7 @@ const tagComponent = computed(() => {
     @include hover {
       --bg: var(--color-white);
 
-      color: var(--ui-button-color-black);
+      color: var(--ui-button-secondary-color);
 
       &::before {
         transform: scale(1);
@@ -151,7 +149,7 @@ const tagComponent = computed(() => {
   &--secondary {
     --bg: var(--color-white);
 
-    color: var(--ui-button-color-black);
+    color: var(--ui-button-secondary-color);
     transition:
       background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
       color 1s ease;
@@ -167,7 +165,7 @@ const tagComponent = computed(() => {
     @include hover {
       --bg: var(--gradient-primary);
 
-      color: var(--ui-button-color-white);
+      color: var(--ui-button-primary-color);
     }
   }
 
