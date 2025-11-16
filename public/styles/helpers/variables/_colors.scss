@@ -18,7 +18,7 @@ $theme-light: (
 
   shadow-md: 0px 4px 15px 0px #694E4B24,
 
-  gradient-primary: linear-gradient(90deg, #FFB6C1, #8E2DBC, #0066CC),
+  gradient-primary: conic-gradient(from 180deg at 50% 50%, #8E2DBC 0deg, #FFC5BD 120deg, #DB7AE3 240deg, #0066CC 360deg),
 );
 
 //TODO: актулизировать цвета под темную тему

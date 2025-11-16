@@ -2,12 +2,15 @@
   <component :is="tagComponent" class="ui-button" :class="classes" :type="buttonType">
     <slot name="prefix-icon" />
 
-    <slot />
+    <div class="ui-button__content">
+      <slot />
+    </div>
   </component>
 </template>
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
+import { computed } from 'vue'
 
 interface IProps {
   tag?: 'button' | 'nuxt-link'
@@ -45,135 +48,103 @@ const tagComponent = computed(() => {
   --ui-button-secondary-color: #333;
   --ui-button-secondary-color-hover: #333;
   --ui-button-text-color-hover: #06c;
+  --ui-button-background-color: var(--gradient-primary);
   --ui-button-disabled-bg-color: #e0e0e0;
   --ui-button-disabled-primary-color: #9e9e9e;
-  --el-button-disabled-border-color: #bdbdbd;
-  --el-button-transition-primary: 0.6s;
+  --ui-button-disabled-border-color: #bdbdbd;
 
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  color: var(--ui-button-primary-color);
+  transition: color var(--transition-duration-primary) ease;
+  overflow: hidden;
   gap: 5px;
 
-  &[disabled] {
+  &:disabled {
     pointer-events: none;
     user-select: none;
   }
 
-  &--secondary,
-  &--primary {
-    position: relative;
-    border: none;
+  &--primary,
+  &--secondary {
     border-radius: 50px;
-    background: var(--bg);
 
+    &:active {
+      filter: drop-shadow(0 0 4px #ecdeff) drop-shadow(0 0 6px #dac1fd);
+    }
+
+    &:disabled {
+      --ui-button-primary-color: var(--ui-button-disabled-primary-color);
+
+      &::before {
+        background-image: none;
+        background-color: var(--ui-button-disabled-bg-color);
+      }
+    }
+  }
+
+  &--primary {
     &::before {
       content: '';
+      width: 190%;
       position: absolute;
-      border-radius: 52px;
-      background: var(--gradient-primary);
-      transition:
-        transform var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
-        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      background-image: var(--gradient-primary);
+      filter: blur(36px);
+      transform: translate(-18%, -50%);
+      transition: transform var(--transition-duration-primary) ease;
+      pointer-events: none;
       z-index: -1;
-      inset: -2px;
-    }
-
-    &[disabled] {
-      color: var(--ui-button-disabled-primary-color);
-
-      &::before {
-        border: 2px solid var(--el-button-disabled-border-color);
-      }
-    }
-  }
-
-  &--icon,
-  &--text {
-    transition: color 0.3s ease;
-
-    &[disabled] {
-      --ui-button-secondary-color: var(--ui-button-disabled-primary-color);
+      aspect-ratio: 1;
+      inset: 0;
     }
 
     @include hover {
-      color: var(--ui-button-text-color-hover);
-    }
-  }
-
-  &--text {
-    @include typography(body);
-
-    color: var(--ui-button-secondary-color);
-
-    &:deep(.ui-icon) {
-      font-size: 26px;
-    }
-  }
-
-  &--primary {
-    --bg: var(--gradient-primary);
-
-    color: var(--ui-button-primary-color);
-    transition:
-      background var(--el-button-transition-primary) ease,
-      color var(--el-button-transition-primary) ease;
-
-    &::before {
-      transform: scale(0.96);
-      opacity: 0;
-    }
-
-    &[disabled] {
-      --bg: var(--ui-button-disabled-bg-color);
-
       &::before {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    @include hover {
-      --bg: var(--color-white);
-
-      color: var(--ui-button-secondary-color);
-
-      &::before {
-        transform: scale(1);
-        opacity: 1;
+        transform: translate(-20%, -40%) scale(1.3);
       }
     }
   }
 
   &--secondary {
-    --bg: var(--color-white);
+    --ui-button-primary-color: var(--ui-button-secondary-color);
+    --angle: 0.5turn;
 
-    color: var(--ui-button-secondary-color);
-    transition: color var(--el-button-transition-primary) ease;
+    border: 2px solid transparent;
+    background:
+      linear-gradient(to right, #fff, #fff) content-box,
+      conic-gradient(from var(--angle), #8e2dbc 0deg, #ffc5bd 120deg, #db7ae3 240deg, #06c 360deg) border-box;
+    animation: none;
 
-    &::before {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    &[disabled] {
-      --bg: transparent;
-
-      &::before {
-        background: var(--bg);
-      }
+    &:disabled {
+      border-color: var(--ui-button-disabled-border-color);
     }
 
     @include hover {
-      --bg: var(--gradient-primary);
+      animation: gradient-border 5s linear infinite;
+    }
+  }
 
-      color: var(--ui-button-primary-color);
+  &--icon,
+  &--text {
+    &:disabled {
+      --ui-button-secondary-color: var(--ui-button-disabled-primary-color);
+    }
 
-      &::before {
-        transform: scale(0.96);
-        opacity: 0;
-      }
+    @include hover {
+      --ui-button-primary-color: var(--ui-button-text-color-hover);
+    }
+  }
+
+  &--text {
+    --ui-button-primary-color: var(--ui-button-secondary-color);
+
+    @include typography(body);
+
+    &:deep(.ui-icon) {
+      font-size: 26px;
     }
   }
 
@@ -192,19 +163,43 @@ const tagComponent = computed(() => {
   }
 
   &--lg {
-    padding: 0 55px;
+    .ui-button__content {
+      padding: 0 55px;
+    }
   }
 
   &--md {
-    padding: 0 22px;
+    .ui-button__content {
+      padding: 0 22px;
+    }
   }
 
   &--sm {
-    padding: 0 13px;
+    .ui-button__content {
+      padding: 0 13px;
+    }
   }
 
   &--xs {
-    padding: 0 20px;
+    .ui-button__content {
+      padding: 0 20px;
+    }
   }
+}
+
+@keyframes gradient-border {
+  from {
+    --angle: 0.5turn;
+  }
+
+  to {
+    --angle: 2.5turn;
+  }
+}
+
+@property --angle {
+  inherits: true;
+  initial-value: 0.5turn;
+  syntax: '<angle>';
 }
 </style>
