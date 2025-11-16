@@ -21,6 +21,8 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
   size: 'md',
+  tag: 'button',
+  type: 'button',
 })
 
 const classes = computed(() => {
@@ -30,13 +32,12 @@ const classes = computed(() => {
   ]
 })
 
-// 2. возможность сократить код
 const buttonType = computed(() => {
-  return props.tag === 'button' ? props.type || 'button' : undefined
+  return props.tag === 'button' ? props.type : undefined
 })
 
 const tagComponent = computed(() => {
-  return props.tag === 'nuxt-link' ? NuxtLink : 'button'
+  return props.tag === 'nuxt-link' ? NuxtLink : props.tag
 })
 </script>
 
