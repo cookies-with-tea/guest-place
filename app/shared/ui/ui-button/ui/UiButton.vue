@@ -130,8 +130,8 @@ const tagComponent = computed(() => {
       --bg: var(--ui-button-disabled-bg-color);
 
       &::before {
-        transform: scale(1) !important;
-        opacity: 1 !important;
+        transform: scale(1);
+        opacity: 1;
       }
     }
 
