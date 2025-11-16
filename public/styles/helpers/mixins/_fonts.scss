@@ -25,3 +25,12 @@
     }
     /* stylelint-enable */
 }
+
+@mixin box($value, $radius: false) {
+  width: $value;
+  height: $value;
+
+  @if ($radius != false) {
+    border-radius: $radius;
+  }
+}

@@ -2,19 +2,45 @@
   <div class="ui-kit">
     <div class="box">
       <div class="column">
-        <UiButton> Hi </UiButton>
+        <UiButton> Показать на карте </UiButton>
 
-        <UiButton> Hi </UiButton>
-
-        <UiButton> Hi </UiButton>
+        <UiButton variant="secondary"> Показать на карте </UiButton>
       </div>
 
       <div class="column">
-        <UiButton> Hi 2 </UiButton>
+        <UiButton disabled> Показать на карте </UiButton>
 
-        <UiButton> Hi 2 </UiButton>
+        <UiButton variant="secondary" disabled> Показать на карте </UiButton>
 
-        <UiButton> Hi 2 </UiButton>
+        <UiButton tag="nuxt-link" to="/"> Это ссылка. кликни на меня ^_^ </UiButton>
+      </div>
+
+      <div class="column">
+        <UiButton variant="text" disabled>
+          <template #prefix-icon>
+            <UiIcon name="house" width="26px" height="26px" />
+          </template>
+
+          <template #default> Показать рядом со мной </template>
+        </UiButton>
+
+        <UiButton variant="text">
+          <template #prefix-icon>
+            <UiIcon name="house" />
+          </template>
+
+          <template #default> Показать рядом со мной </template>
+        </UiButton>
+      </div>
+
+      <div class="column">
+        <UiButton variant="icon" disabled>
+          <UiIcon name="house" width="26px" height="26px" />
+        </UiButton>
+
+        <UiButton variant="icon">
+          <UiIcon name="house" width="26px" height="26px" />
+        </UiButton>
       </div>
     </div>
 
@@ -46,9 +72,6 @@ import { UiButton, UiIcon } from '../shared/ui'
 .column {
   display: flex;
   flex-direction: column;
-
-  > * {
-    display: block;
-  }
+  gap: 20px;
 }
 </style>

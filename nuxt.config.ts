@@ -18,6 +18,10 @@ const typedIconPluginConfig = typedIconPlugin({
 })
 
 export default defineNuxtConfig({
+  srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
+  dir: {
+    plugins: 'app/plugins', // ← относительно srcDir
+  },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module'],
@@ -30,8 +34,15 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [svgIconsConfig, typedIconPluginConfig],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "styles/library" as *;`,
+        },
+      },
+    },
   },
-  css: ['styles/index.scss'],
+  css: ['styles/base.scss'],
   alias: {
     '@': fileURLToPath(new URL('./app', import.meta.url)),
     '#shared': fileURLToPath(new URL('./app/shared', import.meta.url)),
@@ -40,6 +51,6 @@ export default defineNuxtConfig({
     '#widgets': fileURLToPath(new URL('./app/widgets', import.meta.url)),
     '#pages': fileURLToPath(new URL('./app/pages', import.meta.url)),
     '#fonts': fileURLToPath(new URL('./public/assets/fonts', import.meta.url)),
-    styles: fileURLToPath(new URL('./public/assets/styles', import.meta.url)),
+    styles: fileURLToPath(new URL('./public/styles', import.meta.url)),
   },
 })
