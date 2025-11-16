@@ -49,7 +49,7 @@ const tagComponent = computed(() => {
   --ui-button-disabled-bg-color: #e0e0e0;
   --ui-button-disabled-primary-color: #9e9e9e;
   --el-button-disabled-border-color: #bdbdbd;
-  --el-button-transition-primary: 0.3s;
+  --el-button-transition-primary: 1s;
 
   display: inline-flex;
   align-items: center;
@@ -120,9 +120,8 @@ const tagComponent = computed(() => {
     &::before {
       transform: scale(0.96);
       transition:
-        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
         transform var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
-        color var(--el-button-transition-primary) ease;
+        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28);
       opacity: 0;
     }
 
