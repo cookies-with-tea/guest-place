@@ -89,7 +89,7 @@ const products: Product[] = [
   margin: 0 auto;
 
   &__title {
-    @include fluid-value(font-size, 768, 1920, 24px, 72px);
+    @include fluid-value(font-size, sm, xxl, 24px, 72px);
 
     text-align: center;
     margin: 0 0 24px;

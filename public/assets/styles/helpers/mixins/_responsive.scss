@@ -3,7 +3,7 @@
 @use 'sass:meta';
 
 $breakpoints: (
-  xll: 1920,
+  xxl: 1920,
   xl: 1440,
   md: 1024,
   sm: 768,
@@ -17,11 +17,27 @@ $breakpoints: (
 /// @example scss
 ///   strip-unit(24px) // возвращает 24
 ///   strip-unit(1.5)  // возвращает 1.5
-@function strip-unit($number) {
+@function strip-units($number) {
   @if meta.type-of($number) == 'number' and not math.is-unitless($number) {
     @return  math.div($number, $number * 0 + 1);
   }
   @return $number;
+}
+
+/// Извлекает значение брейкпоинта из карты $breakpoints по ключу
+/// @name get-breakpoint
+/// @param {String} $breakpoint - Ключ брейкпоинта (например, 'md', 'xl')
+/// @returns {Number | Null} - Значение брейкпоинта в пикселях или null, если ключ не найден
+/// @require $breakpoints - Карта брейкпоинтов, импортируется из '../variables/responsive'
+/// @example scss
+///   get-breakpoint(md) // возвращает 1024 (если в карте md: 1024)
+@function get-breakpoint($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @return map.get($breakpoints, $breakpoint);
+  } @else {
+    @warn 'Брейкпоинт "#{$breakpoint}" не найден. Доступные: #{map.keys($breakpoints)}';
+    @return null;
+  }
 }
 
 /// Миксин для создания медиа-запросов по брейкпоинтам (max-width)
@@ -43,25 +59,36 @@ $breakpoints: (
       @content;
     }
   } @else {
-    @warn 'Неизвестный брейкпоинт: #{$breakpoint}. Доступные брейкпоинты: #{map-keys($breakpoints)}';
+    @warn 'Неизвестный брейкпоинт: #{$breakpoint}. Доступные брейкпоинты: #{map.keys($breakpoints)}';
   }
 }
 
 /// Миксин для плавного изменения CSS-свойства в зависимости от ширины экрана (резиновая адаптация)
 /// @name fluid-value
 /// @param {String} $property - Название CSS-свойства (например, font-size, padding, margin)
-/// @param {Number} $min-width - Минимальная ширина экрана (в px), от которой начинается адаптация
-/// @param {Number} $max-width - Максимальная ширина экрана (в px), на которой адаптация заканчивается
+/// @param {String} $min-breakpoint - Ключ минимального брейкпоинта (например, 'sm', 'md')
+/// @param {String} $max-breakpoint - Ключ максимального брейкпоинта (например, 'xl', 'xll')
 /// @param {Number} $min-value - Значение свойства на минимальной ширине экрана
 /// @param {Number} $max-value - Значение свойства на максимальной ширине экрана
 /// @example scss
-///   @include fluid-value(font-size, 768, 1920, 16px, 24px);
+///   @include fluid-value(font-size, sm, xxl, 16px, 24px);
 ///   // font-size будет плавно изменяться от 16px (при <= 768px) до 24px (при >= 1920px)
 /// @requires {function} strip-unit - Для корректной работы calc() с единицами измерения
-@mixin fluid-value($property, $min-width, $max-width, $min-value, $max-value) {
+/// @requires {function} get-breakpoint - Для извлечения значений брейкпоинтов по ключу
+/// @link https://css-tricks.com/books/volume-i/scale-typography-screen-size/ - Подробнее о fluid typography
+@mixin fluid-value($property, $min-breakpoint, $max-breakpoint, $min-value, $max-value) {
+  $min-width: get-breakpoint($min-breakpoint);
+  $max-width: get-breakpoint($max-breakpoint);
+
+  // Если один из брейкпоинтов не найден, прерываем выполнение
+  @if $min-width == null or $max-width == null {
+    @error 'Необходимо указать значения брейкпоинтов';
+  }
+
   #{$property}: $min-value;
+
   @media (min-width: #{$min-width}px) {
-    #{$property}: calc(#{$min-value} + #{strip-unit($max-value - $min-value)} * ((100vw - #{$min-width}px) / #{strip-unit($max-width - $min-width)}));
+    #{$property}: calc(#{$min-value} + #{strip-units($max-value - $min-value)} * ((100vw - #{$min-width}px) / #{strip-units($max-width - $min-width)}));
   }
   @media (min-width: #{$max-width}px) {
     #{$property}: $max-value;
