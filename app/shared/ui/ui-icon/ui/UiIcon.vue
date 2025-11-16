@@ -33,7 +33,7 @@ const iconClass = computed(() => {
 <style scoped>
 .ui-icon {
   position: relative;
-  display: flex;
+  display: inline-block;
   flex-shrink: 0;
   transition: transform 0.2s;
 }
