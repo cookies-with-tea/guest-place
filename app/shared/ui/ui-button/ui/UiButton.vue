@@ -49,7 +49,7 @@ const tagComponent = computed(() => {
   --ui-button-disabled-bg-color: #e0e0e0;
   --ui-button-disabled-primary-color: #9e9e9e;
   --el-button-disabled-border-color: #bdbdbd;
-  --el-button-transition-primary: 1s;
+  --el-button-transition-primary: 0.6s;
 
   display: inline-flex;
   align-items: center;
