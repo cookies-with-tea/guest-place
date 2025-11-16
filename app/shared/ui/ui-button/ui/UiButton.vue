@@ -92,7 +92,7 @@ const tagComponent = computed(() => {
     transition: color 0.3s ease;
 
     &[disabled] {
-      color: var(--ui-button-disabled-primary-color);
+      --ui-button-secondary-color: var(--ui-button-disabled-primary-color);
     }
 
     @include hover {
