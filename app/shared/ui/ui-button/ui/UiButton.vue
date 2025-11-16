@@ -59,6 +59,7 @@ const tagComponent = computed(() => {
 
   &[disabled] {
     pointer-events: none;
+    user-select: none;
   }
 
   &--secondary,
