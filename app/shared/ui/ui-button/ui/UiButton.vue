@@ -88,7 +88,7 @@ const tagComponent = computed(() => {
 
   &--icon,
   &--text {
-    transition: color var(--el-button-transition-primary) ease;
+    transition: color 0.3s ease;
 
     &[disabled] {
       color: var(--ui-button-disabled-primary-color);
