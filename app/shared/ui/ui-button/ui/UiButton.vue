@@ -16,8 +16,6 @@ interface IProps {
   size?: 'lg' | 'md' | 'sm' | 'xs'
 }
 
-// 2. дефолтные пропсы прокинуть type и tag
-
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
   size: 'md',
@@ -75,6 +73,9 @@ const tagComponent = computed(() => {
       position: absolute;
       border-radius: 52px;
       background: var(--gradient-primary);
+      transition:
+        transform var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
+        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28);
       z-index: -1;
       inset: -2px;
     }
@@ -121,9 +122,6 @@ const tagComponent = computed(() => {
 
     &::before {
       transform: scale(0.96);
-      transition:
-        transform var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28),
-        opacity var(--el-button-transition-primary) cubic-bezier(0.18, 0.89, 0.32, 1.28);
       opacity: 0;
     }
 
@@ -152,9 +150,12 @@ const tagComponent = computed(() => {
     --bg: var(--color-white);
 
     color: var(--ui-button-secondary-color);
-    transition:
-      background 1s cubic-bezier(0.18, 0.89, 0.32, 1.28),
-      color 1s ease;
+    transition: color var(--el-button-transition-primary) ease;
+
+    &::before {
+      transform: scale(1);
+      opacity: 1;
+    }
 
     &[disabled] {
       --bg: transparent;
@@ -168,6 +169,11 @@ const tagComponent = computed(() => {
       --bg: var(--gradient-primary);
 
       color: var(--ui-button-primary-color);
+
+      &::before {
+        transform: scale(0.96);
+        opacity: 0;
+      }
     }
   }
 
