@@ -48,6 +48,8 @@
       <UiIcon style="color: #000" name="close" width="50px" height="50px" />
 
       <UiIcon style="color: #f90" name="user" width="50px" height="50px" />
+
+      <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
   </div>
 </template>
