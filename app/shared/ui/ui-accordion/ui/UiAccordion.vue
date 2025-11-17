@@ -1,5 +1,7 @@
 <template>
-  <div class="ui-accordion"> </div>
+  <ul class="ui-accordion">
+    <slot />
+  </ul>
 </template>
 
 <script setup lang="ts"></script>

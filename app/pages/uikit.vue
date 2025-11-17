@@ -52,17 +52,25 @@
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
 
-    <div class="box">
-      <UiAccordion />
+    <div class="box" style="display: block">
+      <UiAccordion>
+        <UiAccordionItem
+          title="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab adipisci blanditiis deserunt earum expedita iure, libero molestiae pariatur provident quia repudiandae totam voluptates? Aperiam beatae, cumque debitis dolor dolorem et eum facere, in non praesentium quis sapiente sunt tempore vitae!"
+        >
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab adipisci blanditiis deserunt earum expedita iure,
+          libero molestiae pariatur provident quia repudiandae totam voluptates? Aperiam beatae, cumque debitis dolor
+          dolorem et eum facere, in non praesentium quis sapiente sunt tempore vitae!
+        </UiAccordionItem>
+      </UiAccordion>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiButton, UiIcon } from '../shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '../shared/ui'
 
-// const items = ref<string[]>([])
-//
+// const items = ref<string[] | string>([])
+
 // const faq = ref([
 //   {
 //     title: 'Test 1',
@@ -81,7 +89,7 @@ import { UiAccordion, UiButton, UiIcon } from '../shared/ui'
 }
 
 .box {
-  width: fit-content;
+  //width: fit-content;
   display: flex;
   border: 1px dashed rgb(89 0 131);
   padding: 20px;
