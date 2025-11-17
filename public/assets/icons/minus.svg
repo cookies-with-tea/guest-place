@@ -1,0 +1,18 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<foreignObject x="-5" y="-5" width="58" height="58"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(2.5px);clip-path:url(#bgblur_0_1199_48475_clip_path);height:100%;width:100%"></div></foreignObject><circle opacity="0.8" data-figma-bg-blur-radius="5" cx="24" cy="24" r="24" fill="white"/>
+<mask id="path-2-inside-1_1199_48475" fill="white">
+<path d="M48 24C48 37.2548 37.2548 48 24 48C10.7452 48 0 37.2548 0 24C0 10.7452 10.7452 0 24 0C37.2548 0 48 10.7452 48 24Z"/>
+</mask>
+<g clip-path="url(#paint0_angular_1199_48475_clip_path)" data-figma-skip-parse="true" mask="url(#path-2-inside-1_1199_48475)"><g transform="matrix(0 0.024 -0.024 0 24 24)"><foreignObject x="-1125" y="-1125" width="2250" height="2250"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(142, 44, 188, 1) 0deg,rgba(255, 197, 189, 1) 120deg,rgba(218, 122, 227, 1) 240deg,rgba(0, 102, 204, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><path d="M45 24C45 35.598 35.598 45 24 45V51C38.9117 51 51 38.9117 51 24H45ZM24 45C12.402 45 3 35.598 3 24H-3C-3 38.9117 9.08831 51 24 51V45ZM3 24C3 12.402 12.402 3 24 3V-3C9.08831 -3 -3 9.08831 -3 24H3ZM24 3C35.598 3 45 12.402 45 24H51C51 9.08831 38.9117 -3 24 -3V3Z" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.55744063854217529,&#34;g&#34;:0.17481487989425659,&#34;b&#34;:0.73750001192092896,&#34;a&#34;:1.0},&#34;position&#34;:0.0},{&#34;color&#34;:{&#34;r&#34;:1.0,&#34;g&#34;:0.77254903316497803,&#34;b&#34;:0.74117648601531982,&#34;a&#34;:1.0},&#34;position&#34;:0.33333334326744080},{&#34;color&#34;:{&#34;r&#34;:0.85864198207855225,&#34;g&#34;:0.47885814309120178,&#34;b&#34;:0.89166665077209473,&#34;a&#34;:1.0},&#34;position&#34;:0.66666668653488159},{&#34;color&#34;:{&#34;r&#34;:0.0,&#34;g&#34;:0.40000000596046448,&#34;b&#34;:0.80000001192092896,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[],&#34;transform&#34;:{&#34;m00&#34;:2.9391524462044029e-15,&#34;m01&#34;:-48.0,&#34;m02&#34;:48.0,&#34;m10&#34;:48.0,&#34;m11&#34;:2.9391524462044029e-15,&#34;m12&#34;:-2.9391524462044029e-15},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}" mask="url(#path-2-inside-1_1199_48475)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M35 23.5C35 24.3284 34.3284 25 33.5 25H14.5C13.6716 25 13 24.3284 13 23.5C13 22.6716 13.6716 22 14.5 22L33.5 22C34.3284 22 35 22.6716 35 23.5Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M35 23.5C35 24.3284 34.3284 25 33.5 25H14.5C13.6716 25 13 24.3284 13 23.5C13 22.6716 13.6716 22 14.5 22L33.5 22C34.3284 22 35 22.6716 35 23.5Z" fill="url(#paint1_linear_1199_48475)"/>
+<defs>
+<clipPath id="bgblur_0_1199_48475_clip_path" transform="translate(5 5)"><circle cx="24" cy="24" r="24"/>
+</clipPath><clipPath id="paint0_angular_1199_48475_clip_path"><path d="M45 24C45 35.598 35.598 45 24 45V51C38.9117 51 51 38.9117 51 24H45ZM24 45C12.402 45 3 35.598 3 24H-3C-3 38.9117 9.08831 51 24 51V45ZM3 24C3 12.402 12.402 3 24 3V-3C9.08831 -3 -3 9.08831 -3 24H3ZM24 3C35.598 3 45 12.402 45 24H51C51 9.08831 38.9117 -3 24 -3V3Z" mask="url(#path-2-inside-1_1199_48475)"/></clipPath><linearGradient id="paint1_linear_1199_48475" x1="12.8169" y1="25.7491" x2="12.8529" y2="20.9994" gradientUnits="userSpaceOnUse">
+<stop stop-color="#8E2DBC"/>
+<stop offset="0.333333" stop-color="#FFC5BD"/>
+<stop offset="0.666667" stop-color="#DB7AE3"/>
+<stop offset="1" stop-color="#0066CC"/>
+</linearGradient>
+</defs>
+</svg>

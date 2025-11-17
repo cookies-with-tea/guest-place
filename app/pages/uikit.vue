@@ -51,11 +51,28 @@
 
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
+
+    <div class="box">
+      <UiAccordion />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiButton, UiIcon } from '../shared/ui'
+import { UiAccordion, UiButton, UiIcon } from '../shared/ui'
+
+// const items = ref<string[]>([])
+//
+// const faq = ref([
+//   {
+//     title: 'Test 1',
+//     text: 'Text 1',
+//   },
+//   {
+//     title: 'Test 1',
+//     text: 'Text 1',
+//   }
+// ])
 </script>
 
 <style lang="scss" scoped>
