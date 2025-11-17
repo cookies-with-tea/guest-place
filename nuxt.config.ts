@@ -2,14 +2,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { typedIconPlugin } from 'typed-icon-template'
 import * as path from 'node:path'
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-
-const svgIconsConfig = createSvgIconsPlugin({
-  iconDirs: [path.resolve(process.cwd(), './public/assets/icons')],
-  symbolId: 'icon-[dir]-[name]',
-  inject: 'body-first',
-  customDomId: '__svg__icons__dom__',
-})
 
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
@@ -24,7 +16,12 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module'],
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo'],
+  svgo: {
+    defaultImport: 'component',
+    componentPrefix: 'ui',
+    autoImportPath: false,
+  },
   stylelint: {
     emitError: false,
   },
@@ -33,7 +30,7 @@ export default defineNuxtConfig({
     dirs: [],
   },
   vite: {
-    plugins: [svgIconsConfig, typedIconPluginConfig],
+    plugins: [typedIconPluginConfig],
     css: {
       preprocessorOptions: {
         scss: {
@@ -52,5 +49,6 @@ export default defineNuxtConfig({
     '#pages': fileURLToPath(new URL('./app/pages', import.meta.url)),
     '#fonts': fileURLToPath(new URL('./public/assets/fonts', import.meta.url)),
     styles: fileURLToPath(new URL('./public/styles', import.meta.url)),
+    public: fileURLToPath(new URL('./public', import.meta.url)),
   },
 })

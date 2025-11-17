@@ -1,7 +1,5 @@
 <template>
-  <svg class="ui-icon" :class="iconClass" :width="props.width" :height="props.height" aria-hidden="true">
-    <use :href="symbolId" />
-  </svg>
+  <component :is="iconComponent" :class="iconClass" :height :width aria-hidden="true" class="ui-icon" />
 </template>
 
 <script setup lang="ts">
@@ -10,35 +8,49 @@ import type { IconNamesType } from '../types'
 
 interface Props {
   name: IconNamesType
-  prefix?: string
   width?: string | number
   height?: string | number
   reverse?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  prefix: 'icon',
   width: '1em',
   height: '1em',
   reverse: false,
 })
 
-const symbolId = computed(() => `#${props.prefix}-${props.name}`)
-
 const iconClass = computed(() => {
-  return [{ 'reversed-icon': props.reverse }, `ui-icon--${props.name}`]
+  return [{ 'ui-icon--reversed': props.reverse }, `ui-icon--${props.name}`]
+})
+
+const iconComponent = computed(() => {
+  try {
+    return defineAsyncComponent(() =>
+      import(`public/assets/icons/${props.name}.svg`).catch((error) => {
+        console.error(`Failed to load icon: ${props.name}`, error)
+
+        return {
+          template: '<div>Not found</div>',
+        }
+      })
+    )
+  } catch (e) {
+    console.error('Error defining async component for icon:', props.name, e)
+
+    return null
+  }
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ui-icon {
   position: relative;
   display: inline-block;
   flex-shrink: 0;
-  transition: transform 0.2s;
-}
+  transition: transform var(--transition-duration-secondary);
 
-.reversed-icon {
-  transform: rotate(180deg);
+  &--reversed {
+    transform: rotate(180deg);
+  }
 }
 </style>
