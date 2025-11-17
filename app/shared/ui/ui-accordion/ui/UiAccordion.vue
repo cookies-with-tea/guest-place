@@ -4,7 +4,16 @@
   </ul>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// interface IProps {
+//   a: any,
+// }
+//
+// const props = defineProps<IProps>()
+const model = defineModel()
+console.log(model)
+provide('key', model)
+</script>
 
 <style scoped lang="scss">
 .ui-accordion {

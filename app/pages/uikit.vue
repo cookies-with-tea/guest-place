@@ -53,13 +53,14 @@
     </div>
 
     <div class="box" style="display: block">
-      <UiAccordion>
+      <UiAccordion v-model="items">
         <UiAccordionItem
-          title="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab adipisci blanditiis deserunt earum expedita iure, libero molestiae pariatur provident quia repudiandae totam voluptates? Aperiam beatae, cumque debitis dolor dolorem et eum facere, in non praesentium quis sapiente sunt tempore vitae!"
+          v-for="item in faq"
+          :title="item.title"
+          :id="item.id"
+          :key="item.id"
         >
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab adipisci blanditiis deserunt earum expedita iure,
-          libero molestiae pariatur provident quia repudiandae totam voluptates? Aperiam beatae, cumque debitis dolor
-          dolorem et eum facere, in non praesentium quis sapiente sunt tempore vitae!
+          {{item.text}}
         </UiAccordionItem>
       </UiAccordion>
     </div>
@@ -69,18 +70,30 @@
 <script setup lang="ts">
 import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '../shared/ui'
 
-// const items = ref<string[] | string>([])
+const items = ref<string[] | string>('1')
 
-// const faq = ref([
-//   {
-//     title: 'Test 1',
-//     text: 'Text 1',
-//   },
-//   {
-//     title: 'Test 1',
-//     text: 'Text 1',
-//   }
-// ])
+const faq = ref([
+  {
+    id: '1',
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    id: '2',
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    id: '3',
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    id: '4',
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  }
+])
 </script>
 
 <style lang="scss" scoped>

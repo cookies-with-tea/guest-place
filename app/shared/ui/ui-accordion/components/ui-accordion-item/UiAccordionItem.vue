@@ -1,24 +1,26 @@
 <template>
   <li class="ui-accordion-item">
-    <div class="ui-accordion-item__trigger">
+    <div class="ui-accordion-item__trigger" @click="a = props.id">
       {{ props.title }}
 
       <UiIcon name="plus" width="48" height="48" />
     </div>
 
-    <div class="ui-accordion-item__content">
+    <div class="ui-accordion-item__content" v-if="a === props.id">
       <slot />
     </div>
   </li>
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue'
 import UiIcon from '../../../ui-icon'
 
-// const model = defineModel()
-
+const a = inject('key')
+console.log(a)
 interface IProps {
-  title: string | number
+  title: string | number,
+  id: string
 }
 
 const props = defineProps<IProps>()
