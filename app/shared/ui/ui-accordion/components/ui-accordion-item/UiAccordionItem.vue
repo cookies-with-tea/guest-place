@@ -1,29 +1,38 @@
 <template>
   <li class="ui-accordion-item">
-    <div class="ui-accordion-item__trigger" @click="a = props.id">
+    <div class="ui-accordion-item__trigger" @click="activeItems = [props.name]">
       {{ props.title }}
 
       <UiIcon name="plus" width="48" height="48" />
     </div>
 
-    <div class="ui-accordion-item__content" v-if="a === props.id">
+    <div class="ui-accordion-item__content" v-if="isActive">
       <slot />
     </div>
   </li>
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { computed, inject, type Ref  } from 'vue'
+// import type { Ref } from 'vue'
 import UiIcon from '../../../ui-icon'
 
-const a = inject('key')
-console.log(a)
 interface IProps {
   title: string | number,
-  id: string
+  name: string | number,
 }
 
+const activeItems = inject('activeItems') as Ref<string | string[]>
+
 const props = defineProps<IProps>()
+
+// console.log()
+// console.log(model.value.includes(props.id))
+// console.log(props.id)
+const isActive = computed(() => {
+  return activeItems.value.includes(String(props.name))
+})
+
 </script>
 
 <style scoped lang="scss">
