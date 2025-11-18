@@ -54,13 +54,8 @@
 
     <div class="box" style="display: block">
       <UiAccordion v-model="items" multiple>
-        <UiAccordionItem
-          v-for="(item, index) in faq"
-          :title="item.title"
-          :name="index"
-          :key="index"
-        >
-          {{item.text}}
+        <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index">
+          {{ item.text }}
         </UiAccordionItem>
       </UiAccordion>
     </div>
@@ -70,7 +65,7 @@
 <script setup lang="ts">
 import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '../shared/ui'
 
-const items = ref<string[] | string>(['1'])
+const items = ref<string[] | string>(['1', '2'])
 
 const faq = ref([
   {
@@ -88,7 +83,7 @@ const faq = ref([
   {
     title: 'Title',
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-  }
+  },
 ])
 </script>
 

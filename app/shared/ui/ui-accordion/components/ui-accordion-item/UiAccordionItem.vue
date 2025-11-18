@@ -1,38 +1,36 @@
 <template>
   <li class="ui-accordion-item">
-    <div class="ui-accordion-item__trigger" @click="activeItems = [props.name]">
+    <div class="ui-accordion-item__trigger" @click="showContent(nameToString)">
       {{ props.title }}
 
       <UiIcon name="plus" width="48" height="48" />
     </div>
 
-    <div class="ui-accordion-item__content" v-if="isActive">
+    <div v-if="isActive(nameToString)" class="ui-accordion-item__content">
       <slot />
     </div>
   </li>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, type Ref  } from 'vue'
-// import type { Ref } from 'vue'
+import { computed, inject } from 'vue'
 import UiIcon from '../../../ui-icon'
 
 interface IProps {
-  title: string | number,
-  name: string | number,
+  title: string | number
+  name: string | number
 }
 
-const activeItems = inject('activeItems') as Ref<string | string[]>
+interface AccordionContext {
+  isActive: (currentIndex: string) => boolean
+  showContent: (currentIndex: string) => void
+}
 
 const props = defineProps<IProps>()
 
-// console.log()
-// console.log(model.value.includes(props.id))
-// console.log(props.id)
-const isActive = computed(() => {
-  return activeItems.value.includes(String(props.name))
-})
+const { isActive, showContent } = inject<AccordionContext>('activeItems')!
 
+const nameToString = computed(() => props.name.toString())
 </script>
 
 <style scoped lang="scss">
