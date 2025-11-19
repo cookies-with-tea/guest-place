@@ -45,21 +45,19 @@ let isAnimating = false
 const toggleAccordion = () => {
   if (isAnimating) return
 
-  const isActiveNow = isActive(nameToString.value)
+  const wasActive = isActive(nameToString.value)
 
   showContent(nameToString.value)
 
-  // Получаем корневой элемент иконки: либо <svg>, либо контейнер с ним
   const iconContainer = plusIconRef.value?.$el
 
   if (!iconContainer) return
 
-  const svgEl = iconContainer.tagName === 'svg' ? iconContainer : iconContainer.querySelector('svg')
+  const circle = iconContainer?.querySelector('#plus-bg-circle')
+  const horLine = iconContainer?.querySelector('#plus-line-h')
+  const verLine = iconContainer?.querySelector('#plus-line-v')
 
-  const horLine = svgEl?.querySelector('#plus-line-h')
-  const verLine = svgEl?.querySelector('#plus-line-v')
-
-  if (!svgEl || !horLine || !verLine) return
+  if (!iconContainer || !circle || !horLine || !verLine) return
 
   isAnimating = true
 
@@ -69,48 +67,51 @@ const toggleAccordion = () => {
     },
   })
 
-  if (!isActiveNow) {
-    // --- Открытие: + → (360°) → scale up → scale back → минус ---
-    tl.to([horLine, verLine], {
-      rotation: 360,
+  // --- 1. Увеличение ---
+  tl.to([circle, horLine, verLine], {
+    scale: 1.25,
+    transformOrigin: 'center',
+    duration: 0.25,
+    ease: 'power2.out',
+  })
+
+  // --- 2. Вращение: направление зависит от действия ---
+  const rotationDirection = wasActive ? '-=360' : '+=360' // ← ключевая строка!
+
+  tl.to(
+    [horLine, verLine],
+    {
+      rotation: rotationDirection,
       transformOrigin: 'center',
       duration: 0.6,
       ease: 'power2.out',
+    },
+    '<'
+  )
+
+  // --- 3. Возврат к исходному размеру ---
+  tl.to([circle, horLine, verLine], {
+    scale: 1,
+    transformOrigin: 'center',
+    duration: 0.25,
+    ease: 'power2.in',
+  })
+
+  // --- 4. Финальный переход + ↔ – ---
+  if (!wasActive) {
+    // ➕ → ➖ : исчезает вертикаль
+    tl.to(verLine, {
+      opacity: 0,
+      duration: 0.25,
+      ease: 'power2.inOut',
     })
-      .to(svgEl, {
-        scale: 1.2,
-        duration: 0.2,
-        ease: 'power2.out',
-      })
-      .to(svgEl, {
-        scale: 1,
-        duration: 0.2,
-        ease: 'power2.in',
-      })
-      .to(verLine, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power1.in',
-      })
   } else {
-    // --- Закрытие: - → (показ вертикали) → 360° → scale up → scale back → плюс ---
-    tl.set(verLine, { opacity: 1 })
-      .to([horLine, verLine], {
-        rotation: 360,
-        transformOrigin: 'center',
-        duration: 0.6,
-        ease: 'power2.out',
-      })
-      .to(svgEl, {
-        scale: 1.2,
-        duration: 0.2,
-        ease: 'power2.out',
-      })
-      .to(svgEl, {
-        scale: 1,
-        duration: 0.2,
-        ease: 'power2.in',
-      })
+    // ➖ → ➕ : появляется вертикаль
+    tl.to(verLine, {
+      opacity: 1,
+      duration: 0.25,
+      ease: 'power2.inOut',
+    })
   }
 }
 </script>
