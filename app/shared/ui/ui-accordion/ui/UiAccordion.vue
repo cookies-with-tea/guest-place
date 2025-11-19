@@ -8,30 +8,27 @@
 import { provide } from 'vue'
 
 interface IProps {
-  multiple: boolean
+  multiple?: boolean
 }
 
-const props = defineProps<IProps>()
+const props = withDefaults(defineProps<IProps>(), {
+  multiple: false,
+})
 
 const model = defineModel<string | string[]>()
-// console.log(model)
 
 const showContent = (currentIndex: string): void => {
+  const isOpenAccordion = isActive(currentIndex)
+
   if (props.multiple) {
-    model.value = [currentIndex]
+    model.value = isOpenAccordion ? [] : [currentIndex]
   } else {
-    model.value = currentIndex
+    model.value = isOpenAccordion ? '0' : currentIndex
   }
 }
 
 const isActive = (currentIndex: string): boolean => {
-  const value = model.value
-
-  if (props.multiple) {
-    return Array.isArray(value) && value.includes(currentIndex)
-  } else {
-    return value === currentIndex
-  }
+  return Array.isArray(model.value) ? model.value.includes(currentIndex) : model.value === currentIndex
 }
 
 provide('activeItems', {

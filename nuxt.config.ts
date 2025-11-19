@@ -30,16 +30,14 @@ export default defineNuxtConfig({
             overrides: {
               // Отключаем конкретный плагин в пресете
               cleanupIds: false,
-            }
-          }
-        }
+            },
+          },
+        },
       ],
     },
   },
   build: {
-    transpile: [
-      'gsap',
-    ],
+    transpile: ['gsap'],
   },
   stylelint: {
     emitError: false,

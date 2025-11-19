@@ -3,7 +3,7 @@
     <div class="ui-accordion-item__trigger">
       {{ props.title }}
 
-<!--      <UiIcon name="plus" width="48" height="48" />-->
+      <!--      <UiIcon name="plus" width="48" height="48" />-->
 
       <button @click="toggleAccordion">
         <UiIcon ref="plusIconRef" name="accordion-plus-minus" width="58px" height="58px" />
@@ -32,6 +32,7 @@ interface AccordionContext {
 }
 
 const props = defineProps<IProps>()
+
 const { isActive, showContent } = inject<AccordionContext>('activeItems')!
 const nameToString = computed(() => props.name.toString())
 
@@ -53,9 +54,7 @@ const toggleAccordion = () => {
 
   if (!iconContainer) return
 
-  const svgEl = iconContainer.tagName === 'svg'
-    ? iconContainer
-    : iconContainer.querySelector('svg')
+  const svgEl = iconContainer.tagName === 'svg' ? iconContainer : iconContainer.querySelector('svg')
 
   const horLine = svgEl?.querySelector('#plus-line-h')
   const verLine = svgEl?.querySelector('#plus-line-v')
@@ -67,7 +66,7 @@ const toggleAccordion = () => {
   const tl = gsap.timeline({
     onComplete: () => {
       isAnimating = false
-    }
+    },
   })
 
   if (!isActiveNow) {
@@ -76,22 +75,22 @@ const toggleAccordion = () => {
       rotation: 360,
       transformOrigin: 'center',
       duration: 0.6,
-      ease: 'power2.out'
+      ease: 'power2.out',
     })
       .to(svgEl, {
         scale: 1.2,
         duration: 0.2,
-        ease: 'power2.out'
+        ease: 'power2.out',
       })
       .to(svgEl, {
         scale: 1,
         duration: 0.2,
-        ease: 'power2.in'
+        ease: 'power2.in',
       })
       .to(verLine, {
         opacity: 0,
         duration: 0.2,
-        ease: 'power1.in'
+        ease: 'power1.in',
       })
   } else {
     // --- Закрытие: - → (показ вертикали) → 360° → scale up → scale back → плюс ---
@@ -100,17 +99,17 @@ const toggleAccordion = () => {
         rotation: 360,
         transformOrigin: 'center',
         duration: 0.6,
-        ease: 'power2.out'
+        ease: 'power2.out',
       })
       .to(svgEl, {
         scale: 1.2,
         duration: 0.2,
-        ease: 'power2.out'
+        ease: 'power2.out',
       })
       .to(svgEl, {
         scale: 1,
         duration: 0.2,
-        ease: 'power2.in'
+        ease: 'power2.in',
       })
   }
 }

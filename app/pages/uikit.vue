@@ -53,8 +53,8 @@
     </div>
 
     <div class="box" style="display: block">
-      <UiAccordion v-model="items" multiple>
-        <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index">
+      <UiAccordion v-model="items">
+        <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
         </UiAccordionItem>
       </UiAccordion>
