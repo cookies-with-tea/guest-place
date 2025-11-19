@@ -21,6 +21,25 @@ export default defineNuxtConfig({
     defaultImport: 'component',
     componentPrefix: 'ui',
     autoImportPath: false,
+    // Настройка SVGO для отключения удаления ID
+    svgoConfig: {
+      plugins: [
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              // Отключаем конкретный плагин в пресете
+              cleanupIds: false,
+            }
+          }
+        }
+      ],
+    },
+  },
+  build: {
+    transpile: [
+      'gsap',
+    ],
   },
   stylelint: {
     emitError: false,
