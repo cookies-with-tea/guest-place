@@ -53,7 +53,7 @@
     </div>
 
     <div class="box" style="display: block">
-      <UiAccordion v-model="items">
+      <UiAccordion v-model="items" multiple>
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
         </UiAccordionItem>
@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '../shared/ui'
 
-const items = ref<string[] | string>(['1', '2'])
+const items = ref<string[] | string>([])
 
 const faq = ref([
   {

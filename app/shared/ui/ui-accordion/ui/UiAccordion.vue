@@ -35,6 +35,16 @@ provide('activeItems', {
   isActive,
   showContent,
 })
+
+onMounted(() => {
+  if (props.multiple && !Array.isArray(model.value)) {
+    throw new Error('Model value must be an array when multiple is true')
+  }
+
+  if (!props.multiple && Array.isArray(model.value)) {
+    throw new Error('Model value must be a string when multiple is false')
+  }
+})
 </script>
 
 <style scoped lang="scss">
