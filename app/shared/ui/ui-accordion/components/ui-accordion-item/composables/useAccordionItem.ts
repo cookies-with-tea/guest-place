@@ -20,46 +20,44 @@ export const useAccordionItem = (isActive: any) => {
 
     isAnimating = true
 
+    const rotatingElements = [circle, horLine, verLine]
+
     const tl = gsap.timeline({
       onComplete: () => {
         isAnimating = false
       },
     })
 
-    // 1. Увеличение
-    tl.to([circle, horLine, verLine], {
-      scale: 1.25,
+    tl.to(rotatingElements, {
+      scale: 1.2,
       transformOrigin: 'center',
-      duration: 0.25,
+      duration: 0.15,
       ease: 'power2.out',
     })
 
-    // 2. Вращение: направление зависит от того, открываем или закрываем
     const rotation = oldActive ? '-=360' : '+=360'
 
     tl.to(
-      [horLine, verLine],
+      rotatingElements,
       {
         rotation,
         transformOrigin: 'center',
-        duration: 0.6,
+        duration: 0.4,
         ease: 'power2.out',
       },
       '<'
     )
 
-    // 3. Возврат размера
-    tl.to([circle, horLine, verLine], {
+    tl.to(rotatingElements, {
       scale: 1,
       transformOrigin: 'center',
-      duration: 0.25,
+      duration: 0.15,
       ease: 'power2.in',
     })
 
-    // 4. Плавное появление/исчезновение вертикальной линии
     tl.to(verLine, {
-      opacity: newActive ? 0 : 1, // true → минус (вертикаль исчезает), false → плюс (появляется)
-      duration: 0.25,
+      opacity: newActive ? 0 : 1,
+      duration: 0.15,
       ease: 'power2.inOut',
     })
   }
@@ -73,9 +71,7 @@ export const useAccordionItem = (isActive: any) => {
         return
       }
 
-      // Убедимся, что oldActive — boolean
       if (typeof oldActive !== 'boolean') return
-
       if (newActive === oldActive) return
       if (isAnimating) return
 

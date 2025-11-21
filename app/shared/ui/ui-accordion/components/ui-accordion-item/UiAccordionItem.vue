@@ -36,7 +36,7 @@ const nameToString = computed(() => props.name.toString())
 const plusIconRef = useAccordionItem(() => isActive(nameToString.value))
 
 const toggleAccordion = () => {
-  showContent(nameToString.value) // Это изменит model.value → изменит isActive → вызовет watch → запустит animateIcon
+  showContent(nameToString.value)
 }
 </script>
 
