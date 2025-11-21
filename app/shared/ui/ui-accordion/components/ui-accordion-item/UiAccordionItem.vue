@@ -38,6 +38,14 @@ const plusIconRef = useAccordionItem(() => isActive(nameToString.value))
 const toggleAccordion = () => {
   showContent(nameToString.value)
 }
+
+onMounted(() => {
+  const verLine = plusIconRef.value?.$el?.querySelector('#plus-line-v')
+
+  if (verLine) {
+    verLine.style.opacity = isActive(nameToString.value) ? '0' : '1'
+  }
+})
 </script>
 
 <style scoped lang="scss">

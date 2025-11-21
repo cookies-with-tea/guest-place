@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '../shared/ui'
 
-const items = ref<string[] | string>('')
+const items = ref<string[] | string>('1')
 
 const faq = ref([
   {

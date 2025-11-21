@@ -2,14 +2,14 @@ import { ref, watch } from 'vue'
 import type UiIcon from '../../../../ui-icon'
 import { useAnimateIcon } from './useAnimateIcon'
 
-export const useAccordionItem = (isActive: any) => {
+export const useAccordionItem = (isActive: () => boolean) => {
   const plusIconRef = ref<InstanceType<typeof UiIcon> | null>(null)
   const isAnimating = ref(false)
 
   let isFirstWatch = true
 
   watch(
-    () => isActive(),
+    () => isActive(), // ← вызываем функцию каждый раз
     (newActive, oldActive) => {
       if (isFirstWatch) {
         isFirstWatch = false
