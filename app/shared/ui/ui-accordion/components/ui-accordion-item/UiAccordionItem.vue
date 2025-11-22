@@ -1,12 +1,12 @@
 <template>
-  <li class="ui-accordion-item">
+  <li class="ui-accordion-item" :class="{ 'ui-accordion-item__content_show': isActive(nameToString) }">
     <button class="ui-accordion-item__trigger" type="button" @click="toggleAccordion">
       {{ props.title }}
 
       <UiIcon ref="plusIconRef" name="accordion-plus-minus" width="58px" height="58px" />
     </button>
 
-    <div class="ui-accordion-item__content" :class="{ 'ui-accordion-item__content_show': isActive(nameToString) }">
+    <div class="ui-accordion-item__content">
       <slot />
     </div>
   </li>
@@ -51,8 +51,6 @@ onMounted(() => {
 .ui-accordion-item {
   --ui-accordion-primary-shadow-color: #694e4b24;
 
-  //--ui-accordion-text-color-active:
-
   display: flex;
   flex-direction: column;
   border-radius: 50px;
@@ -67,6 +65,7 @@ onMounted(() => {
     align-items: center;
     justify-content: space-between;
     color: var(--color-regular);
+    transition: color 0.5s ease;
     gap: 33px;
 
     &:deep(svg) {
@@ -92,8 +91,10 @@ onMounted(() => {
     margin: 0;
     overflow: hidden;
     opacity: 0;
+  }
 
-    &_show {
+  &.ui-accordion-item__content_show {
+    .ui-accordion-item__content {
       max-height: 500px;
       transform: translateY(0);
       padding-top: 20px;
