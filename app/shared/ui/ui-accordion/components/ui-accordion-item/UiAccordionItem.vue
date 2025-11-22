@@ -49,10 +49,14 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .ui-accordion-item {
+  --ui-accordion-primary-shadow-color: #694e4b24;
+
+  //--ui-accordion-text-color-active:
+
   display: flex;
   flex-direction: column;
   border-radius: 50px;
-  box-shadow: 0 4px 15px 0 #694e4b24; // вынести
+  box-shadow: 0 4px 15px 0 var(--ui-accordion-primary-shadow-color);
   background-color: var(--color-white);
   padding: 13px 30px;
 
@@ -69,9 +73,9 @@ onMounted(() => {
       align-self: flex-start;
     }
 
-    //@include hover {
-    //  color: #0066CC;
-    //}
+    @include hover {
+      color: var(--color-text-primary-hover);
+    }
   }
 
   &__content {

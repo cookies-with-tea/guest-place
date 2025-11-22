@@ -46,8 +46,6 @@ const tagComponent = computed(() => {
 .ui-button {
   --ui-button-primary-color: #fff;
   --ui-button-secondary-color: #333;
-  --ui-button-secondary-color-hover: #333;
-  --ui-button-text-color-hover: #06c;
   --ui-button-background-color: var(--gradient-primary);
   --ui-button-disabled-bg-color: #e0e0e0;
   --ui-button-disabled-primary-color: #9e9e9e;
@@ -134,7 +132,7 @@ const tagComponent = computed(() => {
     }
 
     @include hover {
-      --ui-button-primary-color: var(--ui-button-text-color-hover);
+      --ui-button-primary-color: var(--color-text-primary-hover);
     }
   }
 
