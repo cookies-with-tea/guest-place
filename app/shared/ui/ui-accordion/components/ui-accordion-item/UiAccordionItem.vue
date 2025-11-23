@@ -6,7 +6,7 @@
       <UiIcon ref="plusIconRef" name="accordion-plus-minus" width="58px" height="58px" />
     </button>
 
-    <div class="ui-accordion-item__content">
+    <div ref="accordion-content" class="ui-accordion-item__content">
       <slot />
     </div>
   </li>
@@ -32,7 +32,7 @@ const props = defineProps<IProps>()
 const { isActive, showContent } = inject<AccordionContext>('activeItems')!
 const nameToString = computed(() => props.name.toString())
 
-const plusIconRef = useAccordionItem(() => isActive(nameToString.value))
+const { plusIconRef, accordionContent } = useAccordionItem(() => isActive(nameToString.value))
 
 const toggleAccordion = () => {
   showContent(nameToString.value)
@@ -44,12 +44,20 @@ onMounted(() => {
   if (verLine) {
     verLine.style.opacity = isActive(nameToString.value) ? '0' : '1'
   }
+
+  if (accordionContent.value) {
+    accordionContent.value.style.maxHeight = isActive(nameToString.value)
+      ? accordionContent.value.scrollHeight + 'px'
+      : 0
+  }
 })
 </script>
 
 <style scoped lang="scss">
 .ui-accordion-item {
   --ui-accordion-primary-shadow-color: #694e4b24;
+  --transition: 0.22s ease-out;
+  --padding: 24px;
 
   display: flex;
   flex-direction: column;
@@ -81,25 +89,41 @@ onMounted(() => {
     @include typography(h5);
 
     max-height: 0;
+
+    //max-height: 0;
     color: var(--color-text-light);
-    transform: translateY(-10px);
     transition:
-      max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      opacity 0.4s ease,
-      transform 0.4s ease;
-    padding: 0;
-    margin: 0;
+      max-height var(--transition),
+      padding-bottom var(--transition),
+      padding-top var(--transition);
+    will-change: max-height;
+
+    //transform: translateY(-10px);
+    //transition:
+    //  max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    //  opacity 0.4s ease,
+    //  transform 0.4s ease;
+    //padding: 0;
+    //margin: 0;
+    //overflow: hidden;
+    //opacity: 0;
+
+    padding: 0 var(--padding);
     overflow: hidden;
-    opacity: 0;
   }
 
-  &.ui-accordion-item__content_show {
-    .ui-accordion-item__content {
-      max-height: 500px;
-      transform: translateY(0);
-      padding-top: 20px;
-      opacity: 1;
-    }
+  //&.ui-accordion-item__content_show {
+  //  .ui-accordion-item__content {
+  //    max-height: 500px;
+  //    transform: translateY(0);
+  //    padding-top: 20px;
+  //    opacity: 1;
+  //  }
+  //}
+
+  &.ui-accordion-item__content_show .ui-accordion-item__content {
+    padding-top: 0;
+    padding-bottom: var(--padding);
   }
 }
 </style>
