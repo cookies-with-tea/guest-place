@@ -79,7 +79,7 @@ const toggleAccordion = () => {
     align-items: center;
     justify-content: space-between;
     color: var(--color-regular);
-    transition: color 0.5s ease;
+    transition: color var(--transition);
     gap: 33px;
 
     &:deep(.ui-icon) {
