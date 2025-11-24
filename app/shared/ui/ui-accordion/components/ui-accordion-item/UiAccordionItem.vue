@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import UiIcon from '../../../ui-icon'
+import { UiIcon } from '#shared/ui'
 import { useAccordionItem } from './composables'
 
 interface IProps {
