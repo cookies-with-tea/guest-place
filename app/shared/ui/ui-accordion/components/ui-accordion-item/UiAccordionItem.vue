@@ -2,7 +2,7 @@
   <li class="ui-accordion-item">
     <button class="ui-accordion-item__trigger" type="button" :disabled="isButtonDisabled" @click="toggleAccordion">
       {{ props.title }}
-      <UiIcon ref="accordion-icon" name="accordion-plus-minus" width="58px" height="58px" />
+      <UiIcon ref="accordion-icon" name="accordion-plus-minus" />
     </button>
 
     <div ref="accordion-content" class="ui-accordion-item__content">
@@ -82,8 +82,11 @@ const toggleAccordion = () => {
     transition: color 0.5s ease;
     gap: 33px;
 
-    &:deep(svg) {
-      align-self: flex-start;
+    &:deep(.ui-icon) {
+      top: 6px;
+      width: 58px;
+      height: 58px;
+      position: relative;
     }
 
     @include hover {
