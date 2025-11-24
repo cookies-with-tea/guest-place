@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import type UiIcon from '../../../../ui-icon'
 import { useAnimateIcon } from './useAnimateIcon'
 
-function changeHeight(accordionContent: Ref<HTMLDivElement | null>, newActive: boolean) {
+const changeHeight = (accordionContent: Ref<HTMLDivElement | null>, newActive: boolean) => {
   if (accordionContent.value) {
     accordionContent.value.style.maxHeight = newActive ? `${accordionContent.value.scrollHeight}px` : '0px'
   }
