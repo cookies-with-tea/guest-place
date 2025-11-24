@@ -98,41 +98,13 @@ const toggleAccordion = () => {
     @include typography(h5);
 
     max-height: 0;
-
-    //max-height: 0;
     color: var(--color-text-light);
     transition:
       max-height var(--transition),
       padding-bottom var(--transition),
       padding-top var(--transition);
     will-change: max-height;
-
-    //transform: translateY(-10px);
-    //transition:
-    //  max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    //  opacity 0.4s ease,
-    //  transform 0.4s ease;
-    //padding: 0;
-    //margin: 0;
-    //overflow: hidden;
-    //opacity: 0;
-
-    padding: 0 var(--padding);
     overflow: hidden;
-  }
-
-  //&.ui-accordion-item__content_show {
-  //  .ui-accordion-item__content {
-  //    max-height: 500px;
-  //    transform: translateY(0);
-  //    padding-top: 20px;
-  //    opacity: 1;
-  //  }
-  //}
-
-  &.ui-accordion-item__content_show .ui-accordion-item__content {
-    padding-top: 0;
-    padding-bottom: var(--padding);
   }
 }
 </style>
