@@ -28,13 +28,13 @@ interface AccordionContext {
 
 const props = defineProps<IProps>()
 const { model, multiple } = inject<AccordionContext>('activeItems')!
+
 const nameToString = computed(() => props.name.toString())
-
-const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
-
 const isActive = computed(() => {
   return Array.isArray(model.value) ? model.value.includes(nameToString.value) : model.value === nameToString.value
 })
+
+const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
 
 const isButtonDisabled = useAccordionItem(() => isActive.value, accordionContent)
 
