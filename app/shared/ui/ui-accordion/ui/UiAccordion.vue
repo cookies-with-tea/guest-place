@@ -17,27 +17,9 @@ const props = withDefaults(defineProps<IProps>(), {
 
 const model = defineModel<string | string[]>()
 
-const showContent = (currentIndex: string): void => {
-  const isOpenAccordion = isActive(currentIndex)
-
-  if (props.multiple) {
-    const currentList = model.value as string[]
-
-    model.value = isOpenAccordion ? currentList.filter((id) => id !== currentIndex) : [...currentList, currentIndex]
-
-    return
-  }
-
-  model.value = isOpenAccordion ? '0' : currentIndex
-}
-
-const isActive = (currentIndex: string): boolean => {
-  return Array.isArray(model.value) ? model.value.includes(currentIndex) : model.value === currentIndex
-}
-
 provide('activeItems', {
-  isActive,
-  showContent,
+  model,
+  multiple: props.multiple
 })
 
 onMounted(() => {

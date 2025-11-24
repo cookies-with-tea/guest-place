@@ -3,18 +3,17 @@ import type UiIcon from '../../../../ui-icon'
 import { useAnimateIcon } from './useAnimateIcon'
 
 export const useAccordionItem = (isActive: () => boolean) => {
-  const plusIconRef = ref<InstanceType<typeof UiIcon> | null>(null)
+  const plusIconRef = useTemplateRef<InstanceType<typeof UiIcon> | null>('accordion-icon')
   const isAnimating = ref(false)
-  const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
+  const isButtonDisabled = ref(false) // ← новое состояние
 
   let isFirstWatch = true
 
   watch(
-    () => isActive(), // ← вызываем функцию каждый раз
+    isActive,
     (newActive, oldActive) => {
       if (isFirstWatch) {
         isFirstWatch = false
-
         return
       }
 
@@ -22,16 +21,23 @@ export const useAccordionItem = (isActive: () => boolean) => {
       if (newActive === oldActive) return
       if (isAnimating.value) return
 
-      useAnimateIcon(isAnimating, plusIconRef, newActive, oldActive)
+      // 🔒 Блокируем кнопку
+      isButtonDisabled.value = true
 
-      if (isActive()) {
-        accordionContent.value.style.maxHeight = accordionContent.value.scrollHeight + 'px'
-      } else {
-        accordionContent.value.style.maxHeight = 0
-      }
+      // Запускаем анимацию с callback'ом
+      useAnimateIcon(
+        isAnimating,
+        plusIconRef,
+        newActive,
+        oldActive,
+        () => {
+          // ✅ Разблокируем кнопку после анимации
+          isButtonDisabled.value = false
+        }
+      )
     },
     { immediate: true }
   )
 
-  return { plusIconRef, accordionContent }
+  return { plusIconRef, isButtonDisabled }
 }

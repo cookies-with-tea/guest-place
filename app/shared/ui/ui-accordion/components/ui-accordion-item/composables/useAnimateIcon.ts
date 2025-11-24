@@ -1,3 +1,4 @@
+// composables/useAnimateIcon.ts
 import type { Ref } from 'vue'
 import { gsap } from 'gsap'
 
@@ -5,7 +6,8 @@ export const useAnimateIcon = (
   isAnimating: Ref<boolean>,
   plusIconRef: Ref<{ $el: HTMLElement } | null>,
   newActive: boolean,
-  oldActive: boolean
+  oldActive: boolean,
+  onAnimateComplete?: () => void
 ) => {
   const iconContainer = plusIconRef.value?.$el
 
@@ -24,6 +26,7 @@ export const useAnimateIcon = (
   const tl = gsap.timeline({
     onComplete: () => {
       isAnimating.value = false
+      onAnimateComplete?.()
     },
   })
 
