@@ -1,4 +1,3 @@
-// composables/useAnimateIcon.ts
 import type { Ref } from 'vue'
 import { gsap } from 'gsap'
 

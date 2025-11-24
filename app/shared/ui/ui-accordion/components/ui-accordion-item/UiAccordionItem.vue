@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, watch } from 'vue'
+import { computed, inject } from 'vue'
 import UiIcon from '../../../ui-icon'
 import { useAccordionItem } from './composables'
 
@@ -36,7 +36,7 @@ const isActive = computed(() => {
   return Array.isArray(model.value) ? model.value.includes(nameToString.value) : model.value === nameToString.value
 })
 
-const { plusIconRef, isButtonDisabled } = useAccordionItem(() => isActive.value)
+const isButtonDisabled = useAccordionItem(() => isActive.value, accordionContent)
 
 const showContent = () => {
   if (multiple) {
@@ -57,24 +57,6 @@ const toggleAccordion = () => {
 
   showContent()
 }
-
-watch(isActive, (newActive) => {
-  if (accordionContent.value) {
-    accordionContent.value.style.maxHeight = newActive ? `${accordionContent.value.scrollHeight}px` : '0px'
-  }
-})
-
-onMounted(() => {
-  const verLine = plusIconRef.value?.$el?.querySelector('#plus-line-v')
-
-  if (verLine) {
-    verLine.style.opacity = isActive.value ? '0' : '1'
-  }
-
-  if (accordionContent.value) {
-    accordionContent.value.style.maxHeight = isActive.value ? `${accordionContent.value.scrollHeight}px` : '0px'
-  }
-})
 </script>
 
 <style scoped lang="scss">
