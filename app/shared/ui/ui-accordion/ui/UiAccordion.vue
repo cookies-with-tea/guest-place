@@ -19,7 +19,7 @@ const model = defineModel<string | string[]>()
 
 provide('activeItems', {
   model,
-  multiple: props.multiple
+  multiple: props.multiple,
 })
 
 onMounted(() => {

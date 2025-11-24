@@ -14,6 +14,7 @@ export const useAccordionItem = (isActive: () => boolean) => {
     (newActive, oldActive) => {
       if (isFirstWatch) {
         isFirstWatch = false
+
         return
       }
 
@@ -25,16 +26,10 @@ export const useAccordionItem = (isActive: () => boolean) => {
       isButtonDisabled.value = true
 
       // Запускаем анимацию с callback'ом
-      useAnimateIcon(
-        isAnimating,
-        plusIconRef,
-        newActive,
-        oldActive,
-        () => {
-          // ✅ Разблокируем кнопку после анимации
-          isButtonDisabled.value = false
-        }
-      )
+      useAnimateIcon(isAnimating, plusIconRef, newActive, oldActive, () => {
+        // ✅ Разблокируем кнопку после анимации
+        isButtonDisabled.value = false
+      })
     },
     { immediate: true }
   )

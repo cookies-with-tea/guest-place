@@ -1,11 +1,6 @@
 <template>
   <li class="ui-accordion-item">
-    <button
-      class="ui-accordion-item__trigger"
-      type="button"
-      @click="toggleAccordion"
-      :disabled="isButtonDisabled"
-    >
+    <button class="ui-accordion-item__trigger" type="button" :disabled="isButtonDisabled" @click="toggleAccordion">
       {{ props.title }}
       <UiIcon ref="accordion-icon" name="accordion-plus-minus" width="58px" height="58px" />
     </button>
@@ -27,8 +22,8 @@ interface IProps {
 }
 
 interface AccordionContext {
-  model: { value: string | string[] },
-  multiple: boolean,
+  model: { value: string | string[] }
+  multiple: boolean
 }
 
 const props = defineProps<IProps>()
@@ -38,9 +33,7 @@ const nameToString = computed(() => props.name.toString())
 const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
 
 const isActive = computed(() => {
-  return Array.isArray(model.value) ?
-    model.value.includes(nameToString.value):
-    model.value === nameToString.value
+  return Array.isArray(model.value) ? model.value.includes(nameToString.value) : model.value === nameToString.value
 })
 
 const { plusIconRef, isButtonDisabled } = useAccordionItem(() => isActive.value)
@@ -49,9 +42,9 @@ const showContent = () => {
   if (multiple) {
     const currentList = model.value as string[]
 
-    model.value = isActive.value ?
-      currentList.filter((id) => id !== nameToString.value):
-      [...currentList, nameToString.value]
+    model.value = isActive.value
+      ? currentList.filter((id) => id !== nameToString.value)
+      : [...currentList, nameToString.value]
 
     return
   }
@@ -65,27 +58,21 @@ const toggleAccordion = () => {
   showContent()
 }
 
-watch(
-  isActive,
-  (newActive) => {
-    if (accordionContent.value) {
-      accordionContent.value.style.maxHeight = newActive
-        ? `${accordionContent.value.scrollHeight}px`
-        : '0px'
-    }
+watch(isActive, (newActive) => {
+  if (accordionContent.value) {
+    accordionContent.value.style.maxHeight = newActive ? `${accordionContent.value.scrollHeight}px` : '0px'
   }
-)
+})
 
 onMounted(() => {
   const verLine = plusIconRef.value?.$el?.querySelector('#plus-line-v')
+
   if (verLine) {
     verLine.style.opacity = isActive.value ? '0' : '1'
   }
 
   if (accordionContent.value) {
-    accordionContent.value.style.maxHeight = isActive.value
-      ? `${accordionContent.value.scrollHeight}px`
-      : '0px'
+    accordionContent.value.style.maxHeight = isActive.value ? `${accordionContent.value.scrollHeight}px` : '0px'
   }
 })
 </script>

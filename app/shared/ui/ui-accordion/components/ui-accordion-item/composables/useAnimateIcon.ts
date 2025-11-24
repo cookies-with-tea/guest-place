@@ -26,6 +26,7 @@ export const useAnimateIcon = (
   const tl = gsap.timeline({
     onComplete: () => {
       isAnimating.value = false
+
       onAnimateComplete?.()
     },
   })
