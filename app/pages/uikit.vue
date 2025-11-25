@@ -51,16 +51,51 @@
 
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
+
+    <div class="box">
+      <UiAccordion v-model="items" multiple class="ui-kit__accordion">
+        <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
+          {{ item.text }}
+        </UiAccordionItem>
+      </UiAccordion>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiButton, UiIcon } from '../shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
+import { ref } from 'vue'
+import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
+
+const items = ref<TUiAccordionModelValue>(['1', '2'])
+
+const faq = ref([
+  {
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+  {
+    title: 'Title',
+    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  },
+])
 </script>
 
 <style lang="scss" scoped>
 .ui-kit {
   padding: 20px;
+
+  &__accordion {
+    max-width: 40%;
+  }
 }
 
 .box {

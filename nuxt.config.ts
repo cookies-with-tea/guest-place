@@ -6,7 +6,7 @@ import * as path from 'node:path'
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
   iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/types'),
-  fileName: 'index.ts',
+  fileName: 'types.ts',
 })
 
 export default defineNuxtConfig({
@@ -21,6 +21,21 @@ export default defineNuxtConfig({
     defaultImport: 'component',
     componentPrefix: 'ui',
     autoImportPath: false,
+    svgoConfig: {
+      plugins: [
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              cleanupIds: false,
+            },
+          },
+        },
+      ],
+    },
+  },
+  build: {
+    transpile: ['gsap'],
   },
   stylelint: {
     emitError: false,
