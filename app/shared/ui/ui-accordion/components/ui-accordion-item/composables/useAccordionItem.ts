@@ -1,7 +1,9 @@
 import { onMounted, ref, watch } from 'vue'
 import type { Ref } from 'vue'
-import type UiIcon from '../../../../ui-icon'
+import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import { useAnimateIcon } from './useAnimateIcon'
+import type { IUiAccordionProvider } from '../../../interfaces'
+import { UiAccordionInjectionKey } from '../../../constants'
 
 const changeHeight = (accordionContent: Ref<HTMLDivElement | null>, newActive: boolean) => {
   if (accordionContent.value) {
@@ -9,50 +11,55 @@ const changeHeight = (accordionContent: Ref<HTMLDivElement | null>, newActive: b
   }
 }
 
-const shouldAnimate = (isFirstRun: boolean, oldActive: unknown, newActive: boolean, isAnimating: boolean): boolean => {
-  return !(isFirstRun && typeof oldActive !== 'boolean' && newActive === oldActive && isAnimating)
-}
+export const useAccordionItem = (name: string | number) => {
+  const { model, multiple } = inject<IUiAccordionProvider>(UiAccordionInjectionKey)!
 
-export const useAccordionItem = (isActive: () => boolean, accordionContent: Ref<HTMLDivElement | null>) => {
-  const plusIconRef = useTemplateRef<InstanceType<typeof UiIcon> | null>('accordion-icon')
+  const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
+  const plusIconRef = useTemplateRef<UiIconInstanceType>('accordion-icon')
+
   const isAnimating = ref(false)
-  const isButtonDisabled = ref(false)
 
-  let isFirstRun = true
+  const currentName = computed(() => name.toString())
+  const isActive = computed<boolean>(() => {
+    return Array.isArray(model.value) ? model.value.includes(currentName.value) : model.value === currentName.value
+  })
 
   watch(
     isActive,
     (newActive, oldActive) => {
       changeHeight(accordionContent, newActive)
 
-      if (isFirstRun) {
-        isFirstRun = false
-
-        return
-      }
-
-      if (!shouldAnimate(isFirstRun, oldActive, newActive, isAnimating.value)) {
-        return
-      }
-
-      isButtonDisabled.value = true
-
-      useAnimateIcon(isAnimating, plusIconRef, newActive, oldActive as boolean, () => {
-        isButtonDisabled.value = false
-      })
+      useAnimateIcon(isAnimating, plusIconRef, newActive, oldActive as boolean)
     },
     { immediate: true }
   )
 
   onMounted(() => {
-    const verLine = plusIconRef.value?.$el?.querySelector('#plus-line-v')
+    const verLine = plusIconRef.value?.$el?.getElementById('plus-line-v')
 
     if (verLine) {
-      verLine.style.opacity = isActive() ? '0' : '1'
+      verLine.style.opacity = isActive.value ? '0' : '1'
     }
 
-    changeHeight(accordionContent, isActive())
+    changeHeight(accordionContent, isActive.value)
   })
 
-  return isButtonDisabled
+  const toggleAccordion = () => {
+    if (multiple) {
+      const currentList = model.value as string[]
+
+      model.value = isActive.value
+        ? currentList.filter((id) => id !== currentName.value)
+        : [...currentList, currentName.value]
+
+      return
+    }
+
+    model.value = isActive.value ? '0' : currentName.value
+  }
+
+  return {
+    isAnimating,
+    toggleAccordion,
+  }
 }

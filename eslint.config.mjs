@@ -27,6 +27,8 @@ export default withNuxt([
     },
 
     rules: {
+      'eslint-comments/no-unused-disable': 'off',
+      'no-unused-disable': 'off',
       semi: ['error', 'never'],
       quotes: ['error', 'single'],
       'no-useless-constructor': 'off',

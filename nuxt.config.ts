@@ -6,7 +6,7 @@ import * as path from 'node:path'
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
   iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/types'),
-  fileName: 'index.ts',
+  fileName: 'types.ts',
 })
 
 export default defineNuxtConfig({
@@ -21,14 +21,12 @@ export default defineNuxtConfig({
     defaultImport: 'component',
     componentPrefix: 'ui',
     autoImportPath: false,
-    // Настройка SVGO для отключения удаления ID
     svgoConfig: {
       plugins: [
         {
           name: 'preset-default',
           params: {
             overrides: {
-              // Отключаем конкретный плагин в пресете
               cleanupIds: false,
             },
           },

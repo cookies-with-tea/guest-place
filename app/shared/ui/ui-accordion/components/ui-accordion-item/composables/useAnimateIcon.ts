@@ -1,20 +1,20 @@
-import type { Ref } from 'vue'
+import type { Ref, ShallowRef } from 'vue'
 import { gsap } from 'gsap'
+import type { UiIconInstanceType } from '#shared/ui/ui-icon'
 
 export const useAnimateIcon = (
   isAnimating: Ref<boolean>,
-  plusIconRef: Ref<{ $el: HTMLElement } | null>,
+  plusIconRef: Readonly<ShallowRef<UiIconInstanceType>>,
   newActive: boolean,
-  oldActive: boolean,
-  onAnimateComplete?: () => void
+  oldActive: boolean
 ) => {
   const iconContainer = plusIconRef.value?.$el
 
   if (!iconContainer) return
 
-  const circle = iconContainer.querySelector('#plus-bg-circle')
-  const horLine = iconContainer.querySelector('#plus-line-h')
-  const verLine = iconContainer.querySelector('#plus-line-v')
+  const circle = iconContainer.getElementById('plus-bg-circle')
+  const horLine = iconContainer.getElementById('plus-line-h')
+  const verLine = iconContainer.getElementById('plus-line-v')
 
   if (!circle || !horLine || !verLine) return
 
@@ -25,8 +25,6 @@ export const useAnimateIcon = (
   const tl = gsap.timeline({
     onComplete: () => {
       isAnimating.value = false
-
-      onAnimateComplete?.()
     },
   })
 

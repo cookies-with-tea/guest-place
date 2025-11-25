@@ -1,3 +1,3 @@
-import UiAccordionItem from './UiAccordionItem.vue'
+import UiAccordionItem from './ui/UiAccordionItem.vue'
 
 export default UiAccordionItem

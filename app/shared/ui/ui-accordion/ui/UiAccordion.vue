@@ -5,7 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { provide } from 'vue'
+import { provide, onMounted } from 'vue'
+import type { TUiAccordionModelValue } from '../types'
+import type { IUiAccordionProvider } from '../interfaces'
+import { UiAccordionInjectionKey } from '../constants'
 
 interface IProps {
   multiple?: boolean
@@ -15,9 +18,11 @@ const props = withDefaults(defineProps<IProps>(), {
   multiple: false,
 })
 
-const model = defineModel<string | string[]>()
+const model = defineModel<TUiAccordionModelValue>({
+  default: '',
+})
 
-provide('activeItems', {
+provide<IUiAccordionProvider>(UiAccordionInjectionKey, {
   model,
   multiple: props.multiple,
 })

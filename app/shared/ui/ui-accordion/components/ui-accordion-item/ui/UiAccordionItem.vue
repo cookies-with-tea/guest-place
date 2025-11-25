@@ -1,7 +1,8 @@
 <template>
   <li class="ui-accordion-item">
-    <button class="ui-accordion-item__trigger" type="button" :disabled="isButtonDisabled" @click="toggleAccordion">
-      {{ props.title }}
+    <button class="ui-accordion-item__trigger" type="button" :disabled="isAnimating" @click="toggleAccordion">
+      <span>{{ props.title }}</span>
+
       <UiIcon ref="accordion-icon" name="accordion-plus-minus" />
     </button>
 
@@ -12,51 +13,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from 'vue'
 import { UiIcon } from '#shared/ui'
-import { useAccordionItem } from './composables'
+import { useAccordionItem } from '../composables'
 
 interface IProps {
   title: string | number
   name: string | number
 }
 
-interface AccordionContext {
-  model: { value: string | string[] }
-  multiple: boolean
-}
-
 const props = defineProps<IProps>()
-const { model, multiple } = inject<AccordionContext>('activeItems')!
 
-const nameToString = computed(() => props.name.toString())
-const isActive = computed(() => {
-  return Array.isArray(model.value) ? model.value.includes(nameToString.value) : model.value === nameToString.value
-})
-
-const accordionContent = useTemplateRef<HTMLDivElement>('accordion-content')
-
-const isButtonDisabled = useAccordionItem(() => isActive.value, accordionContent)
-
-const showContent = () => {
-  if (multiple) {
-    const currentList = model.value as string[]
-
-    model.value = isActive.value
-      ? currentList.filter((id) => id !== nameToString.value)
-      : [...currentList, nameToString.value]
-
-    return
-  }
-
-  model.value = isActive.value ? '0' : nameToString.value
-}
-
-const toggleAccordion = () => {
-  if (isButtonDisabled.value) return
-
-  showContent()
-}
+const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
 </script>
 
 <style scoped lang="scss">
