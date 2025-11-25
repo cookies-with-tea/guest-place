@@ -220,3 +220,23 @@ a {
 	margin: 0;
 	overflow-wrap: break-word;
 }
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:focus, :active {
+  outline: none;
+}
+
+a:focus, a:active {
+  outline: none;
+}
+
+input, button, textarea {
+  font-family: inherit;
+}
+
+textarea{
+  background: transparent;
+}

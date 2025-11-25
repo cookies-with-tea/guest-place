@@ -53,11 +53,16 @@
     </div>
 
     <div class="box">
-      <UiAccordion v-model="items" multiple class="ui-kit__accordion">
+      <UiAccordion v-model="activeListAccordion" multiple class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
         </UiAccordionItem>
       </UiAccordion>
+    </div>
+
+
+    <div class="box">
+      <ui-input v-model="inputValue"/>
     </div>
   </div>
 </template>
@@ -66,8 +71,10 @@
 import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
+import UiInput from '../shared/ui/ui-input'
 
-const items = ref<TUiAccordionModelValue>(['1', '2'])
+const activeListAccordion = ref<TUiAccordionModelValue>(['1', '2'])
+const inputValue = ref('Andrey')
 
 const faq = ref([
   {
