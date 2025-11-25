@@ -62,7 +62,7 @@
 
 
     <div class="box">
-      <ui-input v-model="inputValue"/>
+      <UiInput v-model="inputValue"/>
     </div>
   </div>
 </template>
