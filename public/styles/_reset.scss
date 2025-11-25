@@ -240,3 +240,34 @@ input, button, textarea {
 textarea{
   background: transparent;
 }
+
+input::-ms-clear {
+  display: none;
+}
+
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+
+  cursor: text;
+  user-select: text;
+
+  &::placeholder {
+    color: inherit;
+    opacity: 1;
+  }
+}
