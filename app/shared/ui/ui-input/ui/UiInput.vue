@@ -71,7 +71,6 @@ const classes = computed(() => `ui-input--${props.size}`)
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
 
     :deep(.ui-icon) {
       font-size: 24px;
