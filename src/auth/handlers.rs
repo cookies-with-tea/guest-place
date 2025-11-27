@@ -22,7 +22,6 @@ fn verify_password(password: &str, hash: &str) -> bool {
         .is_ok()
 }
 
-// Возвращает (token, expires_in_minutes)
 fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
     dotenv().ok();
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
@@ -33,7 +32,7 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
 
     let claims = Claims {
         sub: user_id,
-        exp: expiration.timestamp() as usize, // timestamp в секундах
+        exp: expiration.timestamp() as usize,
     };
 
     let token = encode(
@@ -43,13 +42,12 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
     )
     .unwrap();
 
-    // Возвращаем ТОКЕН и срок в МИНУТАХ (для клиента)
     (token, expires_in_minutes)
 }
 
 pub fn generate_access_token(user_id: Uuid) -> (String, i64) {
     let minutes = env::var("ACCESS_TOKEN_LIFETIME_MINUTES")
-        .unwrap_or_else(|_| "10".to_string()) // 10 минут по умолчанию
+        .unwrap_or_else(|_| "10".to_string())
         .parse()
         .expect("ACCESS_TOKEN_LIFETIME_MINUTES must be a valid integer");
     generate_token(user_id, minutes)
@@ -57,7 +55,7 @@ pub fn generate_access_token(user_id: Uuid) -> (String, i64) {
 
 pub fn generate_refresh_token(user_id: Uuid) -> (String, i64) {
     let minutes = env::var("REFRESH_TOKEN_TTL_MINUTES")
-        .unwrap_or_else(|_| "1440".to_string()) // 24 часа по умолчанию
+        .unwrap_or_else(|_| "1440".to_string())
         .parse::<i64>()
         .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer");
     generate_token(user_id, minutes)

@@ -239,6 +239,7 @@ async fn get_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
+    AuthenticatedUser(_current_user_id): AuthenticatedUser,
 ) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
     let result = sqlx::query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
         .bind(uuid)
