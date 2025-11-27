@@ -1,9 +1,10 @@
 use serde_derive::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 #[derive(Deserialize, Debug, ToSchema)]
 pub struct AuthRequestDTO {
-    pub phone: String,
+    pub email: String,
     pub password: String,
 }
 
@@ -17,4 +18,10 @@ pub struct AuthResponseDTO {
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct AuthRefreshTokenDTO {
     pub refresh_token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: Uuid,
+    pub exp: usize,
 }

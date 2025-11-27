@@ -1,4 +1,3 @@
-use crate::auth::extractors::AuthenticatedUser;
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
 use crate::user::dto::{CreateUserDTO, User, UserResponseDTO, UserRole, UserStatus};
@@ -8,15 +7,15 @@ use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
-use axum::Router;
 use axum::{
     extract::{Extension, Path, State},
     http::StatusCode,
-    routing::{get, post},
+    routing::{delete, get, post},
     Json,
 };
 use sqlx::query_as;
 use std::sync::Arc;
+use utoipa_axum::router::OpenApiRouter;
 use uuid::Uuid;
 
 fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
@@ -160,7 +159,7 @@ async fn create(
     .bind(&payload.first_name)
     .bind(&payload.second_name)
     .bind(&payload.last_name)
-    .bind(&payload.phone.unwrap_or_else(|| "".to_string()))
+    .bind(&payload.phone)
     .bind(&payload.birth_date)
     .bind(&password_hash)
     .bind(&role)
@@ -199,7 +198,6 @@ async fn create(
 async fn get_all(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
-    AuthenticatedUser(_current_user_id): AuthenticatedUser,
 ) -> Result<
     Json<ApiResponse<Vec<UserResponseDTO>>>,
     (StatusCode, Json<ApiResponse<Vec<UserResponseDTO>>>),
@@ -298,7 +296,6 @@ async fn delete_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
-    AuthenticatedUser(_current_user_id): AuthenticatedUser,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let exists =
         sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM guest_user WHERE uuid = $1)")
@@ -349,12 +346,10 @@ async fn delete_one(
     }
 }
 
-pub fn public_routing() -> Router<Arc<AppState>> {
-    Router::new().route("/", post(create))
-}
-
-pub fn protected_routing() -> Router<Arc<AppState>> {
-    Router::new()
+pub fn routing() -> OpenApiRouter<Arc<AppState>> {
+    OpenApiRouter::new()
+        .route("/", post(create))
         .route("/", get(get_all))
-        .route("/{id}", get(get_one).delete(delete_one))
+        .route("/{uuid}", get(get_one))
+        .route("/{uuid}", delete(delete_one))
 }
