@@ -52,17 +52,16 @@
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
 
-    <div class="box">
-      <UiAccordion v-model="activeListAccordion" multiple class="ui-kit__accordion">
+    <div style="display: none" class="box">
+      <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
         </UiAccordionItem>
       </UiAccordion>
     </div>
 
-
     <div class="box">
-      <UiInput v-model="inputValue"/>
+      <UiInput v-model="inputValue" placeholder="Ваше имя" size="md" />
     </div>
   </div>
 </template>
@@ -73,8 +72,8 @@ import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import UiInput from '../shared/ui/ui-input'
 
-const activeListAccordion = ref<TUiAccordionModelValue>(['1', '2'])
-const inputValue = ref('Andrey')
+const activeListAccordion = ref<TUiAccordionModelValue>('1')
+const inputValue = ref('')
 
 const faq = ref([
   {
@@ -98,6 +97,7 @@ const faq = ref([
 
 <style lang="scss" scoped>
 .ui-kit {
+  background-color: #ecf4fd;
   padding: 20px;
 
   &__accordion {
