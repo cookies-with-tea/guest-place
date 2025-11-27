@@ -1,13 +1,12 @@
 use crate::{core::dto::ApiResponse, core::response::into_api_response, AppState};
-use chrono::{NaiveDateTime};
 use axum::{
-    Extension, Json, extract::{Path, State}, http::StatusCode, routing::{delete, get, post}
+    Extension, Json, Router, extract::{Path, State}, http::StatusCode, routing::{delete, get, post}
 };
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use std::{collections::HashMap, sync::Arc};
 use utoipa::ToSchema;
-use utoipa_axum::router::OpenApiRouter;
 
 #[derive(Deserialize, ToSchema)]
 pub struct CreateTranslationDTO {
@@ -18,12 +17,12 @@ pub struct CreateTranslationDTO {
 
 #[derive(Serialize, ToSchema, FromRow)]
 pub struct TranslationDTO {
-  id: uuid::Uuid,
-  key: String,
-  locale: String,
-  value: String,
-  created_at: NaiveDateTime,
-  updated_at: NaiveDateTime,
+    id: uuid::Uuid,
+    key: String,
+    locale: String,
+    value: String,
+    created_at: NaiveDateTime,
+    updated_at: NaiveDateTime,
 }
 
 #[utoipa::path(
@@ -183,7 +182,7 @@ pub async fn get_by_dict_key(
     let pattern = format!("{}.%", dict_key);
 
     let rows: Result<Vec<(String, String)>, _> = sqlx::query_as::<_, (String, String)>(
-        "SELECT key, value FROM i18n_translations WHERE locale = $1 AND key LIKE $2"
+        "SELECT key, value FROM i18n_translations WHERE locale = $1 AND key LIKE $2",
     )
     .bind(&locale)
     .bind(&pattern)
@@ -214,8 +213,8 @@ fn into_api_response_internal(message: String) -> Json<ApiResponse<()>> {
     })
 }
 
-pub fn routing() -> OpenApiRouter<Arc<AppState>> {
-    OpenApiRouter::new()
+pub fn routing() -> Router<Arc<AppState>> {
+    Router::new()
         .route("/", post(create_or_update))
         .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))

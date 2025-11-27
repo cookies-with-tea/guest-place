@@ -11,12 +11,47 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 
 ('user.phone_exists', 'en', 'User with this phone number already exists'),
 ('user.phone_exists', 'ru', 'Пользователь с таким номером телефона уже существует'),
+('user.phone_invalid', 'en', 'Phone number is invalid'),
+('user.phone_invalid', 'ru', 'Номер телефона неверный'),
 
 ('user.password_hash_error', 'en', 'Password hashing error'),
 ('user.password_hash_error', 'ru', 'Ошибка хеширования пароля'),
 
 ('user.check_exists_error', 'en', 'Failed to check user existence'),
 ('user.check_exists_error', 'ru', 'Не удалось проверить существование пользователя'),
+
+('user.email_exists', 'en', 'User with this email already exists'),
+('user.email_exists', 'ru', 'Пользователь с таким email уже существует'),
+('user.email_invalid', 'en', 'Email is invalid'),
+('user.email_invalid', 'ru', 'Email неверный'),
+
+-- auth.*
+('auth.invalid_credentials', 'en', 'Invalid login or password'),
+('auth.invalid_credentials', 'ru', 'Неверный логин или пароль'),
+
+('auth.database_error', 'en', 'Database error'),
+('auth.database_error', 'ru', 'Ошибка запроса к базе данных'),
+
+('auth.refresh_invalid_or_expired', 'en', 'Refresh token is invalid or expired'),
+('auth.refresh_invalid_or_expired', 'ru', 'Refresh-токен недействителен или истёк'),
+
+('auth.refresh_db_error', 'en', 'Database error while checking refresh token'),
+('auth.refresh_db_error', 'ru', 'Ошибка при проверке refresh-токена'),
+
+('auth.logout_db_error', 'en', 'Database error while logging out'),
+('auth.logout_db_error', 'ru', 'Ошибка при удалении refresh-токена'),
+
+('auth.login_success', 'en', 'Login successful'),
+('auth.login_success', 'ru', 'Авторизация успешна'),
+
+('auth.unauthorized', 'en', 'Unauthorized'),
+('auth.unauthorized', 'ru', 'Не авторизовн'),
+
+('auth.refresh_success', 'en', 'Token successfully refreshed'),
+('auth.refresh_success', 'ru', 'Токен успешно обновлён'),
+
+('auth.logout_success', 'en', 'Logout successful'),
+('auth.logout_success', 'ru', 'Выход выполнен успешно'),
 
 -- general.*
 ('general.internal_error', 'en', 'Internal server error'),

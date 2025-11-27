@@ -8,6 +8,7 @@ use crate::media::dto::{
 };
 use crate::core::response::{error_map, into_api_response};
 use crate::AppState;
+use axum::Router;
 use axum::routing::{get, post};
 use axum::{
     extract::{Multipart, State},
@@ -15,7 +16,6 @@ use axum::{
     Json,
 };
 use std::{fs, path::PathBuf, sync::Arc};
-use utoipa_axum::router::OpenApiRouter;
 use uuid::Uuid;
 
 #[utoipa::path(
@@ -208,8 +208,8 @@ pub async fn get_all(
     }
 }
 
-pub fn routing() -> OpenApiRouter<Arc<AppState>> {
-    OpenApiRouter::new()
+pub fn routing() -> Router<Arc<AppState>> {
+    Router::new()
         .route("/", post(create))
         .route("/", get(get_all))
 }

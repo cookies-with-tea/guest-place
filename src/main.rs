@@ -1,26 +1,27 @@
+mod auth;
 mod core;
 mod i18n;
-mod auth;
 mod media;
 mod user;
-mod middlewares;
 
-use crate::i18n::I18nService;
-use crate::{core::app::AppConfig, middlewares::locale::locale_middleware};
+use crate::auth::middlewares::auth_middleware;
+use crate::core::app::AppConfig;
 use crate::core::db::create_pool;
-use axum::{http::{HeaderName, HeaderValue, Method}, middleware};
+use crate::i18n::middlewares::locale_middleware;
+use crate::i18n::I18nService;
+use axum::Router;
+use axum::{http::HeaderValue, middleware};
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::{
-  cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
-  services::ServeDir,
+    cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
+    services::ServeDir,
 };
 use utoipa::{
-  openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
-  Modify, OpenApi,
+    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
+    Modify, OpenApi,
 };
-use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Clone, Debug)]
@@ -31,6 +32,7 @@ struct AppState {
 
 #[derive(OpenApi)]
 #[openapi(
+  security(("bearer_auth" = [])),
   paths(
     crate::auth::handlers::login,
     crate::auth::handlers::logout,
@@ -64,7 +66,15 @@ impl Modify for SecurityAddon {
             components.add_security_scheme(
                 "api_key",
                 SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("gp_apikey"))),
-            )
+            );
+            components.add_security_scheme(
+                "bearer_auth",
+                SecurityScheme::Http(
+                    utoipa::openapi::security::HttpBuilder::new()
+                        .scheme(utoipa::openapi::security::HttpAuthScheme::Bearer)
+                        .build(),
+                ),
+            );
         }
     }
 }
@@ -85,48 +95,68 @@ async fn main() {
         i18n,
     });
 
-    let allowed_origins: Vec<HeaderValue> = std::env::var("CORS_ALLOWED_ORIGINS")
-        .unwrap_or_default()
-        .split(',')
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .map(|origin| {
-            origin
-                .parse()
-                .expect("Invalid origin in CORS_ALLOWED_ORIGINS")
-        })
-        .collect();
+    let cors = {
+        let allowed_origins: Vec<String> = std::env::var("CORS_ALLOWED_ORIGINS")
+            .unwrap_or_default()
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_lowercase())
+            .collect();
 
-    let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::list(allowed_origins))
-        .allow_methods(AllowMethods::list(vec![
-            Method::POST,
-            Method::GET,
-            Method::PUT,
-            Method::PATCH,
-            Method::DELETE,
-        ]))
-        .allow_headers(AllowHeaders::list(vec![
-            HeaderName::from_static("content-type"),
-            HeaderName::from_static("authorization"),
-        ]))
-        .allow_credentials(true)
-        .max_age(Duration::from_secs(3600));
+        CorsLayer::new()
+            .allow_origin(AllowOrigin::predicate(move |origin: &HeaderValue, _| {
+                if let Ok(origin_str) = origin.to_str() {
+                    allowed_origins
+                        .iter()
+                        .any(|o| o == &origin_str.to_lowercase())
+                } else {
+                    false
+                }
+            }))
+            .allow_methods(AllowMethods::list(vec![
+                axum::http::Method::GET,
+                axum::http::Method::POST,
+                axum::http::Method::PUT,
+                axum::http::Method::DELETE,
+                axum::http::Method::OPTIONS,
+            ]))
+            .allow_headers(AllowHeaders::list(vec![
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+                axum::http::header::ACCEPT_LANGUAGE,
+            ]))
+            .allow_credentials(true)
+            .max_age(Duration::from_secs(3600))
+    };
 
-    let media_service = ServeDir::new("media");
+    let openapi = ApiDoc::openapi();
 
-    let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+    // 2. Собираем публичный роутер (без авторизации)
+    let public_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::routing())
-        .nest("/api/v1/user", user::handlers::routing())
-        .nest("/api/v1/media", media::handlers::routing())
-        .nest("/api/v1/i18n", i18n::handlers::routing())
-        .with_state(shared_state.clone())
-        .nest_service("/media", media_service)
-        .layer(middleware::from_fn(locale_middleware))
-        .split_for_parts();
+        .nest("/api/v1/user", user::handlers::public_routing()) // ← только create
+        .nest_service("/media", ServeDir::new("media"))
+        .with_state(shared_state.clone());
 
-    let router = router
-        .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", api.clone()))
+    let protected_router = Router::new()
+        .nest("/api/v1/user", user::handlers::protected_routing()) // ← остальное
+        .nest("/api/v1/i18n", i18n::handlers::routing())
+        .nest("/api/v1/media", media::handlers::routing())
+        .with_state(shared_state.clone())
+        .layer(middleware::from_fn_with_state(
+            shared_state.clone(),
+            auth_middleware,
+        ));
+
+    // 4. Объединяем роутеры и добавляем middleware верхнего уровня (locale)
+    let app_router = public_router
+        .merge(protected_router)
+        .layer(middleware::from_fn(locale_middleware));
+
+    // 5. Добавляем Swagger UI — он просто обслуживает JSON и HTML
+    let router = app_router
+        .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", openapi))
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))

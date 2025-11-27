@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.8.1", features = ["multipart"] }
+axum = { version = "0.8.1", features = ["multipart", "macros"] }
+tower = { version = "0.5", features = ["util"] }
 dotenv = "0.15.0"
 tower-http = { version = "0.6.2", features = ["cors", "fs"] }
 serde = "1.0.197"
@@ -24,6 +25,7 @@ utoipa-axum = { git = "https://github.com/juhaku/utoipa.git", rev = "ca6b2a5" }
 mime_guess = "2.0.5"
 futures = "0.3.31"
 num-format = "0.4.4"
+regex = "1.12.2"
 
 [profile.release]
 strip = true

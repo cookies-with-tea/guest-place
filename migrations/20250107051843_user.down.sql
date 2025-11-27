@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS education_user;
+DROP TABLE IF EXISTS guest_user;
