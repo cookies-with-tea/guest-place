@@ -1,8 +1,12 @@
-use crate::auth::dto::{AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, Claims};
+use crate::auth::dto::{
+    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, Claims, RegisterRequestDTO,
+};
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
+use crate::mailer::handlers::send_email;
 use crate::user::dto::User;
 use crate::AppState;
+use crate::user::utils::validate_email;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
 use axum::routing::post;
 use axum::Router;
@@ -13,6 +17,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::{query_as, Row};
 use std::env;
 use std::sync::Arc;
+use tokio::task;
 use uuid::Uuid;
 
 fn verify_password(password: &str, hash: &str) -> bool {
@@ -66,6 +71,101 @@ fn get_refresh_token_ttl_minutes() -> i32 {
         .unwrap_or_else(|_| "1440".to_string())
         .parse()
         .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer")
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register",
+    request_body = RegisterRequestDTO,
+    responses(
+        (status = 201, description = "Письмо отправлено"),
+        (status = 400, description = "Некорректный email"),
+        (status = 409, description = "Email уже используется"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn register(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<RegisterRequestDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    if !validate_email(&payload.email) {
+        let msg = state.i18n.t("user.email_invalid", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map(&"email".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let token = Uuid::new_v4().to_string();
+    let expires_at = Utc::now() + Duration::hours(24);
+
+    let result = sqlx::query(
+        "INSERT INTO pending_registrations (email, token, expires_at) \
+         VALUES ($1, $2, $3) \
+         ON CONFLICT (email) DO UPDATE \
+         SET token = $2, expires_at = $3",
+    )
+    .bind(&payload.email)
+    .bind(&token)
+    .bind(expires_at)
+    .execute(&state.pool)
+    .await;
+
+    match result {
+        Ok(_) => {
+            let value = state.clone();
+            let email_result = task::spawn_blocking(move || {
+                send_email(
+                    payload.email.clone(),
+                    token.clone(),
+                    value.frontend_url.clone(),
+                    value.smtp_host.clone(),
+                    value.smtp_port,
+                    value.smtp_username.clone(),
+                    value.smtp_password.clone(),
+                    value.smtp_from.clone(),
+                )
+            })
+            .await
+            .unwrap_or_else(|_| Err("Panic during email sending".into()));
+
+            if let Err(e) = email_result {
+                println!("{:?}", e);
+                let msg = state.i18n.t("general.email_failed", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"email".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+
+            let msg = state.i18n.t("auth.register.check_email", &locale).await;
+            into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
+        }
+        Err(sqlx::Error::Database(ref e)) if e.code() == Some("23505".into()) => {
+            let msg = state.i18n.t("auth.register.email_exists", &locale).await;
+            into_api_response(
+                StatusCode::CONFLICT,
+                None,
+                Some(error_map(&"email".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+        Err(_) => {
+            let msg = state.i18n.t("general.db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map(&"database".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
 }
 
 #[utoipa::path(
@@ -125,7 +225,7 @@ pub async fn login(
 
     let _ = sqlx::query(
         "INSERT INTO refresh_token (user_id, token, expires_at) \
-         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)"
+         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)",
     )
     .bind(user.uuid)
     .bind(&refresh_token)
@@ -259,6 +359,7 @@ async fn logout(
 
 pub fn routing() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/register", post(register))
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))

@@ -3,6 +3,7 @@ mod core;
 mod i18n;
 mod media;
 mod user;
+mod mailer;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
@@ -12,6 +13,7 @@ use crate::i18n::I18nService;
 use axum::Router;
 use axum::{http::HeaderValue, middleware};
 use sqlx::{Pool, Postgres};
+use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::{
@@ -28,6 +30,12 @@ use utoipa_swagger_ui::SwaggerUi;
 struct AppState {
     pool: Pool<Postgres>,
     i18n: I18nService,
+    frontend_url: String,
+    smtp_host: String,
+    smtp_port: u16,
+    smtp_username: String,
+    smtp_password: String,
+    smtp_from: String,
 }
 
 #[derive(OpenApi)]
@@ -37,6 +45,7 @@ struct AppState {
     crate::auth::handlers::login,
     crate::auth::handlers::logout,
     crate::auth::handlers::refresh,
+    crate::auth::handlers::register,
     crate::user::handlers::create,
     crate::user::handlers::get_all,
     crate::user::handlers::get_one,
@@ -89,10 +98,23 @@ async fn main() {
     let app_host = config.app_host.clone();
     let app_port = config.app_port.clone();
 
+
+    let smtp_host = std::env::var("SMTP_HOST").expect("SMTP_HOST must be set");
+    let smtp_port: u16 = std::env::var("SMTP_PORT").unwrap_or("587".to_string()).parse().expect("Invalid SMTP_PORT");
+    let smtp_username = std::env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
+    let smtp_password = std::env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
+    let smtp_from = std::env::var("SMTP_FROM").expect("SMTP_FROM must be set");
+
     let i18n = I18nService::new(pool.clone());
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
         i18n,
+        frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
+        smtp_host,
+        smtp_port,
+        smtp_username,
+        smtp_password,
+        smtp_from,
     });
 
     let cors = {
@@ -132,15 +154,14 @@ async fn main() {
 
     let openapi = ApiDoc::openapi();
 
-    // 2. Собираем публичный роутер (без авторизации)
     let public_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::routing())
-        .nest("/api/v1/user", user::handlers::public_routing()) // ← только create
+        .nest("/api/v1/user", user::handlers::public_routing())
         .nest_service("/media", ServeDir::new("media"))
         .with_state(shared_state.clone());
 
     let protected_router = Router::new()
-        .nest("/api/v1/user", user::handlers::protected_routing()) // ← остальное
+        .nest("/api/v1/user", user::handlers::protected_routing())
         .nest("/api/v1/i18n", i18n::handlers::routing())
         .nest("/api/v1/media", media::handlers::routing())
         .with_state(shared_state.clone())
@@ -149,12 +170,10 @@ async fn main() {
             auth_middleware,
         ));
 
-    // 4. Объединяем роутеры и добавляем middleware верхнего уровня (locale)
     let app_router = public_router
         .merge(protected_router)
         .layer(middleware::from_fn(locale_middleware));
 
-    // 5. Добавляем Swagger UI — он просто обслуживает JSON и HTML
     let router = app_router
         .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", openapi))
         .layer(cors);

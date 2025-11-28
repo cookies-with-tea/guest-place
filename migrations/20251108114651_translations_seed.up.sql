@@ -26,6 +26,9 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('user.email_invalid', 'ru', 'Email неверный'),
 
 -- auth.*
+('auth.register.check_email', 'en', 'Registration initiated. Please check your email to confirm.'),
+('auth.register.check_email', 'ru', 'Регистрация начата. Пожалуйста, проверьте вашу почту для подтверждения.'),
+
 ('auth.invalid_credentials', 'en', 'Invalid login or password'),
 ('auth.invalid_credentials', 'ru', 'Неверный логин или пароль'),
 
@@ -45,7 +48,7 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('auth.login_success', 'ru', 'Авторизация успешна'),
 
 ('auth.unauthorized', 'en', 'Unauthorized'),
-('auth.unauthorized', 'ru', 'Не авторизовн'),
+('auth.unauthorized', 'ru', 'Не авторизован'),
 
 ('auth.refresh_success', 'en', 'Token successfully refreshed'),
 ('auth.refresh_success', 'ru', 'Токен успешно обновлён'),
@@ -56,6 +59,9 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 -- general.*
 ('general.internal_error', 'en', 'Internal server error'),
 ('general.internal_error', 'ru', 'Внутренняя ошибка сервера'),
+
+('general.email_failed', 'en', 'Email sending failed'),
+('general.email_failed', 'ru', 'Не удалось отправить письмо'),
 
 ('general.db_error', 'en', 'Database error'),
 ('general.db_error', 'ru', 'Ошибка базы данных')
