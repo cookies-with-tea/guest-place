@@ -9,13 +9,13 @@
     <input :id="id" v-model="model" class="ui-input__inner" :placeholder="props.placeholder" />
 
     <button
-      ref="toggleBtn"
       type="button"
+      class="ui-input__password-icon"
       :aria-pressed="isPasswordVisible"
       :disabled="isAnimating"
       @click="useCheckElement"
     >
-      <UiIcon name="eye" ref="eye-ref"/>
+      <UiIcon name="eye" ref="eye"/>
     </button>
 
 
@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, useId} from 'vue'
+import { computed, nextTick, useId } from 'vue'
 import { useAnimateIcon, useCheckElement } from '../composables'
 
 // TODO: сделать кейс валидации
@@ -55,7 +55,6 @@ const props = withDefaults(defineProps<IProps>(), {
 
 // console.log(props.prefixIcon)
 // const { togglePassword } = useAnimateIcon()
-useCheckElement()
 const model = defineModel()
 const id = useId()
 
@@ -217,10 +216,12 @@ const classes = computed(() => `ui-input--${props.size}`)
 // }
 
 // === Жизненный цикл ===
-// onMounted(() => {
-//   startBlinking()
-//   window.addEventListener('pointermove', moveEye)
-// })
+onMounted(async () => {
+  await nextTick()
+  useCheckElement()
+  // startBlinking()
+  // window.addEventListener('pointermove', moveEye)
+})
 
 // onBeforeUnmount(() => {
 //   if (blinkTimeline.value) blinkTimeline.value.kill()

@@ -1,7 +1,7 @@
 import { onMounted , useTemplateRef, ref} from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 export const useCheckElement = () => {
-  const iconEye = useTemplateRef<UiIconInstanceType>('eye-ref')
+  const iconEye = useTemplateRef<UiIconInstanceType>('eye')
   const iconContainer = iconEye.value?.$el
   console.log(iconContainer)
   if (!iconContainer) return
