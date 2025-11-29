@@ -134,7 +134,6 @@ pub async fn register(
             .unwrap_or_else(|_| Err("Panic during email sending".into()));
 
             if let Err(e) = email_result {
-                println!("{:?}", e);
                 let msg = state.i18n.t("general.email_failed", &locale).await;
                 return into_api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -229,7 +228,6 @@ pub async fn check_register_key(
         );
     }
 
-    // 3. Код валиден → УДАЛЯЕМ его (одноразовое использование)
     let delete_result = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
         .bind(&payload.key)
         .execute(&state.pool)
@@ -245,7 +243,6 @@ pub async fn check_register_key(
         );
     }
 
-    // 4. Успешно: код был валиден и теперь удалён
     let msg = state.i18n.t("auth.register.code_valid", &locale).await;
     into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
 }
