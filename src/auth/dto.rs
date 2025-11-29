@@ -3,6 +3,16 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Deserialize, Debug, ToSchema)]
+pub struct RegisterRequestDTO {
+    pub email: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct CheckEmailCodeDTO {
+    pub key: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
 pub struct AuthRequestDTO {
     pub email: String,
     pub password: String,

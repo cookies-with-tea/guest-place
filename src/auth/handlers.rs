@@ -1,7 +1,12 @@
-use crate::auth::dto::{AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, Claims};
+use crate::auth::dto::{
+    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
+    RegisterRequestDTO,
+};
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
+use crate::mailer::handlers::send_email;
 use crate::user::dto::User;
+use crate::user::utils::validate_email;
 use crate::AppState;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
 use axum::routing::post;
@@ -13,6 +18,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::{query_as, Row};
 use std::env;
 use std::sync::Arc;
+use tokio::task;
 use uuid::Uuid;
 
 fn verify_password(password: &str, hash: &str) -> bool {
@@ -26,7 +32,6 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
     dotenv().ok();
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
-    // Конвертируем минуты → секунды для JWT
     let expires_in_seconds = expires_in_minutes * 60;
     let expiration = Utc::now() + Duration::seconds(expires_in_seconds);
 
@@ -68,6 +73,181 @@ fn get_refresh_token_ttl_minutes() -> i32 {
         .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer")
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register",
+    request_body = RegisterRequestDTO,
+    responses(
+        (status = 201, description = "Письмо отправлено"),
+        (status = 400, description = "Некорректный email"),
+        (status = 409, description = "Email уже используется"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn register(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<RegisterRequestDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    if !validate_email(&payload.email) {
+        let msg = state.i18n.t("user.email_invalid", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map(&"email".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let token = Uuid::new_v4().to_string();
+    let expires_at = Utc::now() + Duration::hours(24);
+
+    let result = sqlx::query(
+        "INSERT INTO pending_registrations (email, token, expires_at) \
+         VALUES ($1, $2, $3) \
+         ON CONFLICT (email) DO UPDATE \
+         SET token = $2, expires_at = $3",
+    )
+    .bind(&payload.email)
+    .bind(&token)
+    .bind(expires_at)
+    .execute(&state.pool)
+    .await;
+
+    match result {
+        Ok(_) => {
+            let value = state.clone();
+            let email_result = task::spawn_blocking(move || {
+                send_email(
+                    payload.email.clone(),
+                    token.clone(),
+                    value.frontend_url.clone(),
+                    value.smtp_host.clone(),
+                    value.smtp_port,
+                    value.smtp_username.clone(),
+                    value.smtp_password.clone(),
+                    value.smtp_from.clone(),
+                )
+            })
+            .await
+            .unwrap_or_else(|_| Err("Panic during email sending".into()));
+
+            if let Err(e) = email_result {
+                let msg = state.i18n.t("general.email_failed", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"email".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+
+            let msg = state.i18n.t("auth.register.check_email", &locale).await;
+            into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
+        }
+        Err(sqlx::Error::Database(ref e)) if e.code() == Some("23505".into()) => {
+            let msg = state.i18n.t("auth.register.email_exists", &locale).await;
+            into_api_response(
+                StatusCode::CONFLICT,
+                None,
+                Some(error_map(&"email".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+        Err(_) => {
+            let msg = state.i18n.t("general.db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map(&"database".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register/key",
+    request_body = CheckEmailCodeDTO,
+    responses(
+        (status = 200, description = "Код действителен"),
+        (status = 400, description = "Некорректный код"),
+        (status = 404, description = "Код не найден или истёк"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn check_register_key(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<CheckEmailCodeDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let row =
+        match sqlx::query("SELECT email, expires_at FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .fetch_optional(&state.pool)
+            .await
+        {
+            Ok(Some(row)) => row,
+            Ok(None) => {
+                let msg = state.i18n.t("auth.register.code_not_found", &locale).await;
+                return into_api_response(
+                    StatusCode::NOT_FOUND,
+                    None,
+                    Some(error_map(&"code".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+            Err(_) => {
+                let msg = state.i18n.t("general.db_error", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"database".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+        };
+
+    let expires_at: chrono::DateTime<chrono::Utc> = row.get("expires_at");
+
+    if Utc::now() > expires_at {
+        let _ = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .execute(&state.pool)
+            .await;
+
+        let msg = state.i18n.t("auth.register.code_expired", &locale).await;
+        return into_api_response(
+            StatusCode::NOT_FOUND,
+            None,
+            Some(error_map(&"code".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let delete_result = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+        .bind(&payload.key)
+        .execute(&state.pool)
+        .await;
+
+    if let Err(_) = delete_result {
+        let msg = state.i18n.t("general.db_error", &locale).await;
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map(&"database".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let msg = state.i18n.t("auth.register.code_valid", &locale).await;
+    into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+}
+
+// TODO: Переписать на set-cookie. HttpOnly
 #[utoipa::path(
     post,
     path = "/api/v1/auth/login",
@@ -125,7 +305,7 @@ pub async fn login(
 
     let _ = sqlx::query(
         "INSERT INTO refresh_token (user_id, token, expires_at) \
-         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)"
+         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)",
     )
     .bind(user.uuid)
     .bind(&refresh_token)
@@ -259,6 +439,8 @@ async fn logout(
 
 pub fn routing() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/register", post(register))
+        .route("/register/key", post(check_register_key))
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
