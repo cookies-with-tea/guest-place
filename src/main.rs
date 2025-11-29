@@ -46,6 +46,7 @@ struct AppState {
     crate::auth::handlers::logout,
     crate::auth::handlers::refresh,
     crate::auth::handlers::register,
+    crate::auth::handlers::check_register_key,
     crate::user::handlers::create,
     crate::user::handlers::get_all,
     crate::user::handlers::get_one,

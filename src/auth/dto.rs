@@ -8,6 +8,11 @@ pub struct RegisterRequestDTO {
 }
 
 #[derive(Deserialize, Debug, ToSchema)]
+pub struct CheckEmailCodeDTO {
+    pub key: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
 pub struct AuthRequestDTO {
     pub email: String,
     pub password: String,

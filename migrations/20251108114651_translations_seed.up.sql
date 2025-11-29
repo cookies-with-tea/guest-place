@@ -29,6 +29,18 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('auth.register.check_email', 'en', 'Registration initiated. Please check your email to confirm.'),
 ('auth.register.check_email', 'ru', 'Регистрация начата. Пожалуйста, проверьте вашу почту для подтверждения.'),
 
+('auth.register.code_not_found', 'en', 'Registration code not found'),
+('auth.register.code_not_found', 'ru', 'Код подтверждения не найден'),
+
+('auth.register.code_expired', 'en', 'Registration code has expired'),
+('auth.register.code_expired', 'ru', 'Срок действия кода подтверждения истёк'),
+
+('auth.register.code_invalid', 'en', 'Invalid registration code'),
+('auth.register.code_invalid', 'ru', 'Неверный код подтверждения'),
+
+('auth.register.code_valid', 'en', 'Registration code is valid'),
+('auth.register.code_valid', 'ru', 'Код подтверждения действителен'),
+
 ('auth.invalid_credentials', 'en', 'Invalid login or password'),
 ('auth.invalid_credentials', 'ru', 'Неверный логин или пароль'),
 

@@ -22,12 +22,12 @@ pub enum UserStatus {
 #[derive(Deserialize, Debug, ToSchema)]
 pub struct CreateUserDTO {
     pub(crate) email: String,
+    pub(crate) password: String,
     pub(crate) phone: Option<String>,
-    pub(crate) first_name: String,
-    pub(crate) second_name: String,
+    pub(crate) first_name: Option<String>,
+    pub(crate) second_name: Option<String>,
     pub(crate) last_name: Option<String>,
     pub(crate) birth_date: Option<NaiveDate>,
-    pub(crate) password: String,
     pub(crate) role: Option<UserRole>,
     pub(crate) status: Option<UserStatus>,
 }

@@ -157,9 +157,9 @@ async fn create(
             first_name, second_name, last_name, phone, birth_date, password_hash, role, status, email
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
     )
-    .bind(&payload.first_name)
-    .bind(&payload.second_name)
-    .bind(&payload.last_name)
+    .bind(&payload.first_name.unwrap_or_else(|| "".to_string()))
+    .bind(&payload.second_name.unwrap_or_else(|| "".to_string()))
+    .bind(&payload.last_name.unwrap_or_else(|| "".to_string()))
     .bind(&payload.phone.unwrap_or_else(|| "".to_string()))
     .bind(&payload.birth_date)
     .bind(&password_hash)

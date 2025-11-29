@@ -1,12 +1,13 @@
 use crate::auth::dto::{
-    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, Claims, RegisterRequestDTO,
+    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
+    RegisterRequestDTO,
 };
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
 use crate::mailer::handlers::send_email;
 use crate::user::dto::User;
-use crate::AppState;
 use crate::user::utils::validate_email;
+use crate::AppState;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
 use axum::routing::post;
 use axum::Router;
@@ -31,7 +32,6 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
     dotenv().ok();
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
-    // Конвертируем минуты → секунды для JWT
     let expires_in_seconds = expires_in_minutes * 60;
     let expiration = Utc::now() + Duration::seconds(expires_in_seconds);
 
@@ -168,6 +168,89 @@ pub async fn register(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register/key",
+    request_body = CheckEmailCodeDTO,
+    responses(
+        (status = 200, description = "Код действителен"),
+        (status = 400, description = "Некорректный код"),
+        (status = 404, description = "Код не найден или истёк"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn check_register_key(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<CheckEmailCodeDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let row =
+        match sqlx::query("SELECT email, expires_at FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .fetch_optional(&state.pool)
+            .await
+        {
+            Ok(Some(row)) => row,
+            Ok(None) => {
+                let msg = state.i18n.t("auth.register.code_not_found", &locale).await;
+                return into_api_response(
+                    StatusCode::NOT_FOUND,
+                    None,
+                    Some(error_map(&"code".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+            Err(_) => {
+                let msg = state.i18n.t("general.db_error", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"database".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+        };
+
+    let expires_at: chrono::DateTime<chrono::Utc> = row.get("expires_at");
+
+    if Utc::now() > expires_at {
+        let _ = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .execute(&state.pool)
+            .await;
+
+        let msg = state.i18n.t("auth.register.code_expired", &locale).await;
+        return into_api_response(
+            StatusCode::NOT_FOUND,
+            None,
+            Some(error_map(&"code".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    // 3. Код валиден → УДАЛЯЕМ его (одноразовое использование)
+    let delete_result = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+        .bind(&payload.key)
+        .execute(&state.pool)
+        .await;
+
+    if let Err(_) = delete_result {
+        let msg = state.i18n.t("general.db_error", &locale).await;
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map(&"database".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    // 4. Успешно: код был валиден и теперь удалён
+    let msg = state.i18n.t("auth.register.code_valid", &locale).await;
+    into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+}
+
+// TODO: Переписать на set-cookie. HttpOnly
 #[utoipa::path(
     post,
     path = "/api/v1/auth/login",
@@ -360,6 +443,7 @@ async fn logout(
 pub fn routing() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
+        .route("/register/key", post(check_register_key))
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
