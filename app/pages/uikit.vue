@@ -61,7 +61,13 @@
     </div>
 
     <div class="box">
-      <UiInput v-model="inputValue" suffix-icon="shop-car" prefix-icon="shop-car" placeholder="Ваше имя" size="md" />
+      <UiInput
+        v-model="inputValue"
+        suffix-icon="shop-car"
+        prefix-icon="shop-car"
+        placeholder="Ваше имя"
+        size="md"
+      />
     </div>
   </div>
 </template>
