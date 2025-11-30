@@ -11,7 +11,6 @@
     <button
       type="button"
       class="ui-input__password-icon"
-      :aria-pressed="isPasswordVisible"
       :disabled="isAnimating"
       @click="useCheckElement"
     >
@@ -29,8 +28,8 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, nextTick, useId } from 'vue'
-import { useAnimateIcon, useCheckElement } from '../composables'
+import { computed, ref, useId } from 'vue'
+import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
 // useCheckElement()
@@ -54,13 +53,19 @@ const props = withDefaults(defineProps<IProps>(), {
 })
 
 // console.log(props.prefixIcon)
-// const { togglePassword } = useAnimateIcon()
+const iconEye = useTemplateRef<HTMLDivElement>('eye')
+const isFocus = ref(false)
 const model = defineModel()
 const id = useId()
 
 const classes = computed(() => `ui-input--${props.size}`)
 // import { ref, onMounted, onBeforeUnmount } from 'vue'
 
+onMounted( () => {
+  const {startBlinking, moveEye} = useAnimateIcon(iconEye)
+  startBlinking()
+  window.addEventListener('pointermove', moveEye)
+})
 // const iconEye = useTemplateRef('eye-ref')
 // const iconContainer = iconEye.value?.$el
 // console.log(iconContainer)
@@ -216,12 +221,6 @@ const classes = computed(() => `ui-input--${props.size}`)
 // }
 
 // === Жизненный цикл ===
-onMounted(async () => {
-  await nextTick()
-  useCheckElement()
-  // startBlinking()
-  // window.addEventListener('pointermove', moveEye)
-})
 
 // onBeforeUnmount(() => {
 //   if (blinkTimeline.value) blinkTimeline.value.kill()

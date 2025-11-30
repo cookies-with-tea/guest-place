@@ -52,7 +52,7 @@
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
 
-    <div style="display: none" class="box">
+    <div class="box">
       <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
