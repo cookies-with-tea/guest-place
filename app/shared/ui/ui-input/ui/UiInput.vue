@@ -40,13 +40,13 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, ref, useId } from 'vue'
+import { computed, useId } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
 interface IProps {
   placeholder: string
-  type?: 'text' | 'password' | 'textarea' | 'number' | 'email'
+  type?: 'text' | 'search' | 'url' | 'email' | 'password' | 'textarea' | 'number'
   suffixIcon?: string
   prefixIcon?: string
   showPassword?: boolean
@@ -101,6 +101,15 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
   box-shadow: var(--ui-input-primary-shadow-color);
   background-color: var(--color-white);
   transition: border-color var(--transition-duration-primary) ease;
+
+  &:disabled {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  &:focus-within {
+    --ui-input-primary-border-color: var(--color-accent);
+  }
 
   .ui-input__password-icon {
     display: flex;
@@ -157,10 +166,6 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
     &::placeholder {
       color: var(--color-text-light);
     }
-  }
-
-  &:focus-within {
-    --ui-input-primary-border-color: var(--color-accent);
   }
 
   &--md {
