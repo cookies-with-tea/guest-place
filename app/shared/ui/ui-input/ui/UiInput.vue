@@ -13,12 +13,15 @@
       :placeholder="props.placeholder"
       @focus="playAnimateEye"
       @blur="resetAnimateEye"
+      :type="type"
     />
 
     <button
       type="button"
       :class="{'ui-input__password-icon_active': isFocus}"
       class="ui-input__password-icon"
+      @click="togglePassword"
+      :disabled="isAnimating"
     >
       <UiIcon
         name="eye" ref="eye"
@@ -36,7 +39,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, ref, useId } from 'vue'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
@@ -66,7 +69,17 @@ const id = useId()
 const isFocus = ref(false)
 const classes = computed(() => `ui-input--${props.size}`)
 const controller = new AbortController()
-const {moveEye, startBlinking, stopBlinking} = useAnimateIcon(iconEye)
+const {
+  startBlinking,
+  stopBlinking,
+  moveEye,
+  togglePassword,
+  isPasswordVisible,
+  isAnimating,
+} = useAnimateIcon(iconEye, model)
+
+// const isPasswordVisible = ref(false)
+const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
 const playAnimateEye = () => {
   isFocus.value = true
@@ -75,7 +88,7 @@ const playAnimateEye = () => {
 
     moveEye(event)
     startBlinking()
-    console.log(event.target)
+    // console.log(event.target)
   },{signal: controller.signal})
 }
 const resetAnimateEye = () => {
@@ -88,16 +101,20 @@ const resetAnimateEye = () => {
 // proxyDiv.style.display = 'none'
 // document.body.appendChild(proxyDiv)
 
-
+// onMounted(() => {
+//   const proxyDiv = document.createElement('div')
+//   // proxyDiv.style.display = 'none'
+//   document.body.appendChild(proxyDiv)
+// })
 // onBeforeUnmount(() => {
 //   if (blinkTimeline.value) blinkTimeline.value.kill()
 //   window.removeEventListener('pointermove', moveEye)
 //   if (resetEyeTimer) resetEyeTimer.kill()
 //   if (proxyDiv.parentNode) proxyDiv.parentNode.removeChild(proxyDiv)
 // })
-onUnmounted(() => {
-
-})
+// onUnmounted(() => {
+//
+// })
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,8 @@
 import { gsap } from 'gsap'
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
-import { onMounted, ref } from 'vue'
+import { ref, type Ref, nextTick } from 'vue'
+import { useCheckItemExists } from './useCheckItemExists'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 
@@ -10,43 +11,37 @@ const TOGGLE_SPEED = 0.125
 const ENCRYPT_SPEED = 1
 const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,.<>?/;":][}{+_)(*&^%$#@!±=-§'
 
+let proxyDiv: HTMLElement | null = null
 
+const getProxyDiv = (): HTMLElement => {
+  if (proxyDiv) return proxyDiv
+  if (typeof document === 'undefined') {
+    throw new Error('ScrambleTextPlugin работает только в браузере')
+  }
+  proxyDiv = document.createElement('div')
+  proxyDiv.style.display = 'none'
+  document.body.appendChild(proxyDiv)
+  return proxyDiv
+}
 
-export const useAnimateIcon = (iconEye) => {
-  const passwordInput = ref(null)
-  // const passwordValue = ref('')
+// Переменные для хранения исходных путей (на уровне модуля, но обнуляются при каждом новом composable)
+export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
   const isPasswordVisible = ref(false)
   const isAnimating = ref(false)
-  const blinkTimeline = ref(null)
-  const resetEyeTimer = ref(null)
-
-  const checkItemExists = () => {
-    const iconContainer = iconEye.value?.$el
-    if (!iconContainer) return
-
-    const eyeOpen = iconContainer.querySelector('#eye-open path')
-    const eyeClosed = iconContainer.querySelector('#eye-closed path')
-    const eye = iconContainer.getElementById('eye')
-    const upper = iconContainer.getElementById('lid--upper')
-    const lower = iconContainer.getElementById('lid--lower')
-
-    return {iconContainer, eyeOpen, eyeClosed, eye, upper, lower}
-  }
+  const blinkTimeline = ref<gsap.core.Timeline | null>(null)
+  const resetEyeTimer = ref<gsap.core.DelayedCall | null>(null)
 
   const startBlinking = () => {
-    const {upper, eyeOpen, lower, eyeClosed} = checkItemExists()
-    if (blinkTimeline.value) blinkTimeline.value.kill()
+    if (isAnimating.value) return
+    blinkTimeline.value?.kill()
+
+    const { upper, eyeOpen, lower, eyeClosed } = useCheckItemExists(iconEye)
 
     const delay = gsap.utils.random(2, 8)
     const repeat = Math.random() > 0.5 ? 3 : 1
 
     blinkTimeline.value = gsap
-      .timeline({
-        delay,
-        onComplete: startBlinking,
-        repeat,
-        yoyo: true,
-      })
+      .timeline({ delay, onComplete: startBlinking, repeat, yoyo: true })
       .to(upper, { morphSVG: lower, duration: BLINK_SPEED }, 0)
       .to(eyeOpen, { morphSVG: eyeClosed, duration: BLINK_SPEED }, 0)
   }
@@ -59,91 +54,90 @@ export const useAnimateIcon = (iconEye) => {
     if (isAnimating.value) return
     isAnimating.value = true
 
-    const currentValue = passwordValue.value
+    const { upper, eyeOpen, lower, eyeClosed } = useCheckItemExists(iconEye)
+
+    const currentValue = modelRef.value
     const wasPassword = !isPasswordVisible.value
+    const isEmpty = currentValue.trim() === ''
 
     if (wasPassword) {
-      // Закрываем глаз
-      if (blinkTimeline.value) blinkTimeline.value.kill()
-      await gsap
-        .timeline()
-        .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
-        .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
-        .to(proxyDiv, {
-          duration: ENCRYPT_SPEED,
-          scrambleText: {
-            chars,
-            text: currentValue || '••••••••',
-          },
-          onStart: () => {
-            isPasswordVisible.value = true
-          },
-          onUpdate: () => {
-            const proxyText = proxyDiv.innerText
-            const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
-            passwordValue.value = proxyText + placeholder
-          },
-          onComplete: () => {
-            passwordValue.value = currentValue // восстанавливаем оригинал
-            proxyDiv.innerHTML = ''
-          },
-        }, 0)
-    } else {
-      // Открываем глаз
-      await gsap
-        .timeline()
-        .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED }, 0)
-        .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED }, 0)
-        .to(proxyDiv, {
-          duration: ENCRYPT_SPEED,
-          scrambleText: {
-            chars,
-            text: '•'.repeat(currentValue.length || 8),
-          },
-          onStart: () => {
-            isPasswordVisible.value = false
-          },
-          onUpdate: () => {
-            const proxyText = proxyDiv.innerText
-            passwordValue.value = proxyText + currentValue.slice(proxyText.length)
-          },
-          onComplete: () => {
-            passwordValue.value = currentValue // финальное значение
-            proxyDiv.innerHTML = ''
-          },
-        }, 0)
-      startBlinking()
-    }
+      // === РАСКРЫТИЕ ===
+      blinkTimeline.value?.kill()
+      isPasswordVisible.value = true
 
-    isAnimating.value = false
+      if (isEmpty) {
+        // Только глаз
+        await gsap.timeline()
+          .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED })
+          .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED })
+      } else {
+        // 🔑 Глаз + scramble ОДНОВРЕМЕННО
+        const proxyDiv = getProxyDiv()
+        await gsap.timeline()
+          .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
+          .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
+          .to(proxyDiv, {
+            duration: ENCRYPT_SPEED,
+            scrambleText: { chars, text: currentValue },
+            onUpdate: () => {
+              const proxyText = proxyDiv.innerText
+              const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
+              modelRef.value = proxyText + placeholder
+            },
+            onComplete: () => {
+              proxyDiv.innerHTML = ''
+              modelRef.value = currentValue
+            },
+          }, 0) // ← запуск scramble СРАЗУ (с задержкой 0)
+      }
+
+      isAnimating.value = false
+    } else {
+      // === СКРЫТИЕ ===
+      if (!isEmpty) {
+        const proxyDiv = getProxyDiv()
+        await gsap.timeline({
+          onComplete: () => {
+            proxyDiv.innerHTML = ''
+            modelRef.value = currentValue
+            isPasswordVisible.value = false
+            startBlinking()
+          },
+        })
+          .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED })
+          .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
+          .to(proxyDiv, {
+            duration: ENCRYPT_SPEED,
+            scrambleText: { chars, text: '•'.repeat(currentValue.length) },
+            onUpdate: () => {
+              const proxyText = proxyDiv.innerText
+              modelRef.value = proxyText + currentValue.slice(proxyText.length)
+            },
+          }, 0)
+      } else {
+        await gsap.timeline()
+          .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED })
+          .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
+        isPasswordVisible.value = false
+        startBlinking()
+      }
+      isAnimating.value = false
+    }
   }
 
-  const moveEye = (e) => {
-    const {iconContainer} = checkItemExists()
+  const moveEye = (e: PointerEvent) => {
+    const { eye, iconContainer } = useCheckItemExists(iconEye)
 
     if (resetEyeTimer.value) resetEyeTimer.value.kill()
-
     resetEyeTimer.value = gsap.delayedCall(2, () => {
       gsap.to(eye, { xPercent: 0, yPercent: 0, duration: 0.2 })
     })
 
     const bounds = iconContainer.getBoundingClientRect()
-    const xPercent = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.x - e.clientX))
-    const yPercent = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.y - e.clientY))
-
-    gsap.set(eye, { xPercent, yPercent })
+    const x = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.left - e.clientX))
+    const y = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.top - e.clientY))
+    gsap.set(eye, { xPercent: x, yPercent: y })
   }
 
-  // onMounted(() => {
-  //   startBlinking()
-  //   window.addEventListener('pointermove', moveEye)
-  // })
-  // onMounted(() => {
-    // useAnimateIcon(iconEye.value?.$el)
-    // startBlinking()
-    // window.addEventListener('pointermove', moveEye)
-  // })
-  return { moveEye, startBlinking, stopBlinking }
+  return { moveEye, startBlinking, stopBlinking, togglePassword, isPasswordVisible, isAnimating }
 }
-
-
