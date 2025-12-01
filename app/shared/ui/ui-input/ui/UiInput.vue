@@ -11,8 +11,8 @@
       v-model="model"
       class="ui-input__inner"
       :placeholder="props.placeholder"
-      @focus="playAnimateEye"
-      @blur="resetAnimateEye"
+      @focus="handlePlayAnimate"
+      @blur="handleStopAnimate"
       :type="type"
     />
 
@@ -66,55 +66,18 @@ const props = withDefaults(defineProps<IProps>(), {
 const iconEye = useTemplateRef<HTMLDivElement>('eye')
 const model = defineModel()
 const id = useId()
-const isFocus = ref(false)
 const classes = computed(() => `ui-input--${props.size}`)
-const controller = new AbortController()
+
 const {
-  startBlinking,
-  stopBlinking,
-  moveEye,
+  handlePlayAnimate,
+  handleStopAnimate,
   togglePassword,
   isPasswordVisible,
+  isFocus,
   isAnimating,
 } = useAnimateIcon(iconEye, model)
 
-// const isPasswordVisible = ref(false)
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
-
-const playAnimateEye = () => {
-  isFocus.value = true
-  window.addEventListener('pointermove', (event) => {
-    if(!isFocus.value) return
-
-    moveEye(event)
-    startBlinking()
-    // console.log(event.target)
-  },{signal: controller.signal})
-}
-const resetAnimateEye = () => {
-  isFocus.value = !isFocus.value
-  stopBlinking()
-}
-
-// Вспомогательный элемент для scramble
-// const proxyDiv = document.createElement('div')
-// proxyDiv.style.display = 'none'
-// document.body.appendChild(proxyDiv)
-
-// onMounted(() => {
-//   const proxyDiv = document.createElement('div')
-//   // proxyDiv.style.display = 'none'
-//   document.body.appendChild(proxyDiv)
-// })
-// onBeforeUnmount(() => {
-//   if (blinkTimeline.value) blinkTimeline.value.kill()
-//   window.removeEventListener('pointermove', moveEye)
-//   if (resetEyeTimer) resetEyeTimer.kill()
-//   if (proxyDiv.parentNode) proxyDiv.parentNode.removeChild(proxyDiv)
-// })
-// onUnmounted(() => {
-//
-// })
 </script>
 
 <style scoped lang="scss">
