@@ -42,7 +42,7 @@ const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
     align-items: center;
     justify-content: space-between;
     color: var(--color-regular);
-    transition: color var(--transition-duration-secondary);
+    transition: color var(--transition-duration-secondary) ease-out;
     gap: 33px;
 
     &:deep(.ui-icon) {
@@ -63,9 +63,9 @@ const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
     max-height: 0;
     color: var(--color-text-light);
     transition:
-      max-height var(--transition),
-      padding-bottom var(--transition),
-      padding-top var(--transition);
+      max-height var(--transition-duration-secondary),
+      padding-bottom var(--transition-duration-secondary),
+      padding-top var(--transition-duration-secondary);
     will-change: max-height;
     overflow: hidden;
   }

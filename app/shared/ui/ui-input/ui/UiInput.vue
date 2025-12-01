@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-input" :class="classes">
+  <div v-if="isTextarea" class="ui-input" :class="classes">
     <div v-if="$slots['prefix-icon'] || props.prefixIcon" class="ui-input__icon prefix-icon">
       <slot name="prefix-icon">
         <UiIcon :name="props.prefixIcon" />
@@ -36,6 +36,15 @@
       </slot>
     </div>
   </div>
+
+  <textarea
+    v-else
+    class="textarea"
+    :id="id"
+    :rows="props.rows"
+    :disabled="props.disabled"
+    :placeholder="props.placeholder"
+  />
 </template>
 
 <script setup lang="ts">
@@ -85,6 +94,8 @@ const {
 } = useAnimateIcon(iconEye, model)
 
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
+
+const isTextarea = computed(() => !(props.type === 'textarea'))
 </script>
 
 <style scoped lang="scss">
@@ -196,6 +207,19 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
   &__inner,
   &__inner::placeholder {
+    @include typography(body);
+  }
+}
+
+.textarea {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+  padding: 20px 47px 20px 40px;
+  border-radius: 30px;
+  @include typography(body);
+
+  &::placeholder {
     @include typography(body);
   }
 }
