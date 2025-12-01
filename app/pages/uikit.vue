@@ -63,9 +63,8 @@
     <div class="box">
       <UiInput
         v-model="inputValue"
-        suffix-icon="shop-car"
-        prefix-icon="shop-car"
         placeholder="Ваше имя"
+        type="password"
         size="md"
       />
     </div>
