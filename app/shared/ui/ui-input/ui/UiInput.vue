@@ -17,6 +17,7 @@
     />
 
     <button
+      v-if="props.showPassword"
       type="button"
       :class="{'ui-input__password-icon_active': isFocus}"
       class="ui-input__password-icon"
@@ -39,17 +40,16 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, onMounted, ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
-// useCheckElement()
 interface IProps {
   placeholder: string
-  showPassword?: boolean
   type?: 'text' | 'password' | 'textarea' | 'number' | 'email'
   suffixIcon?: string
   prefixIcon?: string
+  showPassword?: boolean
   disabled?: boolean
   size?: 's' | 'md'
   rows?: number
@@ -81,8 +81,6 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 </script>
 
 <style scoped lang="scss">
-
-
 .ui-input {
   //TODO: сделать глобально. повторяется во втором компоненте!
   --ui-input-primary-shadow-color: 0 4px 15px 0 #694e4b24;
@@ -116,6 +114,10 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
       color: var(--ui-input-primary-icon-color);
 
       transition: color var(--transition-duration-primary);
+
+      @include hover {
+        color: var(--color-text-primary-hover)
+      }
     }
 
     &.ui-input__password-icon_active {

@@ -66,6 +66,7 @@
         placeholder="Ваше имя"
         type="password"
         size="md"
+        showPassword
       />
     </div>
   </div>
