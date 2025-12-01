@@ -67,6 +67,7 @@
         type="password"
         size="md"
         showPassword
+        disabled
       />
     </div>
   </div>

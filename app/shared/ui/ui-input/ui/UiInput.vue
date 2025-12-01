@@ -13,6 +13,7 @@
       :placeholder="props.placeholder"
       @focus="handlePlayAnimate"
       @blur="handleStopAnimate"
+      :disabled="props.disabled"
       :type="type"
     />
 
@@ -28,7 +29,6 @@
         name="eye" ref="eye"
       />
     </button>
-
 
     <div v-if="$slots['suffix-icon'] || props.suffixIcon" class="ui-input__icon suffix-icon">
       <slot name="suffix-icon">
@@ -66,7 +66,14 @@ const props = withDefaults(defineProps<IProps>(), {
 const iconEye = useTemplateRef<HTMLDivElement>('eye')
 const model = defineModel()
 const id = useId()
-const classes = computed(() => `ui-input--${props.size}`)
+
+const classes = computed(() => {
+    return [
+      `ui-input--${props.size}`,
+      {'is-disabled': props.disabled}
+    ]
+  }
+)
 
 const {
   handlePlayAnimate,
@@ -87,6 +94,10 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
   --ui-input-primary-border-color: transparent;
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
+  --ui-button-bg-color: var(--color-white);
+
+  --ui-button-disabled-bg-color: #E0E0E0;
+  --ui-button-disabled-placeholder-color: #9E9E9E;
 
   --ui-input-primary-icon-color: var(--color-text-light);
   --ui-input-secondary-icon-color: #fff;
@@ -99,12 +110,19 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
   border: 1px solid var(--ui-input-primary-border-color);
   border-radius: 50px;
   box-shadow: var(--ui-input-primary-shadow-color);
-  background-color: var(--color-white);
+  background-color: var(--ui-button-bg-color);
   transition: border-color var(--transition-duration-primary) ease;
 
-  &:disabled {
+  &.is-disabled {
+    background-color: var(--ui-button-disabled-bg-color);
     pointer-events: none;
     user-select: none;
+
+    .ui-input__inner {
+      &::placeholder {
+        color: var(--ui-button-disabled-placeholder-color);
+      }
+    }
   }
 
   &:focus-within {
