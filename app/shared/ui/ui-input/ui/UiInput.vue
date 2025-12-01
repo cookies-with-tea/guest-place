@@ -6,15 +6,23 @@
       </slot>
     </div>
 
-    <input :id="id" v-model="model" class="ui-input__inner" :placeholder="props.placeholder" />
+    <input
+      :id="id"
+      v-model="model"
+      class="ui-input__inner"
+      :placeholder="props.placeholder"
+      @focus="playAnimateEye"
+      @blur="resetAnimateEye"
+    />
 
     <button
       type="button"
+      :class="{'ui-input__password-icon_active': isFocus}"
       class="ui-input__password-icon"
-      :disabled="isAnimating"
-      @click="useCheckElement"
     >
-      <UiIcon name="eye" ref="eye"/>
+      <UiIcon
+        name="eye" ref="eye"
+      />
     </button>
 
 
@@ -35,7 +43,7 @@ import { useAnimateIcon } from '../composables'
 // useCheckElement()
 interface IProps {
   placeholder: string
-  showPassword: boolean
+  showPassword?: boolean
   type?: 'text' | 'password' | 'textarea' | 'number' | 'email'
   suffixIcon?: string
   prefixIcon?: string
@@ -52,175 +60,34 @@ const props = withDefaults(defineProps<IProps>(), {
   rows: 4,
 })
 
-// console.log(props.prefixIcon)
 const iconEye = useTemplateRef<HTMLDivElement>('eye')
-const isFocus = ref(false)
 const model = defineModel()
 const id = useId()
-
+const isFocus = ref(true)
 const classes = computed(() => `ui-input--${props.size}`)
-// import { ref, onMounted, onBeforeUnmount } from 'vue'
+const controller = new AbortController()
+const {moveEye, startBlinking, stopBlinking} = useAnimateIcon(iconEye)
+// const { startBlinking, moveEye, stopBlinking} = useAnimateIcon(iconEye)
+const playAnimateEye = () => {
+  isFocus.value = true
+  window.addEventListener('pointermove', (event) => {
+    if(!isFocus.value) return
 
-onMounted( () => {
-  const {startBlinking, moveEye} = useAnimateIcon(iconEye)
-  startBlinking()
-  window.addEventListener('pointermove', moveEye)
-})
-// const iconEye = useTemplateRef('eye-ref')
-// const iconContainer = iconEye.value?.$el
-// console.log(iconContainer)
-// import { gsap } from 'gsap'
-// import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
-// import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
-//
-// // Регистрация плагинов GSAP
-// gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
-//
-// // Константы
-
-
-
-// Референсы
-// const passwordInput = ref(null)
-
-// Состояния
-// const passwordValue = ref('')
-// const isPasswordVisible = ref(false)
-// const isAnimating = ref(false)
-// const blinkTimeline = ref(null)
-//
-// const iconEye = useTemplateRef('eye')
+    moveEye(event)
+    startBlinking()
+    console.log(event.target)
+  },{signal: controller.signal})
+}
+const resetAnimateEye = () => {
+  isFocus.value = !isFocus.value
+  stopBlinking()
+}
 
 // Вспомогательный элемент для scramble
 // const proxyDiv = document.createElement('div')
 // proxyDiv.style.display = 'none'
 // document.body.appendChild(proxyDiv)
 
-// const startBlinking = () => {
-//   if (blinkTimeline.value) blinkTimeline.value.kill()
-//   const delay = gsap.utils.random(2, 8)
-//   const repeat = Math.random() > 0.5 ? 3 : 1
-//
-//   const iconContainer = iconEye.value?.$el
-//
-//   if (!iconContainer) return
-//
-//   const eyeOpen = iconContainer.querySelector('#eye-open path')
-//   const eyeClosed = iconContainer.querySelector('#eye-closed path')
-//   const eye = iconContainer.getElementById('eye')
-//   const upper = iconContainer.getElementById('lid--upper')
-//   const lower = iconContainer.getElementById('lid--lower')
-//
-//   blinkTimeline.value = gsap
-//     .timeline({
-//       delay,
-//       onComplete: startBlinking,
-//       repeat,
-//       yoyo: true,
-//     })
-//     .to(upper, { morphSVG: lower, duration: BLINK_SPEED }, 0)
-//     .to(eyeOpen, { morphSVG: eyeClosed, duration: BLINK_SPEED }, 0)
-// }
-//
-// let resetEyeTimer = null
-// const moveEye = (e) => {
-//   const iconContainer = iconEye.value?.$el
-//
-//   if (!iconContainer) return
-//
-//   const eyeOpen = iconContainer.querySelector('#eye-open path')
-//   const eyeClosed = iconContainer.querySelector('#eye-closed path')
-//   const eye = iconContainer.getElementById('eye')
-//   const upper = iconContainer.getElementById('lid--upper')
-//   const lower = iconContainer.getElementById('lid--lower')
-//
-//   if (resetEyeTimer) resetEyeTimer.kill()
-//
-//   resetEyeTimer = gsap.delayedCall(2, () => {
-//     gsap.to(eye, { xPercent: 0, yPercent: 0, duration: 0.2 })
-//   })
-//
-//   const bounds = iconContainer.getBoundingClientRect()
-//   const xPercent = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.x - e.clientX))
-//   const yPercent = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.y - e.clientY))
-//   gsap.set(eye, { xPercent, yPercent })
-// }
-//
-//
-// const togglePassword = async () => {
-//   if (isAnimating.value) return
-//   isAnimating.value = true
-//
-//   const currentValue = passwordValue.value
-//   const wasPassword = !isPasswordVisible.value
-//
-//   const iconContainer = iconEye.value?.$el
-//
-//   if (!iconContainer) return
-//
-//   const eyeOpen = iconContainer.querySelector('#eye-open path')
-//   const eyeClosed = iconContainer.querySelector('#eye-closed path')
-//   const upper = iconContainer.getElementById('lid--upper')
-//   const lower = iconContainer.getElementById('lid--lower')
-//
-//
-//   if (wasPassword) {
-//     // Закрываем глаз
-//     if (blinkTimeline.value) blinkTimeline.value.kill()
-//     await gsap
-//       .timeline()
-//       .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
-//       .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
-//       .to(proxyDiv, {
-//         duration: ENCRYPT_SPEED,
-//         scrambleText: {
-//           chars,
-//           text: currentValue || '••••••••',
-//         },
-//         onStart: () => {
-//           isPasswordVisible.value = true
-//         },
-//         onUpdate: () => {
-//           const proxyText = proxyDiv.innerText
-//           const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
-//           passwordValue.value = proxyText + placeholder
-//         },
-//         onComplete: () => {
-//           passwordValue.value = currentValue // восстанавливаем оригинал
-//           proxyDiv.innerHTML = ''
-//         },
-//       }, 0)
-//   } else {
-//     // Открываем глаз
-//     await gsap
-//       .timeline()
-//       .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED }, 0)
-//       .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED }, 0)
-//       .to(proxyDiv, {
-//         duration: ENCRYPT_SPEED,
-//         scrambleText: {
-//           chars,
-//           text: '•'.repeat(currentValue.length || 8),
-//         },
-//         onStart: () => {
-//           isPasswordVisible.value = false
-//         },
-//         onUpdate: () => {
-//           const proxyText = proxyDiv.innerText
-//           passwordValue.value = proxyText + currentValue.slice(proxyText.length)
-//         },
-//         onComplete: () => {
-//           passwordValue.value = currentValue // финальное значение
-//           proxyDiv.innerHTML = ''
-//         },
-//       }, 0)
-//     startBlinking()
-//   }
-//
-//   isAnimating.value = false
-// }
-
-// === Жизненный цикл ===
 
 // onBeforeUnmount(() => {
 //   if (blinkTimeline.value) blinkTimeline.value.kill()
@@ -228,12 +95,13 @@ onMounted( () => {
 //   if (resetEyeTimer) resetEyeTimer.kill()
 //   if (proxyDiv.parentNode) proxyDiv.parentNode.removeChild(proxyDiv)
 // })
+onUnmounted(() => {
+
+})
 </script>
 
 <style scoped lang="scss">
-//.btn {
-//
-//}
+
 
 .ui-input {
   //TODO: сделать глобально. повторяется во втором компоненте!
@@ -241,6 +109,11 @@ onMounted( () => {
   --ui-input-primary-border-color: transparent;
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
+
+  --ui-input-primary-icon-color: var(--color-text-light);
+  --ui-input-secondary-icon-color: #fff;
+
+  --ui-input-focus-primary-icon-color: #333;
 
   width: 100%;
   display: flex;
@@ -250,6 +123,27 @@ onMounted( () => {
   box-shadow: var(--ui-input-primary-shadow-color);
   background-color: var(--color-white);
   transition: border-color var(--transition-duration-primary) ease;
+
+  .ui-input__password-icon {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+
+    :deep(.ui-icon){
+      --bg-color: var(--ui-input-secondary-icon-color);
+
+      font-size: 24px;
+      color: var(--ui-input-primary-icon-color);
+
+      transition: color var(--transition-duration-primary);
+    }
+
+    &.ui-input__password-icon_active {
+      :deep(.ui-icon) {
+        color: var(--ui-input-focus-primary-icon-color);
+      }
+    }
+  }
 
   &__icon {
     height: 100%;
