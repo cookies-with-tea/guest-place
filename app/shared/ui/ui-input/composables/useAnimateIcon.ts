@@ -2,7 +2,7 @@ import { gsap } from 'gsap'
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import { ref, type Ref, nextTick } from 'vue'
-import { useCheckItemExists } from './useCheckItemExists'
+import { useCheckExists } from './useCheckExists'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 
@@ -24,18 +24,19 @@ const getProxyDiv = (): HTMLElement => {
   return proxyDiv
 }
 
-// Переменные для хранения исходных путей (на уровне модуля, но обнуляются при каждом новом composable)
 export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
   const isPasswordVisible = ref(false)
   const isAnimating = ref(false)
   const blinkTimeline = ref<gsap.core.Timeline | null>(null)
   const resetEyeTimer = ref<gsap.core.DelayedCall | null>(null)
+  const isFocus = ref(false)
+  const controller = new AbortController()
 
   const startBlinking = () => {
     if (isAnimating.value) return
     blinkTimeline.value?.kill()
 
-    const { upper, eyeOpen, lower, eyeClosed } = useCheckItemExists(iconEye)
+    const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
 
     const delay = gsap.utils.random(2, 8)
     const repeat = Math.random() > 0.5 ? 3 : 1
@@ -46,32 +47,25 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
       .to(eyeOpen, { morphSVG: eyeClosed, duration: BLINK_SPEED }, 0)
   }
 
-  const stopBlinking = () => {
-    blinkTimeline.value?.kill()
-  }
-
   const togglePassword = async () => {
     if (isAnimating.value) return
     isAnimating.value = true
 
-    const { upper, eyeOpen, lower, eyeClosed } = useCheckItemExists(iconEye)
+    const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
 
     const currentValue = modelRef.value
     const wasPassword = !isPasswordVisible.value
     const isEmpty = currentValue.trim() === ''
 
     if (wasPassword) {
-      // === РАСКРЫТИЕ ===
       blinkTimeline.value?.kill()
       isPasswordVisible.value = true
 
       if (isEmpty) {
-        // Только глаз
         await gsap.timeline()
           .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
       } else {
-        // 🔑 Глаз + scramble ОДНОВРЕМЕННО
         const proxyDiv = getProxyDiv()
         await gsap.timeline()
           .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
@@ -88,12 +82,11 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
               proxyDiv.innerHTML = ''
               modelRef.value = currentValue
             },
-          }, 0) // ← запуск scramble СРАЗУ (с задержкой 0)
+          }, 0)
       }
 
       isAnimating.value = false
     } else {
-      // === СКРЫТИЕ ===
       if (!isEmpty) {
         const proxyDiv = getProxyDiv()
         await gsap.timeline({
@@ -126,7 +119,7 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
   }
 
   const moveEye = (e: PointerEvent) => {
-    const { eye, iconContainer } = useCheckItemExists(iconEye)
+    const { eye, iconContainer } = useCheckExists(iconEye)
 
     if (resetEyeTimer.value) resetEyeTimer.value.kill()
     resetEyeTimer.value = gsap.delayedCall(2, () => {
@@ -139,5 +132,29 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
     gsap.set(eye, { xPercent: x, yPercent: y })
   }
 
-  return { moveEye, startBlinking, stopBlinking, togglePassword, isPasswordVisible, isAnimating }
+  const handlePlayAnimate = () => {
+    isFocus.value = true
+    window.addEventListener('pointermove', (event) => {
+      if(!isFocus.value) return
+
+      moveEye(event)
+      startBlinking()
+      // console.log(event.target)
+    },{signal: controller.signal})
+  }
+
+  const handleStopAnimate = () => {
+    isFocus.value = !isFocus.value
+    blinkTimeline.value?.kill()
+  }
+
+  onUnmounted(() => {
+    controller.abort()
+  })
+
+  return {
+    handlePlayAnimate, handleStopAnimate,
+    togglePassword, isPasswordVisible,
+    isFocus, isAnimating
+  }
 }

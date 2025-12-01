@@ -1,4 +1,4 @@
-export const useCheckItemExists = (iconEye) => {
+export const useCheckExists = (iconEye) => {
   const iconContainer = iconEye.value?.$el
   if (!iconContainer) return
 

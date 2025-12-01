@@ -1,3 +1,3 @@
 export * from './useAnimateIcon'
 
-export * from './useCheckItemExists'
+export * from './useCheckExists'
