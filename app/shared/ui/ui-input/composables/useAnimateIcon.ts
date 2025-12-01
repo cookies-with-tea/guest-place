@@ -1,7 +1,7 @@
 import { gsap } from 'gsap'
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
-import { ref, type Ref, nextTick } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useCheckExists } from './useCheckExists'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
