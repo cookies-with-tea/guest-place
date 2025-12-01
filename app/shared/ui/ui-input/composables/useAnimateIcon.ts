@@ -10,18 +10,7 @@ const TOGGLE_SPEED = 0.125
 const ENCRYPT_SPEED = 1
 const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,.<>?/;":][}{+_)(*&^%$#@!±=-§'
 
-const checkItemExists = (iconEye) => {
-  const iconContainer = iconEye.value?.$el
-  if (!iconContainer) return
 
-  const eyeOpen = iconContainer.querySelector('#eye-open path')
-  const eyeClosed = iconContainer.querySelector('#eye-closed path')
-  const eye = iconContainer.getElementById('eye')
-  const upper = iconContainer.getElementById('lid--upper')
-  const lower = iconContainer.getElementById('lid--lower')
-
-  return {iconContainer, eyeOpen, eyeClosed, eye, upper, lower}
-}
 
 export const useAnimateIcon = (iconEye) => {
   const passwordInput = ref(null)
@@ -31,10 +20,21 @@ export const useAnimateIcon = (iconEye) => {
   const blinkTimeline = ref(null)
   const resetEyeTimer = ref(null)
 
+  const checkItemExists = () => {
+    const iconContainer = iconEye.value?.$el
+    if (!iconContainer) return
 
-  const { eyeOpen, eyeClosed, upper, lower, eye, iconContainer} = checkItemExists(iconEye)
-  console.log(iconContainer)
+    const eyeOpen = iconContainer.querySelector('#eye-open path')
+    const eyeClosed = iconContainer.querySelector('#eye-closed path')
+    const eye = iconContainer.getElementById('eye')
+    const upper = iconContainer.getElementById('lid--upper')
+    const lower = iconContainer.getElementById('lid--lower')
+
+    return {iconContainer, eyeOpen, eyeClosed, eye, upper, lower}
+  }
+
   const startBlinking = () => {
+    const {upper, eyeOpen, lower, eyeClosed} = checkItemExists()
     if (blinkTimeline.value) blinkTimeline.value.kill()
 
     const delay = gsap.utils.random(2, 8)
@@ -49,6 +49,10 @@ export const useAnimateIcon = (iconEye) => {
       })
       .to(upper, { morphSVG: lower, duration: BLINK_SPEED }, 0)
       .to(eyeOpen, { morphSVG: eyeClosed, duration: BLINK_SPEED }, 0)
+  }
+
+  const stopBlinking = () => {
+    blinkTimeline.value?.kill()
   }
 
   const togglePassword = async () => {
@@ -115,6 +119,8 @@ export const useAnimateIcon = (iconEye) => {
   }
 
   const moveEye = (e) => {
+    const {iconContainer} = checkItemExists()
+
     if (resetEyeTimer.value) resetEyeTimer.value.kill()
 
     resetEyeTimer.value = gsap.delayedCall(2, () => {
@@ -137,8 +143,7 @@ export const useAnimateIcon = (iconEye) => {
     // startBlinking()
     // window.addEventListener('pointermove', moveEye)
   // })
-
-  return { moveEye, startBlinking }
+  return { moveEye, startBlinking, stopBlinking }
 }
 
 
