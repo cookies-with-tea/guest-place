@@ -89,8 +89,6 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
 <style scoped lang="scss">
 .ui-input {
-  //TODO: сделать глобально. повторяется во втором компоненте!
-  --ui-input-primary-shadow-color: 0 4px 15px 0 #694e4b24;
   --ui-input-primary-border-color: transparent;
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
@@ -109,7 +107,7 @@ const type = computed(() => isPasswordVisible.value ? 'text': props.type)
   align-items: center;
   border: 1px solid var(--ui-input-primary-border-color);
   border-radius: 50px;
-  box-shadow: var(--ui-input-primary-shadow-color);
+  box-shadow: var(--shadow-md);
   background-color: var(--ui-button-bg-color);
   transition: border-color var(--transition-duration-primary) ease;
 
