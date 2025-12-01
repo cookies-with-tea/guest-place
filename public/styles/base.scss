@@ -8,7 +8,7 @@
 	@include generate-css-vars($theme-light);
 
 	--transition-duration-primary: 0.3s;
-	--transition-duration-secondary: 0.15s;
+	--transition-duration-secondary: 0.22s;
 }
 
 [data-theme='dark'] {

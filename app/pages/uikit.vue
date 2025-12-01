@@ -68,6 +68,12 @@
         size="md"
         showPassword
       />
+
+      <UiInput
+        placeholder="Ваше имя"
+        v-model="textareaValue"
+        type="textarea"
+      />
     </div>
   </div>
 </template>
@@ -80,6 +86,7 @@ import UiInput from '../shared/ui/ui-input'
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
+const textareaValue = ref('')
 
 const faq = ref([
   {
@@ -103,6 +110,8 @@ const faq = ref([
 
 <style lang="scss" scoped>
 .ui-kit {
+  display: grid;
+  gap: 20px;
   background-color: #ecf4fd;
   padding: 20px;
 
