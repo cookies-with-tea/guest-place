@@ -63,11 +63,11 @@ const props = withDefaults(defineProps<IProps>(), {
 const iconEye = useTemplateRef<HTMLDivElement>('eye')
 const model = defineModel()
 const id = useId()
-const isFocus = ref(true)
+const isFocus = ref(false)
 const classes = computed(() => `ui-input--${props.size}`)
 const controller = new AbortController()
 const {moveEye, startBlinking, stopBlinking} = useAnimateIcon(iconEye)
-// const { startBlinking, moveEye, stopBlinking} = useAnimateIcon(iconEye)
+
 const playAnimateEye = () => {
   isFocus.value = true
   window.addEventListener('pointermove', (event) => {
