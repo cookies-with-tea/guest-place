@@ -68,8 +68,8 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
       if (isEmpty) {
         // Только глаз
         await gsap.timeline()
-          .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED })
-          .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED })
+          .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
+          .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
       } else {
         // 🔑 Глаз + scramble ОДНОВРЕМЕННО
         const proxyDiv = getProxyDiv()
