@@ -222,6 +222,7 @@ const resizeClasses = computed(() => {
 .ui-textarea {
   --ui-textarea-border-color: transparent;
   --ui-textarea-bg-color: var(--color-white);
+  --ui-textareas-scrollbar-thumb: #C6C6CC;
 
   --ui-textarea-focus-border-color: var(--color-accent);
 
@@ -232,7 +233,6 @@ const resizeClasses = computed(() => {
   box-shadow: var(--shadow-md);
   background-color: var(--ui-textarea-bg-color);
   position: relative;
-  //box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
 
   &:focus-within {
     --ui-textarea-border-color: var(--ui-textarea-focus-border-color)
@@ -261,6 +261,7 @@ const resizeClasses = computed(() => {
 
   &__inner {
     min-height: 50px;
+    min-width: 80px;
     width: 100%;
     height: 100%;
     resize: none;
@@ -268,6 +269,28 @@ const resizeClasses = computed(() => {
     padding-right: 15px;
     position: relative;
     z-index: 100;
+
+    @-moz-document url-prefix() {
+      scrollbar-width: thin;
+      scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
+    }
+
+    &::-webkit-scrollbar {
+      background-color: transparent;
+      width: 5px;
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--ui-textareas-scrollbar-thumb);
+      border-radius: 30px;
+    }
+
+    &::-webkit-scrollbar-button {
+      width: 0;
+      display: none;
+    }
+
 
     &, &::placeholder {
       @include typography(body);
