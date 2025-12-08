@@ -40,10 +40,12 @@
   <textarea
     v-else
     class="textarea"
+    :class="resizeClasses"
     :id="id"
     :rows="props.rows"
     :disabled="props.disabled"
     :placeholder="props.placeholder"
+    spellcheck
   />
 </template>
 
@@ -55,6 +57,7 @@ import { useAnimateIcon } from '../composables'
 // TODO: сделать кейс валидации
 interface IProps {
   placeholder: string
+  resize?: 'vertical' | 'horizontal'
   type?: 'text' | 'search' | 'url' | 'email' | 'password' | 'textarea' | 'number'
   suffixIcon?: string
   prefixIcon?: string
@@ -96,6 +99,11 @@ const {
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
 const isTextarea = computed(() => !(props.type === 'textarea'))
+
+const resizeClasses = computed(() => {
+  return [{[`textarea--with-resize-${props.resize}`]: !!props.resize}]
+})
+
 </script>
 
 <style scoped lang="scss">
@@ -214,13 +222,25 @@ const isTextarea = computed(() => !(props.type === 'textarea'))
 .textarea {
   width: 100%;
   min-height: 50px;
-  resize: vertical;
   padding: 20px 47px 20px 40px;
   border-radius: 30px;
+  resize: none;
+
   @include typography(body);
 
   &::placeholder {
     @include typography(body);
   }
+
+  &--with-resize {
+    &-vertical {
+      resize: vertical;
+    }
+
+    &-horizontal {
+      resize: horizontal;
+    }
+  }
 }
+
 </style>

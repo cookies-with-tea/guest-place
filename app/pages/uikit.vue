@@ -73,6 +73,7 @@
         placeholder="Ваше имя"
         v-model="textareaValue"
         type="textarea"
+        resize="horizontal"
       />
     </div>
   </div>
