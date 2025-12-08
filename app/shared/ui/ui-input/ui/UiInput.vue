@@ -1,5 +1,16 @@
 <template>
-  <div v-if="isTextarea" class="ui-input" :class="classes">
+  <div v-if="isTextarea" class="ui-textarea" :class="resizeClasses">
+     <textarea
+       class="ui-textarea__inner"
+       :id="id"
+       :rows="props.rows"
+       :disabled="props.disabled"
+       :placeholder="props.placeholder"
+       spellcheck
+     />
+  </div>
+
+  <div v-else class="ui-input" :class="classes">
     <div v-if="$slots['prefix-icon'] || props.prefixIcon" class="ui-input__icon prefix-icon">
       <slot name="prefix-icon">
         <UiIcon :name="props.prefixIcon" />
@@ -36,17 +47,6 @@
       </slot>
     </div>
   </div>
-
-  <textarea
-    v-else
-    class="textarea"
-    :class="resizeClasses"
-    :id="id"
-    :rows="props.rows"
-    :disabled="props.disabled"
-    :placeholder="props.placeholder"
-    spellcheck
-  />
 </template>
 
 <script setup lang="ts">
@@ -98,10 +98,10 @@ const {
 
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
-const isTextarea = computed(() => !(props.type === 'textarea'))
+const isTextarea = computed(() => props.type === 'textarea')
 
 const resizeClasses = computed(() => {
-  return [{[`textarea--with-resize-${props.resize}`]: !!props.resize}]
+  return [{[`ui-textarea--with-resize-${props.resize}`]: !!props.resize}]
 })
 
 </script>
@@ -111,10 +111,10 @@ const resizeClasses = computed(() => {
   --ui-input-primary-border-color: transparent;
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
-  --ui-button-bg-color: var(--color-white);
+  --ui-input-bg-color: var(--color-white);
 
-  --ui-button-disabled-bg-color: #E0E0E0;
-  --ui-button-disabled-placeholder-color: #9E9E9E;
+  --ui-input-disabled-bg-color: #E0E0E0;
+  --ui-input-disabled-placeholder-color: #9E9E9E;
 
   --ui-input-primary-icon-color: var(--color-text-light);
   --ui-input-secondary-icon-color: #fff;
@@ -127,17 +127,17 @@ const resizeClasses = computed(() => {
   border: 1px solid var(--ui-input-primary-border-color);
   border-radius: 50px;
   box-shadow: var(--shadow-md);
-  background-color: var(--ui-button-bg-color);
+  background-color: var(--ui-input-bg-color);
   transition: border-color var(--transition-duration-primary) ease;
 
   &.is-disabled {
-    background-color: var(--ui-button-disabled-bg-color);
+    background-color: var(--ui-input-disabled-bg-color);
     pointer-events: none;
     user-select: none;
 
     .ui-input__inner {
       &::placeholder {
-        color: var(--ui-button-disabled-placeholder-color);
+        color: var(--ui-input-disabled-placeholder-color);
       }
     }
   }
@@ -219,26 +219,62 @@ const resizeClasses = computed(() => {
   }
 }
 
-.textarea {
+.ui-textarea {
+  --ui-textarea-border-color: transparent;
+  --ui-textarea-bg-color: var(--color-white);
+
+  --ui-textarea-focus-border-color: var(--color-accent);
+
   width: 100%;
-  min-height: 50px;
-  padding: 20px 47px 20px 40px;
+
+  padding: 20px 16px 16px 40px;
   border-radius: 30px;
-  resize: none;
+  box-shadow: var(--shadow-md);
+  background-color: var(--ui-textarea-bg-color);
+  position: relative;
+  //box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
 
-  @include typography(body);
+  &:focus-within {
+    --ui-textarea-border-color: var(--ui-textarea-focus-border-color)
+  }
 
-  &::placeholder {
-    @include typography(body);
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    border-radius: 30px;
+    box-shadow: 0 0 0 1px var(--ui-textarea-border-color) inset;
   }
 
   &--with-resize {
-    &-vertical {
+    &-vertical .ui-textarea__inner {
       resize: vertical;
     }
 
-    &-horizontal {
+    &-horizontal .ui-textarea__inner {
       resize: horizontal;
+    }
+  }
+
+  &__inner {
+    min-height: 50px;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    color: var(--color-text-dark);
+    padding-right: 15px;
+    position: relative;
+    z-index: 100;
+
+    &, &::placeholder {
+      @include typography(body);
+    }
+
+    &::placeholder {
+      color: var(--color-text-light);
     }
   }
 }
