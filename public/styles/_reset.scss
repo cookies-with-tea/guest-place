@@ -237,8 +237,9 @@ input, button, textarea {
   font-family: inherit;
 }
 
-textarea{
+textarea {
   background: transparent;
+  border: none;
 }
 
 input::-ms-clear {
