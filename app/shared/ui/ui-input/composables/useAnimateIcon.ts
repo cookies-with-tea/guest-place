@@ -15,12 +15,17 @@ let proxyDiv: HTMLElement | null = null
 
 const getProxyDiv = (): HTMLElement => {
   if (proxyDiv) return proxyDiv
+
   if (typeof document === 'undefined') {
     throw new Error('ScrambleTextPlugin работает только в браузере')
   }
+
   proxyDiv = document.createElement('div')
+
   proxyDiv.style.display = 'none'
+
   document.body.appendChild(proxyDiv)
+
   return proxyDiv
 }
 
@@ -59,6 +64,7 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
 
     if (wasPassword) {
       blinkTimeline.value?.kill()
+
       isPasswordVisible.value = true
 
       if (isEmpty) {
@@ -67,6 +73,7 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
       } else {
         const proxyDiv = getProxyDiv()
+
         await gsap.timeline()
           .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
@@ -76,10 +83,12 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
             onUpdate: () => {
               const proxyText = proxyDiv.innerText
               const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
+
               modelRef.value = proxyText + placeholder
             },
             onComplete: () => {
               proxyDiv.innerHTML = ''
+
               modelRef.value = currentValue
             },
           }, 0)
@@ -89,11 +98,15 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
     } else {
       if (!isEmpty) {
         const proxyDiv = getProxyDiv()
+
         await gsap.timeline({
           onComplete: () => {
             proxyDiv.innerHTML = ''
+
             modelRef.value = currentValue
+
             isPasswordVisible.value = false
+
             startBlinking()
           },
         })
@@ -104,6 +117,7 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
             scrambleText: { chars, text: '•'.repeat(currentValue.length) },
             onUpdate: () => {
               const proxyText = proxyDiv.innerText
+
               modelRef.value = proxyText + currentValue.slice(proxyText.length)
             },
           }, 0)
@@ -111,9 +125,12 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
         await gsap.timeline()
           .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED })
           .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
+
         isPasswordVisible.value = false
+
         startBlinking()
       }
+
       isAnimating.value = false
     }
   }
@@ -129,22 +146,25 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
     const bounds = iconContainer.getBoundingClientRect()
     const x = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.left - e.clientX))
     const y = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.top - e.clientY))
+
     gsap.set(eye, { xPercent: x, yPercent: y })
   }
 
   const handlePlayAnimate = () => {
     isFocus.value = true
+
     window.addEventListener('pointermove', (event) => {
       if(!isFocus.value) return
 
       moveEye(event)
+
       startBlinking()
-      // console.log(event.target)
     },{signal: controller.signal})
   }
 
   const handleStopAnimate = () => {
     isFocus.value = !isFocus.value
+
     blinkTimeline.value?.kill()
   }
 
