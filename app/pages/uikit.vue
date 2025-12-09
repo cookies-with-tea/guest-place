@@ -66,12 +66,12 @@
         placeholder="Ваше имя"
         type="password"
         size="md"
-        showPassword
+        show-password
       />
 
       <UiInput
-        placeholder="Ваше имя"
         v-model="textareaValue"
+        placeholder="Ваше имя"
         type="textarea"
       />
     </div>
@@ -111,9 +111,9 @@ const faq = ref([
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
-  gap: 20px;
   background-color: #ecf4fd;
   padding: 20px;
+  gap: 20px;
 
   &__accordion {
     max-width: 40%;

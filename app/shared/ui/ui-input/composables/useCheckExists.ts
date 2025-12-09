@@ -1,5 +1,6 @@
 export const useCheckExists = (iconEye) => {
   const iconContainer = iconEye.value?.$el
+
   if (!iconContainer) return
 
   const eyeOpen = iconContainer.querySelector('#eye-open path')
