@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isTextarea" class="ui-textarea" :class="resizeClasses">
+  <div v-if="isTextarea" class="ui-textarea" :class="classes">
      <textarea
        class="ui-textarea__inner"
        :id="id"
@@ -80,7 +80,7 @@ const id = useId()
 
 const classes = computed(() => {
     return [
-      `ui-input--${props.size}`,
+      {[`ui-input--${props.size}`]: props.type !== 'textarea'},
       {'is-disabled': props.disabled}
     ]
   }
@@ -220,9 +220,11 @@ const isTextarea = computed(() => props.type === 'textarea')
 
   --ui-textarea-focus-border-color: var(--color-accent);
 
-  width: 100%;
+  --ui-textarea-disabled-bg-color: #E0E0E0;
+  --ui-textarea-disabled-placeholder-color: #9E9E9E;
 
-  padding: 20px 16px 16px 40px;
+  width: 100%;
+  padding: 16px;
   border-radius: 30px;
   box-shadow: var(--shadow-md);
   background-color: var(--ui-textarea-bg-color);
@@ -243,6 +245,18 @@ const isTextarea = computed(() => props.type === 'textarea')
     box-shadow: 0 0 0 1px var(--ui-textarea-border-color) inset;
   }
 
+  &.is-disabled {
+    background-color: var(--ui-textarea-disabled-bg-color);
+    pointer-events: none;
+    user-select: none;
+
+    .ui-textarea__inner {
+      &::placeholder {
+        color: var(--ui-textarea-disabled-placeholder-color);
+      }
+    }
+  }
+
   &__inner {
     min-height: 50px;
     min-width: 80px;
@@ -250,10 +264,11 @@ const isTextarea = computed(() => props.type === 'textarea')
     height: 100%;
     resize: none;
     color: var(--color-text-dark);
-    padding-right: 15px;
+    padding-right: 5px;
     position: relative;
     z-index: 100;
 
+    // TODO: вынести в миксин
     @-moz-document url-prefix() {
       scrollbar-width: thin;
       scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
