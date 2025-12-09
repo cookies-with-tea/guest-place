@@ -57,7 +57,6 @@ import { useAnimateIcon } from '../composables'
 // TODO: сделать кейс валидации
 interface IProps {
   placeholder: string
-  resize?: 'vertical' | 'horizontal'
   type?: 'text' | 'search' | 'url' | 'email' | 'password' | 'textarea' | 'number'
   suffixIcon?: string
   prefixIcon?: string
@@ -99,11 +98,6 @@ const {
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 
 const isTextarea = computed(() => props.type === 'textarea')
-
-const resizeClasses = computed(() => {
-  return [{[`ui-textarea--with-resize-${props.resize}`]: !!props.resize}]
-})
-
 </script>
 
 <style scoped lang="scss">
@@ -247,16 +241,6 @@ const resizeClasses = computed(() => {
     left: 0;
     border-radius: 30px;
     box-shadow: 0 0 0 1px var(--ui-textarea-border-color) inset;
-  }
-
-  &--with-resize {
-    &-vertical .ui-textarea__inner {
-      resize: vertical;
-    }
-
-    &-horizontal .ui-textarea__inner {
-      resize: horizontal;
-    }
   }
 
   &__inner {
