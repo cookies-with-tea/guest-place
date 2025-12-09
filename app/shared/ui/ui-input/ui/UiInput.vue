@@ -84,8 +84,8 @@ const isFocusInput = ref(false)
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const inputFocus = useTemplateRef<HTMLInputElement>('input-focus')
 
-function onClickOutside(event: any) {
-  if (inputWrapper.value && !inputWrapper.value.contains(event.target)) {
+function onClickOutside(event: Event) {
+  if (inputWrapper.value && !inputWrapper.value.contains(event.target as HTMLInputElement)) {
     isFocusInput.value = false
 
     return
