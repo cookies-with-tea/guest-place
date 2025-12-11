@@ -84,6 +84,7 @@ const isFocusInput = ref(false)
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const inputFocus = useTemplateRef<HTMLInputElement>('input-focus')
 
+// TODO: создать отдельный composable или директиву для clickOutside
 function onClickOutside(event: Event) {
   if (inputWrapper.value && !inputWrapper.value.contains(event.target as HTMLInputElement)) {
     isFocusInput.value = false
