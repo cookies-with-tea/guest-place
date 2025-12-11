@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, useId, ref, useTemplateRef } from 'vue'
+import { computed, useId, ref, useTemplateRef, type Ref } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
@@ -76,8 +76,8 @@ const props = withDefaults(defineProps<IProps>(), {
   rows: 4,
 })
 
-const iconEye = useTemplateRef<HTMLDivElement>('eye')
-const model = defineModel()
+const model = defineModel<string>()
+
 const id = useId()
 const isFocusInput = ref(false)
 
@@ -122,7 +122,7 @@ const {
   isPasswordVisible,
   isFocus,
   isAnimating,
-} = useAnimateIcon(iconEye, model)
+} = useAnimateIcon(model as Ref<string>)
 
 const type = computed(() => isPasswordVisible.value ? 'text': props.type)
 

@@ -1,7 +1,8 @@
 import { gsap } from 'gsap'
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
-import { ref, type Ref } from 'vue'
+import { ref, type Ref, useTemplateRef } from 'vue'
+import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import { useCheckExists } from './useCheckExists'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
@@ -29,12 +30,15 @@ const getProxyDiv = (): HTMLElement => {
   return proxyDiv
 }
 
-export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
+export const useAnimateIcon = (modelRef: Ref<string>) => {
+  const iconEye = useTemplateRef<UiIconInstanceType>('eye')
+
   const isPasswordVisible = ref(false)
   const isAnimating = ref(false)
   const blinkTimeline = ref<gsap.core.Timeline | null>(null)
-  const resetEyeTimer = ref<gsap.core.DelayedCall | null>(null)
+  const resetEyeTimer = ref<gsap.core.Tween | null>(null)
   const isFocus = ref(false)
+
   const controller = new AbortController()
 
   const startBlinking = () => {
@@ -42,6 +46,8 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
     blinkTimeline.value?.kill()
 
     const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
+
+    if(!upper) return
 
     const delay = gsap.utils.random(2, 8)
     const repeat = Math.random() > 0.5 ? 3 : 1
@@ -57,6 +63,8 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
     isAnimating.value = true
 
     const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
+
+    if(!upper) return
 
     const currentValue = modelRef.value
     const wasPassword = !isPasswordVisible.value
@@ -137,6 +145,8 @@ export const useAnimateIcon = (iconEye: Ref<any>, modelRef: Ref<string>) => {
 
   const moveEye = (e: PointerEvent) => {
     const { eye, iconContainer } = useCheckExists(iconEye)
+
+    if(!eye) return
 
     if (resetEyeTimer.value) resetEyeTimer.value.kill()
     resetEyeTimer.value = gsap.delayedCall(2, () => {
