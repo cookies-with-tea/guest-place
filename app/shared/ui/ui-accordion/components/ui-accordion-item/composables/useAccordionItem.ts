@@ -1,4 +1,4 @@
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, inject, useTemplateRef, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import { useAnimateIcon } from './useAnimateIcon'

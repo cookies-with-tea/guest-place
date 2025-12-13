@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, useId, ref, useTemplateRef } from 'vue'
+import { computed, useId, ref, useTemplateRef, onMounted, onBeforeUnmount } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 const model = defineModel<string>({ default: '' })
