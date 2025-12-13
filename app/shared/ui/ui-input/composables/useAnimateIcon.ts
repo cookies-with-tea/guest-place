@@ -1,5 +1,5 @@
 import { gsap } from 'gsap'
-import { useTemplateRef, ref } from 'vue'
+import { useTemplateRef, ref, onUnmounted } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import type { Ref, TemplateRef } from 'vue'
 
