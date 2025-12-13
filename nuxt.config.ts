@@ -16,6 +16,12 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo'],
+  imports: {
+    scan: false,
+    autoImport: false,
+
+  },
   modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo', '@nuxt/test-utils/module'],
   svgo: {
     defaultImport: 'component',
