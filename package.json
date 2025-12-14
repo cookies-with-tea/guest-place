@@ -64,5 +64,6 @@
     "*": [
       "prettier --check ."
     ]
-  }
+  },
+  "packageManager": "pnpm@9.0.6"
 }
