@@ -5,8 +5,8 @@ import * as path from 'node:path'
 
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
-  iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/types'),
-  fileName: 'types.ts',
+  iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/interfaces'),
+  fileName: 'interfaces.ts',
 })
 
 export default defineNuxtConfig({
@@ -34,6 +34,13 @@ export default defineNuxtConfig({
       ],
     },
   },
+  runtimeConfig: {
+    public: {
+      env: {
+        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI,
+      },
+    },
+  },
   build: {
     transpile: ['gsap'],
   },
@@ -51,6 +58,11 @@ export default defineNuxtConfig({
         scss: {
           additionalData: `@use "styles/library" as *;`,
         },
+      },
+    },
+    server: {
+      proxy: {
+        '/api': process.env?.NUXT_BACKEND_BASE_URI ?? '',
       },
     },
   },

@@ -53,6 +53,7 @@
     </div>
 
     <div class="box">
+      <div class="column">
       <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
@@ -61,21 +62,49 @@
     </div>
 
     <div class="box">
-      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
+      <div class="column">
+        <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
 
-      <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
+        <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
+      </div>
+
+      <div class="column">
+        <UiForm :data="formData" :rules="formRules" :action="authApi.register" @on-error="onError">
+          <UiFormItem name="email">
+            <UiInput v-model="formData.email" placeholder="email" />
+          </UiFormItem>
+
+          <UiButton  type="submit">
+            Отправить
+          </UiButton>
+        </UiForm>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput } from '#shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiForm, UiFormItem, UiIcon, UiInput } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
+import { FORM_RULES } from '#shared/constants/form'
+import { authApi } from '#entities/auth'
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
 const textareaValue = ref('')
+
+const formData = ref({
+  email: '',
+})
+
+const formRules = {
+  email: FORM_RULES.email,
+}
+
+const onError = (e) => {
+  console.log('ERRORS :', e)
+}
 
 const faq = ref([
   {
@@ -115,6 +144,7 @@ const faq = ref([
   border: 1px dashed rgb(89 0 131);
   padding: 20px;
   gap: 40px;
+  margin: 8px;
 }
 
 .column {
