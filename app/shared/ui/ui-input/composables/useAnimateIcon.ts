@@ -48,7 +48,14 @@ const getElementReferences = (iconEye: TemplateRef<UiIconInstanceType>)  => {
   const upper = iconContainer.getElementById('lid--upper')
   const lower = iconContainer.getElementById('lid--lower')
 
-  return { iconContainer, eyeOpen, eyeClosed, eye, upper, lower }
+  return {
+    iconContainer,
+    eyeOpen,
+    eyeClosed,
+    eye,
+    upper,
+    lower
+  }
 }
 
 
