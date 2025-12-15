@@ -10,7 +10,7 @@ gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 const BLINK_SPEED = 0.075
 const TOGGLE_SPEED = 0.125
 const ENCRYPT_SPEED = 1
-const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,.<>?/;":][}{+_)(*&^%$#@!±=-§'
+const CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,.<>?/;":][}{+_)(*&^%$#@!±=-§'
 
 let proxyDiv: HTMLElement | null = null
 
@@ -109,7 +109,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
           .to(proxyDiv, {
             duration: ENCRYPT_SPEED,
-            scrambleText: { chars, text: currentValue },
+            scrambleText: { CHARS, text: currentValue },
             onUpdate: () => {
               const proxyText = proxyDiv.innerText
               const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
@@ -144,7 +144,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
           .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
           .to(proxyDiv, {
             duration: ENCRYPT_SPEED,
-            scrambleText: { chars, text: '•'.repeat(currentValue.length) },
+            scrambleText: { CHARS, text: '•'.repeat(currentValue.length) },
             onUpdate: () => {
               const proxyText = proxyDiv.innerText
 
