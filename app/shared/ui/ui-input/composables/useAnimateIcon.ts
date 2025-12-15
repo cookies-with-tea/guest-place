@@ -17,7 +17,8 @@ let proxyDiv: HTMLElement | null = null
 const getProxyDiv = (): HTMLElement => {
   if (proxyDiv) return proxyDiv
 
-  if (typeof document === 'undefined') {
+  if (process.server) {
+    // TODO: Добавить переводы
     throw new Error('ScrambleTextPlugin работает только в браузере')
   }
 
