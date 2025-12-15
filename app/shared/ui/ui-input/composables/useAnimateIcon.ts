@@ -195,7 +195,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
       moveEye(event)
 
       startBlinking()
-    },{signal: controller.signal})
+    }, { signal: controller.signal })
   }
 
   const handleStopAnimate = () => {
