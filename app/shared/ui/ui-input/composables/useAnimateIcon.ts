@@ -190,7 +190,9 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
     isFocus.value = true
 
     window.addEventListener('pointermove', (event) => {
-      if(!isFocus.value) return
+      if(!isFocus.value) {
+        return
+      }
 
       moveEye(event)
 
