@@ -3,7 +3,7 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import { ref, type Ref, useTemplateRef } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
-import { useCheckExists } from './useCheckExists'
+import type { ShallowRef } from 'vue'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 
@@ -30,6 +30,27 @@ const getProxyDiv = (): HTMLElement => {
   return proxyDiv
 }
 
+const getElementReferences = (iconEye: Readonly<ShallowRef<UiIconInstanceType>>)  => {
+  const iconContainer = iconEye.value?.$el
+
+  if (!iconContainer) {
+    return {
+      iconContainer: null, eyeOpen: null,
+      eyeClosed: null, eye: null,
+      upper: null, lower: null
+    }
+  }
+
+  const eyeOpen = iconContainer.querySelector('#eye-open path')
+  const eyeClosed = iconContainer.querySelector('#eye-closed path')
+  const eye = iconContainer.getElementById('eye')
+  const upper = iconContainer.getElementById('lid--upper')
+  const lower = iconContainer.getElementById('lid--lower')
+
+  return { iconContainer, eyeOpen, eyeClosed, eye, upper, lower }
+}
+
+
 export const useAnimateIcon = (modelRef: Ref<string>) => {
   const iconEye = useTemplateRef<UiIconInstanceType>('eye')
 
@@ -45,7 +66,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
     if (isAnimating.value) return
     blinkTimeline.value?.kill()
 
-    const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
+    const { upper, eyeOpen, lower, eyeClosed } = getElementReferences(iconEye)
 
     if(!upper) return
 
@@ -62,7 +83,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
     if (isAnimating.value) return
     isAnimating.value = true
 
-    const { upper, eyeOpen, lower, eyeClosed } = useCheckExists(iconEye)
+    const { upper, eyeOpen, lower, eyeClosed } = getElementReferences(iconEye)
 
     if(!upper) return
 
@@ -144,7 +165,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   }
 
   const moveEye = (e: PointerEvent) => {
-    const { eye, iconContainer } = useCheckExists(iconEye)
+    const { eye, iconContainer } = getElementReferences(iconEye)
 
     if(!eye) return
 
