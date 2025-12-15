@@ -64,7 +64,10 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   const controller = new AbortController()
 
   const startBlinking = () => {
-    if (isAnimating.value) return
+    if (isAnimating.value) {
+      return
+    }
+
     blinkTimeline.value?.kill()
 
     const { upper, eyeOpen, lower, eyeClosed } = getElementReferences(iconEye)
