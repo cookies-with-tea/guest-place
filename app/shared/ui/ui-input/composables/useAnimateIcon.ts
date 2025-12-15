@@ -209,8 +209,11 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   })
 
   return {
-    handlePlayAnimate, handleStopAnimate,
-    togglePassword, isPasswordVisible,
-    isFocus, isAnimating
+    handlePlayAnimate,
+    handleStopAnimate,
+    togglePassword,
+    isPasswordVisible,
+    isFocus,
+    isAnimating
   }
 }
