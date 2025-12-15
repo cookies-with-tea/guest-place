@@ -179,6 +179,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
     })
 
     const bounds = iconContainer.getBoundingClientRect()
+
     const x = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.left - e.clientX))
     const y = gsap.utils.clamp(-30, 30, gsap.utils.mapRange(-100, 100, 30, -30)(bounds.top - e.clientY))
 
