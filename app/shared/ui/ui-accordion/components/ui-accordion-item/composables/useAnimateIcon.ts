@@ -1,10 +1,10 @@
-import type { Ref, ShallowRef } from 'vue'
+import type { Ref, TemplateRef } from 'vue'
 import { gsap } from 'gsap'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon'
 
 export const useAnimateIcon = (
   isAnimating: Ref<boolean>,
-  plusIconRef: Readonly<ShallowRef<UiIconInstanceType>>,
+  plusIconRef: TemplateRef<UiIconInstanceType>,
   newActive: boolean,
   oldActive: boolean
 ) => {

@@ -3,7 +3,7 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import { ref, type Ref, useTemplateRef } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
-import type { ShallowRef } from 'vue'
+import type { TemplateRef } from 'vue'
 
 gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 
@@ -31,7 +31,7 @@ const getProxyDiv = (): HTMLElement => {
   return proxyDiv
 }
 
-const getElementReferences = (iconEye: Readonly<ShallowRef<UiIconInstanceType>>)  => {
+const getElementReferences = (iconEye: TemplateRef<UiIconInstanceType>)  => {
   const iconContainer = iconEye.value?.$el
 
   if (!iconContainer) {
