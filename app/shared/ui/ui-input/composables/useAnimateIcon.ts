@@ -170,7 +170,10 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
 
     if(!eye) return
 
-    if (resetEyeTimer.value) resetEyeTimer.value.kill()
+    if (resetEyeTimer.value) {
+      resetEyeTimer.value.kill()
+    }
+
     resetEyeTimer.value = gsap.delayedCall(2, () => {
       gsap.to(eye, { xPercent: 0, yPercent: 0, duration: 0.2 })
     })
