@@ -165,12 +165,12 @@ const isTextarea = computed(() => props.type === 'textarea')
     transition: box-shadow var(--transition-duration-secondary) ease-out;
   }
 
-  .ui-input__password-icon {
+  &__password-icon {
     display: flex;
     align-items: center;
     margin-left: 8px;
 
-    :deep(.ui-icon){
+    :deep(.ui-icon) {
       --bg-color: var(--ui-input-secondary-icon-color);
 
       font-size: 24px;
