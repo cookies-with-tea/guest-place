@@ -1,11 +1,7 @@
 import { gsap } from 'gsap'
-import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
-import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import { ref, type Ref, useTemplateRef } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import type { TemplateRef } from 'vue'
-
-gsap.registerPlugin(MorphSVGPlugin, ScrambleTextPlugin)
 
 const BLINK_SPEED = 0.075
 const TOGGLE_SPEED = 0.125
