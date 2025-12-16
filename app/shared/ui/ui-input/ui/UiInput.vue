@@ -326,10 +326,8 @@ const isTextarea = computed(() => props.type === 'textarea')
     }
 
     // TODO: вынести в миксин
-    @document url-prefix() {
-      scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
-      scrollbar-width: thin;
-    }
+    scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
+    scrollbar-width: thin;
   }
 
 
