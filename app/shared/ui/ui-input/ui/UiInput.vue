@@ -76,7 +76,7 @@ const props = withDefaults(defineProps<IProps>(), {
   rows: 4,
 })
 
-const model = defineModel<string>()
+const model = defineModel<string>({ default:"" })
 
 const id = useId()
 const isInputFocus = ref(false)
