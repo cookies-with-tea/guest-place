@@ -1,7 +1,7 @@
 <template>
   <div v-if="isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
      <textarea
-       :id="id"
+       :id
        ref="input-focus"
        class="ui-textarea__inner"
        :rows="props.rows"
@@ -19,13 +19,13 @@
     </div>
 
     <input
-      :id="id"
+      :id
       ref="input-focus"
       v-model="model"
       class="ui-input__inner"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
-      :type="type"
+      :type
       @focus="handlePlayAnimate"
       @blur="handleStopAnimate"
     />
