@@ -1,5 +1,5 @@
 import { gsap } from 'gsap'
-import  { useTemplateRef, ref} from 'vue'
+import { useTemplateRef, ref } from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
 import type { Ref, TemplateRef } from 'vue'
 
@@ -11,7 +11,9 @@ const CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~,
 let proxyDiv: HTMLElement | null = null
 
 const getProxyDiv = (): HTMLElement => {
-  if (proxyDiv) return proxyDiv
+  if (proxyDiv) {
+    return proxyDiv
+  }
 
   if (import.meta.server) {
     // TODO: Добавить переводы
