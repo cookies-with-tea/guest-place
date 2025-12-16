@@ -2,7 +2,7 @@
   <div v-if="isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
      <textarea
        :id
-       ref="input-focus"
+       ref="element-ref"
        class="ui-textarea__inner"
        :rows="props.rows"
        :disabled="props.disabled"
@@ -20,7 +20,7 @@
 
     <input
       :id
-      ref="input"
+      ref="element-ref"
       v-model="model"
       class="ui-input__inner"
       :placeholder="props.placeholder"
@@ -82,7 +82,7 @@ const id = useId()
 const isInputFocus = ref(false)
 
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
-const inputFocus = useTemplateRef<HTMLInputElement>('input')
+const elementRef = useTemplateRef<HTMLInputElement>('element-ref')
 
 // TODO: создать отдельный composable или директиву для clickOutside
 function onClickOutside(event: Event) {
@@ -92,10 +92,10 @@ function onClickOutside(event: Event) {
     return
   }
 
-  isInputFocus.value = true
+  if (elementRef.value) {
+    isInputFocus.value = true
 
-  if (inputFocus.value) {
-    inputFocus.value.focus()
+    elementRef.value.focus()
   }
 }
 
