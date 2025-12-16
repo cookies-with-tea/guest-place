@@ -200,14 +200,18 @@ const isTextarea = computed(() => props.type === 'textarea')
       font-size: 24px;
     }
 
-    &--prefix:deep(.ui-icon) {
-      color: var(--ui-input-prefix-icon-color);
-      margin-right: 8px;
+    &--prefix {
+      :deep(.ui-icon) {
+        color: var(--ui-input-prefix-icon-color);
+        margin-right: 8px;
+      }
     }
 
-    &--suffix:deep(.ui-icon) {
-      color: var(--ui-input-suffix-icon-color);
-      margin-left: 8px;
+    &--suffix {
+      :deep(.ui-icon) {
+        color: var(--ui-input-suffix-icon-color);
+        margin-left: 8px;
+      }
     }
   }
 

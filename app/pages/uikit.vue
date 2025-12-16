@@ -67,7 +67,11 @@
         type="password"
         size="md"
         show-password
-      />
+      >
+        <template #suffix-icon>
+          <UiIcon  name="close"  />
+        </template>
+      </UiInput>
 
       <UiInput
         v-model="textareaValue"
