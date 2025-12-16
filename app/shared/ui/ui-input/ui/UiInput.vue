@@ -20,7 +20,7 @@
 
     <input
       :id
-      ref="input-focus"
+      ref="input"
       v-model="model"
       class="ui-input__inner"
       :placeholder="props.placeholder"
@@ -82,7 +82,7 @@ const id = useId()
 const isFocusInput = ref(false)
 
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
-const inputFocus = useTemplateRef<HTMLInputElement>('input-focus')
+const inputFocus = useTemplateRef<HTMLInputElement>('input')
 
 // TODO: создать отдельный composable или директиву для clickOutside
 function onClickOutside(event: Event) {
