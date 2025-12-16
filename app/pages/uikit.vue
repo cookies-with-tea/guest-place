@@ -61,19 +61,9 @@
     </div>
 
     <div class="box">
-      <UiInput
-        v-model="inputValue"
-        placeholder="Ваше имя"
-        type="password"
-        size="md"
-        show-password
-      />
+      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
 
-      <UiInput
-        v-model="textareaValue"
-        placeholder="Ваше имя"
-        type="textarea"
-      />
+      <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
     </div>
   </div>
 </template>

@@ -1,7 +1,7 @@
 import { gsap } from 'gsap'
-import { ref, type Ref, useTemplateRef } from 'vue'
+import  { useTemplateRef, ref} from 'vue'
 import type { UiIconInstanceType } from '#shared/ui/ui-icon/types'
-import type { TemplateRef } from 'vue'
+import type { Ref, TemplateRef } from 'vue'
 
 const BLINK_SPEED = 0.075
 const TOGGLE_SPEED = 0.125
@@ -13,12 +13,13 @@ let proxyDiv: HTMLElement | null = null
 const getProxyDiv = (): HTMLElement => {
   if (proxyDiv) return proxyDiv
 
-  if (process.server) {
+  if (import.meta.server) {
     // TODO: Добавить переводы
     throw new Error('ScrambleTextPlugin работает только в браузере')
   }
 
   proxyDiv = document.createElement('div')
+
   proxyDiv.classList.add('ui-input__element')
 
   proxyDiv.style.display = 'none'
@@ -28,14 +29,17 @@ const getProxyDiv = (): HTMLElement => {
   return proxyDiv
 }
 
-const getElementReferences = (iconEye: TemplateRef<UiIconInstanceType>)  => {
+const getElementReferences = (iconEye: TemplateRef<UiIconInstanceType>) => {
   const iconContainer = iconEye.value?.$el
 
   if (!iconContainer) {
     return {
-      iconContainer: null, eyeOpen: null,
-      eyeClosed: null, eye: null,
-      upper: null, lower: null
+      iconContainer: null,
+      eyeOpen: null,
+      eyeClosed: null,
+      eye: null,
+      upper: null,
+      lower: null,
     }
   }
 
@@ -51,10 +55,9 @@ const getElementReferences = (iconEye: TemplateRef<UiIconInstanceType>)  => {
     eyeClosed,
     eye,
     upper,
-    lower
+    lower,
   }
 }
-
 
 export const useAnimateIcon = (modelRef: Ref<string>) => {
   const iconEye = useTemplateRef<UiIconInstanceType>('eye')
@@ -76,7 +79,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
 
     const { upper, eyeOpen, lower, eyeClosed } = getElementReferences(iconEye)
 
-    if(!upper) return
+    if (!upper) return
 
     const delay = gsap.utils.random(2, 8)
     const repeat = Math.random() > 0.5 ? 3 : 1
@@ -93,7 +96,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
 
     const { upper, eyeOpen, lower, eyeClosed } = getElementReferences(iconEye)
 
-    if(!upper) return
+    if (!upper) return
 
     const currentValue = modelRef.value
     const wasPassword = !isPasswordVisible.value
@@ -105,30 +108,36 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
       isPasswordVisible.value = true
 
       if (isEmpty) {
-        await gsap.timeline()
+        await gsap
+          .timeline()
           .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
       } else {
         const proxyDiv = getProxyDiv()
 
-        await gsap.timeline()
+        await gsap
+          .timeline()
           .to(upper, { morphSVG: lower, duration: TOGGLE_SPEED }, 0)
           .to(eyeOpen, { morphSVG: eyeClosed, duration: TOGGLE_SPEED }, 0)
-          .to(proxyDiv, {
-            duration: ENCRYPT_SPEED,
-            scrambleText: { CHARS, text: currentValue },
-            onUpdate: () => {
-              const proxyText = proxyDiv.innerText
-              const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
+          .to(
+            proxyDiv,
+            {
+              duration: ENCRYPT_SPEED,
+              scrambleText: { CHARS, text: currentValue },
+              onUpdate: () => {
+                const proxyText = proxyDiv.innerText
+                const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
 
-              modelRef.value = proxyText + placeholder
-            },
-            onComplete: () => {
-              proxyDiv.innerHTML = ''
+                modelRef.value = proxyText + placeholder
+              },
+              onComplete: () => {
+                proxyDiv.innerHTML = ''
 
-              modelRef.value = currentValue
+                modelRef.value = currentValue
+              },
             },
-          }, 0)
+            0
+          )
       }
 
       isAnimating.value = false
@@ -136,30 +145,36 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
       if (!isEmpty) {
         const proxyDiv = getProxyDiv()
 
-        await gsap.timeline({
-          onComplete: () => {
-            proxyDiv.innerHTML = ''
+        await gsap
+          .timeline({
+            onComplete: () => {
+              proxyDiv.innerHTML = ''
 
-            modelRef.value = currentValue
+              modelRef.value = currentValue
 
-            isPasswordVisible.value = false
+              isPasswordVisible.value = false
 
-            startBlinking()
-          },
-        })
+              startBlinking()
+            },
+          })
           .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED })
           .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
-          .to(proxyDiv, {
-            duration: ENCRYPT_SPEED,
-            scrambleText: { CHARS, text: '•'.repeat(currentValue.length) },
-            onUpdate: () => {
-              const proxyText = proxyDiv.innerText
+          .to(
+            proxyDiv,
+            {
+              duration: ENCRYPT_SPEED,
+              scrambleText: { CHARS, text: '•'.repeat(currentValue.length) },
+              onUpdate: () => {
+                const proxyText = proxyDiv.innerText
 
-              modelRef.value = proxyText + currentValue.slice(proxyText.length)
+                modelRef.value = proxyText + currentValue.slice(proxyText.length)
+              },
             },
-          }, 0)
+            0
+          )
       } else {
-        await gsap.timeline()
+        await gsap
+          .timeline()
           .to(upper, { morphSVG: upper, duration: TOGGLE_SPEED })
           .to(eyeOpen, { morphSVG: eyeOpen, duration: TOGGLE_SPEED })
 
@@ -175,7 +190,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   const moveEye = (e: PointerEvent) => {
     const { eye, iconContainer } = getElementReferences(iconEye)
 
-    if(!eye) return
+    if (!eye) return
 
     if (resetEyeTimer.value) {
       resetEyeTimer.value.kill()
@@ -196,15 +211,19 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   const handlePlayAnimate = () => {
     isFocus.value = true
 
-    window.addEventListener('pointermove', (event) => {
-      if(!isFocus.value) {
-        return
-      }
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        if (!isFocus.value) {
+          return
+        }
 
-      moveEye(event)
+        moveEye(event)
 
-      startBlinking()
-    }, { signal: controller.signal })
+        startBlinking()
+      },
+      { signal: controller.signal }
+    )
   }
 
   const handleStopAnimate = () => {
@@ -218,7 +237,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
 
     const inputElement = document.querySelector('.ui-input__element')
 
-    if(inputElement) {
+    if (inputElement) {
       inputElement.remove()
     }
   })
@@ -229,6 +248,6 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
     togglePassword,
     isPasswordVisible,
     isFocus,
-    isAnimating
+    isAnimating,
   }
 }

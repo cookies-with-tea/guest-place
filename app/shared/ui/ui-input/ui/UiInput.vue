@@ -1,14 +1,14 @@
 <template>
   <div v-if="isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
-     <textarea
-       :id
-       ref="element-ref"
-       class="ui-textarea__inner"
-       :rows="props.rows"
-       :disabled="props.disabled"
-       :placeholder="props.placeholder"
-       spellcheck
-     />
+    <textarea
+      :id
+      ref="element-ref"
+      class="ui-textarea__inner"
+      :rows="props.rows"
+      :disabled="props.disabled"
+      :placeholder="props.placeholder"
+      spellcheck
+    />
   </div>
 
   <div v-else ref="input-wrapper" class="ui-input" :class="classes">
@@ -38,9 +38,7 @@
       :disabled="isAnimating"
       @click="togglePassword"
     >
-      <UiIcon
-        ref="eye" name="eye"
-      />
+      <UiIcon ref="eye" name="eye" />
     </button>
 
     <div v-if="$slots['suffix-icon'] || props.suffixIcon" class="ui-input__icon ui-input__icon--suffix">
@@ -76,7 +74,7 @@ const props = withDefaults(defineProps<IProps>(), {
   rows: 4,
 })
 
-const model = defineModel<string>({ default:"" })
+const model = defineModel<string>({ default: '' })
 
 const id = useId()
 const isInputFocus = ref(false)
@@ -110,35 +108,27 @@ onBeforeUnmount(() => {
 const classes = computed(() => ({
   [`ui-input--${props.size}`]: props.type !== 'textarea',
   'is-disabled': props.disabled,
-  'is-focus': isInputFocus.value
+  'is-focus': isInputFocus.value,
 }))
 
 const isActiveAnimate = computed(() => {
-  return {'ui-input__password-icon--active': isFocus.value}
+  return { 'ui-input__password-icon--active': isFocus.value }
 })
 
-const {
-  handlePlayAnimate,
-  handleStopAnimate,
-  togglePassword,
-  isPasswordVisible,
-  isFocus,
-  isAnimating,
-} = useAnimateIcon(model as Ref<string>)
+const { handlePlayAnimate, handleStopAnimate, togglePassword, isPasswordVisible, isFocus, isAnimating } =
+  useAnimateIcon(model as Ref<string>)
 
-const type = computed(() => isPasswordVisible.value ? 'text': props.type)
+const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
 
 const isTextarea = computed(() => props.type === 'textarea')
 </script>
 
 <style scoped lang="scss">
-
-.ui-textarea, .ui-input {
+.ui-textarea,
+.ui-input {
   --ui-textfield-border-color: transparent;
   --ui-textfield-focus-border-color: var(--color-accent);
-
   --ui-textfield-bg-color: var(--color-white);
-
   --ui-textfield-disabled-bg-color: #e0e0e0;
   --ui-textfield-disabled-placeholder-color: #9e9e9e;
 }
@@ -146,7 +136,6 @@ const isTextarea = computed(() => props.type === 'textarea')
 .ui-input {
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
-
   --ui-input-primary-icon-color: var(--color-text-light);
   --ui-input-secondary-icon-color: #fff;
   --ui-input-focus-primary-icon-color: #333;
@@ -161,7 +150,7 @@ const isTextarea = computed(() => props.type === 'textarea')
   transition: border-color var(--transition-duration-primary) ease;
 
   &::before {
-    content: "";
+    content: '';
     top: 0;
     left: 0;
     width: 100%;
@@ -185,7 +174,7 @@ const isTextarea = computed(() => props.type === 'textarea')
       transition: color var(--transition-duration-primary);
 
       @include hover {
-        color: var(--ui-input-focus-primary-icon-color)
+        color: var(--ui-input-focus-primary-icon-color);
       }
     }
 
@@ -235,7 +224,7 @@ const isTextarea = computed(() => props.type === 'textarea')
   }
 
   &.is-focus {
-    --ui-textfield-border-color: var(--ui-textfield-focus-border-color)
+    --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
   }
 
   &.is-disabled {
@@ -278,7 +267,7 @@ const isTextarea = computed(() => props.type === 'textarea')
   padding: 16px;
 
   &::before {
-    content: "";
+    content: '';
     top: 0;
     left: 0;
     width: 100%;
@@ -300,6 +289,10 @@ const isTextarea = computed(() => props.type === 'textarea')
     padding-right: 5px;
     z-index: 100;
 
+    // TODO: вынести в миксин
+    scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
+    scrollbar-width: thin;
+
     &::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -320,19 +313,14 @@ const isTextarea = computed(() => props.type === 'textarea')
       color: var(--color-text-light);
     }
 
-
-    &, &::placeholder {
+    &,
+    &::placeholder {
       @include typography(body);
     }
-
-    // TODO: вынести в миксин
-    scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
-    scrollbar-width: thin;
   }
 
-
   &.is-focus {
-    --ui-textfield-border-color: var(--ui-textfield-focus-border-color)
+    --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
   }
 
   &.is-disabled {
@@ -347,5 +335,4 @@ const isTextarea = computed(() => props.type === 'textarea')
     }
   }
 }
-
 </style>
