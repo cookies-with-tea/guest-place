@@ -33,8 +33,8 @@
     <button
       v-if="props.showPassword"
       type="button"
-      :class="{'ui-input__password-icon_active': isFocus}"
       class="ui-input__password-icon"
+      :class="isActiveAnimate"
       :disabled="isAnimating"
       @click="togglePassword"
     >
@@ -116,6 +116,10 @@ const classes = computed(() => {
   }
 )
 
+const isActiveAnimate = computed(() => {
+  return {'ui-input__password-icon--active': isFocus.value}
+})
+
 const {
   handlePlayAnimate,
   handleStopAnimate,
@@ -181,7 +185,7 @@ const isTextarea = computed(() => props.type === 'textarea')
       }
     }
 
-    &.ui-input__password-icon_active {
+    &.ui-input__password-icon--active {
       :deep(.ui-icon) {
         color: var(--ui-input-focus-primary-icon-color);
       }
