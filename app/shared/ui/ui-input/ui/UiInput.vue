@@ -107,14 +107,11 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onClickOutside)
 })
 
-const classes = computed(() => {
-    return [
-      {[`ui-input--${props.size}`]: props.type !== 'textarea'},
-      {'is-disabled': props.disabled},
-      {'is-focus': isInputFocus.value}
-    ]
-  }
-)
+const classes = computed(() => ({
+  [`ui-input--${props.size}`]: props.type !== 'textarea',
+  'is-disabled': props.disabled,
+  'is-focus': isInputFocus.value
+}))
 
 const isActiveAnimate = computed(() => {
   return {'ui-input__password-icon--active': isFocus.value}
