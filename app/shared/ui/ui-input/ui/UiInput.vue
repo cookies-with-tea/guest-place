@@ -132,14 +132,21 @@ const isTextarea = computed(() => props.type === 'textarea')
 </script>
 
 <style scoped lang="scss">
+
+.ui-textarea, .ui-input {
+  --ui-textfield-border-color: transparent;
+  --ui-textfield-focus-border-color: var(--color-accent);
+
+  --ui-textfield-bg-color: var(--color-white);
+
+  --ui-textfield-disabled-bg-color: #e0e0e0;
+  --ui-textfield-disabled-placeholder-color: #9e9e9e;
+}
+
 .ui-input {
-  --ui-input-primary-border-color: transparent;
   --ui-input-prefix-icon-color: var(--color-text-light);
   --ui-input-suffix-icon-color: var(--color-text-light);
-  --ui-input-bg-color: var(--color-white);
-  --ui-input-disabled-bg-color: #e0e0e0;
-  --ui-input-disabled-placeholder-color: #9e9e9e;
-  --ui-input-focus-border-color: var(--color-accent);
+
   --ui-input-primary-icon-color: var(--color-text-light);
   --ui-input-secondary-icon-color: #fff;
   --ui-input-focus-primary-icon-color: #333;
@@ -150,7 +157,7 @@ const isTextarea = computed(() => props.type === 'textarea')
   align-items: center;
   border-radius: 50px;
   box-shadow: var(--shadow-md);
-  background-color: var(--ui-input-bg-color);
+  background-color: var(--ui-textfield-bg-color);
   transition: border-color var(--transition-duration-primary) ease;
 
   &::before {
@@ -161,7 +168,7 @@ const isTextarea = computed(() => props.type === 'textarea')
     height: 100%;
     position: absolute;
     border-radius: 50px;
-    box-shadow: 0 0 0 1px var(--ui-input-primary-border-color) inset;
+    box-shadow: 0 0 0 1px var(--ui-textfield-border-color) inset;
     transition: box-shadow var(--transition-duration-secondary) ease-out;
   }
 
@@ -228,18 +235,18 @@ const isTextarea = computed(() => props.type === 'textarea')
   }
 
   &.is-focus {
-    --ui-input-primary-border-color: var(--ui-input-focus-border-color)
+    --ui-textfield-border-color: var(--ui-textfield-focus-border-color)
   }
 
   &.is-disabled {
-    --ui-input-bg-color: var(--ui-input-disabled-bg-color);
+    --ui-input-bg-color: var(--ui-textfield-disabled-bg-color);
 
     pointer-events: none;
     user-select: none;
 
     .ui-input__inner {
       &::placeholder {
-        color: var(--ui-input-disabled-placeholder-color);
+        color: var(--ui-textfield-disabled-placeholder-color);
       }
     }
   }
@@ -261,18 +268,13 @@ const isTextarea = computed(() => props.type === 'textarea')
 }
 
 .ui-textarea {
-  --ui-textarea-border-color: transparent;
-  --ui-textarea-bg-color: var(--color-white);
   --ui-textareas-scrollbar-thumb: #c6c6cc;
-  --ui-textarea-focus-border-color: var(--color-accent);
-  --ui-textarea-disabled-bg-color: #e0e0e0;
-  --ui-textarea-disabled-placeholder-color: #9e9e9e;
 
   width: 100%;
   position: relative;
   border-radius: 30px;
   box-shadow: var(--shadow-md);
-  background-color: var(--ui-textarea-bg-color);
+  background-color: var(--ui-textfield-bg-color);
   padding: 16px;
 
   &::before {
@@ -283,7 +285,7 @@ const isTextarea = computed(() => props.type === 'textarea')
     height: 100%;
     position: absolute;
     border-radius: 30px;
-    box-shadow: 0 0 0 1px var(--ui-textarea-border-color) inset;
+    box-shadow: 0 0 0 1px var(--ui-textfield-border-color) inset;
     transition: box-shadow var(--transition-duration-secondary) ease-out;
   }
 
@@ -332,17 +334,17 @@ const isTextarea = computed(() => props.type === 'textarea')
 
 
   &.is-focus {
-    --ui-textarea-border-color: var(--ui-textarea-focus-border-color)
+    --ui-textfield-border-color: var(--ui-textfield-focus-border-color)
   }
 
   &.is-disabled {
-    background-color: var(--ui-textarea-disabled-bg-color);
+    background-color: var(--ui-textfield-disabled-bg-color);
     pointer-events: none;
     user-select: none;
 
     .ui-textarea__inner {
       &::placeholder {
-        color: var(--ui-textarea-disabled-placeholder-color);
+        color: var(--ui-textfield-disabled-placeholder-color);
       }
     }
   }
