@@ -23,7 +23,7 @@ const getProxyDiv = (): HTMLElement => {
   }
 
   proxyDiv = document.createElement('div')
-  proxyDiv.classList.add('ui-input__animate')
+  proxyDiv.classList.add('ui-input__element')
 
   proxyDiv.style.display = 'none'
 
@@ -220,7 +220,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   onUnmounted(() => {
     controller.abort()
 
-    const inputElement = document.querySelector('.ui-input__animate')
+    const inputElement = document.querySelector('.ui-input__element')
 
     if(inputElement) {
       inputElement.remove()
