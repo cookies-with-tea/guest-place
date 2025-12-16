@@ -12,7 +12,7 @@
   </div>
 
   <div v-else ref="input-wrapper" class="ui-input" :class="classes">
-    <div v-if="$slots['prefix-icon'] || props.prefixIcon" class="ui-input__icon prefix-icon">
+    <div v-if="$slots['prefix-icon'] || props.prefixIcon" class="ui-input__icon ui-input__icon--prefix">
       <slot name="prefix-icon">
         <UiIcon :name="props.prefixIcon" />
       </slot>
@@ -43,7 +43,7 @@
       />
     </button>
 
-    <div v-if="$slots['suffix-icon'] || props.suffixIcon" class="ui-input__icon suffix-icon">
+    <div v-if="$slots['suffix-icon'] || props.suffixIcon" class="ui-input__icon ui-input__icon--suffix">
       <slot name="suffix-icon">
         <UiIcon :name="props.suffixIcon" />
       </slot>
@@ -198,16 +198,16 @@ const isTextarea = computed(() => props.type === 'textarea')
     :deep(.ui-icon) {
       font-size: 24px;
     }
-  }
 
-  .prefix-icon:deep(.ui-icon) {
-    color: var(--ui-input-prefix-icon-color);
-    margin-right: 8px;
-  }
+    &--prefix:deep(.ui-icon) {
+      color: var(--ui-input-prefix-icon-color);
+      margin-right: 8px;
+    }
 
-  .suffix-icon:deep(.ui-icon) {
-    color: var(--ui-input-suffix-icon-color);
-    margin-left: 8px;
+    &--suffix:deep(.ui-icon) {
+      color: var(--ui-input-suffix-icon-color);
+      margin-left: 8px;
+    }
   }
 
   &__inner {
