@@ -79,7 +79,7 @@ const props = withDefaults(defineProps<IProps>(), {
 const model = defineModel<string>()
 
 const id = useId()
-const isFocusInput = ref(false)
+const isInputFocus = ref(false)
 
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const inputFocus = useTemplateRef<HTMLInputElement>('input')
@@ -87,12 +87,12 @@ const inputFocus = useTemplateRef<HTMLInputElement>('input')
 // TODO: создать отдельный composable или директиву для clickOutside
 function onClickOutside(event: Event) {
   if (inputWrapper.value && !inputWrapper.value.contains(event.target as HTMLInputElement)) {
-    isFocusInput.value = false
+    isInputFocus.value = false
 
     return
   }
 
-  isFocusInput.value = true
+  isInputFocus.value = true
 
   if (inputFocus.value) {
     inputFocus.value.focus()
@@ -111,7 +111,7 @@ const classes = computed(() => {
     return [
       {[`ui-input--${props.size}`]: props.type !== 'textarea'},
       {'is-disabled': props.disabled},
-      {'is-focus': isFocusInput.value}
+      {'is-focus': isInputFocus.value}
     ]
   }
 )
