@@ -107,8 +107,8 @@ onBeforeUnmount(() => {
 
 const classes = computed(() => ({
   [`ui-input--${props.size}`]: props.type !== 'textarea',
-  'is-disabled': props.disabled,
-  'is-focus': isInputFocus.value,
+  'ui-textfield--disabled': props.disabled,
+  'ui-textfield--focus': isInputFocus.value,
 }))
 
 const passwordIconClasses = computed(() => {
@@ -223,11 +223,11 @@ const isTextarea = computed(() => props.type === 'textarea')
     }
   }
 
-  &.is-focus {
+  &.ui-textfield--focus {
     --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
   }
 
-  &.is-disabled {
+  &.ui-textfield--disabled {
     --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
 
     pointer-events: none;
@@ -257,7 +257,8 @@ const isTextarea = computed(() => props.type === 'textarea')
 }
 
 .ui-textarea {
-  --ui-textareas-scrollbar-thumb: #c6c6cc;
+  --ui-textarea-scrollbar-thumb: #c6c6cc;
+
   $root: &;
 
   width: 100%;
@@ -291,7 +292,7 @@ const isTextarea = computed(() => props.type === 'textarea')
     z-index: 100;
 
     // TODO: вынести в миксин
-    scrollbar-color: var(--ui-textareas-scrollbar-thumb) transparent;
+    scrollbar-color: var(--ui-textarea-scrollbar-thumb) transparent;
     scrollbar-width: thin;
 
     &::-webkit-scrollbar {
@@ -302,7 +303,7 @@ const isTextarea = computed(() => props.type === 'textarea')
 
     &::-webkit-scrollbar-thumb {
       border-radius: 30px;
-      background-color: var(--ui-textareas-scrollbar-thumb);
+      background-color: var(--ui-textarea-scrollbar-thumb);
     }
 
     &::-webkit-scrollbar-button {
@@ -320,11 +321,11 @@ const isTextarea = computed(() => props.type === 'textarea')
     }
   }
 
-  &.is-focus {
+  &.ui-textfield--focus {
     --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
   }
 
-  &.is-disabled {
+  &.ui-textfield--disabled {
     --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
 
     pointer-events: none;
