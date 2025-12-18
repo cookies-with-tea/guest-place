@@ -228,7 +228,7 @@ const isTextarea = computed(() => props.type === 'textarea')
   }
 
   &.is-disabled {
-    --ui-input-bg-color: var(--ui-textfield-disabled-bg-color);
+    --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
 
     pointer-events: none;
     user-select: none;
@@ -324,7 +324,8 @@ const isTextarea = computed(() => props.type === 'textarea')
   }
 
   &.is-disabled {
-    background-color: var(--ui-textfield-disabled-bg-color);
+    --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
+
     pointer-events: none;
     user-select: none;
 
