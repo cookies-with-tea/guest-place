@@ -34,7 +34,7 @@
       v-if="props.showPassword"
       type="button"
       class="ui-input__password-icon"
-      :class="isActiveAnimate"
+      :class="passwordIconClasses"
       :disabled="isAnimating"
       @click="togglePassword"
     >
@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui'
-import { computed, useId, ref, useTemplateRef, type Ref } from 'vue'
+import { computed, useId, ref, useTemplateRef } from 'vue'
 import { useAnimateIcon } from '../composables'
 
 // TODO: сделать кейс валидации
@@ -111,12 +111,12 @@ const classes = computed(() => ({
   'is-focus': isInputFocus.value,
 }))
 
-const isActiveAnimate = computed(() => {
+const passwordIconClasses = computed(() => {
   return { 'ui-input__password-icon--active': isFocus.value }
 })
 
 const { handlePlayAnimate, handleStopAnimate, togglePassword, isPasswordVisible, isFocus, isAnimating } =
-  useAnimateIcon(model as Ref<string>)
+  useAnimateIcon(model)
 
 const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
 
