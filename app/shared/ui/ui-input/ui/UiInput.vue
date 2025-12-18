@@ -178,7 +178,7 @@ const isTextarea = computed(() => props.type === 'textarea')
       }
     }
 
-    &.ui-input__password-icon--active {
+    &--active {
       :deep(.ui-icon) {
         color: var(--ui-input-focus-primary-icon-color);
       }
