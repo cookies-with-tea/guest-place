@@ -258,6 +258,7 @@ const isTextarea = computed(() => props.type === 'textarea')
 
 .ui-textarea {
   --ui-textareas-scrollbar-thumb: #c6c6cc;
+  $root: &;
 
   width: 100%;
   position: relative;
@@ -329,7 +330,7 @@ const isTextarea = computed(() => props.type === 'textarea')
     pointer-events: none;
     user-select: none;
 
-    .ui-textarea__inner {
+    #{$root}__inner {
       &::placeholder {
         color: var(--ui-textfield-disabled-placeholder-color);
       }
