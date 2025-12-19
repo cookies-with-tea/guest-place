@@ -53,21 +53,29 @@
     </div>
 
     <div class="box">
-      <UiAccordion v-model="items" multiple class="ui-kit__accordion">
+      <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
         </UiAccordionItem>
       </UiAccordion>
     </div>
+
+    <div class="box">
+      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
+
+      <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 
-const items = ref<TUiAccordionModelValue>(['1', '2'])
+const activeListAccordion = ref<TUiAccordionModelValue>('1')
+const inputValue = ref('')
+const textareaValue = ref('')
 
 const faq = ref([
   {
@@ -91,7 +99,10 @@ const faq = ref([
 
 <style lang="scss" scoped>
 .ui-kit {
+  display: grid;
+  background-color: #ecf4fd;
   padding: 20px;
+  gap: 20px;
 
   &__accordion {
     max-width: 40%;

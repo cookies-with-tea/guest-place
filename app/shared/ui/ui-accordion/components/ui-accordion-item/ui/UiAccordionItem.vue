@@ -28,14 +28,10 @@ const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
 
 <style scoped lang="scss">
 .ui-accordion-item {
-  --ui-accordion-primary-shadow-color: #694e4b24;
-  --transition: 0.22s ease-out;
-  --padding: 24px;
-
   display: flex;
   flex-direction: column;
   border-radius: 50px;
-  box-shadow: 0 4px 15px 0 var(--ui-accordion-primary-shadow-color);
+  box-shadow: var(--shadow-md);
   background-color: var(--color-white);
   padding: 13px 30px;
 
@@ -46,7 +42,7 @@ const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
     align-items: center;
     justify-content: space-between;
     color: var(--color-regular);
-    transition: color var(--transition);
+    transition: color var(--transition-duration-secondary) ease-out;
     gap: 33px;
 
     &:deep(.ui-icon) {
@@ -67,9 +63,9 @@ const { isAnimating, toggleAccordion } = useAccordionItem(props.name)
     max-height: 0;
     color: var(--color-text-light);
     transition:
-      max-height var(--transition),
-      padding-bottom var(--transition),
-      padding-top var(--transition);
+      max-height var(--transition-duration-secondary),
+      padding-bottom var(--transition-duration-secondary),
+      padding-top var(--transition-duration-secondary);
     will-change: max-height;
     overflow: hidden;
   }
