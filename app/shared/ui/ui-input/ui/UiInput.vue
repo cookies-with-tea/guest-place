@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
+  <div v-if="!isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
     <textarea
       :id
       ref="element-ref"
@@ -85,10 +85,14 @@ const isInputFocus = ref(false)
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const elementRef = useTemplateRef<HTMLInputElement>('element-ref')
 
+const typedClasses = computed(() => {
+  return isTextarea.value ? 'input' : 'textarea'
+})
+
 const classes = computed(() => ({
-  'ui-textfield--disabled': props.disabled,
-  'ui-textfield--focus': isInputFocus.value,
-  [`ui-input--${props.size}`]: props.type !== 'textarea',
+  [`ui-${typedClasses.value}--disabled`]: props.disabled,
+  [`ui-${typedClasses.value}--focus`]: isInputFocus.value,
+  [`ui-input--${props.size}`]: isTextarea.value,
 }))
 
 const passwordIconClasses = computed(() => {
@@ -97,7 +101,7 @@ const passwordIconClasses = computed(() => {
 
 const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
 
-const isTextarea = computed(() => props.type === 'textarea')
+const isTextarea = computed(() => props.type !== 'textarea')
 
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
@@ -131,24 +135,12 @@ function onClickOutside(event: Event) {
   --ui-textfield-bg-color: var(--color-white);
   --ui-textfield-disabled-bg-color: #e0e0e0;
   --ui-textfield-disabled-placeholder-color: #9e9e9e;
-}
-
-.ui-input {
-  --ui-input-prefix-icon-color: var(--color-text-light);
-  --ui-input-suffix-icon-color: var(--color-text-light);
-  --ui-input-primary-icon-color: var(--color-text-light);
-  --ui-input-secondary-icon-color: #fff;
-  --ui-input-focus-primary-icon-color: #333;
   $self: &;
 
   width: 100%;
   position: relative;
-  display: flex;
-  align-items: center;
-  border-radius: 50px;
   box-shadow: var(--shadow-md);
   background-color: var(--ui-textfield-bg-color);
-  transition: border-color var(--transition-duration-primary) ease;
 
   &::before {
     content: '';
@@ -157,9 +149,41 @@ function onClickOutside(event: Event) {
     width: 100%;
     height: 100%;
     position: absolute;
-    border-radius: 50px;
     box-shadow: 0 0 0 1px var(--ui-textfield-border-color) inset;
     transition: box-shadow var(--transition-duration-secondary) ease-out;
+  }
+
+  &--focus {
+    --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
+  }
+
+  &--disabled {
+    --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
+
+    pointer-events: none;
+    user-select: none;
+
+    #{$self}__inner {
+      &::placeholder {
+        color: var(--ui-textfield-disabled-placeholder-color);
+      }
+    }
+  }
+}
+
+.ui-input {
+  --ui-input-prefix-icon-color: var(--color-text-light);
+  --ui-input-suffix-icon-color: var(--color-text-light);
+  --ui-input-primary-icon-color: var(--color-text-light);
+  --ui-input-secondary-icon-color: #fff;
+  --ui-input-focus-primary-icon-color: #333;
+
+  display: flex;
+  align-items: center;
+  border-radius: 50px;
+
+  &::before {
+    border-radius: 50px;
   }
 
   &__password-icon {
@@ -224,23 +248,6 @@ function onClickOutside(event: Event) {
     }
   }
 
-  &.ui-textfield--focus {
-    --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
-  }
-
-  &.ui-textfield--disabled {
-    --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
-
-    pointer-events: none;
-    user-select: none;
-
-    #{$self}__inner {
-      &::placeholder {
-        color: var(--ui-textfield-disabled-placeholder-color);
-      }
-    }
-  }
-
   &--md {
     height: 62px;
     padding: 0 40px;
@@ -260,25 +267,11 @@ function onClickOutside(event: Event) {
 .ui-textarea {
   --ui-textarea-scrollbar-thumb: #c6c6cc;
 
-  $self: &;
-
-  width: 100%;
-  position: relative;
   border-radius: 30px;
-  box-shadow: var(--shadow-md);
-  background-color: var(--ui-textfield-bg-color);
   padding: 16px;
 
   &::before {
-    content: '';
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
     border-radius: 30px;
-    box-shadow: 0 0 0 1px var(--ui-textfield-border-color) inset;
-    transition: box-shadow var(--transition-duration-secondary) ease-out;
   }
 
   &__inner {
@@ -319,23 +312,6 @@ function onClickOutside(event: Event) {
     &,
     &::placeholder {
       @include typography(body);
-    }
-  }
-
-  &.ui-textfield--focus {
-    --ui-textfield-border-color: var(--ui-textfield-focus-border-color);
-  }
-
-  &.ui-textfield--disabled {
-    --ui-textfield-bg-color: var(--ui-textfield-disabled-bg-color);
-
-    pointer-events: none;
-    user-select: none;
-
-    #{$self}__inner {
-      &::placeholder {
-        color: var(--ui-textfield-disabled-placeholder-color);
-      }
     }
   }
 }
