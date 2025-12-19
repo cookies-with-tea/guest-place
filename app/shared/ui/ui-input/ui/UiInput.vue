@@ -54,6 +54,8 @@ import { UiIcon } from '#shared/ui'
 import { computed, useId, ref, useTemplateRef } from 'vue'
 import { useAnimateIcon } from '../composables'
 
+const model = defineModel<string>({ default: '' })
+
 // TODO: сделать кейс валидации
 interface IProps {
   placeholder: string
@@ -74,13 +76,36 @@ const props = withDefaults(defineProps<IProps>(), {
   rows: 4,
 })
 
-const model = defineModel<string>({ default: '' })
+const { handlePlayAnimate, handleStopAnimate, togglePassword, isPasswordVisible, isFocus, isAnimating } =
+  useAnimateIcon(model)
 
 const id = useId()
 const isInputFocus = ref(false)
 
 const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const elementRef = useTemplateRef<HTMLInputElement>('element-ref')
+
+const classes = computed(() => ({
+  [`ui-input--${props.size}`]: props.type !== 'textarea',
+  'ui-textfield--disabled': props.disabled,
+  'ui-textfield--focus': isInputFocus.value,
+}))
+
+const passwordIconClasses = computed(() => {
+  return { 'ui-input__password-icon--active': isFocus.value }
+})
+
+const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
+
+const isTextarea = computed(() => props.type === 'textarea')
+
+onMounted(() => {
+  document.addEventListener('click', onClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onClickOutside)
+})
 
 // TODO: создать отдельный composable или директиву для clickOutside
 function onClickOutside(event: Event) {
@@ -96,31 +121,6 @@ function onClickOutside(event: Event) {
     elementRef.value.focus()
   }
 }
-
-onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onClickOutside)
-})
-
-const classes = computed(() => ({
-  [`ui-input--${props.size}`]: props.type !== 'textarea',
-  'ui-textfield--disabled': props.disabled,
-  'ui-textfield--focus': isInputFocus.value,
-}))
-
-const passwordIconClasses = computed(() => {
-  return { 'ui-input__password-icon--active': isFocus.value }
-})
-
-const { handlePlayAnimate, handleStopAnimate, togglePassword, isPasswordVisible, isFocus, isAnimating } =
-  useAnimateIcon(model)
-
-const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
-
-const isTextarea = computed(() => props.type === 'textarea')
 </script>
 
 <style scoped lang="scss">
