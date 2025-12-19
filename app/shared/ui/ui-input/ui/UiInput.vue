@@ -139,6 +139,7 @@ function onClickOutside(event: Event) {
   --ui-input-primary-icon-color: var(--color-text-light);
   --ui-input-secondary-icon-color: #fff;
   --ui-input-focus-primary-icon-color: #333;
+  $self: &;
 
   width: 100%;
   position: relative;
@@ -233,7 +234,7 @@ function onClickOutside(event: Event) {
     pointer-events: none;
     user-select: none;
 
-    .ui-input__inner {
+    #{$self}__inner {
       &::placeholder {
         color: var(--ui-textfield-disabled-placeholder-color);
       }
@@ -259,7 +260,7 @@ function onClickOutside(event: Event) {
 .ui-textarea {
   --ui-textarea-scrollbar-thumb: #c6c6cc;
 
-  $root: &;
+  $self: &;
 
   width: 100%;
   position: relative;
@@ -331,7 +332,7 @@ function onClickOutside(event: Event) {
     pointer-events: none;
     user-select: none;
 
-    #{$root}__inner {
+    #{$self}__inner {
       &::placeholder {
         color: var(--ui-textfield-disabled-placeholder-color);
       }
