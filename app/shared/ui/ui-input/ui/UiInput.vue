@@ -86,9 +86,9 @@ const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const elementRef = useTemplateRef<HTMLInputElement>('element-ref')
 
 const classes = computed(() => ({
-  [`ui-input--${props.size}`]: props.type !== 'textarea',
   'ui-textfield--disabled': props.disabled,
   'ui-textfield--focus': isInputFocus.value,
+  [`ui-input--${props.size}`]: props.type !== 'textarea',
 }))
 
 const passwordIconClasses = computed(() => {
