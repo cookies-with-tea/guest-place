@@ -69,10 +69,9 @@
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
-import UiInput from '../shared/ui/ui-input'
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
