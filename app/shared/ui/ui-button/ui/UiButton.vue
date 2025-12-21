@@ -61,6 +61,10 @@ const tagComponent = computed(() => {
   overflow: hidden;
   gap: 5px;
 
+  &__content {
+    z-index: 2;
+  }
+
   &:disabled {
     pointer-events: none;
     user-select: none;
@@ -94,7 +98,7 @@ const tagComponent = computed(() => {
       transform: translate(-18%, -50%);
       transition: transform var(--transition-duration-primary) ease;
       pointer-events: none;
-      z-index: -1;
+      z-index: 1;
       aspect-ratio: 1;
       inset: 0;
     }
