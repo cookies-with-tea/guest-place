@@ -127,8 +127,10 @@ const tagComponent = computed(() => {
 
   &--icon,
   &--text {
+    --ui-button-primary-color: var(--ui-button-secondary-color);
+
     &:disabled {
-      --ui-button-secondary-color: var(--ui-button-disabled-primary-color);
+      --ui-button-primary-color: var(--ui-button-disabled-primary-color);
     }
 
     @include hover {
@@ -137,8 +139,6 @@ const tagComponent = computed(() => {
   }
 
   &--text {
-    --ui-button-primary-color: var(--ui-button-secondary-color);
-
     @include typography(body);
 
     &:deep(.ui-icon) {
