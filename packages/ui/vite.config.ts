@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import federation from '@originjs/vite-plugin-federation'
-// import ViteSvgSpriteWrapper from 'vite-svg-sprite-wrapper'
 import { fileURLToPath } from 'node:url'
 import svgSpriteInlinePlugin from './vite-svg-sprite-inline-plugin.ts'
 
@@ -18,18 +17,10 @@ export default defineConfig({
 			},
 			shared: ['vue'],
 		}),
-		// ViteSvgSpriteWrapper({
-		//   icons: './assets/icons/*.svg',
-		//   outputDir: 'public/assets/icons',
-		//   generateType: true,
-		//   typeName: 'IconNamesType',
-		//   typeFileName: 'iconTypes',
-		//   typeOutputDir: './src/ui-icon/types',
-		// })
 		svgSpriteInlinePlugin({
 			inputDir: 'assets/icons',
-			outputTs: 'src/generated/sprite.ts',
-			prefix: 'icon', // опционально
+			outputTs: 'src/ui-icon/sprite/sprite.ts',
+			prefix: 'icon',
 		}),
 	],
 	resolve: {

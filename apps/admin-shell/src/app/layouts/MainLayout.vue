@@ -4,6 +4,7 @@
 			<div class="main-layout__content">
 				<header>host header</header>
 				<router-view />
+				<ElButton>Click</ElButton>
 			</div>
 		</div>
 	</div>

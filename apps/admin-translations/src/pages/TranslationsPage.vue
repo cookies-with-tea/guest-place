@@ -1,27 +1,23 @@
 <template>
-	<h1>Remote Translations Page</h1>
-
-	<UiIcon name="arrow-left" />
-
-	<TranslationEditor />
+	<div class="translations-page">
+		<TranslationsFilters />
+		<TranslationsTable />
+		<TranslationModal />
+	</div>
 </template>
 
 <script setup lang="ts">
-import { UiIcon } from '@admin-panel/ui'
-import TranslationEditor from '#shared/TranslationEditor.vue'
-import { watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { setLocale } from '@admin-panel/i18n'
+import { useTranslations } from '@/entities/translation/lib/composables'
 
-const route = useRoute()
+import TranslationModal from '#features/TranslationModal.vue'
+import TranslationsTable from '#features/TranslationsTable.vue'
+import TranslationsFilters from '#features/TranslationsFilters.vue'
 
-watch(
-	() => route.params.locale,
-	(newLocale) => {
-		if (['en', 'ru', 'fr', 'ja'].includes(newLocale as string)) {
-			setLocale(newLocale as string)
-		}
-	},
-	{ immediate: true }
-)
+useTranslations()
 </script>
+
+<style scoped>
+.translations-page {
+	padding: 24px;
+}
+</style>

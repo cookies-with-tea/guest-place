@@ -3,10 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 export const routes = [
 	{
 		path: '/',
-		redirect: '/en',
+		redirect: '/ru',
 	},
 	{
-		path: '/:locale(en|ru|fr|ja)/translations',
+		path: '/:lng([a-z]{2})?',
 		name: 'TranslationsDashboard',
 		component: () => import('#pages/TranslationsPage.vue'),
 	},

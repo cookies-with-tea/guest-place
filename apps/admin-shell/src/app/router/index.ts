@@ -31,6 +31,8 @@ const loadRemoteRoutes = async () => {
 export const initRouter = async () => {
 	const remoteRoutes = await loadRemoteRoutes()
 
+	console.log(remoteRoutes)
+
 	return createRouter({
 		history: createWebHistory(),
 		routes: [
