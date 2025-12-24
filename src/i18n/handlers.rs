@@ -201,4 +201,4 @@ pub fn protected_routing() -> Router<Arc<AppState>> {
         .route("/", post(create_or_update))
         .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))
-}
+
