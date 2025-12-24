@@ -1,29 +1,8 @@
-use crate::{core::dto::ApiResponse, core::response::into_api_response, AppState};
+use crate::{AppState, core::{dto::ApiResponse, response::into_api_response}, i18n::dto::{CreateTranslationDTO, TranslationDTO}};
 use axum::{
     Extension, Json, Router, extract::{Path, State}, http::StatusCode, routing::{delete, get, post}
 };
-use chrono::NaiveDateTime;
-use serde::{Deserialize, Serialize};
-use sqlx::prelude::FromRow;
 use std::{collections::HashMap, sync::Arc};
-use utoipa::ToSchema;
-
-#[derive(Deserialize, ToSchema)]
-pub struct CreateTranslationDTO {
-    pub key: String,
-    pub locale: String,
-    pub value: String,
-}
-
-#[derive(Serialize, ToSchema, FromRow)]
-pub struct TranslationDTO {
-    id: uuid::Uuid,
-    key: String,
-    locale: String,
-    value: String,
-    created_at: NaiveDateTime,
-    updated_at: NaiveDateTime,
-}
 
 #[utoipa::path(
     post,
@@ -213,14 +192,13 @@ fn into_api_response_internal(message: String) -> Json<ApiResponse<()>> {
     })
 }
 
-pub fn public_router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/{dict_key}", get(get_by_dict_key))
+pub fn public_routing() -> Router<Arc<AppState>> {
+    Router::new().route("/{dict_key}", get(get_by_dict_key))
 }
 
-pub fn private_router() -> Router<Arc<AppState>> {
+pub fn protected_routing() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create_or_update))
         .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))
-}
+

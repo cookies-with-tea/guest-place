@@ -68,7 +68,16 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('auth.logout_success', 'en', 'Logout successful'),
 ('auth.logout_success', 'ru', 'Выход выполнен успешно'),
 
+('auth.emal_sent', 'en', 'An email has been sent to your inbox. Please {span}click the link{/span} in the email to confirm your email address.'),
+('auth.emal_sent', 'ru', 'Вам на почту отправлено письмо. Пожалуйста, {span}перейдите по ссылке{/span} в письме, чтобы подтвердить ваш E-mail.'),
+
 -- general.*
+('general.avg_sum', 'en', 'Average check: {sum}'),
+('general.avg_sum', 'ru', 'Средний чек: {sum}'),
+
+('general.avg_sum_2', 'en', 'Average check: {br}{sum}'),
+('general.avg_sum_2', 'ru', 'Средний чек: {br}{sum}'),
+
 ('general.internal_error', 'en', 'Internal server error'),
 ('general.internal_error', 'ru', 'Внутренняя ошибка сервера'),
 
