@@ -9,7 +9,7 @@ export default defineConfig({
 		federation({
 			name: '@admin-panel/admin-docs',
 			remotes: {
-				'@admin-panel/ui': 'http://localhost:3003/assets/remoteEntry.js',
+				'@admin-panel/ui': 'http://localhost:6003/assets/remoteEntry.js',
 			},
 		}),
 	],

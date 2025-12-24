@@ -13,10 +13,10 @@ export default defineConfig({
 				'./TranslationsRoutes': './src/app/router/index.ts',
 			},
 			remotes: {
-				'@admin-panel/ui': 'http://localhost:3003/assets/remoteEntry.js',
-				'@admin-panel/i18n': 'http://localhost:3004/assets/remoteEntry.js',
+				'@admin-panel/ui': 'http://localhost:6003/assets/remoteEntry.js',
+				'@admin-panel/i18n': 'http://localhost:6004/assets/remoteEntry.js',
 			},
-			shared: ['vue', 'vue-router'],
+			shared: ['vue', 'vue-router', 'element-plus', '@tanstack/vue-query'],
 		}),
 	],
 	resolve: {
@@ -37,7 +37,7 @@ export default defineConfig({
 		cssCodeSplit: false,
 	},
 	server: {
-		port: 3001,
+		port: 3002,
 		cors: true,
 	},
 })

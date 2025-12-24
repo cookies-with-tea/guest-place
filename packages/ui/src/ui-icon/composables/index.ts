@@ -1,4 +1,4 @@
-import { SVG_SPRITE } from '../../generated/sprite.ts'
+import { SVG_SPRITE } from '../sprite/sprite'
 
 export const useUiIcon = () => {
 	const initIcon = async () => {
