@@ -158,12 +158,13 @@ async fn main() {
     let public_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::routing())
         .nest("/api/v1/user", user::handlers::public_routing())
+        .nest("/api/v1/i18n", i18n::handlers::public_routing())
         .nest_service("/media", ServeDir::new("media"))
         .with_state(shared_state.clone());
 
     let protected_router = Router::new()
         .nest("/api/v1/user", user::handlers::protected_routing())
-        .nest("/api/v1/i18n", i18n::handlers::routing())
+        .nest("/api/v1/i18n", i18n::handlers::protected_routing())
         .nest("/api/v1/media", media::handlers::routing())
         .with_state(shared_state.clone())
         .layer(middleware::from_fn_with_state(
