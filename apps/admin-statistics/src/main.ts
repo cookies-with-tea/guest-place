@@ -1,3 +1,3 @@
 import { app } from '#app/index'
 
-app.mount('#app')
+app.mount('#__MF_STATISTICS__')

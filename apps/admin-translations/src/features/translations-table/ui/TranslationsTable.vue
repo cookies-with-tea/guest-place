@@ -1,4 +1,3 @@
-<!-- src/features/translations/ui/TranslationsTable.vue -->
 <template>
 	<div class="translations-table">
 		<el-table :data="translations" v-loading="isLoading" border>
@@ -33,7 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import { useTranslations } from '@/entities/translation/lib/composables'
+import { useTranslations } from '#entities/translation/lib/composables'
 
 const { translations, isLoading, pagination, openEditModal, handleDelete, setPage, setPageSize } = useTranslations()
 

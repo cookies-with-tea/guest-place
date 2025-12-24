@@ -1,18 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-export const routes = [
-	{
+export const publicRoutes = {
+	translations: {
 		path: '/',
-		redirect: '/ru',
+		name: 'TranslationsPage',
+		component: () => import('#pages/translations-page'),
 	},
-	{
-		path: '/:lng([a-z]{2})?',
-		name: 'TranslationsDashboard',
-		component: () => import('#pages/TranslationsPage.vue'),
-	},
-]
+}
 
 export const router = createRouter({
 	history: createWebHistory(),
-	routes,
+	routes: [publicRoutes.translations],
 })

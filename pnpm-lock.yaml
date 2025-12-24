@@ -172,6 +172,9 @@ importers:
       '@admin-panel/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
@@ -370,6 +373,9 @@ importers:
       '@admin-panel/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -395,6 +401,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
         version: 6.0.1(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.13.0
+        version: 2.13.0(vue@3.5.22(typescript@5.9.3))
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

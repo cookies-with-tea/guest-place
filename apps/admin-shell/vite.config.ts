@@ -15,9 +15,10 @@ export default defineConfig({
 			remotes: {
 				statistics: 'http://localhost:3001/assets/remoteEntry.js',
 				translations: 'http://localhost:3002/assets/remoteEntry.js',
-				'@admin-panel/ui': 'http://localhost:3003/assets/remoteEntry.js',
+				users: 'http://localhost:3003/assets/remoteEntry.js',
+				'@admin-panel/ui': 'http://localhost:6003/assets/remoteEntry.js',
 			},
-			shared: ['vue', 'vue-router', 'element-plus'],
+			shared: ['vue', 'vue-router', 'element-plus', '@tanstack/vue-query'],
 		}),
 	],
 	resolve: {

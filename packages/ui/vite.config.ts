@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import svgSpriteInlinePlugin from './vite-svg-sprite-inline-plugin.ts'
 
 export default defineConfig({
-	base: 'http://localhost:3003/',
+	base: 'http://localhost:6003/',
 	plugins: [
 		vue(),
 		federation({
@@ -37,7 +37,7 @@ export default defineConfig({
 		assetsDir: 'assets',
 	},
 	server: {
-		port: 3003,
+		port: 6003,
 		cors: true,
 	},
 })

@@ -1,4 +1,3 @@
-<!-- src/features/translations/ui/TranslationsFilters.vue -->
 <template>
 	<div class="translations-filters">
 		<el-select
@@ -28,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTranslations } from '@/entities/translation/lib/composables'
+import { useTranslations } from '#entities/translation/lib/composables'
 
 const { filters, openAddModal } = useTranslations()
 

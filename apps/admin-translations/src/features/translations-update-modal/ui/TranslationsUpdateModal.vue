@@ -1,7 +1,7 @@
 <template>
 	<el-dialog
-		:title="isEditing ? 'Edit translation' : 'Add translation'"
 		v-model="isModalOpen"
+		:title="isEditing ? 'Edit translation' : 'Add translation'"
 		width="500px"
 		@closed="closeModal"
 	>
@@ -39,12 +39,12 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { useTranslations } from '@/entities/translation/lib/composables'
+import { useTranslations } from '#entities/translation/lib/composables'
 
 const { isModalOpen, editingTranslation, closeModal, handleSubmit } = useTranslations()
 
 const formRef = ref<FormInstance>()
-const isSubmitting = computed(() => /* можно добавить логику из мутаций, но для простоты — false */ false)
+const isSubmitting = computed(() => false)
 
 const form = ref({
 	namespace: '',

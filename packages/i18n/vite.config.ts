@@ -24,6 +24,8 @@ export default defineConfig(({ mode }) => {
 					secure: false,
 				},
 			},
+			port: 6004,
+			cors: true,
 		},
 	}
 })

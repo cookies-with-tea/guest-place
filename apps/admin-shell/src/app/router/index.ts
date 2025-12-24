@@ -5,23 +5,47 @@ import MainLayout from '#app/layouts/MainLayout.vue'
 const loadRemoteRoutes = async () => {
 	const routes = []
 
+	const addPrefixToRoute = (route: any, prefix: string): any => {
+		const { path, ...rest } = route
+
+		const basePath = path === '/' ? '' : path
+		const newPath = `${prefix}${basePath}`
+
+		const modifiedRoute = {
+			...rest,
+			path: newPath,
+		}
+
+		if (Array.isArray(route.children)) {
+			modifiedRoute.children = route.children.map((child: any) => addPrefixToRoute(child, ''))
+		}
+
+		return modifiedRoute
+	}
+
 	try {
 		// @ts-ignore
-		const stats = await import('statistics/StatisticsRoutes')
+		const stats = await import('users/UsersRoutes')
+		const transRoute = stats.default.publicRoutes.users
 
-		routes.push(...(stats.default.routes || []))
+		const modifiedRoute = addPrefixToRoute(transRoute, '/users')
+
+		routes.push(modifiedRoute)
 	} catch {
-		// eslint-disable-next-line
 		console.warn('Statistics routes not loaded')
 	}
 
 	try {
 		// @ts-ignore
 		const trans = await import('translations/TranslationsRoutes')
+		const transRoute = trans.default.publicRoutes.translations
 
-		routes.push(...(trans.default.routes || []))
+		console.log(trans)
+
+		const modifiedRoute = addPrefixToRoute(transRoute, '/translations')
+
+		routes.push(modifiedRoute)
 	} catch {
-		// eslint-disable-next-line
 		console.warn('Translations routes not loaded')
 	}
 
