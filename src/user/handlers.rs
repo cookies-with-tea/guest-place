@@ -354,7 +354,7 @@ pub fn public_router() -> Router<Arc<AppState>> {
     Router::new().route("/", post(create))
 }
 
-pub fn private_router() -> Router<Arc<AppState>> {
+pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_all))
         .route("/{id}", get(get_one).delete(delete_one))
