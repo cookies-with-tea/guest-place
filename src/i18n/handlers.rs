@@ -192,13 +192,13 @@ fn into_api_response_internal(message: String) -> Json<ApiResponse<()>> {
     })
 }
 
-pub fn public_routing() -> Router<Arc<AppState>> {
+pub fn public_router() -> Router<Arc<AppState>> {
     Router::new().route("/{dict_key}", get(get_by_dict_key))
 }
 
-pub fn protected_routing() -> Router<Arc<AppState>> {
+pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create_or_update))
         .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))
-
+}
