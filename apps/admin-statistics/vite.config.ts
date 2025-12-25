@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import federation from '@originjs/vite-plugin-federation'
 import { fileURLToPath } from 'node:url'
+import { APPS_PORTS } from '@admin-panel/lib'
 
 export default defineConfig({
 	plugins: [
@@ -33,7 +34,10 @@ export default defineConfig({
 		cssCodeSplit: false,
 	},
 	server: {
-		port: 3001,
 		cors: true,
+		port: APPS_PORTS.statistics.dev,
+	},
+	preview: {
+		port: APPS_PORTS.statistics.preview,
 	},
 })

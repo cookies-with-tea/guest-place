@@ -1,8 +1,12 @@
+import { resolve } from 'path'
 import federation from '@originjs/vite-plugin-federation'
 import { defineConfig, loadEnv } from 'vite'
+import { PACKAGES_PORTS } from '@admin-panel/lib'
 
 export default defineConfig(({ mode }) => {
-	const env = loadEnv(mode, process.cwd(), '') as ImportMetaEnv
+	const rootDir = resolve(__dirname, '../../')
+
+	const env = loadEnv(mode, rootDir, '') as ImportMetaEnv
 
 	return {
 		plugins: [
@@ -17,6 +21,8 @@ export default defineConfig(({ mode }) => {
 			}),
 		],
 		server: {
+			cors: true,
+			port: PACKAGES_PORTS.i18n.dev,
 			proxy: {
 				'/api': {
 					target: env.VITE_API_BASE,
@@ -24,8 +30,9 @@ export default defineConfig(({ mode }) => {
 					secure: false,
 				},
 			},
-			port: 6004,
-			cors: true,
+		},
+		preview: {
+			port: PACKAGES_PORTS.i18n.preview,
 		},
 	}
 })

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '#app/layouts/MainLayout.vue'
+import { useSidebar } from '#widgets/the-sidebar'
 
 // Загружаем роуты асинхронно (top-level await в модуле)
 const loadRemoteRoutes = async () => {
@@ -40,8 +41,6 @@ const loadRemoteRoutes = async () => {
 		const trans = await import('translations/TranslationsRoutes')
 		const transRoute = trans.default.publicRoutes.translations
 
-		console.log(trans)
-
 		const modifiedRoute = addPrefixToRoute(transRoute, '/translations')
 
 		routes.push(modifiedRoute)
@@ -52,10 +51,18 @@ const loadRemoteRoutes = async () => {
 	return routes
 }
 
+const routesToSidebar = (data: any) => {
+	return data.map((route) => ({ title: route.meta.title, path: route.path }))
+}
+
 export const initRouter = async () => {
 	const remoteRoutes = await loadRemoteRoutes()
 
 	console.log(remoteRoutes)
+
+	const { setData } = useSidebar()
+
+	setData(routesToSidebar(remoteRoutes))
 
 	return createRouter({
 		history: createWebHistory(),

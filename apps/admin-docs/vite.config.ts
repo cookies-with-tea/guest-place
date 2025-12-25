@@ -8,9 +8,6 @@ export default defineConfig({
 		vue(),
 		federation({
 			name: '@admin-panel/admin-docs',
-			remotes: {
-				'@admin-panel/ui': 'http://localhost:6003/assets/remoteEntry.js',
-			},
 		}),
 	],
 })

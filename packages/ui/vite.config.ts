@@ -3,9 +3,9 @@ import vue from '@vitejs/plugin-vue'
 import federation from '@originjs/vite-plugin-federation'
 import { fileURLToPath } from 'node:url'
 import svgSpriteInlinePlugin from './vite-svg-sprite-inline-plugin.ts'
+import { PACKAGES_PORTS } from '@admin-panel/lib'
 
 export default defineConfig({
-	base: 'http://localhost:6003/',
 	plugins: [
 		vue(),
 		federation({
@@ -37,7 +37,10 @@ export default defineConfig({
 		assetsDir: 'assets',
 	},
 	server: {
-		port: 6003,
 		cors: true,
+		port: PACKAGES_PORTS.ui.dev,
+	},
+	preview: {
+		port: PACKAGES_PORTS.ui.preview,
 	},
 })

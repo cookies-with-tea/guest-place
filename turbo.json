@@ -2,32 +2,45 @@
 	"$schema": "https://turborepo.com/schema.json",
 	"tasks": {
 		"build": {
-			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*", "vite.config.ts"],
 			"outputs": ["dist/**", "storybook-static/**"],
-			"dependsOn": ["^build"]
-		},
-		"lint": {
-			"dependsOn": ["^lint"]
+			"dependsOn": ["^build"],
+			"cache": true
 		},
 		"dev": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"cache": false,
 			"persistent": true
 		},
-		"clean": {
+		"preview": {
+			"inputs": ["dist/**"],
+			"outputs": [],
+			"dependsOn": ["build"],
 			"cache": false
 		},
-		"preview-storybook": {
-			"dependsOn": ["^build"],
+		"lint": {
+			"dependsOn": ["^lint"],
+			"outputs": []
+		},
+		"type-check": {
+			"outputs": []
+		},
+		"clean": {
 			"cache": false
 		},
 		"storybook": {
 			"cache": false,
 			"persistent": true
 		},
-		"preview": {
-			"dependsOn": ["build"],
+		"preview-storybook": {
+			"dependsOn": ["^build"],
 			"cache": false
+		},
+		"test:unit": {
+			"inputs": ["$TURBO_DEFAULT$"],
+			"outputs": [],
+			"cache": true
 		}
-	}
+	},
+	"globalDependencies": ["**/package.json"]
 }

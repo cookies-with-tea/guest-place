@@ -1,10 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { ROUTES } from '@admin-panel/lib'
 
-export const publicRoutes = {
+export const publicRoutes: Record<string, RouteRecordRaw> = {
 	users: {
 		path: '/',
-		name: 'UsersPage',
+		name: ROUTES.users.name,
 		component: () => import('#pages/users-page'),
+		meta: {
+			title: ROUTES.users.title,
+		},
 	},
 }
 
