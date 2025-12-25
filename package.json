@@ -7,16 +7,18 @@
 	"keywords": [],
 	"author": "miirsery",
 	"scripts": {
+		"prebuild": "pnpm --filter @admin-panel/lib build",
 		"build": "turbo run build --filter=!./apps/admin-docs",
 		"build:project": "node scripts/choose-project.js build",
 		"dev:project": "node scripts/choose-project.js dev",
 		"lint:project": "node scripts/choose-project.js lint",
 		"clean:project": "node scripts/choose-project.js clean",
+		"create:mf": "node scripts/create-mf.js",
 		"dev": "turbo run dev --parallel",
 		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
 		"dev:shell": "turbo run dev --filter=./apps/admin-shell",
-		"preview:mf": "turbo run preview --parallel --filter=./apps/* --filter=./packages/ui --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
-		"dev:mf": "run-p \"build\" \"preview:mf\" \"dev:shell\"",
+		"preview:mf": "pnpm prebuild && turbo run preview --parallel --filter=./apps/* --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
+		"dev:mf": "run-p \"preview:mf\" \"dev:shell\"",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"test": "pnpm test:unit",
 		"test:unit": "turbo run test:unit --parallel",
@@ -39,7 +41,12 @@
 		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
 		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
 		"storybook": "turbo run storybook --filter=docs",
-		"preview-storybook": "turbo run preview-storybook"
+		"preview-storybook": "turbo run preview-storybook",
+		"build:mf": "turbo run build --filter=./apps/* --filter=./packages/ui",
+		"dev:fast": "turbo run dev --parallel --filter=!./apps/admin-docs",
+		"why": "pnpm why",
+		"outdated": "pnpm outdated",
+		"dedupe": "pnpm dedupe"
 	},
 	"dependencies": {
 		"vue": "^3.5.22",
@@ -56,8 +63,10 @@
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vue/test-utils": "^2.4.6",
 		"cypress": "^15.3.0",
+		"dependency-cruiser": "^15.0.0",
 		"enquirer": "^2.4.1",
 		"eslint": "^9.38.0",
+		"eslint-plugin-security": "^3.0.1",
 		"husky": "^9.1.7",
 		"jiti": "^2.5.1",
 		"jsdom": "^27.0.0",
@@ -84,5 +93,6 @@
 		"*": [
 			"prettier --check ."
 		]
-	}
+	},
+	"packageManager": "pnpm@9.0.6"
 }

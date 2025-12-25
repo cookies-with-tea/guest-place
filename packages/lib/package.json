@@ -1,0 +1,43 @@
+{
+	"name": "@admin-panel/lib",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "pnpm unbuild --stub",
+		"prepublishOnly": "npm run build",
+		"prepack": "pnpm unbuild",
+		"build": "unbuild --entries ./src/index --declaration --outDir dist",
+		"lint": "eslint ."
+	},
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.ts"
+		},
+		"./constants": {
+			"require": "./dist/constants.cjs",
+			"import": "./dist/constants.mjs",
+			"types": "./dist/constants.d.ts"
+		},
+		"./utils": {
+			"require": "./dist/utils.cjs",
+			"import": "./dist/utils.mjs",
+			"types": "./dist/utils.d.ts"
+		}
+	},
+	"devDependencies": {
+		"@admin-panel/eslint-config": "workspace:*",
+		"@admin-panel/typescript-config": "workspace:*",
+		"typescript": "^5.9.3",
+		"unbuild": "^3.6.1",
+		"@types/node": "^24.9.1"
+	}
+}

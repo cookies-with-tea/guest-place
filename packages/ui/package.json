@@ -16,13 +16,14 @@
 		"src/"
 	],
 	"scripts": {
-		"dev": "vite --port 4176",
+		"dev": "vite",
 		"build": "vue-tsc -b && vite build",
-		"preview": "vite preview --port 6003",
+		"preview": "vite preview",
 		"lint": "eslint .",
 		"test:unit": "vitest"
 	},
 	"dependencies": {
+		"@admin-panel/lib": "workspace:*",
 		"svgo": "^4.0.0",
 		"vue": "^3.5.22"
 	},

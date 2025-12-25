@@ -4,10 +4,6 @@ import { ofetch } from 'ofetch'
 type TranslationDict = Record<string, string>
 type Locale = string
 
-const config = {
-	apiBase: '/api',
-}
-
 let currentLocale = 'en'
 
 export function setLocale(locale: string) {
@@ -16,10 +12,6 @@ export function setLocale(locale: string) {
 
 export function getLocale() {
 	return currentLocale
-}
-
-export function initI18n(options: { apiBase?: string }) {
-	config.apiBase = options.apiBase || '/api'
 }
 
 const cache = new Map<Locale, TranslationDict>()
@@ -45,7 +37,7 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 
 	const loadPromise = (async () => {
 		try {
-			const data = await ofetch(`${config.apiBase}/v1/i18n/${dictKey}`, {
+			const data = await ofetch(`/api/v1/i18n/${dictKey}`, {
 				headers: { 'Accept-Language': currentLocale },
 				credentials: 'include',
 			})
@@ -87,7 +79,7 @@ export function clearI18nCache() {
 	loading.clear()
 }
 
-export const useI18nStore = () => {
+export const useI18n = () => {
 	const translations = ref<Record<string, string>>({})
 
 	const loadDict = async (dictKey: string) => {

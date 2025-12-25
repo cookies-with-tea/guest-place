@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@admin-panel/ui": "workspace:*",
-		"@admin-panel/utils": "workspace:*",
+		"@admin-panel/lib": "workspace:*",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},
