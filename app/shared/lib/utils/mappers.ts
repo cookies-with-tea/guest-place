@@ -35,7 +35,6 @@ export const camelToSnake = <T extends Record<string, any>>(data: T): SnakeCased
 
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      // Handle camelCase → snake_case
       const snakeKey = key.replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase()
 
       result[snakeKey] = camelToSnake(data[key])
