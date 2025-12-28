@@ -9,24 +9,18 @@ export const useFormErrors = () => {
   }
 
   const setFormErrors = (errors: TResponseErrors) => {
-      const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {}
 
-      console.log('ERR', errors)
-
-      console.log('f', errors[0])
-
-      if (errors?.length && errors[0]) {
-        Object.entries(errors[0]).forEach(([field, errors]) => {
-          if (errors && errors[0]) {
-            newErrors[field] = errors[0]
-          }
-        })
-      }
-
-      console.log(errors)
-
-      formErrors.value = newErrors
+    if (errors?.length && errors[0]) {
+      Object.entries(errors[0]).forEach(([field, errors]) => {
+        if (errors && errors[0]) {
+          newErrors[field] = errors[0]
+        }
+      })
     }
+
+    formErrors.value = newErrors
+  }
 
   return {
     formErrors,

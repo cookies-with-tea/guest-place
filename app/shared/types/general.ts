@@ -16,9 +16,7 @@ type _CamelToSnake<T extends string> = T extends `${infer A}${infer B}`
     : `${Uncapitalize<A>}_${_CamelToSnake<Uncapitalize<B>>}`
   : Uncapitalize<T>
 
-export type CamelToSnake<T extends string> = T extends ''
-  ? ''
-  : _CamelToSnake<T>
+export type CamelToSnake<T extends string> = T extends '' ? '' : _CamelToSnake<T>
 
 export type SnakeCasedProperties<T> = {
   [K in keyof T as CamelToSnake<K & string>]: T[K] extends object

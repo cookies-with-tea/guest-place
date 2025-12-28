@@ -16,6 +16,7 @@
     "prettier:fix": "prettier --write .",
     "lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
     "lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
+    "type-check": "cross-env NODE_OPTIONS=--max_old_space_size=4096 vue-tsc --noEmit --skipLibCheck",
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
@@ -38,6 +39,7 @@
     "@types/node": "^24.9.1",
     "@typescript-eslint/parser": "^8.46.2",
     "@vue/test-utils": "^2.4.6",
+    "cross-env": "^10.1.0",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.5.1",
@@ -61,7 +63,8 @@
     "typescript-eslint": "^8.46.2",
     "vite-plugin-svg-icons": "^2.0.1",
     "vitest": "^4.0.16",
-    "vue-eslint-parser": "^10.2.0"
+    "vue-eslint-parser": "^10.2.0",
+    "vue-tsc": "^3.2.1"
   },
   "lint-staged": {
     "*.{js,ts,vue}": [

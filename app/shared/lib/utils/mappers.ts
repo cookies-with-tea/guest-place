@@ -22,7 +22,6 @@ export const snakeToCamel = <T extends Record<string, any>>(data: T): CamelCased
   return result as CamelCasedProperties<T>
 }
 
-
 export const camelToSnake = <T extends Record<string, any>>(data: T): SnakeCasedProperties<T> => {
   if (data === null || typeof data !== 'object') {
     return data as SnakeCasedProperties<T>

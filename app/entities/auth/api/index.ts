@@ -1,11 +1,10 @@
-import type { IResponse } from '#shared/interfaces'
-import { useFetchData } from '~/shared/lib/composables'
 import type { IAuthRefreshResponse, IAuthRefreshUpdateRequest, IAuthRegisterRequest } from '../model'
 import { camelToSnake } from '#shared/lib/utils'
+import { fetchData } from '~/shared/lib/utils/fetch'
 
 const register = async ({ email }: IAuthRegisterRequest) => {
-  return await useFetch('/api/v1/auth/register', {
-    method: 'post',
+  return await fetchData('/api/v1/auth/register', {
+    method: 'POST',
     body: {
       email,
     },
@@ -13,7 +12,7 @@ const register = async ({ email }: IAuthRegisterRequest) => {
 }
 
 export const refresh = (data: IAuthRefreshUpdateRequest) => {
-  return useFetchData<IResponse<IAuthRefreshResponse>>('/api/v1/auth/refresh', {
+  return fetchData<IAuthRefreshResponse>('/api/v1/auth/refresh', {
     method: 'POST',
     body: camelToSnake(data),
   })
