@@ -1,23 +1,21 @@
 <template>
-  <form ref="formRef" class="ui-form" @submit.prevent="handleFormSubmit">
+  <form class="ui-form">
     <slot />
   </form>
 </template>
 
-<script lang="ts" setup generic="T extends object">
+<script lang="ts" setup generic="Input extends object">
 import { useForm } from '../composables'
-import type { IEmits, IUseFormOptions } from '../interfaces'
+import type { IFormExpose, IUseFormOptions } from '../model'
 
-type TProps = IUseFormOptions<T>
+type TProps = IUseFormOptions<Input>
 
 const props = defineProps<TProps>()
-const emit = defineEmits<IEmits<T>>()
 
-const { isLoading, handleFormSubmit } = useForm<T>(props, emit)
+const { validate } = useForm<Input>(props)
 
-defineExpose({
-  isLoading,
-  submit: handleFormSubmit,
+defineExpose<IFormExpose>({
+  validate,
 })
 </script>
 

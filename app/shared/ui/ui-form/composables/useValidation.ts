@@ -1,11 +1,12 @@
 import { ref } from 'vue'
-import Schema from 'async-validator'
-import type { TResponseErrors } from '#shared/types'
+import Schema, { type Rules } from 'async-validator'
 import { useFormErrors } from './useFormErrors'
+import type { TResponseErrors } from '#shared/types'
 
-export const useValidation = <T extends Record<string, any>>(data: T, rules: Record<keyof T, any[]>) => {
-  const isValid = ref(true)
+export const useValidation = <T extends Record<string, any>>(data: T, rules: Rules) => {
   const { setFormErrors, clearFormErrors } = useFormErrors()
+
+  const isValid = ref(true)
 
   const validate = async (): Promise<boolean> => {
     clearFormErrors()
@@ -21,16 +22,22 @@ export const useValidation = <T extends Record<string, any>>(data: T, rules: Rec
     } catch (e: any) {
       isValid.value = false
 
-      const errors: TResponseErrors = {} as TResponseErrors
+      const errors: TResponseErrors = []
 
       if (e.errors && Array.isArray(e.errors)) {
         e.errors.forEach((err: { field?: string; message?: string }) => {
           if (err.field) {
-            if (!errors[err.field]) {
-              errors[err.field] = []
+            let fieldErrors = errors.find((item) => item[err.field as string])
+
+            if (!fieldErrors) {
+              fieldErrors = { [err.field]: [] }
+
+              errors.push(fieldErrors)
             }
 
-            errors[err.field].push(err.message || 'Ошибка валидации')
+            if (err?.field && fieldErrors[err.field]) {
+              fieldErrors[err.field]!.push(err.message || 'Validation error')
+            }
           }
         })
       }

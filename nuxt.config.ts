@@ -5,8 +5,8 @@ import * as path from 'node:path'
 
 const typedIconPluginConfig = typedIconPlugin({
   iconsPath: './public/assets/icons',
-  iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/interfaces'),
-  fileName: 'interfaces.ts',
+  iconComponentPath: path.resolve(process.cwd(), './app/shared/ui/ui-icon/types'),
+  fileName: 'types.ts',
 })
 
 export default defineNuxtConfig({
@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo'],
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo', '@nuxt/test-utils/module'],
   svgo: {
     defaultImport: 'component',
     componentPrefix: 'ui',

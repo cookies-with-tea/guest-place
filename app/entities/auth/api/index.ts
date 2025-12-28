@@ -1,8 +1,8 @@
-import type { IAuthRegister } from '../model'
-import { useFetchData } from '#shared/lib/composables'
+import type { IResponse } from '#shared/interfaces'
+import type { IAuthRefreshResponse, IAuthRefreshUpdateRequest, IAuthRegisterRequest } from '../model'
 
-const register = async ({ email }: any) => {
-  return await useFetchData('/api/v1/auth/register', {
+const register = async ({ email }: IAuthRegisterRequest) => {
+  return await useFetch('/api/v1/auth/register', {
     method: 'post',
     body: {
       email,
@@ -10,6 +10,16 @@ const register = async ({ email }: any) => {
   })
 }
 
+export const refresh = (data: IAuthRefreshUpdateRequest) => {
+  return useFetch<IResponse<IAuthRefreshResponse>>('/api/v1/auth/refresh', {
+    method: 'POST',
+    body: {
+      refresh_token: data.refreshToken,
+    },
+  })
+}
+
 export const authApi = {
   register,
+  refresh,
 }
