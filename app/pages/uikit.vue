@@ -95,6 +95,10 @@ const formRules: Rules = {
   refreshToken: FORM_RULES.name,
 }
 
+const activeListAccordion = ref<TUiAccordionModelValue>('1')
+const inputValue = ref('')
+const textareaValue = ref('')
+
 const formData = ref<IAuthRefreshUpdateRequest>({
   refreshToken: '',
 })
@@ -125,10 +129,6 @@ const { handleSubmit } = useForm<IAuthRefreshUpdateRequest, IAuthRefreshResponse
 const onSubmit = async () => {
   await handleSubmit(formData)
 }
-
-const activeListAccordion = ref<TUiAccordionModelValue>('1')
-const inputValue = ref('')
-const textareaValue = ref('')
 </script>
 
 <style lang="scss" scoped>
