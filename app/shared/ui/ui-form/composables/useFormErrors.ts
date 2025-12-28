@@ -1,45 +1,32 @@
-import { ref } from 'vue'
 import type { TResponseErrors } from '#shared/types'
-
-const snakeToCamelCase = (str: string): string => {
-  return str.replace(/_([a-z])/g, (_, char) => char.toUpperCase())
-}
-
-const mapErrorsKeysToCamelCase = (errors: TResponseErrors): TResponseErrors => {
-  const result: TResponseErrors = {} as TResponseErrors
-
-  for (const [key, messages] of Object.entries(errors)) {
-    if (typeof key === 'string') {
-      const camelKey = snakeToCamelCase(key)
-
-      Object.assign(result, {
-        [camelKey]: messages,
-      })
-    }
-  }
-
-  return result
-}
-
-const formErrors = ref<Record<string, string>>({})
+import { useState } from '#imports'
 
 export const useFormErrors = () => {
+  const formErrors = useState<Record<string, string>>('formErrors', () => ({}))
+
   const clearFormErrors = () => {
     formErrors.value = {}
   }
 
   const setFormErrors = (errors: TResponseErrors) => {
-    const camelCaseErrors = mapErrorsKeysToCamelCase(errors)
-    const newErrors: Record<string, string> = {}
+      const newErrors: Record<string, string> = {}
 
-    for (const [field, messages] of Object.entries(camelCaseErrors)) {
-      if (Array.isArray(messages) && messages.length > 0) {
-        newErrors[field] = messages[0]
+      console.log('ERR', errors)
+
+      console.log('f', errors[0])
+
+      if (errors?.length && errors[0]) {
+        Object.entries(errors[0]).forEach(([field, errors]) => {
+          if (errors && errors[0]) {
+            newErrors[field] = errors[0]
+          }
+        })
       }
-    }
 
-    formErrors.value = newErrors
-  }
+      console.log(errors)
+
+      formErrors.value = newErrors
+    }
 
   return {
     formErrors,

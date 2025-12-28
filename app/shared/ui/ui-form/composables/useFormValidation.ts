@@ -3,18 +3,18 @@ import Schema, { type Rules } from 'async-validator'
 import { useFormErrors } from './useFormErrors'
 import type { TResponseErrors } from '#shared/types'
 
-export const useValidation = <T extends Record<string, any>>(data: T, rules: Rules) => {
+export const useFormValidation = () => {
   const { setFormErrors, clearFormErrors } = useFormErrors()
 
   const isValid = ref(true)
 
-  const validate = async (): Promise<boolean> => {
+  const validate = async <T extends Record<string, any>>(data: Ref<T>, rules: Rules): Promise<boolean> => {
     clearFormErrors()
 
     const validator = new Schema(rules)
 
     try {
-      await validator.validate(data)
+      await validator.validate(data.value)
 
       isValid.value = true
 

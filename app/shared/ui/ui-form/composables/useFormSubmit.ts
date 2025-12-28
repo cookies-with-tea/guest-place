@@ -1,38 +1,37 @@
 import { useFormErrors } from './useFormErrors'
+import { useFormValidation } from './useFormValidation'
 import type { IFormSubmitProps } from '../model'
 
 export const useFormSubmit = <T extends object, U extends object>({
-  formRef,
-  validateFn,
   submitFn,
   onSuccess,
   onError,
+  rules
 }: IFormSubmitProps<T, U>) => {
   const { clearFormErrors, setFormErrors } = useFormErrors()
+  const { validate } = useFormValidation()
 
-  const handleSubmit = async (formData: T): Promise<void> => {
+  const handleSubmit = async (formData: Ref<T>): Promise<void> => {
     clearFormErrors()
 
-    if (!formRef.value) return
+    const isValid = !rules ? Promise.resolve(true) : validate(formData, rules)
 
-    const isValid = validateFn ? await validateFn() : Promise.resolve(true)
+    if (!await isValid) return
 
-    if (!isValid) return
+    const result = await submitFn(formData.value)
 
-    const result = await submitFn(formData)
+    console.log(result)
 
-    const { data, error } = result
+    if (result.value?.errors) {
+      setFormErrors([result.value.errors])
 
-    if (error.value?.data?.errors) {
-      setFormErrors(error.value.data?.errors)
-
-      onError?.(error)
+      onError?.(result.value.errors)
 
       return
     }
 
-    if (data.value?.data) {
-      onSuccess?.(data.value.data)
+    if (result.value?.data) {
+      onSuccess?.(result.value?.data)
     }
   }
 

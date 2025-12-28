@@ -1,7 +1,6 @@
 import type { TResponseErrors } from '#shared/types'
 import type { Rules } from 'async-validator'
 import type { AsyncData } from 'nuxt/app'
-import type { TemplateRef } from 'vue'
 import type { IResponse } from '~/shared/interfaces'
 import type { FetchError } from 'ofetch'
 
@@ -23,8 +22,8 @@ export interface IFormExpose {
 export type TFormInstance = IFormExpose
 
 export interface IFormSubmitProps<T, U> {
-  formRef: TemplateRef<TFormInstance>
-  validateFn?: () => Promise<boolean>
+  rules?: Rules
+  data: Ref<T>
   submitFn: (data: T) => AsyncData<IResponse<U> | undefined, FetchError<any> | undefined>
   onSuccess?: (data: U) => void
   onError?: (error: any) => void

@@ -70,7 +70,7 @@
       </div>
 
       <div class="column">
-        <UiForm ref="formRef" :data="formData" :rules="formRules" @submit.prevent="onSubmit">
+        <UiForm @submit.prevent="onSubmit">
           <UiFormItem name="refreshToken">
             <UiInput v-model="formData.refreshToken" placeholder="Refresh" />
           </UiFormItem>
@@ -88,13 +88,12 @@ import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import { FORM_RULES } from '#shared/constants'
 import { authApi, type IAuthRefreshResponse, type IAuthRefreshUpdateRequest } from '#entities/auth'
-import { useFormSubmit, type TFormInstance } from '#shared/ui/ui-form'
+import { useFormSubmit } from '#shared/ui/ui-form'
+import type { Rules } from 'async-validator'
 
-const formRules = {
+const formRules: Rules = {
   refreshToken: FORM_RULES.name,
 }
-
-const formRef = useTemplateRef<TFormInstance>('formRef')
 
 const formData = ref<IAuthRefreshUpdateRequest>({
   refreshToken: '',
@@ -112,8 +111,8 @@ const faq = ref([
 ])
 
 const { handleSubmit } = useFormSubmit<IAuthRefreshUpdateRequest, IAuthRefreshResponse>({
-  formRef,
-  validateFn: () => formRef.value?.validate() ?? Promise.resolve(true),
+  data: formData,
+  rules: formRules,
   submitFn: (data) => authApi.refresh(data),
   onSuccess: (data) => {
     console.log('Success:', data)
@@ -124,7 +123,7 @@ const { handleSubmit } = useFormSubmit<IAuthRefreshUpdateRequest, IAuthRefreshRe
 })
 
 const onSubmit = async () => {
-  await handleSubmit(formData.value)
+  await handleSubmit(formData)
 }
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
