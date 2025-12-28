@@ -358,7 +358,7 @@ pub async fn refresh(
             return into_api_response(
                 StatusCode::UNAUTHORIZED,
                 None,
-                Some(error_map("auth", &msg)),
+                Some(error_map("refresh_token", &msg)),
                 Some(vec![msg]),
             );
         }
