@@ -1,4 +1,4 @@
-import { fetchData } from '~/shared/lib/utils/fetch'
+import { fetchData } from '#shared/lib/utils'
 
 export const getAll = () => {
   return fetchData('/api/v1/user', {

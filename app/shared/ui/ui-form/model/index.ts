@@ -1,7 +1,7 @@
 import type { TResponseErrors } from '#shared/types'
 import type { Rules } from 'async-validator'
 import type { Ref } from 'vue'
-import type { IResponse } from '~/shared/interfaces'
+import type { IResponse } from '#shared/interfaces'
 
 export type IUseFormOptions<T> = {
   data?: T

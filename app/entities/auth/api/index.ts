@@ -1,6 +1,5 @@
 import type { IAuthRefreshResponse, IAuthRefreshUpdateRequest, IAuthRegisterRequest } from '../model'
-import { camelToSnake } from '#shared/lib/utils'
-import { fetchData } from '~/shared/lib/utils/fetch'
+import { camelToSnake, fetchData } from '#shared/lib/utils'
 
 const register = async ({ email }: IAuthRegisterRequest) => {
   return await fetchData('/api/v1/auth/register', {
