@@ -52,7 +52,7 @@
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
 
-    <div style="display: none" class="box">
+    <div class="box" style="display: none">
       <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
@@ -75,6 +75,10 @@
         type="textarea"
       />
     </div>
+
+    <div class="box">
+      <UiTabs :tabs />
+    </div>
   </div>
 </template>
 
@@ -83,6 +87,7 @@ import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import UiInput from '../shared/ui/ui-input'
+import UiTabs from '../shared/ui/ui-tabs'
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
@@ -106,12 +111,24 @@ const faq = ref([
     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
   },
 ])
+
+const tabs = [
+  {
+    title: 'home',
+    content: UiIcon,
+    name: 'home'
+  },
+  {
+    title: 'user',
+    content: UiIcon,
+    name: 'user'
+  }
+]
 </script>
 
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
-  background-color: #ecf4fd;
   padding: 20px;
   gap: 20px;
 
