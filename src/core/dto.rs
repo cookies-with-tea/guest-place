@@ -4,6 +4,12 @@ use std::collections::HashMap;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct PaginationQuery {
+    pub page: Option<i32>,
+    pub limit: Option<i32>,
+}
+
 #[derive(Serialize, Debug, ToSchema)]
 pub struct ApiResponse<T: serde::Serialize> {
     pub(crate) data: Option<T>,
@@ -29,7 +35,7 @@ pub struct PaginationDTO {
     pub page: i32,                // default - 1
     pub total: Option<i32>,       // default - 0
     pub total_pages: Option<i32>, // default - 0
-    pub limit: Option<i32>,       // default - 0
+    pub limit: Option<i32>,       // default - 10
 }
 
 #[derive(Serialize, Deserialize, Debug, FromRow, ToSchema)]
