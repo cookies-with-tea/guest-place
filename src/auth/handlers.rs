@@ -133,7 +133,7 @@ pub async fn register(
             .await
             .unwrap_or_else(|_| Err("Panic during email sending".into()));
 
-            if let Err(e) = email_result {
+            if let Err(_e) = email_result {
                 let msg = state.i18n.t("general.email_failed", &locale).await;
                 return into_api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,

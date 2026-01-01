@@ -1,6 +1,5 @@
-use crate::auth::extractors::AuthenticatedUser;
-use crate::core::dto::ApiResponse;
-use crate::core::response::{error_map, into_api_response};
+use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO, PaginationQuery};
+use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
 use crate::user::dto::{CreateUserDTO, User, UserResponseDTO, UserRole, UserStatus};
 use crate::user::utils::{validate_email, validate_phone};
 use crate::AppState;
@@ -10,7 +9,7 @@ use argon2::{
 };
 use axum::Router;
 use axum::{
-    extract::{Extension, Path, State},
+    extract::{Extension, Path, Query, State},
     http::StatusCode,
     routing::{get, post},
     Json,
@@ -189,9 +188,13 @@ async fn create(
 #[utoipa::path(
     get,
     path = "/api/v1/user",
+    params(
+        ("page" = Option<i32>, Query, description = "Page number"),
+        ("limit" = Option<i32>, Query, description = "Items per page")
+    ),
     responses(
-        (status = 200, body = ApiResponse<Vec<UserResponseDTO>>),
-        (status = 500, body = ApiResponse<Vec<UserResponseDTO>>)
+        (status = 200, body = ApiResponseWithPagination<UserResponseDTO>),
+        (status = 500, body = ApiResponseWithPagination<UserResponseDTO>)
     ),
     tag = "User",
     operation_id = "get_all_users",
@@ -199,26 +202,74 @@ async fn create(
 async fn get_all(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
-    AuthenticatedUser(_current_user_id): AuthenticatedUser,
+    Query(pagination): Query<PaginationQuery>,
 ) -> Result<
-    Json<ApiResponse<Vec<UserResponseDTO>>>,
-    (StatusCode, Json<ApiResponse<Vec<UserResponseDTO>>>),
+    Json<ApiResponseWithPagination<UserResponseDTO>>,
+    (StatusCode, Json<ApiResponseWithPagination<UserResponseDTO>>),
 > {
-    match query_as::<_, UserResponseDTO>(
-        "SELECT uuid, email, first_name, second_name, last_name, phone, avatar, birth_date, created_at, updated_at FROM guest_user"
-    )
-    .fetch_all(&state.pool)
-    .await
-    {
-        Ok(users) => into_api_response(StatusCode::OK, Some(users), None, None),
+    let page = pagination.page.unwrap_or(1);
+    let limit = pagination.limit.unwrap_or(10);
+    let offset = (page - 1) * limit;
+
+    let total_query = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM guest_user")
+        .fetch_one(&state.pool)
+        .await;
+
+    let total = match total_query {
+        Ok(count) => count,
         Err(_) => {
             let msg = state.i18n.t("general.db_error", &locale).await;
-            into_api_response(
+            return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map(&"database".to_string(), &msg.clone())),
                 Some(vec![msg]),
-            )
+            );
+        }
+    };
+
+    let total_pages = (total as f64 / limit as f64).ceil() as i32;
+
+    let users_query = query_as::<_, UserResponseDTO>(
+        "SELECT uuid, email, first_name, second_name, last_name, phone, avatar, birth_date, created_at, updated_at FROM guest_user ORDER BY created_at LIMIT $1 OFFSET $2"
+    )
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(&state.pool)
+    .await;
+
+    match users_query {
+        Ok(users) => {
+            let pagination = PaginationDTO {
+                page,
+                total: Some(total as i32),
+                total_pages: Some(total_pages),
+                limit: Some(limit),
+            };
+
+            let api_pagination = ApiPaginationDTO {
+                items: users,
+                pagination: pagination,
+            };
+
+            into_api_response_with_pagination(StatusCode::OK, Some(api_pagination), None, None)
+        }
+        Err(_) => {
+          let msg = state.i18n.t("general.db_error", &locale).await;
+          return into_api_response_with_pagination(
+              StatusCode::INTERNAL_SERVER_ERROR,
+              Some(ApiPaginationDTO {
+                  items: vec![],
+                  pagination: PaginationDTO {
+                      page,
+                      total: Some(0),
+                      total_pages: Some(0),
+                      limit: Some(limit),
+                  },
+              }),
+              Some(error_map("database", &msg)),
+              Some(vec![msg]),
+          );
         }
     }
 }
@@ -239,7 +290,6 @@ async fn get_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
-    AuthenticatedUser(_current_user_id): AuthenticatedUser,
 ) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
     let result = sqlx::query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
         .bind(uuid)
@@ -299,7 +349,6 @@ async fn delete_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
-    AuthenticatedUser(_current_user_id): AuthenticatedUser,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let exists =
         sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM guest_user WHERE uuid = $1)")
@@ -350,12 +399,12 @@ async fn delete_one(
     }
 }
 
+// FIXME: get all move to protected router
 pub fn public_router() -> Router<Arc<AppState>> {
-    Router::new().route("/", post(create))
+    Router::new().route("/", post(create)).route("/", get(get_all))
 }
 
 pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(get_all))
         .route("/{id}", get(get_one).delete(delete_one))
 }
