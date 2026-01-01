@@ -84,7 +84,7 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('general.email_failed', 'en', 'Email sending failed'),
 ('general.email_failed', 'ru', 'Не удалось отправить письмо'),
 
-('general.db_error', 'en', 'Database error'),
-('general.db_error', 'ru', 'Ошибка базы данных')
+('general.db_error', 'en', 'Internal error'),
+('general.db_error', 'ru', 'Внутренняя ошибка')
 
 ON CONFLICT (key, locale) DO NOTHING;

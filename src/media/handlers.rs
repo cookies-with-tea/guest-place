@@ -208,7 +208,7 @@ pub async fn get_all(
     }
 }
 
-pub fn routing() -> Router<Arc<AppState>> {
+pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create))
         .route("/", get(get_all))
