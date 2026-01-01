@@ -14,7 +14,7 @@ export interface TranslationFilters {
 
 export interface Pagination {
 	page: number
-	pageSize: number
+	limit: number
 	total: number
 }
 

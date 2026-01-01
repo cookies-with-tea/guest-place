@@ -382,6 +382,9 @@ importers:
       '@admin-panel/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@element-plus/icons-vue':
+        specifier: ^2.3.2
+        version: 2.3.2(vue@3.5.22(typescript@5.9.3))
       '@tanstack/vue-query':
         specifier: ^5.92.1
         version: 5.92.1(vue@3.5.22(typescript@5.9.3))
@@ -485,6 +488,10 @@ importers:
         version: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1)
 
   packages/lib:
+    dependencies:
+      ofetch:
+        specifier: ^1.3.4
+        version: 1.5.1
     devDependencies:
       '@admin-panel/eslint-config':
         specifier: workspace:*

@@ -1,12 +1,19 @@
 import { ref, watch, computed } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../api'
-import type { UserFilters, User, CreateUserDTO, UpdateUserDTO } from '../../model'
+import type { UserFilters, IUserResponse, IUserCreateUpdate } from '../../model'
 import { USERS_QUERY_KEY } from '../../model'
+import { userApi } from '../../api'
+import type { IPagination } from '@admin-panel/lib'
 
 const isModalOpen = ref(false)
 
+const { create, update, getAll, deleteById, getById } = userApi
+
+const editingUserUuid = ref<string>('')
+
 export const useUsers = () => {
+	const queryClient = useQueryClient()
+
 	// === State ===
 	const filters = ref<UserFilters>({
 		status: undefined,
@@ -14,92 +21,105 @@ export const useUsers = () => {
 		search: undefined,
 	})
 
-	const pagination = ref({
+	const pagination = ref<IPagination>({
 		page: 1,
-		pageSize: 10,
+		limit: 10,
 		total: 0,
+		totalPages: 0,
 	})
 
-	const editingUser = ref<User | null>(null)
 
 	// === Query ===
 	const queryKey = computed(() => [
 		USERS_QUERY_KEY,
-		{ ...filters.value, page: pagination.value.page, pageSize: pagination.value.pageSize },
+		{ ...filters.value, page: pagination.value.page, limit: pagination.value.limit },
 	])
 
 	const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
 
-	const queryClient = useQueryClient()
+	const users = computed(
+		() =>
+			usersQuery.data.value?.data.items.map((user) => ({
+				...user,
+				name: [user.firstName, user.secondName, user.lastName].filter(Boolean).join(' '),
+			})) || []
+	)
 
 	const usersQuery = useQuery({
 		queryKey,
 		queryFn: () =>
-			fetchUsers({
+			getAll({
 				...filters.value,
 				page: pagination.value.page,
-				pageSize: pagination.value.pageSize,
+				limit: pagination.value.limit,
 			}),
 	})
 
+	const { data: editingUser, refetch: refetchEditingUser } = useQuery({
+		queryKey: [USERS_QUERY_KEY, editingUserUuid.value],
+		queryFn: () => getById(editingUserUuid.value || ''),
+		enabled: !!editingUserUuid.value,
+	})
+
 	watch(
-		() => usersQuery.data?.value?.pagination,
+		() => usersQuery.data?.value?.data.pagination,
 		(newPagination) => {
-			if (newPagination) pagination.value = { ...newPagination }
+			if (newPagination) {
+				pagination.value = { ...newPagination }
+			}
 		}
 	)
 
 	// === Modal ===
 	const openAddModal = () => {
-		editingUser.value = null
+		editingUserUuid.value = ''
 
 		isModalOpen.value = true
 	}
 
-	const openEditModal = (user: User) => {
-		editingUser.value = user
+	const openEditModal = (userUuid: string) => {
+		editingUserUuid.value = userUuid
 
 		isModalOpen.value = true
+
+		refetchEditingUser()
 	}
 
 	const closeModal = () => {
 		isModalOpen.value = false
 
-		editingUser.value = null
+		editingUserUuid.value = ''
 	}
 
 	// === Mutations ===
 	const createMutation = useMutation({
-		mutationFn: createUser,
+		mutationFn: create,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
-
 			closeModal()
 		},
 	})
 
 	const updateMutation = useMutation({
-		mutationFn: updateUser,
+		mutationFn: update,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
-
 			closeModal()
 		},
 	})
 
 	const deleteMutation = useMutation({
-		mutationFn: deleteUser,
+		mutationFn: deleteById,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
 		},
 	})
 
-	const handleSubmit = (data: CreateUserDTO | UpdateUserDTO) => {
+	const handleSubmit = (data: IUserCreateUpdate) => {
 		if ('uuid' in data) {
-			// Это UpdateUserDTO (с uuid)
-			updateMutation.mutate(data)
+			const { uuid, ...rest } = data
+			updateMutation.mutate({ uuid: data.uuid!, ...rest })
 		} else {
-			// Это CreateUserDTO (без uuid)
 			createMutation.mutate(data)
 		}
 	}
@@ -113,9 +133,8 @@ export const useUsers = () => {
 		pagination.value.page = page
 	}
 
-	const setPageSize = (size: number) => {
-		pagination.value.pageSize = size
-
+  const setlimit = (limit: number) => {
+		pagination.value.limit = limit
 		pagination.value.page = 1
 	}
 
@@ -128,10 +147,11 @@ export const useUsers = () => {
 		filters,
 		pagination,
 		isModalOpen,
-		editingUser,
 
 		// data
-		users: computed(() => usersQuery.data.value?.data || []),
+		users,
+		editingUser,
+		editingUserUuid,
 		isLoading: usersQuery.isLoading,
 
 		// actions
@@ -141,7 +161,7 @@ export const useUsers = () => {
 		handleSubmit,
 		handleDelete,
 		setPage,
-		setPageSize,
+		setlimit,
 		isSubmitting,
 	}
 }

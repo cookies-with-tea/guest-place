@@ -19,10 +19,10 @@
 		<div class="translations-table__pagination">
 			<el-pagination
 				v-model:current-page="currentPage"
-				v-model:page-size="currentPageSize"
+				v-model:page-size="currentlimit"
 				:total="pagination.total"
 				layout="prev, pager, next, total"
-				@size-change="setPageSize"
+				@size-change="setlimit"
 				@current-change="setPage"
 			/>
 		</div>
@@ -34,16 +34,16 @@ import { computed } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { useTranslations } from '#entities/translation/lib/composables'
 
-const { translations, isLoading, pagination, openEditModal, handleDelete, setPage, setPageSize } = useTranslations()
+const { translations, isLoading, pagination, openEditModal, handleDelete, setPage, setlimit } = useTranslations()
 
 const currentPage = computed({
 	get: () => pagination.value.page,
 	set: (val) => setPage(val),
 })
 
-const currentPageSize = computed({
-	get: () => pagination.value.pageSize,
-	set: (val) => setPageSize(val),
+const currentlimit = computed({
+	get: () => pagination.value.limit,
+	set: (val) => setlimit(val),
 })
 
 const confirmDelete = (id: string) => {

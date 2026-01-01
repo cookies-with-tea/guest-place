@@ -2,16 +2,12 @@
 	<div class="users-table">
 		<el-table :data="users" v-loading="isLoading" border>
 			<el-table-column prop="email" label="Email" min-width="200" />
-			<el-table-column label="Name" min-width="200">
-				<template #default="{ row }">
-					{{ [row.firstName, row.secondName, row.lastName].filter(Boolean).join(' ') }}
-				</template>
-			</el-table-column>
+			<el-table-column prop="name" label="Name" min-width="200" />
 			<el-table-column prop="role" label="Role" width="120" />
 			<el-table-column prop="status" label="Status" width="140" />
 			<el-table-column label="Actions" width="160">
 				<template #default="scope">
-					<el-button v-if="scope.row" size="small" type="primary" plain @click="openEditModal(scope.row)">
+					<el-button v-if="scope.row" size="small" type="primary" plain @click="openEditModal(scope.row.uuid)">
 						Edit
 					</el-button>
 					<el-button v-if="scope.row" size="small" type="danger" plain @click="confirmDelete(scope.row.uuid)">
@@ -23,11 +19,11 @@
 
 		<div class="users-table__pagination">
 			<el-pagination
-				v-model:current-page="currentPage"
-				v-model:page-size="currentPageSize"
+				v-model:current-page="pagination.page"
+				v-model:page-size="pagination.limit"
 				:total="pagination.total"
 				layout="prev, pager, next, total"
-				@size-change="setPageSize"
+				@size-change="setlimit"
 				@current-change="setPage"
 			/>
 		</div>
@@ -35,21 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { useUsers } from '#entities/user/lib/composables'
 
-const { users, isLoading, pagination, openEditModal, handleDelete, setPage, setPageSize } = useUsers()
-
-const currentPage = computed({
-	get: () => pagination.value.page,
-	set: setPage,
-})
-
-const currentPageSize = computed({
-	get: () => pagination.value.pageSize,
-	set: setPageSize,
-})
+const { users, isLoading, pagination, openEditModal, handleDelete, setPage, setlimit } = useUsers()
 
 const confirmDelete = (uuid: string) => {
 	ElMessageBox.confirm('Delete user?', 'Confirm', {

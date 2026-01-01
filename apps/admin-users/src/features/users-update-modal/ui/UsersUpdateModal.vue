@@ -1,6 +1,6 @@
 <template>
-	<el-dialog :title="isEditing ? 'Edit user' : 'Add user'" v-model="isModalOpen" width="600px">
-		<el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
+	<el-dialog :title="isEditing ? 'Edit user' : 'Add user'" v-model="isModalOpen" width="600px" @closed="handleModalClose">
+		<el-form :model="form" :rules="rules" ref="formRef" label-width="120px" @submit.prevent>
 			<el-form-item label="Email" prop="email">
 				<el-input v-model="form.email" />
 			</el-form-item>
@@ -41,10 +41,20 @@
 					<el-option label="In moderation" :value="UserStatus.InModeration" />
 				</el-select>
 			</el-form-item>
+			<el-upload
+				:auto-upload="false"
+				action="#"
+				class="avatar-uploader"
+				:on-change="onFilesChange"
+				:show-file-list="false"
+			>
+				<img v-if="avtarUrl" :src="avtarUrl" class="avatar" />
+				<el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+			</el-upload>
 		</el-form>
 
 		<template #footer>
-			<el-button @click="closeModal">Cancel</el-button>
+			<el-button @click="handleModalClose">Cancel</el-button>
 			<el-button type="primary" :loading="isSubmitting" @click="submit">
 				{{ isEditing ? 'Save' : 'Create' }}
 			</el-button>
@@ -53,15 +63,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
-import { useUsers } from '#entities/user/lib/composables'
-import { UserRole, UserStatus } from '#entities/user/model'
+import type { IUserCreateUpdate } from '#entities/user'
+import { UserRole, UserStatus, useUsers } from '#entities/user'
+import { uploadMedia } from '@admin-panel/lib'
+import { Plus } from '@element-plus/icons-vue'
+import type { FormInstance, FormRules, UploadProps } from 'element-plus'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 
-const { isModalOpen, editingUser, closeModal, handleSubmit, isSubmitting } = useUsers()
+const rules = computed<FormRules>(() => ({
+	email: [{ required: true, message: 'Email is required', trigger: 'blur' }],
+	password: [{ required: !isEditing.value, message: 'Password is required', trigger: 'blur' }],
+}))
 
-const formRef = ref<FormInstance>()
-const form = ref({
+const { isModalOpen, closeModal, handleSubmit, isSubmitting, editingUser, editingUserUuid } = useUsers()
+
+const formRef = useTemplateRef<FormInstance>('formRef')
+
+const avtarUrl = ref<string>('')
+
+const form = ref<IUserCreateUpdate>({
 	email: '',
 	password: '',
 	firstName: '',
@@ -69,48 +89,69 @@ const form = ref({
 	lastName: '',
 	phone: '',
 	birthDate: '',
-	role: undefined as UserRole | undefined,
-	status: undefined as UserStatus | undefined,
+	role: UserRole.User,
+	status: UserStatus.Active,
+	avatar: '',
+	city: '',
+	gender: '',
+	street: '',
 })
 
-const isEditing = computed(() => !!editingUser.value?.uuid)
+const isEditing = computed(() => !!editingUserUuid.value)
 
-watch(isModalOpen, (isOpen) => {
-	if (isOpen && editingUser.value) {
-		const u = editingUser.value
+watch([isModalOpen, editingUser, editingUserUuid], ([isOpen, user, userUuid]) => {
+  formRef.value?.clearValidate()
+
+	if (isOpen && user?.data && userUuid) {
+		const u = user.data
 
 		form.value = {
-			email: u.email,
-			password: '',
-			firstName: u.firstName,
-			secondName: u.secondName,
+			email: u.email || '',
+			password: u.password || '',
+			firstName: u.firstName || '',
+			secondName: u.secondName || '',
 			lastName: u.lastName || '',
 			phone: u.phone || '',
 			birthDate: u.birthDate || '',
-			role: u.role,
-			status: u.status,
-		}
-	} else {
-		form.value = {
-			email: '',
-			password: '',
-			firstName: '',
-			secondName: '',
-			lastName: '',
-			phone: '',
-			birthDate: '',
-			role: undefined,
-			status: undefined,
+			role: u.role || UserRole.User,
+			status: u.status || UserStatus.Active,
+			avatar: u.avatar || '',
+			city: u.city || '',
+			gender: u.gender || '',
+			street: u.street || '',
 		}
 	}
 })
 
-const rules = computed<FormRules>(() => ({
-	email: [{ required: true, message: 'Email is required', trigger: 'blur' }],
-	password: [{ required: !isEditing.value, message: 'Password is required', trigger: 'blur' }],
-	firstName: [{ required: true, message: 'First name is required', trigger: 'blur' }],
-	secondName: [{ required: true, message: 'Second name is required', trigger: 'blur' }],
-}))
+const onFilesChange: UploadProps['onChange'] = async (file) => {
+	avtarUrl.value = (await uploadMedia(file.raw!))?.url ?? ''
+}
+
+const handleModalClose = () => {
+  closeModal()
+
+  resetForm()
+}
+
+const resetForm = () => {
+	avtarUrl.value = ''
+
+	form.value = {
+		email: '',
+		password: '',
+		firstName: '',
+		secondName: '',
+		lastName: '',
+		phone: '',
+		birthDate: '',
+		role: UserRole.User,
+		status: UserStatus.Active,
+		avatar: '',
+		city: '',
+		gender: '',
+		street: '',
+	}
+}
 
 const submit = async () => {
 	await formRef.value?.validate()
@@ -129,7 +170,7 @@ const submit = async () => {
 		})
 	} else {
 		handleSubmit({
-			uuid: editingUser.value!.uuid,
+			uuid: editingUserUuid.value,
 			email: form.value.email,
 			firstName: form.value.firstName,
 			secondName: form.value.secondName,
@@ -142,3 +183,34 @@ const submit = async () => {
 	}
 }
 </script>
+
+<style scoped>
+.avatar-uploader .avatar {
+	width: 178px;
+	height: 178px;
+	display: block;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+	border: 1px dashed var(--el-border-color);
+	border-radius: 6px;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+	border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+	font-size: 28px;
+	color: #8c939d;
+	width: 178px;
+	height: 178px;
+	text-align: center;
+}
+</style>
