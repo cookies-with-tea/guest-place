@@ -39,3 +39,24 @@ export const fetchData = async <T>(
     }
   }
 }
+
+export const fakeFetch = async <T>(
+  url: string,
+  options: any,
+  mock?: T
+): Promise<{ data: { value: { data: T | undefined } }; error: { value: undefined } }> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: {
+          value: {
+            data: mock,
+          },
+        },
+        error: {
+          value: undefined,
+        },
+      })
+    }, 300)
+  })
+}
