@@ -7,8 +7,8 @@ export interface IAuthRefreshUpdateRequest {
 }
 
 export interface IAuthRefreshResponse {
-  access_expires_in: number
-  access_token: string
-  refresh_expires_in: number
-  refresh_token: string
+  accessExpiresIn: number
+  accessToken: string
+  refreshExpiresIn: number
+  refreshToken: string
 }
