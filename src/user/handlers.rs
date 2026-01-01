@@ -399,7 +399,7 @@ async fn delete_one(
     }
 }
 
-// FIXME: get all move to protected router
+// TODO: get all move to protected router
 pub fn public_router() -> Router<Arc<AppState>> {
     Router::new().route("/", post(create)).route("/", get(get_all))
 }
