@@ -1,6 +1,6 @@
 import { ref, watch, computed } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { UserFilters, IUserResponse, IUserCreateUpdate } from '../../model'
+import type { UserFilters, IUserCreateUpdate } from '../../model'
 import { USERS_QUERY_KEY } from '../../model'
 import { userApi } from '../../api'
 import type { IPagination } from '@admin-panel/lib'
@@ -27,7 +27,6 @@ export const useUsers = () => {
 		total: 0,
 		totalPages: 0,
 	})
-
 
 	// === Query ===
 	const queryKey = computed(() => [
@@ -96,14 +95,16 @@ export const useUsers = () => {
 		mutationFn: create,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+
 			closeModal()
 		},
 	})
 
 	const updateMutation = useMutation({
-		mutationFn: update,
+		mutationFn: ({ id, data }: { id: string; data: IUserCreateUpdate }) => update(id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+
 			closeModal()
 		},
 	})
@@ -118,7 +119,8 @@ export const useUsers = () => {
 	const handleSubmit = (data: IUserCreateUpdate) => {
 		if ('uuid' in data) {
 			const { uuid, ...rest } = data
-			updateMutation.mutate({ uuid: data.uuid!, ...rest })
+
+			updateMutation.mutate({ id: uuid!, data: rest })
 		} else {
 			createMutation.mutate(data)
 		}
@@ -133,8 +135,9 @@ export const useUsers = () => {
 		pagination.value.page = page
 	}
 
-  const setlimit = (limit: number) => {
+	const setlimit = (limit: number) => {
 		pagination.value.limit = limit
+
 		pagination.value.page = 1
 	}
 

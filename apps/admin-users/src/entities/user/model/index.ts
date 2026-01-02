@@ -23,9 +23,9 @@ export interface IUserResponse {
 }
 
 export interface IUserCreateUpdate {
-  uuid?: string
-  email?: string
-  password?: string
+	uuid?: string
+	email?: string
+	password?: string
 	firstName?: string
 	secondName?: string
 	lastName?: string

@@ -1,5 +1,10 @@
 <template>
-	<el-dialog :title="isEditing ? 'Edit user' : 'Add user'" v-model="isModalOpen" width="600px" @closed="handleModalClose">
+	<el-dialog
+		:title="isEditing ? 'Edit user' : 'Add user'"
+		v-model="isModalOpen"
+		width="600px"
+		@closed="handleModalClose"
+	>
 		<el-form :model="form" :rules="rules" ref="formRef" label-width="120px" @submit.prevent>
 			<el-form-item label="Email" prop="email">
 				<el-input v-model="form.email" />
@@ -48,7 +53,7 @@
 				:on-change="onFilesChange"
 				:show-file-list="false"
 			>
-				<img v-if="avtarUrl" :src="avtarUrl" class="avatar" />
+				<img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
 				<el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
 			</el-upload>
 		</el-form>
@@ -79,7 +84,7 @@ const { isModalOpen, closeModal, handleSubmit, isSubmitting, editingUser, editin
 
 const formRef = useTemplateRef<FormInstance>('formRef')
 
-const avtarUrl = ref<string>('')
+const avatarUrl = ref<string>('')
 
 const form = ref<IUserCreateUpdate>({
 	email: '',
@@ -100,41 +105,45 @@ const form = ref<IUserCreateUpdate>({
 const isEditing = computed(() => !!editingUserUuid.value)
 
 watch([isModalOpen, editingUser, editingUserUuid], ([isOpen, user, userUuid]) => {
-  formRef.value?.clearValidate()
+	formRef.value?.clearValidate()
 
 	if (isOpen && user?.data && userUuid) {
-		const u = user.data
+		setFormData(user.data)
 
-		form.value = {
-			email: u.email || '',
-			password: u.password || '',
-			firstName: u.firstName || '',
-			secondName: u.secondName || '',
-			lastName: u.lastName || '',
-			phone: u.phone || '',
-			birthDate: u.birthDate || '',
-			role: u.role || UserRole.User,
-			status: u.status || UserStatus.Active,
-			avatar: u.avatar || '',
-			city: u.city || '',
-			gender: u.gender || '',
-			street: u.street || '',
-		}
+		avatarUrl.value = user.data.avatar || ''
 	}
 })
 
+const setFormData = (user: IUserCreateUpdate) => {
+	form.value = {
+		email: user.email || '',
+		password: user.password || '',
+		firstName: user.firstName || '',
+		secondName: user.secondName || '',
+		lastName: user.lastName || '',
+		phone: user.phone || '',
+		birthDate: user.birthDate || '',
+		role: user.role || UserRole.User,
+		status: user.status || UserStatus.Active,
+		avatar: user.avatar || '',
+		city: user.city || '',
+		gender: user.gender || '',
+		street: user.street || '',
+	}
+}
+
 const onFilesChange: UploadProps['onChange'] = async (file) => {
-	avtarUrl.value = (await uploadMedia(file.raw!))?.url ?? ''
+	avatarUrl.value = (await uploadMedia(file.raw!))?.url ?? ''
 }
 
 const handleModalClose = () => {
-  closeModal()
+	closeModal()
 
-  resetForm()
+	resetForm()
 }
 
 const resetForm = () => {
-	avtarUrl.value = ''
+	avatarUrl.value = ''
 
 	form.value = {
 		email: '',
@@ -158,27 +167,20 @@ const submit = async () => {
 
 	if (!isEditing.value) {
 		handleSubmit({
-			email: form.value.email,
-			password: form.value.password,
-			firstName: form.value.firstName,
-			secondName: form.value.secondName,
+			...form.value,
+			avatar: avatarUrl.value,
+			birthDate: form.value.birthDate || undefined,
 			lastName: form.value.lastName || undefined,
 			phone: form.value.phone || undefined,
-			birthDate: form.value.birthDate || undefined,
-			role: form.value.role,
-			status: form.value.status,
 		})
 	} else {
 		handleSubmit({
+			...form.value,
 			uuid: editingUserUuid.value,
-			email: form.value.email,
-			firstName: form.value.firstName,
-			secondName: form.value.secondName,
+			avatar: avatarUrl.value,
+			birthDate: form.value.birthDate || undefined,
 			lastName: form.value.lastName || undefined,
 			phone: form.value.phone || undefined,
-			birthDate: form.value.birthDate || undefined,
-			role: form.value.role,
-			status: form.value.status,
 		})
 	}
 }
@@ -194,12 +196,12 @@ const submit = async () => {
 
 <style>
 .avatar-uploader .el-upload {
+	position: relative;
 	border: 1px dashed var(--el-border-color);
 	border-radius: 6px;
-	cursor: pointer;
-	position: relative;
-	overflow: hidden;
 	transition: var(--el-transition-duration-fast);
+	cursor: pointer;
+	overflow: hidden;
 }
 
 .avatar-uploader .el-upload:hover {
@@ -207,10 +209,10 @@ const submit = async () => {
 }
 
 .el-icon.avatar-uploader-icon {
-	font-size: 28px;
-	color: #8c939d;
 	width: 178px;
 	height: 178px;
+	font-size: 28px;
 	text-align: center;
+	color: #8c939d;
 }
 </style>
