@@ -77,7 +77,7 @@
     </div>
 
     <div class="box">
-      <UiTabs :tabs />
+      <UiTabs v-model="activeTab" :tabs />
     </div>
   </div>
 </template>
@@ -88,6 +88,26 @@ import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import UiInput from '../shared/ui/ui-input'
 import UiTabs from '../shared/ui/ui-tabs'
+
+const Comp1 = defineAsyncComponent(() =>
+  import('../shared/ui/Comp1.vue')
+)
+
+const Comp2 = defineAsyncComponent(() =>
+  import('../shared/ui/Comp2.vue')
+)
+
+const Comp3 = defineAsyncComponent(() =>
+  import('../shared/ui/Comp3.vue')
+)
+
+const Comp4 = defineAsyncComponent(() =>
+  import('../shared/ui/Comp4.vue')
+)
+
+const Comp5 = defineAsyncComponent(() =>
+  import('../shared/ui/Comp5.vue')
+)
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
@@ -112,16 +132,33 @@ const faq = ref([
   },
 ])
 
+const activeTab = ref('home')
+
 const tabs = [
   {
     title: 'home',
-    content: UiIcon,
+    content: Comp1,
     name: 'home'
   },
   {
     title: 'user',
-    content: UiIcon,
+    content: Comp2,
     name: 'user'
+  },
+  {
+    title: 'Comp3',
+    content: Comp3,
+    name: 'Comp3'
+  },
+  {
+    title: 'Comp4',
+    content: Comp4,
+    name: 'Comp4'
+  },
+  {
+    title: 'Comp5',
+    content: Comp5,
+    name: 'Comp5'
   }
 ]
 </script>
