@@ -46,6 +46,18 @@
 					<el-option label="In moderation" :value="UserStatus.InModeration" />
 				</el-select>
 			</el-form-item>
+			<el-form-item label="Street">
+				<el-input v-model="form.street" />
+			</el-form-item>
+			<el-form-item label="City">
+				<el-input v-model="form.city" />
+			</el-form-item>
+			<el-form-item label="Gender">
+				<el-radio-group v-model="form.gender">
+					<el-radio label="male">Male</el-radio>
+					<el-radio label="female">Female</el-radio>
+				</el-radio-group>
+			</el-form-item>
 			<el-upload
 				:auto-upload="false"
 				action="#"

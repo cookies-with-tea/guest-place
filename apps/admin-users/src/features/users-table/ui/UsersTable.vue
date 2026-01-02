@@ -1,16 +1,22 @@
 <template>
 	<div class="users-table">
-		<el-table :data="users" v-loading="isLoading" border>
+		<el-table
+			:data="users"
+			v-loading="isLoading"
+			border
+			@row-click="(row: IUserResponse) => openDetailDrawer(row.uuid!)"
+		>
 			<el-table-column prop="email" label="Email" min-width="200" />
-			<el-table-column prop="name" label="Name" min-width="200" />
+			<el-table-column prop="name" label="Full Name" min-width="200" />
+			<el-table-column prop="phone" label="Phone" width="140" />
 			<el-table-column prop="role" label="Role" width="120" />
 			<el-table-column prop="status" label="Status" width="140" />
-			<el-table-column label="Actions" width="160">
+			<el-table-column label="Actions" width="240">
 				<template #default="scope">
-					<el-button v-if="scope.row" size="small" type="primary" plain @click="openEditModal(scope.row.uuid)">
+					<el-button v-if="scope.row" size="small" type="warning" plain @click.stop="openEditModal(scope.row.uuid)">
 						Edit
 					</el-button>
-					<el-button v-if="scope.row" size="small" type="danger" plain @click="confirmDelete(scope.row.uuid)">
+					<el-button v-if="scope.row" size="small" type="danger" plain @click.stop="confirmDelete(scope.row.uuid)">
 						Delete
 					</el-button>
 				</template>
@@ -32,9 +38,9 @@
 
 <script setup lang="ts">
 import { ElMessageBox } from 'element-plus'
-import { useUsers } from '#entities/user/lib/composables'
+import { useUsers, type IUserResponse } from '#entities/user'
 
-const { users, isLoading, pagination, openEditModal, handleDelete, setPage, setlimit } = useUsers()
+const { users, isLoading, pagination, openEditModal, openDetailDrawer, handleDelete, setPage, setlimit } = useUsers()
 
 const confirmDelete = (uuid: string) => {
 	ElMessageBox.confirm('Delete user?', 'Confirm', {
