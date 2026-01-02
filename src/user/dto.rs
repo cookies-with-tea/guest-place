@@ -5,16 +5,16 @@ use uuid::Uuid;
 use sqlx::FromRow;
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
-#[sqlx(type_name = "user_role", rename_all = "lowercase")]
-#[serde(rename_all = "lowercase")]
+#[sqlx(type_name = "user_role", rename_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum UserRole {
     Admin,
     User,
 }
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
-#[sqlx(type_name = "user_status", rename_all = "lowercase")]
-#[serde(rename_all = "lowercase")]
+#[sqlx(type_name = "user_status", rename_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum UserStatus {
     Active,
     Inactive,
