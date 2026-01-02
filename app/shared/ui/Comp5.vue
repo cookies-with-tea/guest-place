@@ -1,13 +1,7 @@
 <template>
-<div>
-  content 5
-</div>
+  <div> content 5 </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts"></script>
 
-</script>
-
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

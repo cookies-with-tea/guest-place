@@ -6,7 +6,7 @@
         :key="tab.name"
         type="button"
         class="ui-tabs__item"
-        :class="{'ui-tabs--active': model === tab.name}"
+        :class="{ 'ui-tabs--active': model === tab.name }"
         @click="handleClickTab(tab)"
       >
         {{ tab.title }}
@@ -20,19 +20,19 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue';
+import type { Component } from 'vue'
 import { computed } from 'vue'
 
-const model = defineModel<string>({ default: ''})
+const model = defineModel<string>({ default: '' })
 
 interface ITab {
-  title: string,
-  content: Component,
-  name: string,
+  title: string
+  content: Component
+  name: string
 }
 
 interface IProps {
-  tabs: ITab[],
+  tabs: ITab[]
   variant?: 'primary' | 'secondary'
 }
 
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<IProps>(), {
 })
 
 const activeTab = computed(() => {
-  return props.tabs!.find(tab => tab.name === model.value)
+  return props.tabs!.find((tab) => tab.name === model.value)
 })
 
 // const classes = computed(() => {
@@ -56,7 +56,6 @@ const activeTab = computed(() => {
 const handleClickTab = (tab: ITab) => {
   model.value = tab.name
 }
-
 </script>
 
 <style scoped lang="scss">
@@ -68,7 +67,7 @@ const handleClickTab = (tab: ITab) => {
     width: 100%;
 
     &::before {
-      content: "";
+      content: '';
       top: 0;
       left: 0;
       width: 100%;

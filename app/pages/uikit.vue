@@ -61,19 +61,9 @@
     </div>
 
     <div class="box">
-      <UiInput
-        v-model="inputValue"
-        placeholder="Ваше имя"
-        type="password"
-        size="md"
-        show-password
-      />
+      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
 
-      <UiInput
-        v-model="textareaValue"
-        placeholder="Ваше имя"
-        type="textarea"
-      />
+      <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
     </div>
 
     <div class="box">
@@ -83,31 +73,20 @@
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiIcon } from '#shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
-import UiInput from '../shared/ui/ui-input'
 import UiTabs from '../shared/ui/ui-tabs'
 
-const Comp1 = defineAsyncComponent(() =>
-  import('../shared/ui/Comp1.vue')
-)
+const Comp1 = defineAsyncComponent(() => import('../shared/ui/Comp1.vue'))
 
-const Comp2 = defineAsyncComponent(() =>
-  import('../shared/ui/Comp2.vue')
-)
+const Comp2 = defineAsyncComponent(() => import('../shared/ui/Comp2.vue'))
 
-const Comp3 = defineAsyncComponent(() =>
-  import('../shared/ui/Comp3.vue')
-)
+const Comp3 = defineAsyncComponent(() => import('../shared/ui/Comp3.vue'))
 
-const Comp4 = defineAsyncComponent(() =>
-  import('../shared/ui/Comp4.vue')
-)
+const Comp4 = defineAsyncComponent(() => import('../shared/ui/Comp4.vue'))
 
-const Comp5 = defineAsyncComponent(() =>
-  import('../shared/ui/Comp5.vue')
-)
+const Comp5 = defineAsyncComponent(() => import('../shared/ui/Comp5.vue'))
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
@@ -138,36 +117,34 @@ const tabs = [
   {
     title: 'home',
     content: Comp1,
-    name: 'home'
+    name: 'home',
   },
   {
     title: 'user',
     content: Comp2,
-    name: 'user'
+    name: 'user',
   },
   {
     title: 'Comp3',
     content: Comp3,
-    name: 'Comp3'
+    name: 'Comp3',
   },
   {
     title: 'Comp4',
     content: Comp4,
-    name: 'Comp4'
+    name: 'Comp4',
   },
   {
     title: 'Comp5',
     content: Comp5,
-    name: 'Comp5'
-  }
+    name: 'Comp5',
+  },
 ]
 </script>
 
 <style lang="scss" scoped>
 .ui-kit {
-  display: grid;
   padding: 20px;
-  gap: 20px;
 
   &__accordion {
     max-width: 40%;
