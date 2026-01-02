@@ -5,9 +5,9 @@ import { fileURLToPath, resolve } from 'node:url'
 import { APPS_PORTS } from '@admin-panel/lib'
 
 export default defineConfig(({ mode }) => {
-	const rootDir = resolve(__dirname, '../../')
+	const rootDir = resolve(__dirname, '../')
 
-	const env = loadEnv(mode, rootDir, '')
+	const env = loadEnv(mode, rootDir)
 
 	return {
 		plugins: [

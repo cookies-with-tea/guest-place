@@ -2,7 +2,7 @@ import type { TranslationFilters, Translation, Pagination } from '../model'
 
 export interface FetchTranslationsParams extends TranslationFilters {
 	page: number
-	pageSize: number
+	limit: number
 }
 
 export const fetchTranslations = async (
@@ -27,14 +27,14 @@ export const fetchTranslations = async (
 		return byNs && byLang && bySearch
 	})
 
-	const start = (params.page - 1) * params.pageSize
-	const paginated = filtered.slice(start, start + params.pageSize)
+	const start = (params.page - 1) * params.limit
+	const paginated = filtered.slice(start, start + params.limit)
 
 	return {
 		data: paginated,
 		pagination: {
 			page: params.page,
-			pageSize: params.pageSize,
+			limit: params.limit,
 			total: filtered.length,
 		},
 	}

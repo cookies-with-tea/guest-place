@@ -14,14 +14,14 @@ export const useTranslations = () => {
 
 	const pagination = ref({
 		page: 1,
-		pageSize: 10,
+		limit: 10,
 		total: 0,
 	})
 
 	// === Query ===
 	const queryKey = computed(() => [
 		TRANSLATIONS_QUERY_KEY,
-		{ ...filters.value, page: pagination.value.page, pageSize: pagination.value.pageSize },
+		{ ...filters.value, page: pagination.value.page, limit: pagination.value.limit },
 	])
 
 	const queryClient = useQueryClient()
@@ -32,7 +32,7 @@ export const useTranslations = () => {
 			fetchTranslations({
 				...filters.value,
 				page: pagination.value.page,
-				pageSize: pagination.value.pageSize,
+				limit: pagination.value.limit,
 			}),
 	})
 
@@ -111,8 +111,8 @@ export const useTranslations = () => {
 		pagination.value.page = page
 	}
 
-	const setPageSize = (size: number) => {
-		pagination.value.pageSize = size
+	const setlimit = (size: number) => {
+		pagination.value.limit = size
 
 		pagination.value.page = 1
 	}
@@ -140,6 +140,6 @@ export const useTranslations = () => {
 		handleSubmit,
 		handleDelete,
 		setPage,
-		setPageSize,
+		setlimit,
 	}
 }
