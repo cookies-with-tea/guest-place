@@ -437,7 +437,7 @@ async fn logout(
     }
 }
 
-pub fn routing() -> Router<Arc<AppState>> {
+pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
         .route("/register/key", post(check_register_key))
