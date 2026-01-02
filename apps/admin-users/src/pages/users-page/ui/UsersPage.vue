@@ -5,6 +5,7 @@
 		<UsersFilters />
 		<UsersTable />
 		<UsersUpdateModal />
+		<DrawerDetailUser />
 	</div>
 </template>
 
@@ -13,6 +14,7 @@ import { useUsers } from '#entities/user/lib/composables'
 import { UsersFilters } from '#features/users-filters'
 import { UsersUpdateModal } from '#features/users-update-modal'
 import { UsersTable } from '#features/users-table'
+import { DrawerDetailUser } from './components/drawer-detail-user'
 
 useUsers()
 </script>

@@ -6,6 +6,7 @@ import { userApi } from '../../api'
 import type { IPagination } from '@admin-panel/lib'
 
 const isModalOpen = ref(false)
+const isDetailDrawerOpen = ref(false)
 
 const { create, update, getAll, deleteById, getById } = userApi
 
@@ -84,6 +85,29 @@ export const useUsers = () => {
 		refetchEditingUser()
 	}
 
+	const openDetailDrawer = (userUuid: string) => {
+		editingUserUuid.value = userUuid
+
+		isDetailDrawerOpen.value = true
+
+		refetchEditingUser()
+	}
+
+	const closeDetailDrawer = () => {
+		isDetailDrawerOpen.value = false
+
+		editingUserUuid.value = ''
+	}
+
+	watch(
+		() => editingUserUuid.value,
+		(newEditingUserUuid) => {
+			if (!newEditingUserUuid) {
+				closeModal()
+			}
+		}
+	)
+
 	const closeModal = () => {
 		isModalOpen.value = false
 
@@ -150,6 +174,7 @@ export const useUsers = () => {
 		filters,
 		pagination,
 		isModalOpen,
+		isDetailDrawerOpen,
 
 		// data
 		users,
@@ -161,6 +186,8 @@ export const useUsers = () => {
 		openAddModal,
 		openEditModal,
 		closeModal,
+		openDetailDrawer,
+		closeDetailDrawer,
 		handleSubmit,
 		handleDelete,
 		setPage,

@@ -10,16 +10,20 @@ export enum UserStatus {
 }
 
 export interface IUserResponse {
-	uuid: string
-	email: string
+	uuid?: string
+	email?: string
+	password?: string
 	firstName?: string
 	secondName?: string
 	lastName?: string
+	birthDate?: string
+	role?: UserRole
+	status?: UserStatus
 	phone?: string
 	avatar?: string
-	birthDate?: string
-	createdAt?: string
-	updatedAt?: string
+	street?: string
+	city?: string
+	gender?: string
 }
 
 export interface IUserCreateUpdate {

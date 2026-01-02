@@ -18,7 +18,7 @@
 		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
 		"dev:shell": "turbo run dev --filter=./apps/admin-shell",
 		"preview:mf": "pnpm prebuild && turbo run preview --parallel --filter=./apps/* --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
-		"dev:mf": "run-p \"preview:mf\" \"dev:shell\"",
+		"dev:all": "run-p \"preview:mf\" \"dev:shell\"",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"test": "pnpm test:unit",
 		"test:unit": "turbo run test:unit --parallel",
