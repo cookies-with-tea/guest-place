@@ -30,6 +30,11 @@ pub struct AuthRefreshTokenDTO {
     pub refresh_token: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct LogoutRequestDTO{
+    pub refresh_token: String,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: Uuid,

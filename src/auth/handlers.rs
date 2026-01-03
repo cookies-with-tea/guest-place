@@ -1,6 +1,5 @@
 use crate::auth::dto::{
-    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
-    RegisterRequestDTO,
+    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims, LogoutRequestDTO, RegisterRequestDTO
 };
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
@@ -14,6 +13,7 @@ use axum::Router;
 use axum::{extract::Extension, extract::State, http::StatusCode, Json};
 use chrono::{Duration, Utc};
 use dotenv::dotenv;
+use futures::future::err;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::{query_as, Row};
 use std::env;
@@ -408,7 +408,7 @@ pub async fn refresh(
     ),
     tag = "Auth"
 )]
-async fn logout(
+async fn _logout(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Json(payload): Json<AuthResponseDTO>,
@@ -437,11 +437,68 @@ async fn logout(
     }
 }
 
-pub fn routing() -> Router<Arc<AppState>> {
+
+
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/logout",
+    responses(
+        (status = 200, description = "Успешный выход"),
+        (status = 401, description = "Неавторизован"),
+        (status = 500, description = "Ошибка базы данных")
+    ),
+    tag = "Auth",
+    security(
+        ("bearerAuth" = [])
+    )
+)]
+pub async fn logout(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(user_id): Extension<uuid::Uuid>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query(
+        "DELETE FROM refresh_token WHERE user_id = $1"
+    )
+    .bind(user_id)
+    .execute(&state.pool)
+    .await;
+
+    match result {
+        Ok(_) => {
+            let msg = state.i18n.t("auth.logout_success", &locale).await;
+            into_api_response(
+                StatusCode::OK,
+                None,
+                None,
+                Some(vec![msg]),
+            )
+        }
+        Err(_) => {
+            let msg = state.i18n.t("auth.logout_db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+
+pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
         .route("/register/key", post(check_register_key))
         .route("/login", post(login))
-        .route("/logout", post(logout))
+        // .route("/logout", post(logout))
         .route("/refresh", post(refresh))
+}
+
+
+pub fn private_router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/logout", post(logout))
 }

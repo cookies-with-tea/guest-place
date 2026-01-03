@@ -30,7 +30,7 @@ impl DatabaseConfig {
 
     pub fn connect_url(&self) -> String {
         format!(
-            "{}://{}:{}@{}/{}",
+            "{}://{}:{}@{}:5434/{}",
             self.db_engine, self.db_user, self.db_password, self.db_host, self.db_name
         )
     }
@@ -38,6 +38,7 @@ impl DatabaseConfig {
 
 pub async fn create_pool(config: &AppConfig) -> sqlx::Pool<sqlx::Postgres> {
     let connect_url = config.db_config.connect_url();
+    println!("{}", connect_url);
 
     PgPoolOptions::new()
         .max_connections(5)
