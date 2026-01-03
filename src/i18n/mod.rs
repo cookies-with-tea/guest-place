@@ -1,5 +1,6 @@
 pub mod handlers;
 pub mod middlewares;
+mod dto;
 
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;

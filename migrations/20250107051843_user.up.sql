@@ -13,8 +13,11 @@ CREATE TABLE IF NOT EXISTS guest_user
     birth_date  DATE,
     password_hash    TEXT             NOT NULL DEFAULT '',
     avatar TEXT NOT NULL DEFAULT '',
-    created_at  TIMESTAMP        NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP        NOT NULL DEFAULT NOW(),
+    street TEXT NOT NULL DEFAULT '',
+    gender TEXT NOT NULL DEFAULT '',
+    city TEXT NOT NULL DEFAULT '',
     role        user_role  NOT NULL DEFAULT 'user',
-    status      user_status       NOT NULL DEFAULT 'active'
+    status      user_status       NOT NULL DEFAULT 'active',
+    created_at  TIMESTAMP        NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP        NOT NULL DEFAULT NOW()
 );
