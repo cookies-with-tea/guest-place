@@ -6,7 +6,7 @@
         :key="tab.name"
         type="button"
         class="ui-tabs__item"
-        :class="{ 'ui-tabs--active': model === tab.name }"
+        :class="activeTabClass(tab.name)"
         @click="handleClickTab(tab)"
       >
         {{ tab.title }}
@@ -14,7 +14,13 @@
     </div>
 
     <div class="ui-tabs__content">
-      <component :is="activeTab.content" />
+      <!--TODO:
+        Сделать скелетон или лоудер,чтоб
+        при ассинхроной подгрузке компонента контент не прыгал
+      -->
+        <KeepAlive include="Comp1">
+          <component :is="activeTab.content" />
+        </KeepAlive>
     </div>
   </div>
 </template>
@@ -44,14 +50,8 @@ const activeTab = computed(() => {
   return props.tabs!.find((tab) => tab.name === model.value)
 })
 
-// const classes = computed(() => {
-//     return [
-//       {[`ui-input--${props.size}`]: props.type !== 'textarea'},
-//       {'is-disabled': props.disabled},
-//       {'is-focus': isFocusInput.value}
-//     ]
-//   }
-// )
+
+const activeTabClass = computed(() => (name: string) => ({'ui-tabs--active': model.value === name}))
 
 const handleClickTab = (tab: ITab) => {
   model.value = tab.name
@@ -103,6 +103,7 @@ const handleClickTab = (tab: ITab) => {
     box-shadow: 0 0 15px 0 #694e4b1a;
     padding: 65px;
     z-index: 100;
+    min-height: 200px;
   }
 
   &--active {

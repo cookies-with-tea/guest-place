@@ -73,12 +73,16 @@
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput } from '#shared/ui'
+import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput, UiTabs } from '#shared/ui'
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
-import UiTabs from '../shared/ui/ui-tabs'
 
-const Comp1 = defineAsyncComponent(() => import('../shared/ui/Comp1.vue'))
+// const Comp1 = defineAsyncComponent(() => import('../shared/ui/Comp1.vue'))
+
+const Comp1 = defineAsyncComponent({
+  loader: () => import('../shared/ui/Comp1.vue'),
+  name: 'Comp1'  // ← это имя будет использоваться сразу!
+})
 
 const Comp2 = defineAsyncComponent(() => import('../shared/ui/Comp2.vue'))
 
