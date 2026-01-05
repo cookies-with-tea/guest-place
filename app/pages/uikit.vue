@@ -70,7 +70,6 @@
       <UiTabs
         v-model="activeTab"
         :tabs
-        exclude="Comp1"
       />
     </div>
   </div>

@@ -11,6 +11,7 @@
       >
         {{ tab.title }}
       </button>
+
     </div>
 
     <div class="ui-tabs__content">
@@ -26,10 +27,9 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue'
 import type { Component } from 'vue'
 import { computed } from 'vue'
-
-const model = defineModel<string>({ default: '' })
 
 interface ITab {
   title: string
@@ -41,26 +41,43 @@ interface IProps {
   tabs: ITab[]
   variant?: 'primary' | 'secondary'
   exclude: string | string[]
+  isQuery: boolean
 }
+
+const route = useRoute()
+
+const model = defineModel<string>({ default: '' })
 
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
 })
 
-const activeTab = computed(() => {
-  return props.tabs.find((tab) => tab.name === model.value)?.content
-})
+// const activeTab = computed(() => {
+//   if(props.isQuery) {
+//     return props.tabs.find((tab) => tab.name === route.query.tab)?.content
+//   } else {
+//     return props.tabs.find((tab) => tab.name === model.value)?.content
+//   }
+// })
 
 const keepAlivesProps = computed(() => ({
   exclude: props.exclude ?  props.exclude: undefined
 }))
 
+watch(model, async (newValue) => {
+  await navigateTo({
+    query: {
+      tab: newValue,
+    },
+  })
+},  { immediate: true })
 
 const activeTabClass = computed(() => (name: string) => ({'ui-tabs--active': model.value === name}))
 
 const handleClickTab = (tab: ITab) => {
   model.value = tab.name
 }
+
 </script>
 
 <style scoped lang="scss">
