@@ -70,6 +70,7 @@
       <UiTabs
         v-model="activeTab"
         :tabs
+        is-query
       />
     </div>
   </div>

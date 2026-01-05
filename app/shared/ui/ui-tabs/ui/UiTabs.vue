@@ -11,7 +11,6 @@
       >
         {{ tab.title }}
       </button>
-
     </div>
 
     <div class="ui-tabs__content">
@@ -19,17 +18,16 @@
         Сделать скелетон или лоудер,чтоб
         при ассинхроной подгрузке компонента контент не прыгал
       -->
-        <KeepAlive v-bind="keepAlivesProps">
-          <component :is="activeTab" />
-        </KeepAlive>
+      <KeepAlive v-bind="keepAliveProps">
+        <component :is="currentContent" />
+      </KeepAlive>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
-import type { Component } from 'vue'
-import { computed } from 'vue'
+import { watch, computed, type Component } from 'vue'
+import { useRoute } from 'vue-router'
 
 interface ITab {
   title: string
@@ -40,44 +38,87 @@ interface ITab {
 interface IProps {
   tabs: ITab[]
   variant?: 'primary' | 'secondary'
-  exclude: string | string[]
-  isQuery: boolean
+  exclude?: string | string[]
+  isQuery?: boolean
 }
 
 const route = useRoute()
 
-const model = defineModel<string>({ default: '' })
+const currentTab = defineModel<string>({ default: '' })
 
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
 })
 
-// const activeTab = computed(() => {
-//   if(props.isQuery) {
-//     return props.tabs.find((tab) => tab.name === route.query.tab)?.content
-//   } else {
-//     return props.tabs.find((tab) => tab.name === model.value)?.content
-//   }
-// })
+const currentContent = computed(() => props.tabs.find((tab) => tab.name === currentTab.value)?.content)
 
-const keepAlivesProps = computed(() => ({
-  exclude: props.exclude ?  props.exclude: undefined
+const keepAliveProps = computed(() => ({
+  exclude: props.exclude,
 }))
 
-watch(model, async (newValue) => {
-  await navigateTo({
-    query: {
-      tab: newValue,
-    },
-  })
-},  { immediate: true })
+const activeTabClass = computed(() => (name: string) => ({ 'ui-tabs--active': currentTab.value === name }))
 
-const activeTabClass = computed(() => (name: string) => ({'ui-tabs--active': model.value === name}))
-
-const handleClickTab = (tab: ITab) => {
-  model.value = tab.name
+const setDefaultName = () => {
+  currentTab.value = props.tabs[0]?.name as string
 }
 
+const setModel = async () => {
+  if (props.isQuery) {
+    const tab = route.query?.tab as string
+
+    if (tab) {
+      currentTab.value = tab
+
+      return
+    }
+
+    if (props.tabs?.length) {
+      setDefaultName()
+
+      return
+    }
+
+    return
+  }
+
+  if (route.query) {
+    await navigateTo({
+      query: {},
+    })
+  }
+
+  setDefaultName()
+}
+
+const changeQuery = async (tab?: string) => {
+  if (!tab) {
+    return
+  }
+
+  await navigateTo({
+    query: {
+      tab,
+    },
+  })
+}
+
+watch(currentTab, (value) => {
+  if (!props.isQuery) {
+    return
+  }
+
+  changeQuery(value)
+})
+
+onMounted(() => {
+  setModel()
+
+  changeQuery()
+})
+
+const handleClickTab = (tab: ITab) => {
+  currentTab.value = tab.name
+}
 </script>
 
 <style scoped lang="scss">
