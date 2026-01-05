@@ -18,8 +18,8 @@
         Сделать скелетон или лоудер,чтоб
         при ассинхроной подгрузке компонента контент не прыгал
       -->
-        <KeepAlive include="Comp1">
-          <component :is="activeTab.content" />
+        <KeepAlive v-bind="keepAlivesProps">
+          <component :is="activeTab" />
         </KeepAlive>
     </div>
   </div>
@@ -40,6 +40,7 @@ interface ITab {
 interface IProps {
   tabs: ITab[]
   variant?: 'primary' | 'secondary'
+  exclude: string | string[]
 }
 
 const props = withDefaults(defineProps<IProps>(), {
@@ -47,8 +48,12 @@ const props = withDefaults(defineProps<IProps>(), {
 })
 
 const activeTab = computed(() => {
-  return props.tabs!.find((tab) => tab.name === model.value)
+  return props.tabs.find((tab) => tab.name === model.value)?.content
 })
+
+const keepAlivesProps = computed(() => ({
+  exclude: props.exclude ?  props.exclude: undefined
+}))
 
 
 const activeTabClass = computed(() => (name: string) => ({'ui-tabs--active': model.value === name}))
@@ -97,13 +102,14 @@ const handleClickTab = (tab: ITab) => {
   }
 
   &__content {
+    min-height: 200px;
+
     //background-color: var(--color-white);
     position: relative;
     border-radius: 30px;
     box-shadow: 0 0 15px 0 #694e4b1a;
     padding: 65px;
     z-index: 100;
-    min-height: 200px;
   }
 
   &--active {

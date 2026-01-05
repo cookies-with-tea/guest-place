@@ -1,11 +1,11 @@
 <template>
   <div> content {{ a }} </div>
 
-  <button type="button" @click="a = a +=1" style="color: #007bff">
+  <button type="button" style="color: #007bff" @click="a = a +=1">
     click me
   </button>
 
-  <button   type="button" @click="a = 1" style="color: forestgreen; margin-left: 10px">
+  <button   type="button" style="color: forestgreen; margin-left: 10px" @click="a = 1">
     reset
   </button>
 </template>

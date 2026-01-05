@@ -67,7 +67,11 @@
     </div>
 
     <div class="box">
-      <UiTabs v-model="activeTab" :tabs />
+      <UiTabs
+        v-model="activeTab"
+        :tabs
+        exclude="Comp1"
+      />
     </div>
   </div>
 </template>
@@ -77,12 +81,7 @@ import { UiAccordion, UiAccordionItem, UiButton, UiIcon, UiInput, UiTabs } from 
 import { ref } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 
-// const Comp1 = defineAsyncComponent(() => import('../shared/ui/Comp1.vue'))
-
-const Comp1 = defineAsyncComponent({
-  loader: () => import('../shared/ui/Comp1.vue'),
-  name: 'Comp1'  // ← это имя будет использоваться сразу!
-})
+const Comp1 = defineAsyncComponent(() => import('../shared/ui/Comp1.vue'))
 
 const Comp2 = defineAsyncComponent(() => import('../shared/ui/Comp2.vue'))
 
