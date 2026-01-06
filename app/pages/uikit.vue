@@ -52,7 +52,7 @@
       <UiIcon style="color: #f90" name="shop-car" width="50px" height="50px" reverse />
     </div>
 
-    <div class="box" style="display: none">
+    <div class="box">
       <UiAccordion v-model="activeListAccordion" class="ui-kit__accordion">
         <UiAccordionItem v-for="(item, index) in faq" :key="index" :title="item.title" :name="index + 1">
           {{ item.text }}
@@ -70,7 +70,8 @@
       <UiTabs
         v-model="activeTab"
         :tabs
-        is-query
+        isQuery
+        id="tabs"
       />
     </div>
   </div>

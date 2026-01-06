@@ -29,6 +29,8 @@
 import { watch, computed, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 
+const getAttributes = useAttrs()
+
 interface ITab {
   title: string
   content: Component
@@ -59,6 +61,10 @@ const keepAliveProps = computed(() => ({
 const activeTabClass = computed(() => (name: string) => ({ 'ui-tabs--active': currentTab.value === name }))
 
 const setDefaultName = () => {
+  if (currentTab.value) {
+    return
+  }
+
   currentTab.value = props.tabs[0]?.name as string
 }
 
@@ -72,7 +78,7 @@ const setModel = async () => {
       return
     }
 
-    if (props.tabs?.length) {
+    if (props.tabs?.length && !tab && !currentTab.value) {
       setDefaultName()
 
       return
@@ -81,9 +87,14 @@ const setModel = async () => {
     return
   }
 
-  if (route.query) {
+  if (route.query?.tab) {
+    const newQuery = { ...route.query }
+
+    delete newQuery.tab
+
     await navigateTo({
-      query: {},
+      path: route.path,
+      query: newQuery,
     })
   }
 
@@ -94,11 +105,14 @@ const changeQuery = async (tab?: string) => {
   if (!tab) {
     return
   }
+  console.log(1)
+  const idTabs = getAttributes.id as string
 
   await navigateTo({
     query: {
       tab,
     },
+    hash: `#${idTabs}`
   })
 }
 
@@ -110,7 +124,22 @@ watch(currentTab, (value) => {
   changeQuery(value)
 })
 
+// watch(
+//   () => route.query.tab,
+//   (newPath, oldPath) => {
+//     console.log('URL изменился:', oldPath, '→', newPath);
+//   }
+// )
+
 onMounted(() => {
+  const queryTab = route.query?.tab as string
+
+  // if (queryTab) {
+  //   setModel()
+  //
+  //   return
+  // }
+
   setModel()
 
   changeQuery()
