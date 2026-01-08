@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-tabs">
+  <div class="ui-tabs" :class="classes">
     <div class="ui-tabs__buttons">
       <button
         v-for="tab in tabs"
@@ -76,6 +76,12 @@ const activeTabClass = computed(() => (name: string) => {
   return { 'ui-tabs--active': valueQuery.value(name)}
 })
 
+const classes = computed(() => {
+  return [
+    `ui-tabs--${props.variant}`,
+  ]
+})
+
 onMounted( async () => {
   if (!props.isQuery && !currentTab.value) {
     throw new Error('v-model is required if there is no isQuery prop')
@@ -111,8 +117,21 @@ const handleClickTab = async (tab: ITab) => {
 
 <style scoped lang="scss">
 .ui-tabs {
+  --ui-tabs-box-shadow: 0 0 15px 0 #694e4b1a;
+  --ui-tabs-color: var(--color-text-dark);
+  --ui-tabs-bg-color: var(--color-accent-2);
+  --ui-tabs-active-bg-color: var(--color-white);
+
   width: 100%;
   position: relative;
+
+  &--primary {
+
+  }
+
+  &--secondary {
+
+  }
 
   &__buttons {
     width: 100%;
@@ -125,12 +144,12 @@ const handleClickTab = async (tab: ITab) => {
       height: 100%;
       position: absolute;
       border-radius: 30px 30px 0 0;
-      box-shadow: 0 0 15px 0 #694e4b1a;
+      box-shadow: var(--ui-tabs-box-shadow);
 
       //background-color: red;
       //opacity: 0.2;
 
-      background-color: var(--color-white);
+      background-color: var(--ui-tabs-active-bg-color);
       z-index: 1;
     }
   }
@@ -141,8 +160,8 @@ const handleClickTab = async (tab: ITab) => {
     //z-index: 11111;
     position: relative;
     border-radius: 30px 30px 0 0;
-    color: var(--color-text-dark);
-    background-color: var(--color-accent-2);
+    color: var(--ui-tabs-color);
+    background-color: var(--ui-tabs-bg-color);
     padding: 40px;
     z-index: 1111111111111111;
   }
@@ -150,10 +169,10 @@ const handleClickTab = async (tab: ITab) => {
   &__content {
     min-height: 200px;
 
-    //background-color: var(--color-white);
+    //background-color: var(--ui-tabs-active-bg-color);
     position: relative;
     border-radius: 30px;
-    box-shadow: 0 0 15px 0 #694e4b1a;
+    box-shadow: var(--ui-tabs-box-shadow);
     padding: 65px;
     z-index: 100;
   }
@@ -161,8 +180,7 @@ const handleClickTab = async (tab: ITab) => {
   &--active {
     position: relative;
 
-    //box-shadow: 0 0 15px 0 #694E4B1A;
-    background-color: var(--color-white);
+    background-color: var(--ui-tabs-active-bg-color);
     z-index: 10000;
 
     //&:before {
