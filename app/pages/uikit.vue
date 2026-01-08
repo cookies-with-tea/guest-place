@@ -1,7 +1,7 @@
 <template>
   <div class="ui-kit">
     <div class="box">
-      <div id="buttons" class="column">
+      <div class="column">
         <UiButton> Показать на карте </UiButton>
 
         <UiButton variant="secondary"> Показать на карте </UiButton>
@@ -174,6 +174,7 @@ const tabs = [
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
+  background-color: #ecf4fd;
   padding: 20px;
   gap: 20px;
 
