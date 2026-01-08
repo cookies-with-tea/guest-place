@@ -1,7 +1,7 @@
 <template>
   <div class="ui-kit">
     <div class="box">
-      <div class="column">
+      <div class="column" id="buttons">
         <UiButton> Показать на карте </UiButton>
 
         <UiButton variant="secondary"> Показать на карте </UiButton>
@@ -61,14 +61,13 @@
     </div>
 
     <div class="box">
-      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password />
+      <UiInput v-model="inputValue" placeholder="Ваше имя" type="password" size="md" show-password/>
 
       <UiInput v-model="textareaValue" placeholder="Ваше имя" type="textarea" />
     </div>
 
     <div class="box">
       <UiTabs
-        v-model="activeTab"
         :tabs
         isQuery
         id="tabs"
@@ -115,7 +114,7 @@ const faq = ref([
   },
 ])
 
-const activeTab = ref('home')
+// const activeTab = ref('home')
 
 const tabs = [
   {
