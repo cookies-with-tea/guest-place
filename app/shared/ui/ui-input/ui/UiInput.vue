@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isTextarea" ref="input-wrapper" class="ui-textarea" :class="classes">
+  <div v-if="!isInput" ref="input-wrapper" class="ui-textarea" :class="classes">
     <textarea
       :id
       ref="element-ref"
@@ -86,13 +86,13 @@ const inputWrapper = useTemplateRef<HTMLDivElement>('input-wrapper')
 const elementRef = useTemplateRef<HTMLInputElement>('element-ref')
 
 const typedClasses = computed(() => {
-  return isTextarea.value ? 'input' : 'textarea'
+  return isInput.value ? 'input' : 'textarea'
 })
 
 const classes = computed(() => ({
   [`ui-${typedClasses.value}--disabled`]: props.disabled,
   [`ui-${typedClasses.value}--focus`]: isInputFocus.value,
-  [`ui-input--${props.size}`]: isTextarea.value,
+  [`ui-input--${props.size}`]: isInput.value,
 }))
 
 const passwordIconClasses = computed(() => {
@@ -101,7 +101,7 @@ const passwordIconClasses = computed(() => {
 
 const type = computed(() => (isPasswordVisible.value ? 'text' : props.type))
 
-const isTextarea = computed(() => props.type !== 'textarea')
+const isInput = computed(() => props.type !== 'textarea')
 
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
@@ -238,7 +238,6 @@ function onClickOutside(event: Event) {
 
   &__inner {
     width: 100%;
-    height: 100%;
     position: relative;
     color: var(--color-text-dark);
     z-index: 100;

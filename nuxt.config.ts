@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo'],
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxtjs/stylelint-module', 'nuxt-svgo', '@nuxt/test-utils/module'],
   svgo: {
     defaultImport: 'component',
     componentPrefix: 'ui',
@@ -32,6 +32,13 @@ export default defineNuxtConfig({
           },
         },
       ],
+    },
+  },
+  runtimeConfig: {
+    public: {
+      env: {
+        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI,
+      },
     },
   },
   build: {
@@ -51,6 +58,11 @@ export default defineNuxtConfig({
         scss: {
           additionalData: `@use "styles/library" as *;`,
         },
+      },
+    },
+    server: {
+      proxy: {
+        '/api': process.env?.NUXT_BACKEND_BASE_URI ?? '',
       },
     },
   },
