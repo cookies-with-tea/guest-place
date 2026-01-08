@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, computed, type Component } from 'vue'
+import { computed, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 
 const getAttributes = useAttrs()
@@ -56,14 +56,15 @@ const props = withDefaults(defineProps<IProps>(), {
 
 const tabQuery = computed(() =>  route.query?.tab as string)
 
+// TODO: дать нормальный неминг
+const valueQuery = computed(() => (name: string) => {
+  return props.isQuery ?
+    (tabQuery.value ?? props.tabs[0]?.name) === name:
+    currentTab.value === name
+})
+
 const currentContent = computed(() => {
-    return props.tabs.find((tab) => {
-      if (props.isQuery) {
-        return (tabQuery.value ?? props.tabs[0]?.name) === tab.name
-      } else {
-        return tab.name === currentTab.value
-      }
-    })?.content
+    return props.tabs.find(({name}) => valueQuery.value(name))?.content
   }
 )
 
@@ -72,84 +73,25 @@ const keepAliveProps = computed(() => ({
 }))
 
 const activeTabClass = computed(() => (name: string) => {
-  return { 'ui-tabs--active': props.isQuery ? (tabQuery.value ?? props.tabs[0]?.name) === name : currentTab.value === name}
+  return { 'ui-tabs--active': valueQuery.value(name)}
 })
 
-console.log(!!currentTab.value)
-const setDefaultName = () => {
-  if (currentTab.value) {
-    return
+onMounted( async () => {
+  if (!props.isQuery && !currentTab.value) {
+    throw new Error('v-model is required if there is no isQuery prop')
   }
 
-  currentTab.value = props.tabs[0]?.name as string
-}
+  if (!props.isQuery && tabQuery.value) {
+    const newQuery = { ...route.query }
 
-// const setModel = async () => {
-//   if (props.isQuery) {
-//     const tab = route.query?.tab as string
-//
-//     if (tab) {
-//       currentTab.value = tab
-//
-//       await navigateTo({
-//         query: {
-//           tab
-//         },
-//         hash: `#${idTabs}`
-//       })
-//
-//       return
-//     }
-//
-//     if (props.tabs?.length && !tab && !currentTab.value) {
-//       setDefaultName()
-//
-//       return
-//     }
-//
-//     return
-//   }
-//
-//   if (route.query?.tab) {
-//     const newQuery = { ...route.query }
-//
-//     delete newQuery.tab
-//
-//     await navigateTo({
-//       path: route.path,
-//       query: newQuery,
-//     })
-//   }
-//
-//   setDefaultName()
-// }
+    delete newQuery.tab
 
-const changeQuery = async (tab?: string) => {
-  if (!tab) {
-    return
+    await navigateTo({
+      path: route.path,
+      query: newQuery,
+    })
   }
-
-  await navigateTo({
-    query: {
-      tab,
-    },
-    hash: `#${idTabs}`
-  })
-}
-
-// watch(currentTab, (value) => {
-//   if (!props.isQuery) {
-//     return
-//   }
-//
-//   changeQuery(value)
-// })
-
-// onMounted( () => {
-//   // setModel()
-//
-//   changeQuery()
-// })
+})
 
 const handleClickTab = async (tab: ITab) => {
   if (props.isQuery) {

@@ -1,7 +1,7 @@
 <template>
   <div class="ui-kit">
     <div class="box">
-      <div class="column" id="buttons">
+      <div id="buttons" class="column">
         <UiButton> Показать на карте </UiButton>
 
         <UiButton variant="secondary"> Показать на карте </UiButton>
@@ -68,9 +68,9 @@
 
     <div class="box">
       <UiTabs
-        :tabs
-        isQuery
         id="tabs"
+        v-model="activeTab"
+        :tabs
       />
     </div>
   </div>
@@ -114,7 +114,7 @@ const faq = ref([
   },
 ])
 
-// const activeTab = ref('home')
+const activeTab = ref('home')
 
 const tabs = [
   {
