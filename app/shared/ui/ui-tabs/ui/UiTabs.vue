@@ -26,11 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, onMounted, type Component } from 'vue'
+import { computed, onMounted, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { navigateTo } from 'nuxt/app'
 
-const getAttributes = useAttrs()
+// TODO: Исправить баги. См. https://app.weeek.net/ws/867311/project/1/board/1?modals=m_task&m_task_workspace-id=867311&m_task_id=208
 
 interface ITab {
   title: string
@@ -41,49 +41,48 @@ interface ITab {
 interface IProps {
   tabs: ITab[]
   variant?: 'primary' | 'secondary'
-  exclude?: string | string[]
-  isQuery?: boolean
+  excludeFromKeepAlive?: string | string[]
+  withQuery?: boolean
+  id?: string
 }
 
 const route = useRoute()
 
 const currentTab = defineModel<string>({ default: '' })
 
-const idTabs = getAttributes.id as string
-
 const props = withDefaults(defineProps<IProps>(), {
   variant: 'primary',
+  id: 'tabs',
 })
 
 const tabQuery = computed(() => route.query?.tab as string)
 
-// TODO: дать нормальный неминг
-const valueQuery = computed(() => (name: string) => {
-  return props.isQuery ? (tabQuery.value ?? props.tabs[0]?.name) === name : currentTab.value === name
-})
+const isTabActive = (name: string) => {
+  return props.withQuery ? (tabQuery.value ?? props.tabs[0]?.name) === name : currentTab.value === name
+}
 
 const currentContent = computed(() => {
-  return props.tabs.find(({ name }) => valueQuery.value(name))?.content
+  return props.tabs.find(({ name }) => isTabActive(name))?.content
 })
 
 const keepAliveProps = computed(() => ({
-  exclude: props.exclude,
+  exclude: props.excludeFromKeepAlive,
 }))
 
-const activeTabClass = computed(() => (name: string) => {
-  return { 'ui-tabs--active': valueQuery.value(name) }
-})
+const activeTabClass = (name: string) => {
+  return { 'ui-tabs--active': isTabActive(name) }
+}
 
 const classes = computed(() => {
   return [`ui-tabs--${props.variant}`]
 })
 
 onMounted(async () => {
-  if (!props.isQuery && !currentTab.value) {
-    throw new Error('v-model is required if there is no isQuery prop')
+  if (!props.withQuery && !currentTab.value) {
+    throw new Error('v-model is required if there is no withQuery prop')
   }
 
-  if (!props.isQuery && tabQuery.value) {
+  if (!props.withQuery && tabQuery.value) {
     const newQuery = { ...route.query }
 
     delete newQuery.tab
@@ -96,14 +95,14 @@ onMounted(async () => {
 })
 
 const handleClickTab = async (tab: ITab) => {
-  if (props.isQuery) {
+  if (props.withQuery) {
     const tabPath = tab.name as string
 
     await navigateTo({
       query: {
         tab: tabPath,
       },
-      hash: `#${idTabs}`,
+      hash: `#${props.id}`,
     })
   } else {
     currentTab.value = tab.name
@@ -133,6 +132,10 @@ const handleClickTab = async (tab: ITab) => {
       position: absolute;
       border-radius: 30px 30px 0 0;
       box-shadow: var(--ui-tabs-box-shadow);
+
+      //background-color: red;
+      //opacity: 0.2;
+
       background-color: var(--ui-tabs-active-bg-color);
       z-index: 1;
     }
@@ -141,6 +144,7 @@ const handleClickTab = async (tab: ITab) => {
   &__item {
     @include typography(h4);
 
+    //z-index: 11111;
     position: relative;
     border-radius: 30px 30px 0 0;
     color: var(--ui-tabs-color);
@@ -151,6 +155,8 @@ const handleClickTab = async (tab: ITab) => {
 
   &__content {
     min-height: 200px;
+
+    //background-color: var(--ui-tabs-active-bg-color);
     position: relative;
     border-radius: 30px;
     box-shadow: var(--ui-tabs-box-shadow);
@@ -158,18 +164,31 @@ const handleClickTab = async (tab: ITab) => {
     z-index: 100;
   }
 
-  //&--primary {
-  //
-  //}
-  //
-  //&--secondary {
-  //
-  //}
+  &--primary {
+  }
+
+  &--secondary {
+  }
 
   &--active {
     position: relative;
     background-color: var(--ui-tabs-active-bg-color);
     z-index: 10000;
+
+    //&:before {
+    //  content: "";
+    //  position: absolute;
+    //  top: 0;
+    //  left: 0;
+    //  //background-color: red;
+    //  //opacity: 0.2;
+    //
+    //  background-color: var(--color-white);
+    //  box-shadow: 0 0 15px 0 #694E4B1A;
+    //  width: 100%;
+    //  height: 100%;
+    //  z-index: 1;
+    //}
   }
 }
 </style>
