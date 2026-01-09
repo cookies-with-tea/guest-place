@@ -1,4 +1,4 @@
-import { fetchData } from '#shared/lib/api'
+import { fetchData } from '#shared/api'
 import type { IAuthRefreshResponse, IAuthRefreshUpdateRequest, IAuthRegisterRequest } from '../model'
 
 const register = async ({ email }: IAuthRegisterRequest) => {
