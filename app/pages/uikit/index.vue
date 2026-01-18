@@ -77,10 +77,14 @@
     </div>
 
     <div class="box">
-      <UiTabs with-query :tabs />
-    </div>
+      <div class="column">
+        <UiTabs class="ui-kit__tabs" with-query :tabs variant="primary" />
+      </div>
 
-    <UiTabs id="tabs-2" with-query :tabs />
+      <div class="column">
+        <UiTabs id="tabs-2" with-query variant="secondary" :tabs />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -134,12 +138,12 @@ const onSubmit = async () => {
 
 const tabs = [
   {
-    title: 'home',
+    title: 'Описание',
     content: defineAsyncComponent(() => import('./components/Comp1.vue')),
     name: 'home',
   },
   {
-    title: 'user',
+    title: 'Цены/аренда',
     content: defineAsyncComponent(() => import('./components/Comp2.vue')),
     name: 'user',
   },
@@ -149,12 +153,12 @@ const tabs = [
     name: 'Comp3',
   },
   {
-    title: 'Comp4',
+    title: 'Меню',
     content: defineAsyncComponent(() => import('./components/Comp4.vue')),
     name: 'Comp4',
   },
   {
-    title: 'Comp5',
+    title: 'Лента',
     content: defineAsyncComponent(() => import('./components/Comp5.vue')),
     name: 'Comp5',
   },
@@ -164,12 +168,16 @@ const tabs = [
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
-  background-color: #ecf4fd;
+  background-color: #f7faff;
   padding: 20px;
   gap: 20px;
 
   &__accordion {
     max-width: 40%;
+  }
+
+  &__tabs {
+    width: 900px;
   }
 }
 

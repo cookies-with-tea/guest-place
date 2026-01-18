@@ -19,7 +19,9 @@
         при ассинхроной подгрузке компонента контент не прыгал
       -->
       <KeepAlive v-bind="keepAliveProps">
-        <component :is="currentContent" />
+        <Transition name="tabs-content" mode="out-in">
+          <component :is="currentContent" />
+        </Transition>
       </KeepAlive>
     </div>
   </div>
@@ -69,10 +71,6 @@ const keepAliveProps = computed(() => ({
   exclude: props.excludeFromKeepAlive,
 }))
 
-const activeTabClass = (name: string) => {
-  return { 'ui-tabs--active': isTabActive(name) }
-}
-
 const classes = computed(() => {
   return [`ui-tabs--${props.variant}`]
 })
@@ -94,6 +92,10 @@ onMounted(async () => {
   }
 })
 
+const activeTabClass = (name: string) => {
+  return { 'ui-tabs__item--active': isTabActive(name) }
+}
+
 const handleClickTab = async (tab: ITab) => {
   if (props.withQuery) {
     const tabPath = tab.name as string
@@ -111,84 +113,173 @@ const handleClickTab = async (tab: ITab) => {
 </script>
 
 <style scoped lang="scss">
+@use 'public/styles/helpers/mixins' as *;
+
 .ui-tabs {
-  --ui-tabs-box-shadow: 0 0 15px 0 #694e4b1a;
-  --ui-tabs-color: var(--color-text-dark);
   --ui-tabs-bg-color: var(--color-accent-2);
   --ui-tabs-active-bg-color: var(--color-white);
+  --ui-tabs-content-color: var(--color-white);
+  --tabs-animation-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  $self: &;
 
   width: 100%;
   position: relative;
+  font-family: 'Raleway', sans-serif;
 
-  &__buttons {
+  &::after {
+    content: '';
+    top: 100px;
+    left: 0;
+    right: 0;
     width: 100%;
+    height: 40px;
+    position: absolute;
+    background-color: var(--ui-tabs-bg-color);
+    pointer-events: none;
+    z-index: 1;
+  }
 
-    &::before {
-      content: '';
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      border-radius: 30px 30px 0 0;
-      box-shadow: var(--ui-tabs-box-shadow);
+  /* TODO: Поддержка 94%. При необходимости переписать на computed isFirstActive и class --first-active | START */
 
-      //background-color: red;
-      //opacity: 0.2;
-
-      background-color: var(--ui-tabs-active-bg-color);
-      z-index: 1;
+  &:has(.ui-tabs__item:first-child.ui-tabs__item--active) {
+    #{$self}__content {
+      border-top-left-radius: 0;
     }
   }
 
-  &__item {
-    @include typography(h4);
+  &:has(.ui-tabs__item:last-child.ui-tabs__item--active) {
+    #{$self}__content {
+      border-top-right-radius: 0;
+    }
+  }
 
-    //z-index: 11111;
+  /* TODO: Поддержка 94%. При необходимости переписать на computed isFirstActive и class --first-active | END */
+
+  &__buttons {
     position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 18px;
+    z-index: 2;
+  }
+
+  &__item {
+    position: relative;
+    flex-grow: 1;
+    border: none;
     border-radius: 30px 30px 0 0;
-    color: var(--ui-tabs-color);
-    background-color: var(--ui-tabs-bg-color);
+    color: var(--color-text-dark);
+    background: var(--ui-tabs-bg-color);
+    transition:
+      transform var(--transition-duration-secondary) var(--tabs-animation-ease),
+      background-color var(--transition-duration-secondary) var(--tabs-animation-ease);
+    cursor: pointer;
     padding: 40px;
-    z-index: 1111111111111111;
+    z-index: 2;
+
+    &::before,
+    &::after {
+      --s: 40px at;
+      --g: #000 100%, #0000;
+
+      content: '';
+      bottom: 0;
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      -webkit-mask: radial-gradient(var(--s) var(--cut-x) 22%, var(--g)), linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      background: var(--ui-tabs-active-bg-color);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform var(--transition-duration-secondary) var(--tabs-animation-ease);
+      pointer-events: none;
+    }
+
+    &::before {
+      --cut-x: 22%;
+
+      left: -50px;
+      transform-origin: right;
+    }
+
+    &::after {
+      --cut-x: 78%;
+
+      right: -50px;
+      transform-origin: left;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:first-child {
+      &::before {
+        visibility: hidden;
+        opacity: 0;
+      }
+    }
+
+    &:last-child {
+      &::after {
+        visibility: hidden;
+        opacity: 0;
+      }
+    }
+
+    &--active {
+      --ui-tabs-bg-color: var(--ui-tabs-active-bg-color);
+
+      z-index: 4;
+
+      &::before,
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+
+    @include hover {
+      transform: scale(1.06);
+    }
   }
 
   &__content {
-    min-height: 200px;
-
-    //background-color: var(--ui-tabs-active-bg-color);
     position: relative;
     border-radius: 30px;
-    box-shadow: var(--ui-tabs-box-shadow);
+    background: var(--ui-tabs-content-color);
+    transition:
+      background-color var(--transition-duration-primary) var(--tabs-animation-ease),
+      border-radius var(--transition-duration-primary) var(--tabs-animation-ease);
     padding: 65px;
-    z-index: 100;
+    margin-top: -3px;
+    z-index: 2;
   }
 
   &--primary {
+    --ui-tabs-bg-color: var(--color-accent-2);
+    --ui-tabs-active-bg-color: var(--color-white);
+    --ui-tabs-content-color: var(--color-white);
   }
 
   &--secondary {
+    --ui-tabs-bg-color: var(--color-white);
+    --ui-tabs-active-bg-color: var(--color-accent-2);
+    --ui-tabs-content-color: var(--color-accent-2);
   }
+}
 
-  &--active {
-    position: relative;
-    background-color: var(--ui-tabs-active-bg-color);
-    z-index: 10000;
+.tabs-content-enter-active,
+.tabs-content-leave-active {
+  transition:
+    opacity var(--transition-duration-primary) var(--tabs-animation-ease),
+    transform var(--transition-duration-primary) var(--tabs-animation-ease);
+}
 
-    //&:before {
-    //  content: "";
-    //  position: absolute;
-    //  top: 0;
-    //  left: 0;
-    //  //background-color: red;
-    //  //opacity: 0.2;
-    //
-    //  background-color: var(--color-white);
-    //  box-shadow: 0 0 15px 0 #694E4B1A;
-    //  width: 100%;
-    //  height: 100%;
-    //  z-index: 1;
-    //}
-  }
+.tabs-content-enter-from,
+.tabs-content-leave-to {
+  transform: translateY(8px);
+  opacity: 0;
 }
 </style>
