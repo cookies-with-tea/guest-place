@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
   dir: {
     plugins: 'app/plugins', // ← относительно srcDir
+    layouts: 'app/layouts'
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
