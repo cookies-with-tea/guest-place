@@ -43,6 +43,8 @@ const tagComponent = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+@use 'styles/helpers/mixins/responsive' as *;
+
 .ui-button {
   --ui-button-primary-color: #fff;
   --ui-button-secondary-color: #333;
@@ -167,6 +169,14 @@ const tagComponent = computed(() => {
   &--lg {
     .ui-button__content {
       padding: 0 55px;
+
+      @media (width <= 375px) {
+        padding: 0 40px;
+      }
+
+      @include responsive(xs) {
+        padding: 0 40px;
+      }
     }
   }
 

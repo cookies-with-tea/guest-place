@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { fileURLToPath, URL } from 'node:url'
 import { typedIconPlugin } from 'typed-icon-template'
+import type { NuxtPage } from 'nuxt/schema'
 import * as path from 'node:path'
 
 const typedIconPluginConfig = typedIconPlugin({
@@ -13,7 +14,7 @@ export default defineNuxtConfig({
   srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
   dir: {
     plugins: 'app/plugins', // ← относительно srcDir
-    layouts: 'app/layouts'
+    layouts: 'app/layouts',
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -21,6 +22,27 @@ export default defineNuxtConfig({
   imports: {
     scan: false,
     autoImport: false,
+  },
+  hooks: {
+    'pages:extend'(pages: NuxtPage[]) {
+      function removePagesMatching(pathPattern: RegExp, filePattern: RegExp, pages: NuxtPage[] = []) {
+        const pagesToRemove = []
+
+        for (const page of pages) {
+          if (pathPattern.test(page.path) || (page.file && filePattern.test(page.file))) {
+            pagesToRemove.push(page)
+          } else {
+            removePagesMatching(pathPattern, filePattern, page.children)
+          }
+        }
+
+        for (const page of pagesToRemove) {
+          pages.splice(pages.indexOf(page), 1)
+        }
+      }
+
+      removePagesMatching(/\/ui\//, /\.ts$/, pages)
+    },
   },
   svgo: {
     defaultImport: 'component',

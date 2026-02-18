@@ -1,8 +1,10 @@
 <template>
-  <div class="home-page">
-    <div class="test"></div>
-  </div>
+  <div class="home-page"> </div>
 </template>
+
+<script setup lang="ts">
+// import services from './ap'
+</script>
 
 <style lang="scss" scoped>
 .test {
