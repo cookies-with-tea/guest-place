@@ -36,7 +36,7 @@ import { UiButton } from '#shared/ui'
     grid-template-columns: 1fr 1fr;
     gap: 30px;
 
-    @include responsive(xs) {
+    @include responsive-max(xs) {
       grid-template-columns: 1fr;
     }
   }

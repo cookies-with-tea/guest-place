@@ -174,7 +174,7 @@ const tagComponent = computed(() => {
         padding: 0 40px;
       }
 
-      @include responsive(xs) {
+      @include responsive-max(xs) {
         padding: 0 40px;
       }
     }
