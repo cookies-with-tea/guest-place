@@ -25,6 +25,12 @@ pub struct MediaItemDTO {
   pub media_type: MediaType,
 }
 
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateMediaDTO {
+    pub title: Option<String>,
+    pub alt: Option<String>,
+}
+
 #[derive(sqlx::FromRow, Debug)]
 pub struct MediaItemFromDb {
   pub uuid: uuid::Uuid,
