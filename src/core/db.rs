@@ -39,6 +39,8 @@ impl DatabaseConfig {
 pub async fn create_pool(config: &AppConfig) -> sqlx::Pool<sqlx::Postgres> {
     let connect_url = config.db_config.connect_url();
 
+    println!("Connecting to database: {}", connect_url);
+
     PgPoolOptions::new()
         .max_connections(5)
         .connect(&connect_url)

@@ -6,11 +6,10 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    core::{
+    AppState, about::dto::OpportunitiesDTO, core::{
         dto::ApiResponse,
         handlers::get_media_by_uuid,
-    },
-    AppState,
+    }
 };
 
 use super::dto::{
@@ -32,7 +31,7 @@ use super::dto::{
 pub async fn get_about(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<ApiResponse<AboutResponseDTO>>, (StatusCode, Json<ApiResponse<()>>)> {
-    // Fetch about data from database
+
     let about_row = sqlx::query_as::<_, (String, String)>(
         "SELECT title, description FROM about LIMIT 1"
     )
@@ -41,25 +40,27 @@ pub async fn get_about(
 
     let about_data = match about_row {
         Ok(Some(row)) => {
-            // Fetch opportunities
-            let opportunities = fetch_opportunities(&state).await.map_err(|e| {
+            // 1. Fetch raw items
+            let opp_items = fetch_opportunities(&state).await.map_err(|e| {
                 eprintln!("Error fetching opportunities: {:?}", e);
                 e
             })?;
 
-            // Fetch leadership
+            let opportunities = OpportunitiesDTO {
+                title: "Opportunities".to_string(),
+                items: opp_items,
+            };
+
             let leadership = fetch_leadership(&state).await.map_err(|e| {
                 eprintln!("Error fetching leadership: {:?}", e);
                 e
             })?;
 
-            // Fetch who we are
             let who_we_are = fetch_who_we_are(&state).await.map_err(|e| {
                 eprintln!("Error fetching who we are: {:?}", e);
                 e
             })?;
 
-            // Fetch news
             let news = fetch_news(&state).await.map_err(|e| {
                 eprintln!("Error fetching news: {:?}", e);
                 e
@@ -113,7 +114,7 @@ async fn fetch_opportunities(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {:?}", e);
+        eprintln!("Database error fetching opportunities list: {:?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse {
@@ -130,7 +131,6 @@ async fn fetch_opportunities(
     let mut result = Vec::new();
 
     for opp in opportunities {
-        // Fetch opportunity items
         let items = sqlx::query_scalar::<_, String>(
             "SELECT item_text FROM about_opportunity_items WHERE opportunity_id = $1 ORDER BY id"
         )
@@ -138,7 +138,7 @@ async fn fetch_opportunities(
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {:?}", e);
+            eprintln!("Database error fetching opportunity items: {:?}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse {
@@ -152,9 +152,8 @@ async fn fetch_opportunities(
             )
         })?;
 
-        // Get icon media if available
         let icon = get_media_by_uuid(&state, opp.1).await.map_err(|e| {
-            eprintln!("Database error: {:?}", e);
+            eprintln!("Database error fetching opportunity icon: {:?}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse {

@@ -2,11 +2,18 @@ use serde_derive::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use crate::core::dto::MediaDTO;
 
+
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct OpportunityItemDTO {
     pub icon: MediaDTO,
     pub title: String,
     pub items: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct OpportunitiesDTO {
+    pub title: String,
+    pub items: Vec<OpportunityItemDTO>,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
@@ -46,7 +53,7 @@ pub struct NewsDTO {
 pub struct AboutResponseDTO {
     pub title: String,
     pub description: String,
-    pub opportunities: Vec<OpportunityItemDTO>,
+    pub opportunities: OpportunitiesDTO,
     pub leadership: LeadershipDTO,
     pub who_we_are: Vec<WhoWeAreItemDTO>,
     pub news: NewsDTO,

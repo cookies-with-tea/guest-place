@@ -8,9 +8,9 @@ CREATE TABLE about (
 
 CREATE TABLE about_opportunities (
     id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
     about_id INTEGER REFERENCES about(id) ON DELETE CASCADE,
     icon_uuid UUID REFERENCES media(uuid),
-    title TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
