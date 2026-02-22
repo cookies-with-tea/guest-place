@@ -108,8 +108,9 @@ async function main() {
 				'lint:fix': 'pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix',
 			},
 			dependencies: {
+				'@admin-panel/i18n': 'workspace:*',
+				'@admin-panel/lib': 'workspace:*',
 				'@admin-panel/ui': 'workspace:*',
-				'@admin-panel/utils': 'workspace:*',
 				vue: '^3.5.22',
 				'vue-router': '^4.5.1',
 			},

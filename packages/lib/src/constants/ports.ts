@@ -14,6 +14,10 @@ export const APPS_PORTS = {
 	users: {
 		preview: 3003,
 		dev: 4176,
+  },
+  media: {
+    preview: 4004,
+    dev: 4177,
 	},
 } as const
 

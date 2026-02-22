@@ -8,5 +8,9 @@ export const ROUTES = {
 	translations: {
 		name: 'TranslationsPage',
 		title: 'general.tranlsations',
-	},
+  },
+  media: {
+    name: 'MediaPage',
+    title: 'general.media'
+	}
 } as const

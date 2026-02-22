@@ -9,16 +9,17 @@
 	"scripts": {
 		"prebuild": "pnpm --filter @admin-panel/lib build",
 		"build": "turbo run build --filter=!./apps/admin-docs",
+		"build:packages": "turbo run build --filter=./packages/*",
 		"build:project": "node scripts/choose-project.js build",
-		"dev:project": "node scripts/choose-project.js dev",
+		"dev:project": "pnpm build:packages && node scripts/choose-project.js dev",
 		"lint:project": "node scripts/choose-project.js lint",
 		"clean:project": "node scripts/choose-project.js clean",
 		"create:mf": "node scripts/create-mf.js",
 		"dev": "turbo run dev --parallel",
-		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
 		"dev:shell": "turbo run dev --filter=./apps/admin-shell",
-		"preview:mf": "pnpm prebuild && turbo run preview --parallel --filter=./apps/* --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
 		"dev:all": "run-p \"preview:mf\" \"dev:shell\"",
+		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
+		"preview:mf": "pnpm prebuild && turbo run preview --parallel --filter=./apps/* --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"test": "pnpm test:unit",
 		"test:unit": "turbo run test:unit --parallel",
@@ -49,6 +50,9 @@
 		"dedupe": "pnpm dedupe"
 	},
 	"dependencies": {
+		"@primevue/themes": "^4.5.4",
+		"primeicons": "^7.0.0",
+		"primevue": "^4.0.0",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},
