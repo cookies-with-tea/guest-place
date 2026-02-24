@@ -53,15 +53,26 @@ $breakpoints: (
 ///   }
 ///   // Результат: @media (max-width: 1024px) { .element { display: none; } }
 /// @throws {Warn} Если переданный брейкпоинт не найден в карте $breakpoints
-@mixin responsive($breakpoint) {
+@mixin responsive-max($breakpoint) {
   @if map.has-key($breakpoints, $breakpoint) {
-    @media (max-width: #{map.get($breakpoints, $breakpoint)}px) {
+    @media (width <= #{map.get($breakpoints, $breakpoint)}px) {
       @content;
     }
   } @else {
     @warn 'Неизвестный брейкпоинт: #{$breakpoint}. Доступные брейкпоинты: #{map.keys($breakpoints)}';
   }
 }
+
+@mixin responsive-min($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @media (width >= #{map.get($breakpoints, $breakpoint)}px) {
+      @content;
+    }
+  } @else {
+    @warn 'Неизвестный брейкпоинт: #{$breakpoint}. Доступные брейкпоинты: #{map.keys($breakpoints)}';
+  }
+}
+
 
 /// Миксин для плавного изменения CSS-свойства в зависимости от ширины экрана (резиновая адаптация)
 /// @name fluid-value
