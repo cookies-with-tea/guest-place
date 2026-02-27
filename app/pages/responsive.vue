@@ -94,7 +94,7 @@ const products: Product[] = [
     text-align: center;
     margin: 0 0 24px;
 
-    @include responsive(md) {
+    @include responsive-max(md) {
       font-size: 18px;
     }
   }
@@ -104,7 +104,7 @@ const products: Product[] = [
     grid-template-columns: 300px 1fr;
     gap: 20px;
 
-    @include responsive(sm) {
+    @include responsive-max(sm) {
       grid-template-columns: 1fr;
     }
   }
@@ -115,7 +115,7 @@ const products: Product[] = [
     background: #f8f9fa;
     padding: 16px;
 
-    @include responsive(sm) {
+    @include responsive-max(sm) {
       width: 100%;
       order: -1;
     }
