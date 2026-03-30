@@ -1,6 +1,7 @@
 import { createApi, type IWithPagination } from '@admin-panel/lib'
 import type { IUserResponse, IUserCreateUpdate } from '../model'
 import type { IPaginationQuery } from '@admin-panel/lib'
+import { useAuthTemp, authToken } from '@/shared/lib/composables/useTempAuth'
 
 const { fetchData } = createApi('user')
 

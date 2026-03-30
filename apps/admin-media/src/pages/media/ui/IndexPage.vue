@@ -16,6 +16,8 @@
           :disabled="selectedMedia.length === 0"
           @click="confirmDeleteSelected"
         />
+
+        <TempAuth />
       </div>
     </div>
 
@@ -68,6 +70,7 @@ import MediaUploadDialog from '@/features/media/ui/MediaUploadDialog.vue'
 import MediaPreviewDialog from '@/features/media/ui/MediaPreviewDialog.vue'
 import { useMedia } from '@/entities/media/lib/composables/useMedia'
 import type { MediaItem } from '#entities/media'
+import TempAuth from '#features/temp-auth/TempAuth.vue'
 
 const confirm = useConfirm()
 

@@ -10,6 +10,12 @@ type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 const PREFIX = '/api/v1'
 
 export const createApi = (entityName: string) => {
+  let token = ''
+
+  if (typeof localStorage !== 'undefined') {
+		token = localStorage.getItem('authToken') ?? ''
+	}
+
 	const baseUrl = `${PREFIX}/${entityName}`
 
 	const fetchData = async <T>(url: string, options?: JsonFetchOptions): Promise<IResponse<CamelCasedProperties<T>>> => {
@@ -27,7 +33,11 @@ export const createApi = (entityName: string) => {
 			const response = await $fetch<IResponse<SnakeCasedProperties<T>>>(`${baseUrl}${url}`, {
 				...options,
 				body,
-				responseType: 'json',
+        responseType: 'json',
+        headers: {
+          ...options?.headers,
+          Authorization: `Bearer ${token}`
+        }
 			})
 
 			return snakeToCamel(response) as IResponse<CamelCasedProperties<T>>
