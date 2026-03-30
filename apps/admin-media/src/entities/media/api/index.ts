@@ -16,7 +16,7 @@ const create = (data: FormData) => {
 }
 
 export const getAll = (params?: any) => {
-	return fetchData<IMedia[]>('', {
+	return fetchData<{ items: IMedia[]; pagination: any }>('', {
 		method: 'GET',
 		query: params,
 		headers: {

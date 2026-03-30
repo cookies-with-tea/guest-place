@@ -3,19 +3,21 @@
     <div class="media-header">
       <h1>Media Management</h1>
       <div class="media-actions">
-        <Button
-          label="Add Media"
-          icon="pi pi-plus"
-          severity="success"
+        <el-button
+          type="success"
+          :icon="Plus"
           @click="showAddMediaDialog"
-        />
-        <Button
-          label="Delete Selected"
-          icon="pi pi-trash"
-          severity="danger"
+        >
+          Add Media
+        </el-button>
+        <el-button
+          type="danger"
+          :icon="Delete"
           :disabled="selectedMedia.length === 0"
           @click="confirmDeleteSelected"
-        />
+        >
+          Delete Selected
+        </el-button>
 
         <TempAuth />
       </div>
@@ -54,25 +56,19 @@
       @edit="editMedia"
       @close="closePreviewDialog"
     />
-
-    <!-- Confirmation Dialog -->
-    <ConfirmDialog />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useConfirm } from 'primevue/useconfirm'
-import Button from 'primevue/button'
-import ConfirmDialog from 'primevue/confirmdialog'
+import { ElMessageBox, ElMessage } from 'element-plus'
+import { Plus, Delete } from '@element-plus/icons-vue'
 import MediaManagementWidget from '@/widgets/media/ui/MediaManagementWidget.vue'
 import MediaUploadDialog from '@/features/media/ui/MediaUploadDialog.vue'
 import MediaPreviewDialog from '@/features/media/ui/MediaPreviewDialog.vue'
 import { useMedia } from '@/entities/media/lib/composables/useMedia'
 import type { MediaItem } from '#entities/media'
 import TempAuth from '#features/temp-auth/TempAuth.vue'
-
-const confirm = useConfirm()
 
 // State
 const selectedMedia = ref<MediaItem[]>([])
@@ -128,6 +124,7 @@ const saveMedia = async (formData: { title?: string; alt?: string; file?: File }
         title: formData.title,
         alt: formData.alt
       })
+      ElMessage.success('Media updated successfully')
     } else {
       if (!formData.file) {
         throw new Error('File is required')
@@ -137,40 +134,48 @@ const saveMedia = async (formData: { title?: string; alt?: string; file?: File }
         alt: formData.alt,
         file: formData.file
       })
+      ElMessage.success('Media uploaded successfully')
     }
     closeMediaDialog()
   } catch (error) {
     console.error('Failed to save media:', error)
+    ElMessage.error('Failed to save media')
   }
 }
 
 const confirmDelete = (media: MediaItem) => {
-  confirm.require({
-    message: `Are you sure you want to delete "${media.title || 'this media item'}"?`,
-    header: 'Confirmation',
-    icon: 'pi pi-exclamation-triangle',
-    accept: () => {
-      deleteMedia(media.id)
-    },
-    reject: () => {
-      // Do nothing
+  ElMessageBox.confirm(
+    `Are you sure you want to delete "${media.title || 'this media item'}"?`,
+    'Confirmation',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
     }
+  ).then(() => {
+    deleteMedia(media.id)
+    ElMessage.success('Media deleted successfully')
+  }).catch(() => {
+    // Cancelled
   })
 }
 
 const confirmDeleteSelected = () => {
-  confirm.require({
-    message: `Are you sure you want to delete ${selectedMedia.value.length} selected media items?`,
-    header: 'Confirmation',
-    icon: 'pi pi-exclamation-triangle',
-    accept: () => {
-      const ids = selectedMedia.value.map(m => m.id)
-      deleteMultipleMedia(ids)
-      selectedMedia.value = []
-    },
-    reject: () => {
-      // Do nothing
+  ElMessageBox.confirm(
+    `Are you sure you want to delete ${selectedMedia.value.length} selected media items?`,
+    'Confirmation',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
     }
+  ).then(() => {
+    const ids = selectedMedia.value.map(m => m.id)
+    deleteMultipleMedia(ids)
+    selectedMedia.value = []
+    ElMessage.success('Selected media deleted successfully')
+  }).catch(() => {
+    // Cancelled
   })
 }
 
@@ -209,9 +214,10 @@ const closePreviewDialog = () => {
 }
 
 .media-header h1 {
-  color: #333;
+  color: #303133;
   font-size: 2rem;
   margin: 0;
+  font-weight: 600;
 }
 
 .media-actions {

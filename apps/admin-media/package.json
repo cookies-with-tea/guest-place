@@ -23,8 +23,8 @@
     "@admin-panel/i18n": "workspace:*",
     "@admin-panel/lib": "workspace:*",
     "@admin-panel/ui": "workspace:*",
+    "@element-plus/icons-vue": "^2.3.2",
     "@tanstack/vue-table": "^8.21.3",
-    "lucide-vue": "^0.517.0",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },
@@ -33,6 +33,7 @@
     "@admin-panel/prettier-config": "workspace:*",
     "@admin-panel/stylelint-config": "workspace:*",
     "@admin-panel/typescript-config": "workspace:*",
+    "element-plus": "^2.13.0",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "typescript": "~5.9.3",

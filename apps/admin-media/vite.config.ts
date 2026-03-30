@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
 				exposes: {
 					'./MediaRoutes': './src/app/router/index.ts',
 				},
-				shared: ['vue', 'vue-router', 'primevue'],
+				shared: ['vue', 'vue-router', 'element-plus'],
 			}),
 		],
 		resolve: {
@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		preview: {
-			port: APPS_PORTS.users.preview,
+			port: APPS_PORTS.media.preview,
 		},
 	}
 })

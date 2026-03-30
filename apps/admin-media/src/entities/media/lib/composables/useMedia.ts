@@ -30,8 +30,8 @@ export const useMedia = () => {
     // For now, we'll just fetch all media items
     const response = await mediaApi.getAll()
     console.log(response)
-    mediaItems.value = response.data.items || []
-    totalItems.value = response.data.pagination.total || 0
+    mediaItems.value = (response.data.items as unknown as MediaItem[]) || []
+    totalItems.value = (response.data.pagination.total as number) || 0
 
     loading.value = false
   }
@@ -53,7 +53,7 @@ export const useMedia = () => {
     await loadMedia(currentPage.value, itemsPerPage.value, searchQuery.value)
 
     loading.value = false
-    return newMedia
+    return newMedia.data as unknown as MediaItem
   }
 
   const updateMedia = async (mediaData: IUpdateMedia): Promise<MediaItem> => {
@@ -71,11 +71,11 @@ export const useMedia = () => {
     // Find and update the item in the local array
     const index = mediaItems.value.findIndex(m => m.id === mediaData.id)
     if (index !== -1) {
-      mediaItems.value[index] = { ...mediaItems.value[index], ...updatedMedia }
+      mediaItems.value[index] = { ...mediaItems.value[index], ...updatedMedia.data as unknown as MediaItem }
     }
 
     loading.value = false
-    return updatedMedia
+    return updatedMedia.data as unknown as MediaItem
   }
 
   const deleteMedia = async (id: string): Promise<void> => {
@@ -114,7 +114,7 @@ export const useMedia = () => {
     const media = await mediaApi.getById(id)
 
     loading.value = false
-    return media
+    return media.data as unknown as MediaItem
   }
 
   const searchMedia = async (query: string) => {

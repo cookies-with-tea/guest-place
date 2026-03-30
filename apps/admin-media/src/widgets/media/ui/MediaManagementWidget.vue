@@ -3,120 +3,140 @@
     <div class="widget-header">
       <h2>{{ title }}</h2>
       <div class="widget-actions">
-        <Button
+        <el-button
           v-if="showAddButton"
-          label="Add Media"
-          icon="pi pi-plus"
-          severity="success"
-          @click="emit('add-media')"
+          type="success"
+          :icon="Plus"
+          @click="addMedia"
           size="small"
-        />
-        <Button
+        >
+          Add Media
+        </el-button>
+        <el-button
           v-if="showDeleteButton && selectedMedia.length > 0"
-          label="Delete Selected"
-          icon="pi pi-trash"
-          severity="danger"
-          @click="emit('delete-selected', selectedMedia)"
+          type="danger"
+          :icon="Delete"
+          @click="deleteSelected"
           size="small"
-        />
+        >
+          Delete Selected
+        </el-button>
       </div>
     </div>
 
-    <DataTable
-      :value="mediaItems"
-      :paginator="paginatorEnabled"
-      :rows="rowsPerPage"
-      :rowsPerPageOptions="rowsPerPageOptions"
-      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-      :currentPageReportTemplate="'Showing {first} to {last} of {totalRecords} media items'"
-      :selection="selectedMedia"
-      @selection-change="onSelectionChange"
-      dataKey="id"
-      v-model:filters="filters"
-      filterDisplay="menu"
-      :globalFilterFields="['title', 'alt']"
-      class="media-table"
-      :loading="loading"
-      :scrollable="true"
-      scrollHeight="flex"
-    >
-      <template #header>
-        <div class="table-header">
-          <span v-if="showSearch" class="p-input-icon-left">
-            <i class="pi pi-search" />
-            <InputText v-model="filters['global'].value" :placeholder="searchPlaceholder" />
-          </span>
-        </div>
-      </template>
+    <div v-if="showSearch" class="table-toolbar">
+      <el-input
+        v-model="searchQuery"
+        :placeholder="searchPlaceholder"
+        :prefix-icon="Search"
+        clearable
+        class="search-input"
+        @input="onSearch"
+      />
+    </div>
 
-      <Column v-if="showSelection" selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="thumbnail" header="Thumbnail" style="width: 100px">
-        <template #body="slotProps">
-          <div class="media-thumbnail" @click="emit('preview-media', slotProps.data)">
-            <img
-              :src="slotProps.data.url"
-              :alt="slotProps.data.alt || 'Media thumbnail'"
+    <el-table
+      v-loading="loading"
+      :data="mediaItems"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+      class="media-table"
+      :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
+    >
+      <el-table-column v-if="showSelection" type="selection" width="55" />
+      
+      <el-table-column label="Thumbnail" width="120">
+        <template #default="scope">
+          <div class="media-thumbnail" @click="emit('preview-media', scope.row)">
+            <el-image
+              :src="scope.row.url"
+              :alt="scope.row.alt || 'Media thumbnail'"
               class="thumbnail-image"
-              @error="handleImageError"
-            />
+              fit="cover"
+            >
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><Picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
           </div>
         </template>
-      </Column>
-      <Column field="title" header="Title" sortable>
-        <template #body="slotProps">
-          <span class="media-title">{{ slotProps.data.title || 'Untitled' }}</span>
+      </el-table-column>
+
+      <el-table-column prop="title" label="Title" sortable>
+        <template #default="scope">
+          <span class="media-title" :title="scope.row.title">{{ scope.row.title || 'Untitled' }}</span>
         </template>
-      </Column>
-      <Column field="alt" header="Alt Text" sortable>
-        <template #body="slotProps">
-          <span class="media-alt">{{ slotProps.data.alt || '-' }}</span>
+      </el-table-column>
+
+      <el-table-column prop="alt" label="Alt Text" sortable>
+        <template #default="scope">
+          <span class="media-alt" :title="scope.row.alt">{{ scope.row.alt || '-' }}</span>
         </template>
-      </Column>
-      <Column field="size" header="Size" sortable>
-        <template #body="slotProps">
-          <span>{{ formatFileSize(slotProps.data.size) }}</span>
+      </el-table-column>
+
+      <el-table-column prop="size" label="Size" sortable width="120">
+        <template #default="scope">
+          <span>{{ formatFileSize(scope.row.size) }}</span>
         </template>
-      </Column>
-      <Column field="createdAt" header="Date Added" sortable>
-        <template #body="slotProps">
-          <span>{{ formatDate(slotProps.data.createdAt) }}</span>
+      </el-table-column>
+
+      <el-table-column prop="createdAt" label="Date Added" sortable width="180">
+        <template #default="scope">
+          <span>{{ formatDate(scope.row.createdAt) }}</span>
         </template>
-      </Column>
-      <Column v-if="showActions" header="Actions" style="width: 120px">
-        <template #body="slotProps">
-          <Button
-            icon="pi pi-eye"
-            class="p-button-rounded p-button-info p-button-text"
-            @click="emit('preview-media', slotProps.data)"
-            aria-label="Preview"
-          />
-          <Button
-            icon="pi pi-pencil"
-            class="p-button-rounded p-button-success p-button-text"
-            @click="emit('edit-media', slotProps.data)"
-            aria-label="Edit"
-          />
-          <Button
-            icon="pi pi-trash"
-            class="p-button-rounded p-button-danger p-button-text"
-            @click="emit('delete-media', slotProps.data)"
-            aria-label="Delete"
-          />
+      </el-table-column>
+
+      <el-table-column v-if="showActions" label="Actions" width="150" fixed="right">
+        <template #default="scope">
+          <el-button-group>
+            <el-button
+              size="small"
+              :icon="View"
+              circle
+              @click="previewMedia(scope.row)"
+              title="Preview"
+            />
+            <el-button
+              size="small"
+              type="primary"
+              :icon="Edit"
+              circle
+              @click="editMedia(scope.row)"
+              title="Edit"
+            />
+            <el-button
+              size="small"
+              type="danger"
+              :icon="Delete"
+              circle
+              @click="deleteMedia(scope.row)"
+              title="Delete"
+            />
+          </el-button-group>
         </template>
-      </Column>
-    </DataTable>
+      </el-table-column>
+    </el-table>
+
+    <div v-if="paginatorEnabled" class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="rowsPerPageOptions"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="mediaItems.length"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts" generic="T extends MediaItem">
 import { ref, watch } from 'vue'
-import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import InputText from 'primevue/inputtext'
+import { Plus, Delete, Search, Edit, View, Picture } from '@element-plus/icons-vue'
 import type { MediaItem } from '@/entities/media/model'
 
-interface Props {
+export interface Props<T> {
   title?: string
   mediaItems: T[]
   loading?: boolean
@@ -131,16 +151,9 @@ interface Props {
   rowsPerPageOptions?: number[]
 }
 
-interface Emits {
-  (e: 'add-media'): void
-  (e: 'edit-media', media: T): void
-  (e: 'delete-media', media: T): void
-  (e: 'delete-selected', media: T[]): void
-  (e: 'preview-media', media: T): void
-  (e: 'selection-change', media: T[]): void
-}
 
-const props = withDefaults(defineProps<Props>(), {
+
+const props = withDefaults(defineProps<Props<T>>(), {
   title: 'Media Management',
   loading: false,
   showSelection: true,
@@ -154,15 +167,20 @@ const props = withDefaults(defineProps<Props>(), {
   rowsPerPageOptions: () => [5, 10, 20, 50]
 })
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<{
+  'add-media': []
+  'edit-media': [media: any]
+  'delete-media': [media: any]
+  'delete-selected': [media: any[]]
+  'preview-media': [media: any]
+  'selection-change': [media: any[]]
+}>()
 
 // State
 const selectedMedia = ref<T[]>([])
-const filters = ref({
-  global: { value: null },
-  title: { value: null },
-  alt: { value: null }
-})
+const searchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = ref(props.rowsPerPage)
 
 // Watch for external changes to mediaItems
 watch(() => props.mediaItems, () => {
@@ -171,13 +189,24 @@ watch(() => props.mediaItems, () => {
 }, { deep: true })
 
 // Methods
-const onSelectionChange = (event: any) => {
-  selectedMedia.value = event.data
-  emit('selection-change', selectedMedia.value)
+const addMedia = () => emit('add-media')
+const editMedia = (media: T) => emit('edit-media', media)
+const deleteMedia = (media: T) => emit('delete-media', media)
+const deleteSelected = () => emit('delete-selected', selectedMedia.value)
+const previewMedia = (media: T) => emit('preview-media', media)
+
+const handleSelectionChange = (val: T[]) => {
+  selectedMedia.value = val
+  emit('selection-change', val)
+}
+
+const onSearch = () => {
+  // Logic for local filtering if needed, or emit to parent
+  // Assuming parent handles it via props.mediaItems for now as per previous implementation
 }
 
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes'
+  if (!bytes || bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -193,49 +222,60 @@ const formatDate = (date: Date): string => {
     minute: '2-digit'
   })
 }
-
-const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZjNmNGY2Ii8+Cjx0ZXh0IHg9IjMwIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjY2Ij5JbWFnZSB0aGUgbWVkaWE8L3RleHQ+Cjwvc3ZnPgo='
-}
 </script>
 
 <style scoped>
 .media-management-widget {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
 .widget-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
 .widget-header h2 {
-  color: #333;
+  color: #303133;
   font-size: 1.5rem;
   margin: 0;
+  font-weight: 600;
 }
 
 .widget-actions {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+}
+
+.table-toolbar {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search-input {
+  width: 300px;
 }
 
 .media-table {
-  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 }
 
 .media-thumbnail {
   cursor: pointer;
-  overflow: hidden;
+  width: 80px;
+  height: 60px;
   border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
   transition: transform 0.2s ease;
 }
 
@@ -245,27 +285,30 @@ const handleImageError = (event: Event) => {
 
 .thumbnail-image {
   width: 100%;
-  height: 60px;
-  object-fit: cover;
-  display: block;
+  height: 100%;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  color: #909399;
+  font-size: 20px;
 }
 
 .media-title, .media-alt {
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
-  display: block;
 }
 
-.table-header {
+.pagination-container {
+  margin-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.table-header .p-input-icon-left {
-  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -276,7 +319,11 @@ const handleImageError = (event: Event) => {
 
   .widget-actions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
+  }
+
+  .search-input {
+    width: 100%;
   }
 }
 </style>

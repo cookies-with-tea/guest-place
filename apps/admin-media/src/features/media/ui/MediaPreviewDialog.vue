@@ -1,17 +1,20 @@
 <template>
-  <Dialog
-    v-model:visible="visible"
-    :header="media.title || 'Media Preview'"
-    :modal="true"
+  <el-dialog
+    v-model="visible"
+    :title="media.title || 'Media Preview'"
+    width="80%"
+    style="max-width: 900px"
     class="media-preview-dialog"
-    :style="{ width: '80vw', maxWidth: '900px' }"
+    destroy-on-close
   >
     <div class="media-preview-content">
-      <div v-if="isImage(media)" class="image-preview-large">
-        <img
+      <div v-if="isImage" class="image-preview-large">
+        <el-image
           :src="media.url"
           :alt="media.alt || media.title || 'Media preview'"
           class="preview-image"
+          fit="contain"
+          :preview-src-list="[media.url]"
         />
       </div>
       <div v-else class="video-preview-large">
@@ -22,50 +25,50 @@
       </div>
       <div class="media-info">
         <h3>{{ media.title || 'Untitled' }}</h3>
-        <p v-if="media.alt" class="alt-text">
-          <strong>Alt Text:</strong> {{ media.alt }}
-        </p>
-        <p class="file-info">
-          <strong>File:</strong> {{ media.filename || 'unknown' }}
-        </p>
-        <p class="file-info">
-          <strong>Size:</strong> {{ formatFileSize(media.size) }}
-        </p>
-        <p class="file-info">
-          <strong>Added:</strong> {{ formatDate(media.createdAt) }}
-        </p>
+        <el-descriptions :column="1" border>
+          <el-descriptions-item v-if="media.alt" label="Alt Text">
+            {{ media.alt }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Filename">
+            {{ media.filename || 'unknown' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Size">
+            {{ formatFileSize(media.size) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Added">
+            {{ formatDate(media.createdAt) }}
+          </el-descriptions-item>
+        </el-descriptions>
       </div>
     </div>
     <template #footer>
-      <Button
-        label="Close"
-        icon="pi pi-times"
-        @click="handleClose"
-      />
-      <Button
-        v-if="showEditButton"
-        label="Edit"
-        icon="pi pi-pencil"
-        class="p-button-success"
-        @click="handleEdit"
-      />
+      <div class="dialog-footer">
+        <el-button @click="handleClose">Close</el-button>
+        <el-button
+          v-if="showEditButton"
+          type="primary"
+          :icon="Edit"
+          @click="handleEdit"
+        >
+          Edit
+        </el-button>
+      </div>
     </template>
-  </Dialog>
+  </el-dialog>
 </template>
 
 <script setup lang="ts" generic="T extends MediaItem">
 import { computed } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
+import { Edit } from '@element-plus/icons-vue'
 import type { MediaItem } from '@/entities/media/model'
 import { mediaUtils } from '@/entities/media/utils/media.utils'
 
-interface Props {
+export interface Props<T> {
   media: T
   showEditButton?: boolean
 }
 
-interface Emits {
+export interface Emits<T> {
   (e: 'edit', media: T): void
   (e: 'close'): void
 }
@@ -75,11 +78,11 @@ const visible = defineModel({
   required: true,
 })
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props<T>>(), {
   showEditButton: true
 })
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits<T>>()
 
 // Computed
 const isImage = computed(() => {
@@ -88,13 +91,13 @@ const isImage = computed(() => {
 
 // Methods
 const handleClose = () => {
-  emit('update:visible', false)
+  visible.value = false
   emit('close')
 }
 
 const handleEdit = () => {
   emit('edit', props.media)
-  emit('update:visible', false)
+  visible.value = false
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -111,29 +114,28 @@ const getMimeType = (filename: string): string => {
 </script>
 
 <style scoped>
-.media-preview-dialog :deep(.p-dialog-header) {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.media-preview-dialog :deep(.p-dialog-content) {
-  padding: 0;
-}
-
 .media-preview-content {
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
-  padding: 2rem;
+  padding: 10px 0;
 }
 
-.image-preview-large img {
-  max-width: 100%;
+.image-preview-large, .video-preview-large {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preview-image {
+  width: 100%;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.video-preview-large video {
+.preview-video {
   max-width: 100%;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -146,18 +148,15 @@ const getMimeType = (filename: string): string => {
 
 .media-info h3 {
   margin-top: 0;
-  color: #333;
+  margin-bottom: 1.5rem;
+  color: #303133;
+  font-weight: 600;
 }
 
-.alt-text {
-  color: #666;
-  margin: 0.5rem 0;
-}
-
-.file-info {
-  color: #666;
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 @media (max-width: 768px) {

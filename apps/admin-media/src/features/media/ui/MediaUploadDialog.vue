@@ -1,111 +1,113 @@
 <template>
-  <Dialog
-    v-model:visible="visible"
-    :header="isEdit ? 'Edit Media' : 'Upload New Media'"
-    :modal="true"
+  <el-dialog
+    v-model="visible"
+    :title="isEdit ? 'Edit Media' : 'Upload New Media'"
+    width="600px"
     class="media-upload-dialog"
-    :style="{ width: '600px' }"
+    destroy-on-close
   >
-    <form @submit.prevent="handleSubmit">
-      <div class="p-fluid">
-        <div class="p-field">
-          <label for="mediaTitle">Title</label>
-          <InputText
-            id="mediaTitle"
-            v-model="formData.title"
-            placeholder="Enter media title"
-            :invalid="!!errors.title"
+    <el-form
+      label-position="top"
+      @submit.prevent="handleSubmit"
+      class="upload-form"
+    >
+      <el-form-item label="Title" :error="errors.title">
+        <el-input
+          v-model="formData.title"
+          placeholder="Enter media title"
+          clearable
+        />
+      </el-form-item>
+
+      <el-form-item label="Alt Text" :error="errors.alt">
+        <el-input
+          v-model="formData.alt"
+          placeholder="Enter alt text for accessibility"
+          clearable
+        />
+      </el-form-item>
+
+      <el-form-item label="File" :error="errors.file">
+        <div
+          class="file-upload-area"
+          :class="{ 'has-file': !!formData.file }"
+          @click="triggerFileInput"
+          @dragover.prevent="handleDragover"
+          @drop.prevent="handleDrop"
+        >
+          <input
+            type="file"
+            id="mediaFileInput"
+            ref="fileInput"
+            @change="handleFileChange"
+            accept="image/*,video/*,.svg"
+            style="display: none"
           />
-          <small v-if="errors.title" class="p-error">{{ errors.title }}</small>
-        </div>
-        <div class="p-field">
-          <label for="mediaAlt">Alt Text</label>
-          <InputText
-            id="mediaAlt"
-            v-model="formData.alt"
-            placeholder="Enter alt text for accessibility"
-            :invalid="!!errors.alt"
-          />
-          <small v-if="errors.alt" class="p-error">{{ errors.alt }}</small>
-        </div>
-        <div class="p-field">
-          <label for="mediaFile">File</label>
-          <div
-            class="file-upload-area"
-            @click="triggerFileInput"
-            @dragover.prevent="handleDragover"
-            @drop.prevent="handleDrop"
-          >
-            <input
-              type="file"
-              id="mediaFileInput"
-              ref="fileInput"
-              @change="handleFileChange"
-              accept="image/*,video/*,.svg"
-              style="display: none"
-            />
-            <div v-if="!formData.file" class="upload-placeholder">
-              <i class="pi pi-cloud-upload" />
-              <p>Drag & drop files here or click to browse</p>
-              <small>Supported: JPG, PNG, GIF, SVG, MP4, AVI, etc. Max 50MB</small>
-            </div>
-            <div v-else class="file-preview">
-              <div v-if="isImage(formData.file)" class="image-preview">
-                <img :src="formData.file.preview" alt="Preview" />
-                <span>{{ formData.file.name }}</span>
-              </div>
-              <div v-else class="video-preview">
-                <video controls :src="formData.file.preview">
-                  <source :src="formData.file.preview" :type="getMimeType(formData.file.name)" />
-                  Your browser does not support the video tag.
-                </video>
-                <span>{{ formData.file.name }}</span>
-              </div>
-              <Button
-                icon="pi pi-times"
-                class="p-button-rounded p-button-danger p-button-text"
-                @click="removeFile"
-                aria-label="Remove file"
-              />
-            </div>
+          
+          <div v-if="!formData.file" class="upload-placeholder">
+            <el-icon class="upload-icon"><Upload /></el-icon>
+            <p class="upload-text">Drag & drop files here or <span>click to browse</span></p>
+            <p class="upload-hint">Supported: JPG, PNG, GIF, SVG, MP4. Max 50MB</p>
           </div>
-          <small v-if="errors.file" class="p-error">{{ errors.file }}</small>
+
+          <div v-else class="file-preview">
+            <div v-if="isImage(formData.file)" class="image-preview">
+              <el-image :src="formData.file.preview" fit="contain" class="preview-content" />
+              <div class="file-info">
+                <span class="file-name">{{ formData.file.name }}</span>
+                <span class="file-size">{{ formatFileSize(formData.file.size) }}</span>
+              </div>
+            </div>
+            <div v-else class="video-preview">
+              <video controls class="preview-content">
+                <source :src="formData.file.preview" :type="getMimeType(formData.file.name)" />
+              </video>
+              <div class="file-info">
+                <span class="file-name">{{ formData.file.name }}</span>
+                <span class="file-size">{{ formatFileSize(formData.file.size) }}</span>
+              </div>
+            </div>
+            
+            <el-button
+              type="danger"
+              :icon="Delete"
+              circle
+              class="remove-btn"
+              @click.stop="removeFile"
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </el-form-item>
+    </el-form>
+
     <template #footer>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        class="p-button-text"
-        @click="handleCancel"
-      />
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        class="p-button-success"
-        @click="handleSubmit"
-        :disabled="!isFormValid"
-        :loading="loading"
-      />
+      <div class="dialog-footer">
+        <el-button @click="handleCancel">Cancel</el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+          :disabled="!isFormValid"
+          :loading="loading"
+        >
+          {{ isEdit ? 'Save Changes' : 'Upload Media' }}
+        </el-button>
+      </div>
     </template>
-  </Dialog>
+  </el-dialog>
 </template>
 
 <script setup lang="ts" generic="T extends MediaItem">
 import { ref, computed, watch } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
+import { Upload, Delete } from '@element-plus/icons-vue'
 import type { MediaItem, MediaFile } from '@/entities/media/model'
 import { mediaUtils } from '#entities/media'
 
-interface Props {
+export interface Props<T> {
   isEdit?: boolean
   media?: T
 }
 
-interface Emits {
+export interface Emits<T> {
   (e: 'submit', data: { title?: string; alt?: string; file?: File }): void
   (e: 'cancel'): void
 }
@@ -114,8 +116,8 @@ const visible = defineModel({
   type: Boolean,
   required: true,
 })
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props<T>>()
+const emit = defineEmits<Emits<T>>()
 
 // State
 const formData = ref({
@@ -135,7 +137,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 // Computed
 const isFormValid = computed(() => {
-  return !errors.value.title && !errors.value.alt && (!props.isEdit || !!formData.value.file)
+  return !errors.value.title && !errors.value.alt && (props.isEdit || !!formData.value.file)
 })
 
 // Watch for prop changes
@@ -270,6 +272,10 @@ const getMimeType = (filename: string): string => {
   return mediaUtils.getMimeType(filename)
 }
 
+const formatFileSize = (bytes: number): string => {
+  return mediaUtils.formatFileSize(bytes)
+}
+
 const resetForm = () => {
   formData.value = {
     title: '',
@@ -285,63 +291,99 @@ const resetForm = () => {
 </script>
 
 <style scoped>
-.media-upload-dialog :deep(.p-dialog-header) {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.media-upload-dialog :deep(.p-dialog-content) {
-  padding: 2rem;
+.upload-form {
+  padding: 10px 0;
 }
 
 .file-upload-area {
-  border: 2px dashed #ccc;
+  border: 2px dashed #dcdfe6;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 30px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  background-color: #fafafa;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .file-upload-area:hover {
-  border-color: #6366f1;
-  background-color: rgba(99, 102, 241, 0.05);
+  border-color: #409eff;
+  background-color: #f0f7ff;
+}
+
+.file-upload-area.has-file {
+  border-style: solid;
+  padding: 15px;
 }
 
 .upload-placeholder {
-  color: #666;
+  color: #909399;
 }
 
-.upload-placeholder i {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  display: block;
+.upload-icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+  color: #c0c4cc;
+}
+
+.upload-text {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.upload-text span {
+  color: #409eff;
+  font-weight: 500;
+}
+
+.upload-hint {
+  font-size: 13px;
+  margin-top: 8px;
 }
 
 .file-preview {
   display: flex;
   flex-direction: column;
+  gap: 15px;
   align-items: center;
-  gap: 1rem;
+  width: 100%;
 }
 
-.image-preview img {
-  max-width: 200px;
-  max-height: 150px;
+.preview-content {
+  max-width: 100%;
+  max-height: 200px;
   border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.video-preview video {
-  max-width: 200px;
-  max-height: 150px;
-  border-radius: 4px;
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.p-error {
-  color: #f44336;
-  font-size: 0.75rem;
-  display: block;
-  margin-top: 0.25rem;
+.file-name {
+  font-weight: 500;
+  color: #303133;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #909399;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>

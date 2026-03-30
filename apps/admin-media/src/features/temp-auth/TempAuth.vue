@@ -1,33 +1,42 @@
 <template>
-	<div class="temp-auth card flex justify-center">
-		<Button type="button" icon="pi pi-share-alt" label="Действия" @click="toggle" />
-
-		<Popover ref="op">
-			<div class="flex flex-col gap-4 w-[25rem]">
-				<div>
-					<FloatLabel>
-						<InputText id="over_label" v-model="authToken" />
-						<label for="over_label">Добавить токен</label>
-					</FloatLabel>
-				</div>
-			</div>
-		</Popover>
-	</div>
+  <div class="temp-auth">
+    <el-popover
+      placement="bottom"
+      :width="400"
+      trigger="click"
+    >
+      <template #reference>
+        <el-button type="primary" :icon="Share">Действия</el-button>
+      </template>
+      
+      <div class="popover-content">
+        <el-form label-position="top">
+          <el-form-item label="Добавить токен">
+            <el-input
+              v-model="authToken"
+              placeholder="Введите токен"
+              clearable
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import Popover from 'primevue/popover'
-import Button from 'primevue/button'
-import FloatLabel from 'primevue/floatlabel'
-import InputText from 'primevue/inputtext'
-import { ref } from 'vue'
+import { Share } from '@element-plus/icons-vue'
 import { useAuthTemp } from '#shared/lib/composables/useTempAuth'
 
 const { authToken } = useAuthTemp()
-
-const op = ref()
-
-const toggle = (event: any) => {
-	op.value.toggle(event)
-}
 </script>
+
+<style scoped>
+.temp-auth {
+  display: inline-block;
+}
+
+.popover-content {
+  padding: 10px 0;
+}
+</style>

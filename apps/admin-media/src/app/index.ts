@@ -1,26 +1,14 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { router } from './router'
-import PrimeVue from 'primevue/config'
-import ToastService from 'primevue/toastservice'
-import ConfirmationService from 'primevue/confirmationservice'
-import Aura from '@primevue/themes/aura'
+import ElementPlus from 'element-plus'
 
 import '@admin-panel/ui/assets/styles/index.scss'
+import 'element-plus/dist/index.css'
 
 const app = createApp(App)
 
 app.use(router)
-app.use(PrimeVue, {
-	theme: {
-		preset: Aura,
-		options: {
-			darkModeSelector: '.dark-mode',
-			cssLayer: false,
-		},
-	},
-})
-app.use(ToastService)
-app.use(ConfirmationService)
+app.use(ElementPlus)
 
 export { app }
