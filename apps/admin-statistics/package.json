@@ -30,7 +30,7 @@
 		"@admin-panel/prettier-config": "workspace:*",
 		"@admin-panel/stylelint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
-		"@types/node": "^24.6.0",
+		"@types/node": "^24.9.2",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"typescript": "~5.9.3",
 		"vite": "^7.1.7",

@@ -29,9 +29,31 @@ async function main() {
 		const displayName = await displayNamePrompt.run()
 
 		// Step 3: Prompt for port numbers
+		const portsFilePath = path.join(process.cwd(), 'packages/lib/src/constants/ports.ts')
+		let portsContent = fs.readFileSync(portsFilePath, 'utf8')
+
+		// Find the last entry in APPS_PORTS to determine next ports
+		const appsPortsMatch = portsContent.match(/export const APPS_PORTS = \{([\s\S]*?)\} as const/)
+		if (!appsPortsMatch) throw new Error('Could not find APPS_PORTS in ports.ts')
+
+		const appsPortsContent = appsPortsMatch[1]
+		const entries = [...appsPortsContent.matchAll(/(\w+):\s*\{[\s\S]*?preview:\s*(\d+),[\s\S]*?dev:\s*(\d+),/g)]
+		const lastEntry = entries[entries.length - 1]
+
+		if (!lastEntry) throw new Error('Could not find any entries in APPS_PORTS')
+
+		const lastAppName = lastEntry[1]
+		const lastPreviewPort = parseInt(lastEntry[2])
+		const lastDevPort = parseInt(lastEntry[3])
+
+		console.log(`🔍 Last app: ${lastAppName} (preview: ${lastPreviewPort}, dev: ${lastDevPort})`)
+
+		const initialDevPort = lastDevPort + 1
+		const initialPreviewPort = lastPreviewPort + 1
+
 		const devPortPrompt = new Input({
-			message: 'Введите порт для режима разработки (например, 4176):',
-			initial: '4176',
+			message: 'Введите порт для режима разработки:',
+			initial: initialDevPort.toString(),
 			validate: (value) => {
 				const port = parseInt(value)
 				if (isNaN(port)) return 'Порт должен быть числом'
@@ -41,8 +63,8 @@ async function main() {
 		})
 
 		const previewPortPrompt = new Input({
-			message: 'Введите порт для режима preview (например, 3003):',
-			initial: '3003',
+			message: 'Введите порт для режима preview:',
+			initial: initialPreviewPort.toString(),
 			validate: (value) => {
 				const port = parseInt(value)
 				if (isNaN(port)) return 'Порт должен быть числом'
@@ -65,6 +87,17 @@ async function main() {
 			console.log('❌ Создание отменено')
 			process.exit(0)
 		}
+
+		// Step 4.1: Update ports.ts
+		const newAppKey = name.replace(/^admin-/, '')
+		const newPortEntry = `\n  ${newAppKey}: {\n    preview: ${previewPort},\n    dev: ${devPort},\n  },`
+		
+		portsContent = portsContent.replace(
+			/(export const APPS_PORTS = \{[\s\S]*?)(\n\}\s*as const)/,
+			`$1${newPortEntry}$2`
+		)
+		fs.writeFileSync(portsFilePath, portsContent)
+		console.log(`✅ Обновлен ${portsFilePath}`)
 
 		// Step 5: Create directory structure
 		const appDir = path.join(process.cwd(), 'apps', name)
@@ -130,44 +163,15 @@ async function main() {
 		fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify(packageJson, null, 2) + '\n')
 
 		// Step 7: Create vite.config.ts
-		const viteConfig = `import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import federation from '@originjs/vite-plugin-federation'
+		const viteConfig = `import { APPS_PORTS, createConfig } from '@admin-panel/lib'
 import { fileURLToPath } from 'node:url'
 
-export default defineConfig({
-	plugins: [
-		vue(),
-		federation({
-			name: '${name.replace(/^admin-/, '')}',
-			filename: 'remoteEntry.js',
-			exposes: {
-				'./${displayName.replace(/\s+/g, '')}Routes': './src/app/router/index.ts',
-			},
-			shared: ['vue', 'vue-router'],
-		}),
-	],
-	resolve: {
-		alias: {
-			'@': fileURLToPath(new URL('./src', import.meta.url)),
-			'#app': fileURLToPath(new URL('./src/app', import.meta.url)),
-			'#pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
-			'#widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
-			'#features': fileURLToPath(new URL('./src/features', import.meta.url)),
-			'#entities': fileURLToPath(new URL('./src/entities', import.meta.url)),
-			'#shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
-			styles: fileURLToPath(new URL('./src/app/assets/styles', import.meta.url)),
-		},
-	},
-	build: {
-		target: 'esnext',
-		minify: false,
-		cssCodeSplit: false,
-	},
-	server: {
-		port: ${previewPort},
-		cors: true,
-	},
+export default createConfig({
+	name: '${name.replace(/^admin-/, '')}',
+	displayName: '${displayName}',
+	devPort: APPS_PORTS.${newAppKey}.dev,
+	previewPort: APPS_PORTS.${newAppKey}.preview,
+	url: import.meta.url,
 })
 `
 

@@ -18,7 +18,7 @@ export const APPS_PORTS = {
   media: {
     preview: 4004,
     dev: 4177,
-	},
+  },
 } as const
 
 export const PACKAGES_PORTS = {

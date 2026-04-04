@@ -41,16 +41,26 @@
 			"require": "./dist/utils.cjs",
 			"import": "./dist/utils.mjs",
 			"types": "./dist/utils.d.ts"
+		},
+		"./vite": {
+			"require": "./dist/vite.cjs",
+			"import": "./dist/vite.mjs",
+			"types": "./dist/vite.d.ts"
 		}
 	},
 	"devDependencies": {
 		"@admin-panel/eslint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
-		"@types/node": "^24.9.1",
+		"@types/node": "^24.9.2",
 		"typescript": "^5.9.3",
 		"unbuild": "^3.6.1"
 	},
 	"dependencies": {
-		"ofetch": "^1.3.4"
+		"@originjs/vite-plugin-federation": "^1.4.1",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"defu": "^6.1.4",
+		"element-plus": "^2.13.0",
+		"ofetch": "^1.3.4",
+		"vite": "^7.1.7"
 	}
 }

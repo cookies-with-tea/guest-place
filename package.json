@@ -44,15 +44,9 @@
 		"storybook": "turbo run storybook --filter=docs",
 		"preview-storybook": "turbo run preview-storybook",
 		"build:mf": "turbo run build --filter=./apps/* --filter=./packages/ui",
-		"dev:fast": "turbo run dev --parallel --filter=!./apps/admin-docs",
-		"why": "pnpm why",
-		"outdated": "pnpm outdated",
-		"dedupe": "pnpm dedupe"
+		"dev:fast": "turbo run dev --parallel --filter=!./apps/admin-docs"
 	},
 	"dependencies": {
-		"@primevue/themes": "^4.5.4",
-		"primeicons": "^7.0.0",
-		"primevue": "^4.0.0",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},

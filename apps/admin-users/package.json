@@ -27,16 +27,16 @@
 		"@tanstack/vue-query": "^5.92.1",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1",
-		"primevue": "^4.0.0"
+		"primevue": "^4.0.0",
+		"element-plus": "^2.13.0"
 	},
 	"devDependencies": {
 		"@admin-panel/eslint-config": "workspace:*",
 		"@admin-panel/prettier-config": "workspace:*",
 		"@admin-panel/stylelint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
-		"@types/node": "^24.6.0",
+		"@types/node": "^24.9.2",
 		"@vitejs/plugin-vue": "^6.0.1",
-		"element-plus": "^2.13.0",
 		"typescript": "~5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
