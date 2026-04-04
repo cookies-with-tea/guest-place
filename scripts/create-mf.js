@@ -163,15 +163,11 @@ async function main() {
 		fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify(packageJson, null, 2) + '\n')
 
 		// Step 7: Create vite.config.ts
-		const viteConfig = `import { APPS_PORTS, createConfig } from '@admin-panel/lib'
-import { fileURLToPath } from 'node:url'
+		const viteConfig = `import { createConfig } from '@admin-panel/lib/vite'
 
 export default createConfig({
 	name: '${name.replace(/^admin-/, '')}',
 	displayName: '${displayName}',
-	devPort: APPS_PORTS.${newAppKey}.dev,
-	previewPort: APPS_PORTS.${newAppKey}.preview,
-	url: import.meta.url,
 })
 `
 

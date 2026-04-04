@@ -5,7 +5,6 @@ import { createConfig } from '@admin-panel/lib/vite'
 export default createConfig({
 	name: 'shell',
 	displayName: 'Shell',
-	url: import.meta.url,
 	exposes: {},
 	remotes: {
 		statistics: `http://localhost:${APPS_PORTS.statistics.preview}/assets/remoteEntry.js`,

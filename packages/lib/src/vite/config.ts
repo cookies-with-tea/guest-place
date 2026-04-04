@@ -15,7 +15,6 @@ export interface CreateConfigOptions {
 	remotes?: Record<string, string>
 	overrides?: UserConfig
 	plugins?: any[]
-	url: string
 }
 
 export function createConfig(options: CreateConfigOptions) {
@@ -31,11 +30,11 @@ export function createConfig(options: CreateConfigOptions) {
 		remotes,
 		overrides = {},
 		plugins = [],
-		url,
 	} = options
 
 	return defineConfig(({ mode }) => {
-		const rootDir = resolve(fileURLToPath(url), '../../../')
+		const appDir = process.cwd()
+		const rootDir = resolve(appDir, '../../')
 		const env = loadEnv(mode, rootDir)
 
 		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
@@ -56,14 +55,14 @@ export function createConfig(options: CreateConfigOptions) {
 			],
 			resolve: {
 				alias: {
-					'@': fileURLToPath(new URL('./src', url)),
-					'#app': fileURLToPath(new URL('./src/app', url)),
-					'#pages': fileURLToPath(new URL('./src/pages', url)),
-					'#widgets': fileURLToPath(new URL('./src/widgets', url)),
-					'#features': fileURLToPath(new URL('./src/features', url)),
-					'#entities': fileURLToPath(new URL('./src/entities', url)),
-					'#shared': fileURLToPath(new URL('./src/shared', url)),
-					styles: fileURLToPath(new URL('./src/app/assets/styles', url)),
+					'@': resolve(appDir, 'src'),
+					'#app': resolve(appDir, 'src/app'),
+					'#pages': resolve(appDir, 'src/pages'),
+					'#widgets': resolve(appDir, 'src/widgets'),
+					'#features': resolve(appDir, 'src/features'),
+					'#entities': resolve(appDir, 'src/entities'),
+					'#shared': resolve(appDir, 'src/shared'),
+					styles: resolve(appDir, 'src/app/assets/styles'),
 				},
 			},
 			build: {
