@@ -1,8 +1,5 @@
 <template>
   <div class="mfe-stats-chart" ref="chartContainer">
-    <div class="chart-overlay">
-      <div class="status-badge" :class="{ 'is-online': true }">System Live</div>
-    </div>
     <svg ref="svgRef"></svg>
   </div>
 </template>
@@ -103,11 +100,10 @@ const initChart = () => {
     .text(d => d.id)
     .attr('dx', d => d.id === 'Shell' ? 25 : 18)
     .attr('dy', 5)
-    .style('fill', '#fff')
+    .attr('class', 'node-text')
     .style('font-size', d => d.id === 'Shell' ? '14px' : '12px')
-    .style('font-weight', '500')
+    .style('font-weight', '600')
     .style('pointer-events', 'none')
-    .style('text-shadow', '0 2px 4px rgba(0,0,0,0.5)')
 
   simulation.on('tick', () => {
     link.attr('d', (d: any) => {
@@ -159,14 +155,9 @@ watch(() => props.data, () => {
   position: relative;
   width: 100%;
   height: 400px;
-  background: #1a1a1a;
-  background-image: 
-    radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
-  background-size: 24px 24px;
+  background: transparent;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(66, 184, 131, 0.2);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .chart-overlay {
@@ -199,16 +190,20 @@ watch(() => props.data, () => {
   box-shadow: 0 0 8px #42b883;
 }
 
-.link-path {
+:deep(.link-path) {
   transition: stroke 0.3s;
 }
 
-.node-circle {
+:deep(.node-text) {
+  fill: var(--gp-text-main) !important;
+}
+
+:deep(.node-circle) {
   transition: transform 0.2s;
   cursor: grab;
 }
 
-.node-circle:active {
-  cursor: grabbing;
+:deep(.node-circle:hover) {
+  transform: scale(1.1);
 }
 </style>

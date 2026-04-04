@@ -1,0 +1,181 @@
+@use 'variables' as *;
+
+:root,
+html.dark,
+html.light {
+  /* Element Plus Root Color Hacks (Replacing Blue with VP Green) */
+  --el-color-primary: var(--gp-primary) !important;
+  --el-color-primary-light-3: var(--gp-primary-light) !important;
+  --el-color-primary-light-5: rgba(66, 184, 131, 0.5) !important;
+  --el-color-primary-light-7: rgba(66, 184, 131, 0.3) !important;
+  --el-color-primary-light-8: var(--gp-bg-glass) !important;
+  --el-color-primary-light-9: var(--gp-bg-glass) !important;
+  --el-color-primary-dark-2: var(--gp-primary-hover) !important;
+
+  /* Typography Variables Overrides */
+  --el-font-family: 'Inter', sans-serif !important;
+}
+
+/* Premium Glass Cards (Fixing ugly gray cards) */
+.el-card {
+  --el-card-bg-color: var(--gp-bg-glass) !important;
+  --el-card-border-color: var(--gp-glass-border);
+  --el-card-border-radius: var(--gp-radius-md);
+  border: 1px solid var(--gp-glass-border) !important;
+  backdrop-filter: blur(16px);
+  box-shadow: var(--gp-glass-shadow) !important;
+}
+
+.el-card__header {
+  border-bottom: 1px solid var(--gp-glass-border) !important;
+  font-weight: 600;
+  color: var(--gp-text-main);
+}
+
+/* Premium Tables */
+.el-table {
+  background-color: transparent !important;
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: var(--gp-bg-glass);
+  --el-table-border: none;
+  --el-table-border-color: transparent;
+  --el-table-text-color: var(--gp-text-main);
+  --el-table-header-text-color: var(--gp-text-secondary);
+  --el-table-row-hover-bg-color: var(--gp-bg-glass-hover);
+}
+
+.el-table th.el-table__cell,
+.el-table td.el-table__cell {
+  border-bottom: 1px solid var(--gp-glass-border) !important;
+  padding: 12px 0;
+}
+
+.el-table::before {
+  display: none; /* Hide bottom border */
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+/* Premium Buttons (Glass Pills) */
+.el-button {
+  --el-border-radius-base: 100px; /* Pill shaped buttons */
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 12px 24px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--gp-bg-glass) !important;
+  border: 1px solid var(--gp-glass-border) !important;
+  color: var(--gp-text-main) !important;
+  backdrop-filter: blur(8px);
+}
+
+.el-button:hover {
+  background: var(--gp-bg-glass-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--gp-glass-shadow);
+}
+
+.el-button--primary {
+  background: var(--gp-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px var(--gp-primary-light);
+}
+.el-button--primary:hover {
+  background: var(--gp-primary-hover) !important;
+  box-shadow: 0 6px 20px var(--gp-primary-light);
+}
+.el-button--danger {
+  background: #ff5f5f !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(255, 95, 95, 0.3);
+}
+.el-button--danger:hover {
+  background: #ff4747 !important;
+  box-shadow: 0 6px 20px rgba(255, 95, 95, 0.4);
+}
+
+/* Premium Inputs */
+.el-input {
+  --el-input-border-radius: var(--gp-radius-md);
+}
+
+.el-input__wrapper {
+  background-color: var(--gp-bg-glass) !important;
+  box-shadow: 0 0 0 1px var(--gp-glass-border) inset !important;
+  backdrop-filter: blur(var(--gp-glass-blur));
+  transition: all 0.3s ease;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--gp-primary) inset, 0 0 8px var(--gp-primary-light) !important;
+  background-color: transparent !important;
+}
+
+/* Premium Modals (Glassmorphism) */
+.el-dialog {
+  background: var(--gp-bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--gp-glass-border) !important;
+  border-radius: var(--gp-radius-md) !important;
+  box-shadow: var(--gp-glass-shadow) !important;
+}
+
+.el-dialog__title {
+  color: var(--gp-text-main) !important;
+  font-weight: 600;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+  color: var(--gp-text-secondary) !important;
+}
+
+.el-dialog__headerbtn:hover .el-dialog__close {
+  color: var(--gp-text-main) !important;
+}
+
+/* Enhancing Tables (No Borders, Full Transparent) */
+.el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: transparent !important;
+  --el-table-border: none !important;
+  --el-table-border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+.el-table,
+.el-table__inner-wrapper,
+.el-table__body-wrapper,
+.el-table__header-wrapper,
+.el-table tr,
+.el-table th,
+.el-table td,
+.el-table th.el-table__cell,
+.el-table td.el-table__cell {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-right: none !important;
+  border-left: none !important;
+  border-top: none !important;
+}
+
+.el-table__inner-wrapper::before,
+.el-table__border-left-patch,
+.el-table::before,
+.el-table::after {
+  display: none !important;
+}
+
+.el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf {
+  border-bottom: 1px solid var(--gp-glass-border) !important;
+}
+
+.el-table tbody tr:hover > td.el-table__cell {
+  background-color: var(--gp-bg-glass-hover) !important;
+  backdrop-filter: blur(5px);
+}

@@ -41,7 +41,6 @@
       style="width: 100%"
       @selection-change="handleSelectionChange"
       class="media-table"
-      :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
     >
       <el-table-column v-if="showSelection" type="selection" width="55" />
       
@@ -93,27 +92,20 @@
           <el-button-group>
             <el-button
               size="small"
-              :icon="View"
-              circle
-              @click="previewMedia(scope.row)"
-              title="Preview"
-            />
-            <el-button
-              size="small"
               type="primary"
-              :icon="Edit"
-              circle
+              plain
               @click="editMedia(scope.row)"
-              title="Edit"
-            />
+            >
+              Edit
+            </el-button>
             <el-button
               size="small"
               type="danger"
-              :icon="Delete"
-              circle
+              plain
               @click="deleteMedia(scope.row)"
-              title="Delete"
-            />
+            >
+              Delete
+            </el-button>
           </el-button-group>
         </template>
       </el-table-column>
@@ -275,7 +267,8 @@ const formatDate = (date: Date): string => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f7fa;
+  background-color: var(--gp-bg-glass);
+  border: 1px solid var(--gp-glass-border);
   transition: transform 0.2s ease;
 }
 

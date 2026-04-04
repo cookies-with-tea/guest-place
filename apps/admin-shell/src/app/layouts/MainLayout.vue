@@ -1,5 +1,9 @@
 <template>
 	<div class="main-layout">
+		<div class="ambient-bg">
+			<div class="ambient-orb orb-1"></div>
+			<div class="ambient-orb orb-2"></div>
+		</div>
 		<TheSidebar />
 
 		<div class="main-layout__content">
@@ -8,6 +12,7 @@
 					<span class="page-title">{{ currentTitle }}</span>
 				</div>
 				<div class="header-right">
+					<UiThemeSwitcher />
 					<el-dropdown trigger="click">
 						<div class="user-profile">
 							<el-avatar :size="32" :icon="UserFilled" />
@@ -34,6 +39,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { UserFilled } from '@element-plus/icons-vue'
 import { TheSidebar } from '#widgets/the-sidebar'
+import { UiThemeSwitcher } from '@admin-panel/ui'
 
 const route = useRoute()
 const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard')
@@ -46,9 +52,52 @@ const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard'
 	display: flex;
 	background: var(--gp-bg-main);
 	overflow: hidden;
+	position: relative;
+}
+
+.ambient-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.ambient-orb {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(100px);
+	opacity: 0.3;
+	animation: float 20s infinite ease-in-out alternate;
+}
+
+.orb-1 {
+	top: -10%;
+	right: -5%;
+	width: 600px;
+	height: 600px;
+	background: var(--gp-primary);
+}
+
+.orb-2 {
+	bottom: -15%;
+	left: 10%;
+	width: 500px;
+	height: 500px;
+	background: #6e39cb;
+	animation-delay: -10s;
+}
+
+@keyframes float {
+	0% { transform: translate(0, 0) scale(1); }
+	100% { transform: translate(-50px, 50px) scale(1.1); }
 }
 
 .main-layout__content {
+  z-index: 1;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
