@@ -27,10 +27,13 @@ use utoipa::{
 };
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::media::storage::StorageService;
+
 #[derive(Clone, Debug)]
 struct AppState {
     pool: Pool<Postgres>,
     i18n: I18nService,
+    media_storage: Arc<StorageService>,
     frontend_url: String,
     smtp_host: String,
     smtp_port: u16,
@@ -112,9 +115,12 @@ async fn main() {
     let smtp_from = std::env::var("SMTP_FROM").expect("SMTP_FROM must be set");
 
     let i18n = I18nService::new(pool.clone());
+    let media_storage = Arc::new(StorageService::new("uploads"));
+    
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
         i18n,
+        media_storage,
         frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
         smtp_host,
         smtp_port,
@@ -166,7 +172,7 @@ async fn main() {
         .nest("/api/v1/i18n", i18n::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
-        .nest_service("/media", ServeDir::new("media").fallback(ServeDir::new("media/image")))
+        .nest_service("/uploads", ServeDir::new("uploads"))
         .with_state(shared_state.clone());
 
     let protected_router = Router::new()

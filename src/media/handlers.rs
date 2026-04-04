@@ -83,39 +83,43 @@ pub async fn create(
         );
     };
 
-    let uuid = Uuid::new_v4();
-    let path_buf = PathBuf::from(&file_name);
-    let extension = path_buf
+    let media_uuid = Uuid::new_v4();
+    let extension = std::path::Path::new(&file_name)
         .extension()
         .and_then(|ext| ext.to_str())
         .unwrap_or("bin");
 
-    let relative_path = format!("media/{}/{}.{}", media_type, uuid, extension);
-    let save_path = PathBuf::from(&relative_path);
-
-    if let Err(e) = fs::create_dir_all(save_path.parent().unwrap()) {
-        eprintln!("FS error (mkdir): {:?}", e);
-        return into_api_response(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            None,
-            Some(error_map("filesystem", "Failed to create upload directory")),
-            Some(vec!["Server configuration error".to_string()]),
-        );
-    }
-
-    if let Err(e) = fs::write(&save_path, &data) {
-        eprintln!("FS error (write): {:?}", e);
-        return into_api_response(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            None,
-            Some(error_map("filesystem", "Failed to save file")),
-            Some(vec!["Could not write file to disk".to_string()]),
-        );
-    }
+    let (hash, relative_path) = if media_type == "image" {
+        let processed_data = state.media_storage.process_image(&data).await.map_err(|e| {
+            eprintln!("Image processing error: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
+                data: None,
+                errors: Some(error_map("image", "Failed to process image")),
+                messages: Some(vec!["Could not process uploaded image".to_string()]),
+            }))
+        })?;
+        state.media_storage.save_cas(&processed_data, "webp").await.map_err(|e| {
+            eprintln!("Storage error (CAS image): {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
+                data: None,
+                errors: Some(error_map("storage", "Failed to save processed image")),
+                messages: Some(vec!["Could not save file to disk".to_string()]),
+            }))
+        })?
+    } else {
+        state.media_storage.save_cas(&data, extension).await.map_err(|e| {
+            eprintln!("Storage error (CAS): {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
+                data: None,
+                errors: Some(error_map("storage", "Failed to save file")),
+                messages: Some(vec!["Could not save file to disk".to_string()]),
+            }))
+        })?
+    };
 
     let config = AppConfig::new();
     let full_url = format!(
-        "{}/{}",
+        "{}/uploads/{}",
         config.public_url.trim_end_matches('/'),
         &relative_path
     );
@@ -123,7 +127,7 @@ pub async fn create(
     let db_result = sqlx::query(
         "INSERT INTO media (uuid, media_type, url, title, alt) VALUES ($1, $2::media_type, $3, $4, $5)",
     )
-    .bind(uuid)
+    .bind(media_uuid)
     .bind(media_type)
     .bind(&full_url)
     .bind(title)
@@ -133,8 +137,7 @@ pub async fn create(
 
     if let Err(e) = db_result {
         eprintln!("DB error: {:?}", e);
-        // удалить файл, если запись в БД не удалась
-        let _ = fs::remove_file(&save_path);
+        // В CAS мы не удаляем файл, так как он может использоваться другими записями (дедупликация)
         return into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
             None,
@@ -146,7 +149,7 @@ pub async fn create(
     into_api_response(
         StatusCode::CREATED,
         Some(MediaUploadResponseDTO {
-            uuid: uuid.to_string(),
+            uuid: media_uuid.to_string(),
             url: full_url,
         }),
         None,
