@@ -7,10 +7,10 @@
 		"dist"
 	],
 	"scripts": {
-		"dev": "pnpm unbuild --stub",
+		"dev": "pnpm build",
 		"prepublishOnly": "npm run build",
 		"prepack": "pnpm unbuild",
-		"build": "unbuild --entries ./src/index --declaration --outDir dist",
+		"build": "unbuild",
 		"lint": "eslint ."
 	},
 	"main": "dist/index.cjs",

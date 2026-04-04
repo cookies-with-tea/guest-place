@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 export const routes = [
 	{
-		path: '/statistics',
+		path: '/',
 		name: 'StatisticsDashboard',
 		component: () => import('#pages/AnalyticsPage.vue'),
 	},

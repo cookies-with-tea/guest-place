@@ -26,10 +26,7 @@ export const useMedia = () => {
     itemsPerPage.value = limit
     searchQuery.value = search || ''
 
-    // Note: The existing API doesn't support pagination/search, so we'll need to implement this
-    // For now, we'll just fetch all media items
     const response = await mediaApi.getAll()
-    console.log(response)
     mediaItems.value = (response.data.items as unknown as MediaItem[]) || []
     totalItems.value = (response.data.pagination.total as number) || 0
 

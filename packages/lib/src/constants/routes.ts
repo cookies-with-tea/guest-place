@@ -7,22 +7,18 @@ export const ROUTES = {
 	},
 	translations: {
 		name: 'TranslationsPage',
-		title: 'general.tranlsations',
-  },
-  media: {
-    name: 'MediaPage',
-    title: 'general.media'
+		title: 'general.translations',
 	},
-  directus: {
-    name: 'DirectusPage',
-    title: 'general.directus',
-  },
-  'directus-2': {
-    name: 'Directus2Page',
-    title: 'general.directus-2',
-  },
-  directus: {
-    name: 'DirectusPage',
-    title: 'general.directus',
-  },
+	media: {
+		name: 'MediaPage',
+		title: 'general.media',
+	},
+	directus: {
+		name: 'DirectusPage',
+		title: 'general.directus',
+	},
+	'directus-2': {
+		name: 'Directus2Page',
+		title: 'general.directus-2',
+	},
 } as const

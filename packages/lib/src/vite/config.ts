@@ -32,14 +32,17 @@ export function createConfig(options: CreateConfigOptions) {
 		plugins = [],
 	} = options
 
-	return defineConfig(({ mode }) => {
+	return defineConfig(({ mode, command }) => {
 		const appDir = process.cwd()
 		const rootDir = resolve(appDir, '../../')
 		const env = loadEnv(mode, rootDir)
 
 		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
+		const isProduction = mode === 'production' || command === 'build'
+		const base = isProduction && name !== 'shell' ? './' : '/'
 
 		const baseConfig: UserConfig = {
+			base: '/', // Keep base as / but override URLs for built assets
 			plugins: [
 				vue(),
 				federation({
@@ -53,6 +56,13 @@ export function createConfig(options: CreateConfigOptions) {
 				}),
 				...plugins,
 			],
+			experimental: {
+				renderBuiltUrl(filename) {
+					if (isProduction && name !== 'shell' && portConfig) {
+						return `http://localhost:${(portConfig as any).preview}/${filename}`
+					}
+				},
+			},
 			resolve: {
 				alias: {
 					'@': resolve(appDir, 'src'),

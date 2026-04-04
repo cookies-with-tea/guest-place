@@ -2,13 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '#app/layouts/MainLayout.vue'
 import { useSidebar } from '#widgets/the-sidebar'
 
-// Загружаем роуты асинхронно (top-level await в модуле)
+import { APPS_PORTS } from '@admin-panel/lib/constants'
+
+// Загружаем роуты асинхронно
 const loadRemoteRoutes = async () => {
-	const routes = []
+	const routes: any[] = []
 
 	const addPrefixToRoute = (route: any, prefix: string): any => {
 		const { path, ...rest } = route
-
 		const basePath = path === '/' ? '' : path
 		const newPath = `${prefix}${basePath}`
 
@@ -24,41 +25,48 @@ const loadRemoteRoutes = async () => {
 		return modifiedRoute
 	}
 
-	try {
-		// @ts-ignore
-		const stats = await import('users/UsersRoutes')
-		const transRoute = stats.default.publicRoutes.users
+	const apps = Object.keys(APPS_PORTS).filter((key) => key !== 'shell' && !key.includes('directus'))
 
-		const modifiedRoute = addPrefixToRoute(transRoute, '/users')
+	for (const appName of apps) {
+		try {
+			let remoteModule: any
 
-		routes.push(modifiedRoute)
-	} catch {
-		console.warn('Statistics routes not loaded')
-	}
+			// Vite needs static-ish strings for import analysis to work with Module Federation
+			// @ts-ignore
+			if (appName === 'statistics') remoteModule = await import('statistics/StatisticsRoutes')
+			// @ts-ignore
+			else if (appName === 'translations') remoteModule = await import('translations/TranslationsRoutes')
+			// @ts-ignore
+			else if (appName === 'users') remoteModule = await import('users/UsersRoutes')
+			// @ts-ignore
+			else if (appName === 'media') remoteModule = await import('media/MediaRoutes')
 
-	try {
-		// @ts-ignore
-		const trans = await import('translations/TranslationsRoutes')
-		const transRoute = trans.default.publicRoutes.translations
+			if (!remoteModule) continue
 
-		const modifiedRoute = addPrefixToRoute(transRoute, '/translations')
+			const remoteRoutes = remoteModule.routes || remoteModule.default?.routes || []
 
-		routes.push(modifiedRoute)
-	} catch {
-		console.warn('Translations routes not loaded')
+			remoteRoutes.forEach((route: any) => {
+				routes.push(addPrefixToRoute(route, `/${appName}`))
+			})
+
+			console.log(`✅ Loaded routes for ${appName}`)
+		} catch (error: any) {
+			console.warn(`⚠️ Could not load routes for ${appName}:`, error instanceof Error ? error.message : String(error))
+		}
 	}
 
 	return routes
 }
 
 const routesToSidebar = (data: any) => {
-	return data.map((route) => ({ title: route.meta.title, path: route.path }))
+	return data.map((route: any) => ({
+		title: route.meta?.title || route.name,
+		path: route.path,
+	}))
 }
 
 export const initRouter = async () => {
 	const remoteRoutes = await loadRemoteRoutes()
-
-	console.log(remoteRoutes)
 
 	const { setData } = useSidebar()
 
