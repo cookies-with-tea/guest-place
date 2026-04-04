@@ -1,5 +1,6 @@
 import UiButton from './src/ui-button'
 import UiInput from './src/ui-input'
 import UiIcon from './src/ui-icon'
+import UiAuthWidget from './src/ui-auth-widget'
 
-export { UiButton, UiInput, UiIcon }
+export { UiButton, UiInput, UiIcon, UiAuthWidget }

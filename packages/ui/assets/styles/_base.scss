@@ -1,14 +1,16 @@
 @use 'reset';
-@use 'helpers/mixins/variables' as mVariables;
 @use 'variables' as *;
 @use 'fonts';
 
 :root {
-	@include mVariables.generate-css-vars($theme-light);
-}
-
-[data-theme='dark'] {
-	@include mVariables.generate-css-vars($theme-dark);
+	--color-bg: #{$gp-bg};
+	--color-surface: #{$gp-surface};
+	--color-bg-2: #{$gp-bg-2};
+	--color-border: #{$gp-border};
+	--color-primary: #{$gp-primary};
+	--color-text: #{$gp-text};
+	--color-text-secondary: #{$gp-text-secondary};
+	--color-text-disabled: #{$gp-text-disabled};
 }
 
 html {

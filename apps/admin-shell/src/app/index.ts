@@ -1,4 +1,15 @@
 import 'element-plus/dist/index.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
+
+if (!localStorage.getItem('gp-theme')) {
+  localStorage.setItem('gp-theme', 'dark')
+}
+
+if (localStorage.getItem('gp-theme') === 'dark') {
+  document.documentElement.classList.add('dark')
+} else {
+  document.documentElement.classList.add('light')
+}
 import { useI18n } from '@admin-panel/i18n'
 import * as vue from 'vue'
 import * as vueRouter from 'vue-router'

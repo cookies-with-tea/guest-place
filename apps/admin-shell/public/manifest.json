@@ -1,6 +1,15 @@
 {
   "remotes": [
     {
+      "name": "orchestrator",
+      "displayName": "Orchestrator",
+      "url": "http://localhost:3005/assets/remoteEntry.js",
+      "scope": "orchestrator",
+      "module": "./OrchestratorRoutes",
+      "icon": "Setting",
+      "order": 0
+    },
+    {
       "name": "statistics",
       "displayName": "Statistics",
       "url": "http://localhost:3001/assets/remoteEntry.js",
@@ -26,6 +35,15 @@
       "module": "./UsersRoutes",
       "icon": "User",
       "order": 3
+    },
+    {
+      "name": "media",
+      "displayName": "Media",
+      "url": "http://localhost:3004/assets/remoteEntry.js",
+      "scope": "media",
+      "module": "./MediaRoutes",
+      "icon": "Picture",
+      "order": 4
     }
   ]
 }

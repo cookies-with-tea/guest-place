@@ -15,6 +15,8 @@ export interface CreateConfigOptions {
 	remotes?: Record<string, string>
 	overrides?: UserConfig
 	plugins?: any[]
+	serverPort?: number
+	previewPort?: number
 }
 
 export function createConfig(options: CreateConfigOptions) {
@@ -30,6 +32,8 @@ export function createConfig(options: CreateConfigOptions) {
 		remotes,
 		overrides = {},
 		plugins = [],
+		serverPort,
+		previewPort,
 	} = options
 
 	return defineConfig(({ mode, command }) => {
@@ -88,7 +92,7 @@ export function createConfig(options: CreateConfigOptions) {
 				},
 			},
 			server: {
-				port: portConfig?.dev,
+				port: serverPort || portConfig?.dev,
 				cors: true,
 				proxy: env.VITE_API_BASE
 					? {
@@ -101,7 +105,7 @@ export function createConfig(options: CreateConfigOptions) {
 					: {},
 			},
 			preview: {
-				port: portConfig?.preview,
+				port: previewPort || portConfig?.preview,
 			},
 		}
 

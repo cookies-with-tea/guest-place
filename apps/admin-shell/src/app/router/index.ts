@@ -83,12 +83,6 @@ export const initRouter = async (app: any) => {
 						path: '/',
 						component: () => import('#pages/main-page'),
 					},
-					{
-						name: 'Monitor',
-						path: '/monitor',
-						component: () => import('#pages/monitor-page'),
-						meta: { title: 'System Monitor' }
-					},
 					...remoteRoutes,
 				],
 			},

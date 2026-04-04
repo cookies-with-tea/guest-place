@@ -14,19 +14,15 @@ export const APPS_PORTS = {
 	users: {
 		preview: 3003,
 		dev: 4176,
-  },
-  media: {
-    preview: 4004,
-    dev: 4177,
-  },
-  'directus-2': {
-    preview: 4006,
-    dev: 4179,
-  },
-  directus: {
-    preview: 4005,
-    dev: 4178,
-  },
+	},
+	media: {
+		preview: 3004,
+		dev: 4177,
+	},
+	orchestrator: {
+		preview: 3005,
+		dev: 4178,
+	},
 } as const
 
 export const PACKAGES_PORTS = {

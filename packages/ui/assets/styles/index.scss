@@ -1,1 +1,9 @@
-@forward 'base';
+@use 'base';
+@use 'tokens';
+@use 'glass';
+
+body {
+  background-color: var(--gp-bg-main);
+  color: var(--gp-text-main);
+  transition: background-color 0.3s, color 0.3s;
+}
