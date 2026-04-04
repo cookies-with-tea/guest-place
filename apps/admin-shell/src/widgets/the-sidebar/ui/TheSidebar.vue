@@ -11,7 +11,7 @@
 		>
 			<el-menu-item v-for="item in sidebarData" :key="item.path" :index="item.path" :route="{ path: item.path }">
 				<template #title>
-					{{ t(item.title) }}
+					{{ t(item.title).value }}
 				</template>
 			</el-menu-item>
 		</el-menu>

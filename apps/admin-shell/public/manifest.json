@@ -1,0 +1,31 @@
+{
+  "remotes": [
+    {
+      "name": "statistics",
+      "displayName": "Statistics",
+      "url": "http://localhost:3001/assets/remoteEntry.js",
+      "scope": "statistics",
+      "module": "./StatisticsRoutes",
+      "icon": "Histogram",
+      "order": 1
+    },
+    {
+      "name": "translations",
+      "displayName": "Translations",
+      "url": "http://localhost:3002/assets/remoteEntry.js",
+      "scope": "translations",
+      "module": "./TranslationsRoutes",
+      "icon": "ChatDotRound",
+      "order": 2
+    },
+    {
+      "name": "users",
+      "displayName": "Users",
+      "url": "http://localhost:3003/assets/remoteEntry.js",
+      "scope": "users",
+      "module": "./UsersRoutes",
+      "icon": "User",
+      "order": 3
+    }
+  ]
+}

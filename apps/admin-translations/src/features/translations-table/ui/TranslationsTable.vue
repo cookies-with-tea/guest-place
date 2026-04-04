@@ -6,10 +6,10 @@
 			<el-table-column prop="value" label="Translation" min-width="200" />
 			<el-table-column label="Actions" width="160">
 				<template #default="scope">
-					<el-button v-if="scope.row" size="small" type="primary" plain @click="openEditModal(scope.row)">
+					<el-button v-if="scope && scope.row" size="small" type="primary" plain @click="openEditModal(scope.row)">
 						Edit
 					</el-button>
-					<el-button v-if="scope.row" size="small" type="danger" plain @click="confirmDelete(scope.row.id)">
+					<el-button v-if="scope && scope.row" size="small" type="danger" plain @click="confirmDelete(scope.row.id)">
 						Delete
 					</el-button>
 				</template>

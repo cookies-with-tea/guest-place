@@ -38,7 +38,7 @@ export function getTsConfigNode() {
 	"compilerOptions": {
 		"composite": true,
 		"module": "ESNext",
-		"moduleResolution": "Node",
+		"moduleResolution": "bundler",
 		"noEmit": true
 	},
 	"include": ["vite.config.ts", "scripts/**/*.ts"]

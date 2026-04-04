@@ -27,11 +27,12 @@
 		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix"
 	},
 	"dependencies": {
-		"@admin-panel/ui": "workspace:*",
 		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
+		"@admin-panel/ui": "workspace:*",
 		"@tanstack/vue-query": "^5.92.1",
 		"element-plus": "^2.13.0",
+		"pinia": "^2.1.7",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},

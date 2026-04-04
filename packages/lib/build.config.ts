@@ -16,5 +16,8 @@ export default defineBuildConfig({
 		'@vitejs/plugin-vue',
 		'@originjs/vite-plugin-federation',
 		'defu',
+		'vue',
+		'pinia',
 	],
+  failOnWarn: false,
 })

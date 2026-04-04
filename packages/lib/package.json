@@ -18,34 +18,34 @@
 	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
-			"require": "./dist/index.cjs",
+			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"require": "./dist/index.cjs"
 		},
 		"./api": {
-			"require": "./dist/api.cjs",
+			"types": "./dist/api.d.ts",
 			"import": "./dist/api.mjs",
-			"types": "./dist/api.d.ts"
+			"require": "./dist/api.cjs"
 		},
 		"./constants": {
-			"require": "./dist/constants.cjs",
+			"types": "./dist/constants.d.ts",
 			"import": "./dist/constants.mjs",
-			"types": "./dist/constants.d.ts"
+			"require": "./dist/constants.cjs"
 		},
 		"./model": {
-			"require": "./dist/model.cjs",
+			"types": "./dist/model.d.ts",
 			"import": "./dist/model.mjs",
-			"types": "./dist/model.d.ts"
+			"require": "./dist/model.cjs"
 		},
 		"./utils": {
-			"require": "./dist/utils.cjs",
+			"types": "./dist/utils.d.ts",
 			"import": "./dist/utils.mjs",
-			"types": "./dist/utils.d.ts"
+			"require": "./dist/utils.cjs"
 		},
 		"./vite": {
-			"require": "./dist/vite.cjs",
+			"types": "./dist/vite.d.ts",
 			"import": "./dist/vite.mjs",
-			"types": "./dist/vite.d.ts"
+			"require": "./dist/vite.cjs"
 		}
 	},
 	"devDependencies": {
@@ -61,6 +61,7 @@
 		"defu": "^6.1.4",
 		"element-plus": "^2.13.0",
 		"ofetch": "^1.3.4",
+		"pinia": "^2.1.7",
 		"vite": "^7.1.7"
 	}
 }

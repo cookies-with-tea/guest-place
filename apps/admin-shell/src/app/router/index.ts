@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '#app/layouts/MainLayout.vue'
 import { useSidebar } from '#widgets/the-sidebar'
 
-import { APPS_PORTS } from '@admin-panel/lib/constants'
+import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
 
 // Загружаем роуты асинхронно
-const loadRemoteRoutes = async () => {
+const loadRemoteRoutes = async (app: any) => {
 	const routes: any[] = []
+// ... (omitting addPrefixToRoute for brevity in targetContent, but I need to match carefully)
+// Better use replace_file_content on the loop part.
 
 	const addPrefixToRoute = (route: any, prefix: string): any => {
 		const { path, ...rest } = route
@@ -25,34 +27,30 @@ const loadRemoteRoutes = async () => {
 		return modifiedRoute
 	}
 
-	const apps = Object.keys(APPS_PORTS).filter((key) => key !== 'shell' && !key.includes('directus'))
+	try {
+		const response = await fetch('/manifest.json')
+		if (!response.ok) throw new Error('Failed to fetch manifest.json')
+		
+		const manifest: RemoteManifest = await response.json()
+		const remotes = manifest.remotes.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
-	for (const appName of apps) {
-		try {
-			let remoteModule: any
+		for (const remote of remotes) {
+			try {
+				const remoteModule = await loadRemoteModule(remote, { app })
+				
+				const routesFromModule = remoteModule.routes || remoteModule.default?.routes || remoteModule.default || []
 
-			// Vite needs static-ish strings for import analysis to work with Module Federation
-			// @ts-ignore
-			if (appName === 'statistics') remoteModule = await import('statistics/StatisticsRoutes')
-			// @ts-ignore
-			else if (appName === 'translations') remoteModule = await import('translations/TranslationsRoutes')
-			// @ts-ignore
-			else if (appName === 'users') remoteModule = await import('users/UsersRoutes')
-			// @ts-ignore
-			else if (appName === 'media') remoteModule = await import('media/MediaRoutes')
+				routesFromModule.forEach((route: any) => {
+					routes.push(addPrefixToRoute(route, `/${remote.name}`))
+				})
 
-			if (!remoteModule) continue
-
-			const remoteRoutes = remoteModule.routes || remoteModule.default?.routes || []
-
-			remoteRoutes.forEach((route: any) => {
-				routes.push(addPrefixToRoute(route, `/${appName}`))
-			})
-
-			console.log(`✅ Loaded routes for ${appName}`)
-		} catch (error: any) {
-			console.warn(`⚠️ Could not load routes for ${appName}:`, error instanceof Error ? error.message : String(error))
+				console.log(`✅ Loaded routes for ${remote.name}`)
+			} catch (error) {
+				console.warn(`⚠️ Could not load remote module ${remote.name}:`, error)
+			}
 		}
+	} catch (error) {
+		console.error('❌ Failed to load manifest:', error)
 	}
 
 	return routes
@@ -65,8 +63,8 @@ const routesToSidebar = (data: any) => {
 	}))
 }
 
-export const initRouter = async () => {
-	const remoteRoutes = await loadRemoteRoutes()
+export const initRouter = async (app: any) => {
+	const remoteRoutes = await loadRemoteRoutes(app)
 
 	const { setData } = useSidebar()
 
@@ -84,6 +82,12 @@ export const initRouter = async () => {
 						name: 'Main',
 						path: '/',
 						component: () => import('#pages/main-page'),
+					},
+					{
+						name: 'Monitor',
+						path: '/monitor',
+						component: () => import('#pages/monitor-page'),
+						meta: { title: 'System Monitor' }
 					},
 					...remoteRoutes,
 				],
