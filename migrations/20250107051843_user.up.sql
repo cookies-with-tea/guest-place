@@ -2,6 +2,7 @@ CREATE TYPE user_role as ENUM ('user', 'admin');
 
 CREATE TYPE user_status as ENUM ('active', 'inactive', 'in_moderation');
 
+
 CREATE TABLE IF NOT EXISTS guest_user
 (
     uuid        UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS guest_user
     city TEXT NOT NULL DEFAULT '',
     role        user_role  NOT NULL DEFAULT 'user',
     status      user_status       NOT NULL DEFAULT 'active',
+    avatar_uuid UUID REFERENCES media(uuid),
     created_at  TIMESTAMP        NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP        NOT NULL DEFAULT NOW()
 );
