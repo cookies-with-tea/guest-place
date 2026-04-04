@@ -12,5 +12,17 @@ export const ROUTES = {
   media: {
     name: 'MediaPage',
     title: 'general.media'
-	}
+	},
+  directus: {
+    name: 'DirectusPage',
+    title: 'general.directus',
+  },
+  'directus-2': {
+    name: 'Directus2Page',
+    title: 'general.directus-2',
+  },
+  directus: {
+    name: 'DirectusPage',
+    title: 'general.directus',
+  },
 } as const

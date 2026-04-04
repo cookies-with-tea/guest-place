@@ -14,7 +14,7 @@
 		"dev:project": "pnpm build:packages && node scripts/choose-project.js dev",
 		"lint:project": "node scripts/choose-project.js lint",
 		"clean:project": "node scripts/choose-project.js clean",
-		"create:mf": "node scripts/create-mf.js",
+		"create:mf": "node scripts/create-mf/index.js",
 		"dev": "turbo run dev --parallel",
 		"dev:shell": "turbo run dev --filter=./apps/admin-shell",
 		"dev:all": "run-p \"preview:mf\" \"dev:shell\"",

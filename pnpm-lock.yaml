@@ -103,6 +103,61 @@ importers:
         specifier: ^3.1.0
         version: 3.1.1(typescript@5.9.3)
 
+  apps/admin-directus:
+    dependencies:
+      '@admin-panel/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@admin-panel/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
+      '@admin-panel/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@element-plus/icons-vue':
+        specifier: ^2.3.2
+        version: 2.3.2(vue@3.5.22(typescript@5.9.3))
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.13.0
+        version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      vue:
+        specifier: ^3.5.22
+        version: 3.5.22(typescript@5.9.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.3(vue@3.5.22(typescript@5.9.3))
+    devDependencies:
+      '@admin-panel/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@admin-panel/prettier-config':
+        specifier: workspace:*
+        version: link:../../packages/prettier-config
+      '@admin-panel/stylelint-config':
+        specifier: workspace:*
+        version: link:../../packages/stylelint-config
+      '@admin-panel/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.9.2
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.1
+        version: 6.0.1(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.1.7
+        version: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.1.1(typescript@5.9.3)
+
   apps/admin-docs:
     dependencies:
       '@admin-panel/lib':
@@ -187,6 +242,9 @@ importers:
       '@tanstack/vue-table':
         specifier: ^8.21.3
         version: 8.21.3(vue@3.5.22(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.13.0
+        version: 2.13.0(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -212,9 +270,6 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
         version: 6.0.1(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
-      element-plus:
-        specifier: ^2.13.0
-        version: 2.13.0(vue@3.5.22(typescript@5.9.3))
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

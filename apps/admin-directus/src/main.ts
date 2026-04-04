@@ -1,3 +1,3 @@
 import { app } from '#app/index'
 
-app.mount('#__MF_MEDIA__')
+app.mount('#__MF_DIRECTUS__')

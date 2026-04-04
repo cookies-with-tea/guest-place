@@ -19,6 +19,14 @@ export const APPS_PORTS = {
     preview: 4004,
     dev: 4177,
   },
+  'directus-2': {
+    preview: 4006,
+    dev: 4179,
+  },
+  directus: {
+    preview: 4005,
+    dev: 4178,
+  },
 } as const
 
 export const PACKAGES_PORTS = {
