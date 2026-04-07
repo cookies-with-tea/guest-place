@@ -14,7 +14,7 @@
   <div v-else ref="input-wrapper" class="ui-input" :class="classes">
     <div v-if="$slots['prefix-icon'] || props.prefixIcon" class="ui-input__icon ui-input__icon--prefix">
       <slot name="prefix-icon">
-        <UiIcon :name="props.prefixIcon" />
+        <UiIcon :name="props.prefixIcon!" />
       </slot>
     </div>
 
@@ -43,7 +43,7 @@
 
     <div v-if="$slots['suffix-icon'] || props.suffixIcon" class="ui-input__icon ui-input__icon--suffix">
       <slot name="suffix-icon">
-        <UiIcon :name="props.suffixIcon" />
+        <UiIcon :name="props.suffixIcon!" />
       </slot>
     </div>
   </div>
@@ -53,6 +53,7 @@
 import { UiIcon } from '#shared/ui'
 import { computed, useId, ref, useTemplateRef, onMounted, onBeforeUnmount } from 'vue'
 import { useAnimateIcon } from '../composables'
+import type { IconNamesType } from '#shared/ui/ui-icon/types'
 
 const model = defineModel<string>({ default: '' })
 
@@ -60,8 +61,8 @@ const model = defineModel<string>({ default: '' })
 interface IProps {
   placeholder: string
   type?: 'text' | 'search' | 'url' | 'email' | 'password' | 'textarea' | 'number'
-  suffixIcon?: string
-  prefixIcon?: string
+  suffixIcon?: IconNamesType
+  prefixIcon?: IconNamesType
   showPassword?: boolean
   disabled?: boolean
   size?: 's' | 'md'

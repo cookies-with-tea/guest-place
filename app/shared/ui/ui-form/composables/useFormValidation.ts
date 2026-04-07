@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import Schema, { type Rules } from 'async-validator'
 import { useFormErrors } from './useFormErrors'
 import type { TResponseErrors } from '#shared/types'
+import type { Ref } from 'vue'
 
 export const useFormValidation = () => {
   const { setFormErrors, clearFormErrors } = useFormErrors()

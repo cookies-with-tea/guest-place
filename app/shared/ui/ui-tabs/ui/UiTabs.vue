@@ -61,9 +61,9 @@ const props = withDefaults(defineProps<IProps>(), {
 
 const tabsWrapper = useTemplateRef<HTMLElement>('tabs-wrapper')
 
-const tabQuery = computed(() => route.query?.tab as string)
+useFlexWrapFix({ tabsWrapper, className: 'ui-tabs--wrapped' })
 
-useFlexWrapFix({ tabsWrapper, className: 'ui-tabs--mobile-view' })
+const tabQuery = computed(() => route.query?.tab as string)
 
 const isTabActive = (name: string) => {
   return props.withQuery ? (tabQuery.value ?? props.tabs[0]?.name) === name : currentTab.value === name
@@ -152,7 +152,7 @@ const handleClickTab = async (tab: ITab) => {
     background: var(--ui-tabs-bg-color);
     transition: transform var(--transition-duration-secondary) var(--tabs-animation-ease);
     cursor: pointer;
-    padding: 65px;
+    padding: 40px;
     z-index: 2;
 
     &:active {
@@ -171,15 +171,16 @@ const handleClickTab = async (tab: ITab) => {
     @include responsive-max(xs) {
       @include typography(h7);
 
+      border-radius: 15px 15px 0 0;
       padding: 15px;
     }
 
     @include hover {
-      transform: scale(1.04);
+      transform: scaleY(1.1);
     }
   }
 
-  &:not(.ui-tabs--mobile-view) {
+  &:not(.ui-tabs--wrapped) {
     &::after {
       content: '';
       top: 100px;
@@ -207,7 +208,7 @@ const handleClickTab = async (tab: ITab) => {
     }
 
     #{$self}__item {
-      transition: background-color var(--transition-duration-secondary) var(--tabs-animation-ease);
+      transition: transform var(--transition-duration-secondary) var(--tabs-animation-ease);
 
       &::before,
       &::after {
@@ -271,10 +272,6 @@ const handleClickTab = async (tab: ITab) => {
           transform: scaleX(1);
         }
       }
-
-      @include hover {
-        transform: scale(1.06);
-      }
     }
   }
 
@@ -284,13 +281,20 @@ const handleClickTab = async (tab: ITab) => {
     background: var(--ui-tabs-content-color);
     transition:
       background-color var(--transition-duration-primary) var(--tabs-animation-ease),
-      border-radius var(--transition-duration-primary) var(--tabs-animation-ease);
+      border-radius var(--transition-duration-primary) var(--tabs-animation-ease),
+      border-top-left-radius var(--transition-duration-primary),
+      border-top-right-radius var(--transition-duration-primary);
     padding: 65px;
     margin-top: -3px;
     z-index: 11;
+
+    @include responsive-max(xs) {
+      border-radius: 15px;
+      padding: 40px 15px;
+    }
   }
 
-  &.ui-tabs--mobile-view {
+  &.ui-tabs--wrapped {
     #{$self}__item {
       box-shadow: var(--shadow-md);
 
@@ -304,11 +308,15 @@ const handleClickTab = async (tab: ITab) => {
         border-radius: 30px;
         background-color: var(--ui-tabs-bg-color);
         z-index: -1;
+
+        @include responsive-max(xs) {
+          border-radius: 15px 15px 0 0;
+        }
       }
     }
 
     #{$self}__content {
-      border: 1px solid var(--ui-tabs-border-color);
+      box-shadow: var(--shadow-md);
     }
   }
 
