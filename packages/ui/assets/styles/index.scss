@@ -1,10 +1,4 @@
-@use 'base';
-@use 'tokens';
+@use 'global';
+@use 'side-effects';
 @use 'glass';
 @use 'element-overrides';
-
-body {
-  background-color: var(--gp-bg-main);
-  color: var(--gp-text-main);
-  transition: background-color 0.3s, color 0.3s;
-}

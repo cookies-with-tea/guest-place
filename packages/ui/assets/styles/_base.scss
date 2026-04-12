@@ -1,23 +1,2 @@
-@use 'reset';
+@use 'global';
 @use 'variables' as *;
-@use 'fonts';
-
-:root {
-	--color-bg: #{$gp-bg};
-	--color-surface: #{$gp-surface};
-	--color-bg-2: #{$gp-bg-2};
-	--color-border: #{$gp-border};
-	--color-primary: #{$gp-primary};
-	--color-text: #{$gp-text};
-	--color-text-secondary: #{$gp-text-secondary};
-	--color-text-disabled: #{$gp-text-disabled};
-}
-
-html {
-	font-family: 'Inter', sans-serif;
-}
-
-body {
-	color: var(--color-text);
-	background-color: var(--color-bg);
-}

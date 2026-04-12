@@ -1,5 +1,6 @@
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/dark/css-vars.css'
+import { initUiStyles } from '@admin-panel/ui'
+
+initUiStyles()
 
 if (!localStorage.getItem('gp-theme')) {
   localStorage.setItem('gp-theme', 'dark')
@@ -46,7 +47,7 @@ import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
-import '@admin-panel/ui/assets/styles/index.scss'
+// Styles handled by initUiStyles
 
 import { createPinia } from 'pinia'
 

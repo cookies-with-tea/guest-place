@@ -1,0 +1,10 @@
+@use 'global';
+@use 'fonts';
+@use 'glass';
+@use 'element-overrides';
+
+[id^="__MF_"], #app {
+  background-color: var(--gp-bg-main);
+  color: var(--gp-text-main);
+  font-family: 'Inter', sans-serif;
+}

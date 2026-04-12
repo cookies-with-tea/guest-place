@@ -9,7 +9,7 @@
 	"exports": {
 		".": "./index.ts",
 		"./assets/styles/index.scss": "./assets/styles/index.scss",
-		"./assets/*": "./src/assets/*"
+		"./assets/*": "./assets/*"
 	},
 	"files": [
 		"index.ts",
