@@ -77,7 +77,7 @@ pub async fn auth_middleware(
         return Err(create_unauthorized_response(&state, &locale).await);
     }
 
-    request.extensions_mut().insert(user_id);
+    request.extensions_mut().insert(token_data.claims);
 
     let response = next.run(request).await;
     Ok(response)
@@ -92,5 +92,29 @@ async fn create_unauthorized_response(state: &Arc<AppState>, locale: &str) -> Re
         Some(error_detail),
         Some(vec![message]),
     );
-    api_response.into_response()
+    match api_response {
+        Ok(res) => res.into_response(),
+        Err(err) => err.into_response(),
+    }
+}
+pub async fn permission_required(
+    State(_state): State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+    permission: &'static str,
+) -> Result<Response, impl IntoResponse> {
+    let claims = request
+        .extensions()
+        .get::<crate::auth::dto::Claims>()
+        .cloned();
+
+    if let Some(claims) = claims {
+        if claims.role == "superadmin" || claims.permissions.contains(&permission.to_string()) {
+            return Ok(next.run(request).await);
+        }
+    }
+
+    // Reuse create_unauthorized_response logic if available or return 403
+    // For now returning 403 Forbidden
+    Ok::<Response, Response>((StatusCode::FORBIDDEN, "Forbidden").into_response())
 }

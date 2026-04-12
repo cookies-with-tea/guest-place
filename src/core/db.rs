@@ -47,3 +47,17 @@ pub async fn create_pool(config: &AppConfig) -> sqlx::Pool<sqlx::Postgres> {
         .await
         .expect("Error")
 }
+
+pub fn create_redis_pool(config: &AppConfig) -> deadpool_redis::Pool {
+    let redis_url = if let Some(password) = &config.redis_password {
+        format!("redis://:{}@{}:{}", password, config.redis_host, config.redis_port)
+    } else {
+        format!("redis://{}:{}", config.redis_host, config.redis_port)
+    };
+
+    println!("Connecting to Redis: {}", redis_url);
+
+    let cfg = deadpool_redis::Config::from_url(redis_url);
+    cfg.create_pool(Some(deadpool_redis::Runtime::Tokio1))
+        .expect("Failed to create Redis pool")
+}

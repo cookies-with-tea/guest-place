@@ -1,6 +1,6 @@
 use crate::auth::dto::{
     AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
-    RegisterRequestDTO,
+    RegisterRequestDTO, RolePermissionsDTO, PermissionDTO,
 };
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
@@ -9,9 +9,9 @@ use crate::user::dto::User;
 use crate::user::utils::validate_email;
 use crate::AppState;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::Router;
-use axum::{extract::Extension, extract::State, http::StatusCode, Json};
+use axum::{extract::Extension, extract::State, extract::Path, http::StatusCode, response::IntoResponse, Json};
 use chrono::{Duration, Utc};
 use dotenv::dotenv;
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -28,7 +28,7 @@ fn verify_password(password: &str, hash: &str) -> bool {
         .is_ok()
 }
 
-fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
+fn generate_token(user_id: Uuid, role: String, permissions: Vec<String>, expires_in_minutes: i64) -> (String, i64) {
     dotenv().ok();
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
@@ -37,6 +37,8 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
 
     let claims = Claims {
         sub: user_id,
+        role,
+        permissions,
         exp: expiration.timestamp() as usize,
     };
 
@@ -50,20 +52,20 @@ fn generate_token(user_id: Uuid, expires_in_minutes: i64) -> (String, i64) {
     (token, expires_in_minutes)
 }
 
-pub fn generate_access_token(user_id: Uuid) -> (String, i64) {
+pub fn generate_access_token(user_id: Uuid, role: String, permissions: Vec<String>) -> (String, i64) {
     let minutes = env::var("ACCESS_TOKEN_LIFETIME_MINUTES")
         .unwrap_or_else(|_| "10".to_string())
         .parse()
         .expect("ACCESS_TOKEN_LIFETIME_MINUTES must be a valid integer");
-    generate_token(user_id, minutes)
+    generate_token(user_id, role, permissions, minutes)
 }
 
-pub fn generate_refresh_token(user_id: Uuid) -> (String, i64) {
+pub fn generate_refresh_token(user_id: Uuid, role: String, permissions: Vec<String>) -> (String, i64) {
     let minutes = env::var("REFRESH_TOKEN_TTL_MINUTES")
         .unwrap_or_else(|_| "1440".to_string())
         .parse::<i64>()
         .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer");
-    generate_token(user_id, minutes)
+    generate_token(user_id, role, permissions, minutes)
 }
 
 fn get_refresh_token_ttl_minutes() -> i32 {
@@ -300,8 +302,32 @@ pub async fn login(
         );
     }
 
-    let (access_token, access_expires_in) = generate_access_token(user.uuid);
-    let (refresh_token, refresh_expires_in) = generate_refresh_token(user.uuid);
+    let role_str = match serde_json::to_value(&user.role) {
+        Ok(v) => v.as_str().unwrap_or("user").to_string(),
+        Err(e) => {
+            eprintln!("Serialization error: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::Json(ApiResponse {
+                    data: None::<AuthResponseDTO>,
+                    errors: None,
+                    messages: Some(vec!["Internal Server Error".to_string()]),
+                }),
+            ));
+        }
+    };
+
+    let permissions = match sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1")
+        .bind(&user.role)
+        .fetch_all(&state.pool)
+        .await
+    {
+        Ok(rows) => rows.iter().map(|r| r.get::<String, _>(0)).collect(),
+        Err(_) => vec![],
+    };
+
+    let (access_token, access_expires_in) = generate_access_token(user.uuid, role_str.clone(), permissions.clone());
+    let (refresh_token, refresh_expires_in) = generate_refresh_token(user.uuid, role_str, permissions);
 
     let _ = sqlx::query(
         "INSERT INTO refresh_token (user_id, token, expires_at) \
@@ -373,8 +399,49 @@ pub async fn refresh(
         }
     };
 
-    let (new_access_token, access_expires_in) = generate_access_token(user_id);
-    let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id);
+    let user = match query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
+        .bind(user_id)
+        .fetch_one(&state.pool)
+        .await
+    {
+        Ok(user) => user,
+        Err(_) => {
+            let msg = state.i18n.t("auth.database_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let role_str = match serde_json::to_value(&user.role) {
+        Ok(v) => v.as_str().unwrap_or("user").to_string(),
+        Err(e) => {
+            eprintln!("Serialization error: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::Json(ApiResponse {
+                    data: None::<AuthResponseDTO>,
+                    errors: None,
+                    messages: Some(vec!["Internal Server Error".to_string()]),
+                }),
+            ));
+        }
+    };
+
+    let permissions = match sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1")
+        .bind(&user.role)
+        .fetch_all(&state.pool)
+        .await
+    {
+        Ok(rows) => rows.iter().map(|r| r.get::<String, _>(0)).collect(),
+        Err(_) => vec![],
+    };
+
+    let (new_access_token, access_expires_in) = generate_access_token(user_id, role_str.clone(), permissions.clone());
+    let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id, role_str, permissions);
 
     let _ = sqlx::query(
         "UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '1 minute' * $2 WHERE user_id = $3"
@@ -437,6 +504,111 @@ async fn logout(
     }
 }
 
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/auth/roles",
+    responses(
+        (status = 200, description = "Список ролей", body = ApiResponse<Vec<String>>)
+    ),
+    tag = "Auth"
+)]
+pub async fn list_roles() -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
+    let roles = vec![
+        "superadmin".to_string(),
+        "admin".to_string(),
+        "editor".to_string(),
+        "user".to_string(),
+    ];
+    into_api_response(StatusCode::OK, Some(roles), None, None)
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/auth/permissions",
+    responses(
+        (status = 200, description = "Список всех разрешений", body = ApiResponse<Vec<String>>)
+    ),
+    tag = "Auth"
+)]
+pub async fn list_permissions(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
+    let permissions = sqlx::query("SELECT id FROM permissions")
+        .fetch_all(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
+        })?;
+
+    let ids = permissions.iter().map(|r| r.get::<String, _>(0)).collect();
+    into_api_response(StatusCode::OK, Some(ids), None, None)
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/auth/roles/{role}/permissions",
+    responses(
+        (status = 200, description = "Права роли", body = ApiResponse<Vec<String>>)
+    ),
+    tag = "Auth"
+)]
+pub async fn get_role_permissions(
+    State(state): State<Arc<AppState>>,
+    Path(role): Path<String>,
+) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
+    let permissions = sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1::user_role")
+        .bind(&role)
+        .fetch_all(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
+        })?;
+
+    let ids = permissions.iter().map(|r| r.get::<String, _>(0)).collect();
+    into_api_response(StatusCode::OK, Some(ids), None, None)
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/roles/{role}/permissions",
+    request_body = Vec<String>,
+    responses(
+        (status = 200, description = "Права обновлены")
+    ),
+    tag = "Auth"
+)]
+pub async fn update_role_permissions(
+    State(state): State<Arc<AppState>>,
+    Path(role): Path<String>,
+    Json(permissions): Json<Vec<String>>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut tx = state.pool.begin().await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+
+    sqlx::query("DELETE FROM roles_permissions WHERE role = $1::user_role")
+        .bind(&role)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+
+    for perm in permissions {
+        sqlx::query("INSERT INTO roles_permissions (role, permission_id) VALUES ($1::user_role, $2)")
+            .bind(&role)
+            .bind(perm)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+    }
+
+    tx.commit().await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+
+    into_api_response(StatusCode::OK, None, None, None)
+}
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
@@ -444,4 +616,7 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
+        .route("/roles", get(list_roles))
+        .route("/permissions", get(list_permissions))
+        .route("/roles/{role}/permissions", get(get_role_permissions).post(update_role_permissions))
 }

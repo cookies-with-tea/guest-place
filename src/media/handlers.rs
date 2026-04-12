@@ -9,14 +9,13 @@ use crate::media::dto::{
 };
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
 use crate::AppState;
-use axum::Router;
-use axum::routing::{delete, get, post, put};
 use axum::{
     extract::{Multipart, Path, Query, State},
     http::StatusCode,
-    Json,
+    routing::{delete, get, post, put},
+    Json, Router,
 };
-use std::{fs, path::PathBuf, sync::Arc};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[utoipa::path(
@@ -89,7 +88,7 @@ pub async fn create(
         .and_then(|ext| ext.to_str())
         .unwrap_or("bin");
 
-    let (hash, relative_path) = if media_type == "image" {
+    let (_hash, relative_path) = if media_type == "image" {
         let processed_data = state.media_storage.process_image(&data).await.map_err(|e| {
             eprintln!("Image processing error: {:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {

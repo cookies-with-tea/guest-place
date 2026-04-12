@@ -1,7 +1,7 @@
 use sha2::{Sha256, Digest};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use tokio::fs;
-use image::{DynamicImage, ImageFormat};
+use image::ImageFormat;
 use anyhow::{Result, Context};
 
 #[derive(Debug)]

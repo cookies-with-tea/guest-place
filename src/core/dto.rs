@@ -12,9 +12,9 @@ pub struct PaginationQuery {
 
 #[derive(Serialize, Debug, ToSchema)]
 pub struct ApiResponse<T: serde::Serialize> {
-    pub(crate) data: Option<T>,
-    pub(crate) errors: Option<HashMap<String, Vec<String>>>,
-    pub(crate) messages: Option<Vec<String>>,
+    pub data: Option<T>,
+    pub errors: Option<HashMap<String, Vec<String>>>,
+    pub messages: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Debug, ToSchema)]
@@ -25,9 +25,9 @@ pub struct ApiPaginationDTO<T: serde::Serialize> {
 
 #[derive(Serialize, Debug, ToSchema)]
 pub struct ApiResponseWithPagination<T: serde::Serialize> {
-  pub(crate) data: Option<ApiPaginationDTO<T>>,
-  pub(crate) errors: Option<HashMap<String, Vec<String>>>,
-  pub(crate) messages: Option<Vec<String>>,
+  pub data: Option<ApiPaginationDTO<T>>,
+  pub errors: Option<HashMap<String, Vec<String>>>,
+  pub messages: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, FromRow, ToSchema)]

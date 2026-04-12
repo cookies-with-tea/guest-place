@@ -2,7 +2,6 @@ use crate::user::dto::{UserRole, UserStatus};
 use crate::AppState;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand_core::OsRng;
-use sqlx::Row;
 use std::sync::Arc;
 
 pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {

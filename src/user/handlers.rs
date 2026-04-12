@@ -7,12 +7,11 @@ use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
-use axum::Router;
 use axum::{
     extract::{Extension, Path, Query, State},
     http::StatusCode,
-    routing::{get, patch, post},
-    Json,
+    routing::get,
+    Json, Router,
 };
 use sqlx::query_as;
 use std::sync::Arc;
@@ -456,62 +455,62 @@ async fn update(
             let mut update_query = "UPDATE guest_user SET ".to_string();
             let mut query_param_index = 1;
 
-            if let Some(email) = &payload.email {
+            if payload.email.is_some() {
                 update_query.push_str(&format!("email = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(phone) = &payload.phone {
+            if payload.phone.is_some() {
                 update_query.push_str(&format!("phone = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(first_name) = &payload.first_name {
+            if payload.first_name.is_some() {
                 update_query.push_str(&format!("first_name = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(second_name) = &payload.second_name {
+            if payload.second_name.is_some() {
                 update_query.push_str(&format!("second_name = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(last_name) = &payload.last_name {
+            if payload.last_name.is_some() {
                 update_query.push_str(&format!("last_name = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(birth_date) = &payload.birth_date {
+            if payload.birth_date.is_some() {
                 update_query.push_str(&format!("birth_date = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(role) = &payload.role {
+            if payload.role.is_some() {
                 update_query.push_str(&format!("role = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(status) = &payload.status {
+            if payload.status.is_some() {
                 update_query.push_str(&format!("status = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(avatar) = &payload.avatar {
+            if payload.avatar.is_some() {
                 update_query.push_str(&format!("avatar = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(street) = &payload.street {
+            if payload.street.is_some() {
                 update_query.push_str(&format!("street = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(gender) = &payload.gender {
+            if payload.gender.is_some() {
                 update_query.push_str(&format!("gender = ${}, ", query_param_index));
                 query_param_index += 1;
             }
 
-            if let Some(city) = &payload.city {
+            if payload.city.is_some() {
                 update_query.push_str(&format!("city = ${}, ", query_param_index));
                 query_param_index += 1;
             }
@@ -530,65 +529,65 @@ async fn update(
 
             let mut query = sqlx::query(&update_query);
 
-            let mut bind_param_index = 1;
+            let mut _bind_param_index = 1;
             if let Some(email) = &payload.email {
                 query = query.bind(email.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(phone) = &payload.phone {
                 query = query.bind(phone.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(first_name) = &payload.first_name {
                 query = query.bind(first_name.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(second_name) = &payload.second_name {
                 query = query.bind(second_name.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(last_name) = &payload.last_name {
                 query = query.bind(last_name.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(birth_date) = &payload.birth_date {
                 query = query.bind(*birth_date);
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(role) = &payload.role {
                 query = query.bind(role);
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(status) = &payload.status {
                 query = query.bind(status);
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(avatar) = &payload.avatar {
                 query = query.bind(avatar.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(street) = &payload.street {
                 query = query.bind(street.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(gender) = &payload.gender {
                 query = query.bind(gender.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             if let Some(city) = &payload.city {
                 query = query.bind(city.clone());
-                bind_param_index += 1;
+                _bind_param_index += 1;
             }
 
             query = query.bind(uuid);

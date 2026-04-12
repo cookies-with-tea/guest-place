@@ -5,4 +5,7 @@ pub mod utils;
 pub mod response;
 pub mod handlers;
 
+pub mod redis;
+pub mod features;
+
 pub use db::DatabaseConfig;

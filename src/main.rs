@@ -9,7 +9,9 @@ mod mfe;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
-use crate::core::db::create_pool;
+use crate::core::db::{create_pool, create_redis_pool};
+use crate::core::redis::RedisService;
+use crate::core::features::FeatureFlagService;
 use crate::i18n::middlewares::locale_middleware;
 use crate::i18n::I18nService;
 use axum::Router;
@@ -35,6 +37,8 @@ struct AppState {
     pool: Pool<Postgres>,
     i18n: I18nService,
     media_storage: Arc<StorageService>,
+    redis: Arc<RedisService>,
+    features: Arc<FeatureFlagService>,
     frontend_url: String,
     smtp_host: String,
     smtp_port: u16,
@@ -124,10 +128,16 @@ async fn main() {
     let i18n = I18nService::new(pool.clone());
     let media_storage = Arc::new(StorageService::new("uploads"));
     
+    let redis_pool = create_redis_pool(&config);
+    let redis = Arc::new(RedisService::new(redis_pool));
+    let features = Arc::new(FeatureFlagService::new(redis.clone()));
+    
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
         i18n,
         media_storage,
+        redis,
+        features,
         frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
         smtp_host,
         smtp_port,
