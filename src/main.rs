@@ -5,6 +5,7 @@ mod i18n;
 mod media;
 mod user;
 mod mailer;
+mod mfe;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
@@ -64,6 +65,11 @@ struct AppState {
     crate::i18n::handlers::get_all,
     crate::i18n::handlers::delete_one,
     crate::i18n::handlers::get_by_dict_key,
+    crate::mfe::handlers::get_manifest,
+    crate::mfe::handlers::get_all,
+    crate::mfe::handlers::create,
+    crate::mfe::handlers::update,
+    crate::mfe::handlers::delete_one,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -72,6 +78,7 @@ struct AppState {
         (name = "Media", description = "Media"),
         (name = "User", description = "User"),
         (name = "I18n", description = "Translations management"),
+        (name = "MFE", description = "Microfrontends management"),
   )
 )]
 struct ApiDoc;
@@ -170,6 +177,7 @@ async fn main() {
         .nest("/api/v1/auth", auth::handlers::router())
         .nest("/api/v1/user", user::handlers::public_router())
         .nest("/api/v1/i18n", i18n::handlers::public_router())
+        .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
         .nest_service("/uploads", ServeDir::new("uploads"))
@@ -178,6 +186,7 @@ async fn main() {
     let protected_router = Router::new()
         .nest("/api/v1/user", user::handlers::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
+        .nest("/api/v1/mfe", mfe::handlers::protected_router())
         .with_state(shared_state.clone())
         .layer(middleware::from_fn_with_state(
             shared_state.clone(),
@@ -203,6 +212,10 @@ async fn main() {
     );
 
     let _ = sqlx::migrate!().run(&pool.clone()).await;
+
+    if let Err(e) = crate::auth::init::init_superadmin(shared_state.clone()).await {
+        eprintln!("[Init] Superadmin initialization failed: {}", e);
+    }
 
     axum::serve(listener, router.into_make_service())
         .await
