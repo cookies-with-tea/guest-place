@@ -4,10 +4,18 @@ import { ROUTES } from '@admin-panel/lib'
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		name: ROUTES.users.name,
+		name: ROUTES.users.list.name,
 		component: () => import('#pages/users-page'),
 		meta: {
-			title: ROUTES.users.title,
+			title: ROUTES.users.list.title,
+		},
+	},
+	{
+		path: '/rights',
+		name: ROUTES.users.rights.name,
+		component: () => import('#pages/rights-page'),
+		meta: {
+			title: ROUTES.users.rights.title,
 		},
 	},
 ]

@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { ofetch } from 'ofetch'
 
 type TranslationDict = Record<string, string>
@@ -100,7 +100,7 @@ export const useI18n = () => {
 		translations.value = { ...translations.value, ...data }
 	}
 
-	const t = (key: string) => computed(() => translations.value[key] || key)
+	const t = (key: string) => translations.value[key] || key
 
 	return { translations, loadDict, t }
 }

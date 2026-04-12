@@ -35,7 +35,9 @@
 			</el-form-item>
 			<el-form-item label="Role">
 				<el-select v-model="form.role" clearable placeholder="Select role">
+					<el-option label="Superadmin" :value="UserRole.Superadmin" />
 					<el-option label="Admin" :value="UserRole.Admin" />
+					<el-option label="Editor" :value="UserRole.Editor" />
 					<el-option label="User" :value="UserRole.User" />
 				</el-select>
 			</el-form-item>

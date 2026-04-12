@@ -1,4 +1,6 @@
 export interface ISidebarItem {
-	path: string
 	title: string
+	path?: string
+	icon?: string
+	children?: ISidebarItem[]
 }

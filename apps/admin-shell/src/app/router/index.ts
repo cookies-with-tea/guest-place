@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '#app/layouts/MainLayout.vue'
 import { useSidebar } from '#widgets/the-sidebar'
+import { ROUTES } from '@admin-panel/lib'
 
 import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
 
 // Загружаем роуты асинхронно
 const loadRemoteRoutes = async (app: any) => {
 	const routes: any[] = []
-	// ... (omitting addPrefixToRoute for brevity in targetContent, but I need to match carefully)
-	// Better use replace_file_content on the loop part.
+	const sidebarGroups: any[] = []
 
 	const addPrefixToRoute = (route: any, prefix: string): any => {
 		const { path, ...rest } = route
@@ -40,9 +40,18 @@ const loadRemoteRoutes = async (app: any) => {
 				const remoteModule = await loadRemoteModule(remote, { app })
 
 				const routesFromModule = remoteModule.routes || remoteModule.default?.routes || remoteModule.default || []
+				const modifiedRoutes = routesFromModule.map((route: any) => addPrefixToRoute(route, `/${remote.name}`))
 
-				routesFromModule.forEach((route: any) => {
-					routes.push(addPrefixToRoute(route, `/${remote.name}`))
+				routes.push(...modifiedRoutes)
+
+				// Finding icon and title from ROUTES if it matches remote name
+				const routeConfig = (ROUTES as any)[remote.name]
+
+				sidebarGroups.push({
+					name: remote.name,
+					title: routeConfig?.title || `general.${remote.name}`,
+					icon: routeConfig?.icon || 'Menu',
+					routes: modifiedRoutes,
 				})
 			} catch {
 				// Silent fail for individual remotes
@@ -52,27 +61,41 @@ const loadRemoteRoutes = async (app: any) => {
 		// Silent fail for manifest
 	}
 
-	return routes
+	return { routes, sidebarGroups }
 }
 
-const routesToSidebar = (data: any) => {
-	return data.map((route: any) => ({
-		title: route.meta?.title || route.name,
-		path: route.path,
-	}))
+const routesToSidebar = (groups: any[]) => {
+	return groups.map((group: any) => {
+		if (group.routes.length === 1 && group.routes[0].path === `/${group.name}`) {
+			return {
+				title: group.routes[0].meta?.title || group.routes[0].name,
+				path: group.routes[0].path,
+				icon: group.icon,
+			}
+		}
+
+		return {
+			title: group.title,
+			icon: group.icon,
+			children: group.routes.map((route: any) => ({
+				title: route.meta?.title || route.name,
+				path: route.path,
+			})),
+		}
+	})
 }
 
 export const initRouter = async (app: any) => {
-	const remoteRoutes = await loadRemoteRoutes(app)
+	const { routes: remoteRoutes, sidebarGroups } = await loadRemoteRoutes(app)
 
 	const { setData } = useSidebar()
 
-	setData(routesToSidebar(remoteRoutes))
+	setData(routesToSidebar(sidebarGroups))
 
 	window.addEventListener('mfe:updated', async () => {
-		const updatedRoutes = await loadRemoteRoutes(app)
+		const { sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
 
-		setData(routesToSidebar(updatedRoutes))
+		setData(routesToSidebar(updatedGroups))
 	})
 
 	const router = createRouter({
