@@ -11,12 +11,15 @@
 		<el-input v-model="filters.search" placeholder="Search by email/name" clearable />
 
 		<el-button type="primary" @click="openAddModal">Add user</el-button>
+
+		<TempAuth />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { useUsers } from '#entities/user/lib/composables'
 import { UserRole, UserStatus } from '#entities/user/model'
+import TempAuth from '#features/temp-auth/TempAuth.vue'
 
 const { filters, openAddModal } = useUsers()
 

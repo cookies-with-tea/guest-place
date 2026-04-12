@@ -1,14 +1,15 @@
 export type SnakeToCamel<S> = S extends `${infer T}_${infer U}` ? `${T}${Capitalize<SnakeToCamel<U>>}` : S
 
-export type CamelCasedProperties<T> = {
-	[K in keyof T as SnakeToCamel<K & string>]: T[K] extends object
-		? T[K] extends Array<infer U>
-			? U extends object
-				? Array<CamelCasedProperties<U>>
-				: T[K]
-			: CamelCasedProperties<T[K]>
-		: T[K]
-}
+export type CamelCasedProperties<T> =
+	T extends Array<infer U>
+		? Array<CamelCasedProperties<U>>
+		: {
+				[K in keyof T as SnakeToCamel<K & string>]: T[K] extends object
+					? T[K] extends Array<infer V>
+						? Array<CamelCasedProperties<V>>
+						: CamelCasedProperties<T[K]>
+					: T[K]
+			}
 
 type _CamelToSnake<T extends string> = T extends `${infer A}${infer B}`
 	? B extends Uncapitalize<B>
@@ -18,15 +19,16 @@ type _CamelToSnake<T extends string> = T extends `${infer A}${infer B}`
 
 export type CamelToSnake<T extends string> = T extends '' ? '' : _CamelToSnake<T>
 
-export type SnakeCasedProperties<T> = {
-	[K in keyof T as CamelToSnake<K & string>]: T[K] extends object
-		? T[K] extends Array<infer U>
-			? U extends object
-				? Array<SnakeCasedProperties<U>>
-				: T[K]
-			: SnakeCasedProperties<T[K]>
-		: T[K]
-}
+export type SnakeCasedProperties<T> =
+	T extends Array<infer U>
+		? Array<SnakeCasedProperties<U>>
+		: {
+				[K in keyof T as CamelToSnake<K & string>]: T[K] extends object
+					? T[K] extends Array<infer V>
+						? Array<SnakeCasedProperties<V>>
+						: SnakeCasedProperties<T[K]>
+					: T[K]
+			}
 
 export interface IPagination {
 	page: number

@@ -1,5 +1,0 @@
-@use 'variables' as *;
-@use 'helpers/mixins/fonts';
-
-@include fonts.addFont('Inter', 'Regular', 400);
-@include fonts.addFont('Inter', 'ExtraBold', 800);

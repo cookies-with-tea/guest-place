@@ -11,8 +11,10 @@
 		"lint": "eslint ./stories/*.stories.ts --max-warnings 0"
 	},
 	"dependencies": {
-		"@admin-panel/ui": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
+		"@admin-panel/ui": "workspace:*",
+		"@tanstack/vue-query": "^5.92.1",
+		"pinia": "^2.1.7",
 		"vue": "^3.5.22"
 	},
 	"devDependencies": {
@@ -25,7 +27,7 @@
 		"@storybook/addon-docs": "9.1.15",
 		"@storybook/addon-vitest": "9.1.15",
 		"@storybook/vue3-vite": "9.1.15",
-		"@types/node": "^24.6.0",
+		"@types/node": "^24.9.2",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vue/tsconfig": "^0.8.1",
 		"eslint-plugin-storybook": "9.1.15",

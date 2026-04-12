@@ -10,19 +10,19 @@ const command = process.argv[2]
 const TURBO_TASKS = ['build', 'dev', 'lint', 'clean', 'typecheck', 'storybook', 'preview-storybook']
 
 if (!command) {
-	console.error('❌ Укажите команду.')
+	console.error('❌ Specify a command.')
 
-	console.error(`Допустимые команды: ${TURBO_TASKS.join(', ')}`)
+	console.error(`Available commands: ${TURBO_TASKS.join(', ')}`)
 
-	console.error('Пример: node scripts/choose-project.js dev')
+	console.error('Example: node scripts/choose-project.js dev')
 
 	process.exit(1)
 }
 
 if (!TURBO_TASKS.includes(command)) {
-	console.error(`❌ Неизвестная команда: "${command}".`)
+	console.error(`❌ Unknown command: "${command}".`)
 
-	console.error(`Допустимые: ${TURBO_TASKS.join(', ')}`)
+	console.error(`Available: ${TURBO_TASKS.join(', ')}`)
 
 	process.exit(1)
 }
@@ -40,21 +40,21 @@ try {
 	const projectNames = [...new Set(appProjects.map((pkg) => pkg.name))].sort()
 
 	if (projectNames.length === 0) {
-		console.error('❌ Не найдено ни одного проекта в папке apps/')
+		console.error('❌ No projects found in apps/ folder')
 
 		process.exit(1)
 	}
 
 	const prompt = new Select({
 		name: 'project',
-		message: `Выберите проект для выполнения "${command}":`,
+		message: `Select a project to run "${command}":`,
 		choices: projectNames,
 	})
 
 	prompt
 		.run()
 		.then((projectName) => {
-			console.log(`\n🚀 Запуск "${command}" для: ${projectName}`)
+			console.log(`\n🚀 Starting "${command}" for: ${projectName}`)
 
 			let turboCmd = `pnpm turbo run ${command} --filter=${projectName}`
 
@@ -64,15 +64,15 @@ try {
 		})
 		.catch((err) => {
 			if (err.isCanceled) {
-				console.log('\n🚫 Выбор отменён.')
+				console.log('\n🚫 Selection cancelled.')
 			} else {
-				console.error('\n❌ Ошибка:', err.message)
+				console.error('\n❌ Error:', err.message)
 			}
 
 			process.exit(1)
 		})
 } catch (e) {
-	console.error('❌ Не удалось получить список проектов:', e.message || e)
+	console.error('❌ Failed to get project list:', e.message || e)
 
 	process.exit(1)
 }

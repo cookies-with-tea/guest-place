@@ -7,6 +7,14 @@ export const ROUTES = {
 	},
 	translations: {
 		name: 'TranslationsPage',
-		title: 'general.tranlsations',
+		title: 'general.translations',
+	},
+	media: {
+		name: 'MediaPage',
+		title: 'general.media',
+	},
+	orchestrator: {
+		name: 'OrchestratorPage',
+		title: 'general.orchestrator',
 	},
 } as const

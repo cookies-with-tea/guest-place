@@ -1,28 +1,25 @@
 $fonts-path: '../fonts';
 
-$theme-light: (
-	color-surface: #fff,
-	color-bg: #f4f5f9,
-	color-bg-2: #e7e7f4,
-	color-border: #dbdcde,
-	color-primary: #6e39cb,
-	color-text: #3a3541,
-	color-text-button: #fff,
-	color-text-secondary: #89868d,
-	color-text-disabled: #b4b2b7,
-);
+/* Optimal Premium Dark Theme Variables */
+$gp-bg: #0a0b10 !default;
+$gp-surface: #161b22 !default;
+$gp-bg-2: #1f242c !default;
+$gp-border: #30363d !default;
+$gp-primary: #42b883 !default;
 
-$theme-dark: (
-	color-surface: #1e1e24,
-	color-bg: #121218,
-	color-bg-2: #25252f,
-	color-border: #353542,
-	color-primary: #a377e3,
-	color-text: #e6e4ea,
-	color-text-button: #e6e4ea,
-	color-text-secondary: #a0a0b0,
-	color-text-disabled: #6b6b7a,
-);
+$gp-text: #f0f6fc !default;
+$gp-text-secondary: #8b949e !default;
+$gp-text-disabled: #484f58 !default;
+
+/* Premium Light Theme Variables */
+$gp-bg-light: #f6f8fa !default;
+$gp-surface-light: #fff !default;
+$gp-bg-2-light: #f3f4f6 !default;
+$gp-border-light: #d0d7de !default;
+
+$gp-text-light: #1f2328 !default;
+$gp-text-secondary-light: #656d76 !default;
+$gp-text-disabled-light: #8c959f !default;
 
 $breakpoints: (
 	desk: 1920,

@@ -1,0 +1,20 @@
+@use 'fonts';
+@use 'reset';
+
+html {
+	font-family: 'Inter', sans-serif;
+	scroll-behavior: smooth;
+}
+
+body {
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: var(--gp-text-main, #f8fafc);
+	background-color: var(--gp-bg-main, #0f172a);
+	transition:
+		background-color 0.3s,
+		color 0.3s;
+	padding: 0;
+	margin: 0;
+}

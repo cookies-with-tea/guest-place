@@ -10,7 +10,7 @@
 		"newLine": "lf",
 		"jsx": "preserve",
 		"strict": true,
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"baseUrl": "./",
 		"paths": {
 			"@/*": ["./src/*"],

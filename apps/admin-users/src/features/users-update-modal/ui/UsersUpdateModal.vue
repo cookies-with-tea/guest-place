@@ -109,6 +109,7 @@ const form = ref<IUserCreateUpdate>({
 	role: UserRole.User,
 	status: UserStatus.Active,
 	avatar: '',
+	avatar_uuid: null,
 	city: '',
 	gender: '',
 	street: '',
@@ -138,6 +139,7 @@ const setFormData = (user: IUserCreateUpdate) => {
 		role: user.role || UserRole.User,
 		status: user.status || UserStatus.Active,
 		avatar: user.avatar || '',
+		avatar_uuid: user.avatar_uuid || null,
 		city: user.city || '',
 		gender: user.gender || '',
 		street: user.street || '',
@@ -145,7 +147,11 @@ const setFormData = (user: IUserCreateUpdate) => {
 }
 
 const onFilesChange: UploadProps['onChange'] = async (file) => {
-	avatarUrl.value = (await uploadMedia(file.raw!))?.url ?? ''
+	const result = await uploadMedia(file.raw!)
+
+	avatarUrl.value = result?.url ?? ''
+
+	form.value.avatar_uuid = result?.uuid ?? null
 }
 
 const handleModalClose = () => {
@@ -168,6 +174,7 @@ const resetForm = () => {
 		role: UserRole.User,
 		status: UserStatus.Active,
 		avatar: '',
+		avatar_uuid: null,
 		city: '',
 		gender: '',
 		street: '',

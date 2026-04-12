@@ -15,6 +15,14 @@ export const APPS_PORTS = {
 		preview: 3003,
 		dev: 4176,
 	},
+	media: {
+		preview: 3004,
+		dev: 4177,
+	},
+	orchestrator: {
+		preview: 3005,
+		dev: 4178,
+	},
 } as const
 
 export const PACKAGES_PORTS = {

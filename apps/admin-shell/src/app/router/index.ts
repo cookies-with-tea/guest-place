@@ -2,13 +2,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '#app/layouts/MainLayout.vue'
 import { useSidebar } from '#widgets/the-sidebar'
 
-// Загружаем роуты асинхронно (top-level await в модуле)
-const loadRemoteRoutes = async () => {
-	const routes = []
+import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
+
+// Загружаем роуты асинхронно
+const loadRemoteRoutes = async (app: any) => {
+	const routes: any[] = []
+	// ... (omitting addPrefixToRoute for brevity in targetContent, but I need to match carefully)
+	// Better use replace_file_content on the loop part.
 
 	const addPrefixToRoute = (route: any, prefix: string): any => {
 		const { path, ...rest } = route
-
 		const basePath = path === '/' ? '' : path
 		const newPath = `${prefix}${basePath}`
 
@@ -25,48 +28,62 @@ const loadRemoteRoutes = async () => {
 	}
 
 	try {
-		// @ts-ignore
-		const stats = await import('users/UsersRoutes')
-		const transRoute = stats.default.publicRoutes.users
+		const response = await fetch('/api/v1/mfe/manifest')
 
-		const modifiedRoute = addPrefixToRoute(transRoute, '/users')
+		if (!response.ok) throw new Error('Failed to fetch manifest from API')
 
-		routes.push(modifiedRoute)
+		const manifest: RemoteManifest = await response.json()
+		const remotes = manifest.remotes.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+
+		for (const remote of remotes) {
+			try {
+				const remoteModule = await loadRemoteModule(remote, { app })
+
+				const routesFromModule = remoteModule.routes || remoteModule.default?.routes || remoteModule.default || []
+
+				routesFromModule.forEach((route: any) => {
+					routes.push(addPrefixToRoute(route, `/${remote.name}`))
+				})
+			} catch {
+				// Silent fail for individual remotes
+			}
+		}
 	} catch {
-		console.warn('Statistics routes not loaded')
-	}
-
-	try {
-		// @ts-ignore
-		const trans = await import('translations/TranslationsRoutes')
-		const transRoute = trans.default.publicRoutes.translations
-
-		const modifiedRoute = addPrefixToRoute(transRoute, '/translations')
-
-		routes.push(modifiedRoute)
-	} catch {
-		console.warn('Translations routes not loaded')
+		// Silent fail for manifest
 	}
 
 	return routes
 }
 
 const routesToSidebar = (data: any) => {
-	return data.map((route) => ({ title: route.meta.title, path: route.path }))
+	return data.map((route: any) => ({
+		title: route.meta?.title || route.name,
+		path: route.path,
+	}))
 }
 
-export const initRouter = async () => {
-	const remoteRoutes = await loadRemoteRoutes()
-
-	console.log(remoteRoutes)
+export const initRouter = async (app: any) => {
+	const remoteRoutes = await loadRemoteRoutes(app)
 
 	const { setData } = useSidebar()
 
 	setData(routesToSidebar(remoteRoutes))
 
-	return createRouter({
+	window.addEventListener('mfe:updated', async () => {
+		const updatedRoutes = await loadRemoteRoutes(app)
+
+		setData(routesToSidebar(updatedRoutes))
+	})
+
+	const router = createRouter({
 		history: createWebHistory(),
 		routes: [
+			{
+				path: '/login',
+				name: 'Login',
+				component: () => import('#pages/login-page'),
+				meta: { public: true },
+			},
 			{
 				path: '/',
 				name: 'Layout',
@@ -83,4 +100,19 @@ export const initRouter = async () => {
 			{ path: '/:pathMatch(.*)*', redirect: '/' },
 		],
 	})
+
+	router.beforeEach((to, from, next) => {
+		const token = localStorage.getItem('gp_access_token')
+		const isAuthenticated = !!token
+
+		if (to.path !== '/login' && !isAuthenticated && !to.meta.public) {
+			next('/login')
+		} else if (to.path === '/login' && isAuthenticated) {
+			next('/')
+		} else {
+			next()
+		}
+	})
+
+	return router
 }

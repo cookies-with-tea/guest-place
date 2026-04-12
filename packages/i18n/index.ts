@@ -14,6 +14,16 @@ export function getLocale() {
 	return currentLocale
 }
 
+export interface I18nConfig {
+	apiBase?: string
+}
+
+let i18nConfig: I18nConfig = {}
+
+export function initI18n(config: I18nConfig) {
+	i18nConfig = config
+}
+
 const cache = new Map<Locale, TranslationDict>()
 const loading = new Map<string, Promise<void>>()
 
@@ -37,7 +47,8 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 
 	const loadPromise = (async () => {
 		try {
-			const data = await ofetch(`/api/v1/i18n/${dictKey}`, {
+			const baseUrl = i18nConfig.apiBase || ''
+			const data = await ofetch(`${baseUrl}/api/v1/i18n/${dictKey}`, {
 				headers: { 'Accept-Language': currentLocale },
 				credentials: 'include',
 			})
@@ -46,6 +57,7 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 
 			cache.set(currentLocale, { ...current, ...data })
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(`Failed to load i18n dict: ${dictKey}`, e)
 		} finally {
 			loading.delete(cacheKey)

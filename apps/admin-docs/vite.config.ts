@@ -1,13 +1,8 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import federation from '@originjs/vite-plugin-federation'
+import { createConfig } from '@admin-panel/lib/vite'
 
-// https://vite.dev/config/
-export default defineConfig({
-	plugins: [
-		vue(),
-		federation({
-			name: '@admin-panel/admin-docs',
-		}),
-	],
+export default createConfig({
+	name: 'docs',
+	displayName: 'Admin Docs',
+	exposes: {},
+	shared: [],
 })

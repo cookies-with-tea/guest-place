@@ -15,7 +15,7 @@ const config: StorybookConfig = {
 
 	addons: [
 		getAbsolutePath('@chromatic-com/storybook'),
-		getAbsolutePath('@storybook/addon-admin-docs'),
+		getAbsolutePath('@storybook/addon-docs'),
 		getAbsolutePath('@storybook/addon-a11y'),
 		getAbsolutePath('@storybook/addon-vitest'),
 	],

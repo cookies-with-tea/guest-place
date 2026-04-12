@@ -13,7 +13,7 @@
 		"test:unit": "vitest",
 		"prepare": "husky",
 		"test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
-		"test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
+		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4173 'cypress open --e2e'",
 		"build-only": "vite build",
 		"type-check": "vue-tsc --build",
 		"format": "prettier --write src/",
@@ -27,11 +27,13 @@
 		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix"
 	},
 	"dependencies": {
-		"@admin-panel/ui": "workspace:*",
 		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
+		"@admin-panel/ui": "workspace:*",
+		"@element-plus/icons-vue": "^2.3.1",
 		"@tanstack/vue-query": "^5.92.1",
 		"element-plus": "^2.13.0",
+		"pinia": "^2.3.1",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},
@@ -41,7 +43,7 @@
 		"@admin-panel/stylelint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
 		"@types/jsdom": "^21.1.7",
-		"@types/node": "^24.9.1",
+		"@types/node": "^24.9.2",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vitest/eslint-plugin": "^1.3.13",
 		"@vue/test-utils": "^2.4.6",

@@ -1,0 +1,23 @@
+.glass-card {
+	border: 1px solid var(--gp-glass-border);
+	border-radius: var(--gp-radius-md);
+	box-shadow: var(--gp-glass-shadow);
+	background: var(--gp-bg-glass);
+	transition: all 0.3s ease;
+	-webkit-backdrop-filter: blur(var(--gp-glass-blur));
+	backdrop-filter: blur(var(--gp-glass-blur));
+}
+
+.glass-panel {
+	border-bottom: 1px solid var(--gp-glass-border);
+	background: var(--gp-bg-glass);
+	-webkit-backdrop-filter: blur(var(--gp-glass-blur));
+	backdrop-filter: blur(var(--gp-glass-blur));
+}
+
+.glass-sidebar {
+	border-right: 1px solid var(--gp-glass-border);
+	background: var(--gp-bg-glass);
+	-webkit-backdrop-filter: blur(var(--gp-glass-blur));
+	backdrop-filter: blur(var(--gp-glass-blur));
+}
