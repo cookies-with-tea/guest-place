@@ -169,6 +169,10 @@ export const useUsers = () => {
 		pagination.value.page = 1
 	})
 
+	watch(users, (v) => {
+		console.log(v)
+	})
+
 	return {
 		// state
 		filters,
