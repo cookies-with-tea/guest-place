@@ -1,9 +1,8 @@
 <template>
 	<div class="temp-auth">
-
 		<ElPopover>
 			<template #reference>
-			  <ElButton> Действия </ElButton>
+				<ElButton> Действия </ElButton>
 			</template>
 
 			<ElInput v-model="authToken" placeholder="Введите токен" />

@@ -420,7 +420,7 @@ export default {
 		'@stylistic/no-eol-whitespace': true,
 		'@stylistic/block-opening-brace-space-before': 'always',
 		'@stylistic/block-closing-brace-newline-after': 'always',
-		'@stylistic/declaration-colon-space-after': 'always',
+		'@stylistic/declaration-colon-space-after': null,
 		'@stylistic/declaration-colon-space-before': 'never',
 		'@stylistic/color-hex-case': 'lower',
 		'@stylistic/string-quotes': 'single',
@@ -481,6 +481,7 @@ export default {
 			'always',
 			{ except: ['after-declaration', 'first-nested'], ignore: ['after-comment', 'inside-single-line-block'] },
 		],
+		'annotation-no-unknown': [true, { ignoreAnnotations: ['default'] }],
 		'declaration-no-important': null,
 
 		'font-family-name-quotes': 'always-unless-keyword',
@@ -550,4 +551,10 @@ export default {
 		'scss/percent-placeholder-pattern': null,
 		'scss/selector-no-redundant-nesting-selector': true,
 	},
+}
+
+export const createConfig = () => {
+	return {
+		extends: ['@admin-panel/stylelint-config'],
+	}
 }

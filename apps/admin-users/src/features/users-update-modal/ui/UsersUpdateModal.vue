@@ -108,8 +108,8 @@ const form = ref<IUserCreateUpdate>({
 	birthDate: '',
 	role: UserRole.User,
 	status: UserStatus.Active,
-  avatar: '',
-  avatar_uuid: null,
+	avatar: '',
+	avatar_uuid: null,
 	city: '',
 	gender: '',
 	street: '',
@@ -138,8 +138,8 @@ const setFormData = (user: IUserCreateUpdate) => {
 		birthDate: user.birthDate || '',
 		role: user.role || UserRole.User,
 		status: user.status || UserStatus.Active,
-    avatar: user.avatar || '',
-    avatar_uuid: user.avatar_uuid || null,
+		avatar: user.avatar || '',
+		avatar_uuid: user.avatar_uuid || null,
 		city: user.city || '',
 		gender: user.gender || '',
 		street: user.street || '',
@@ -147,9 +147,9 @@ const setFormData = (user: IUserCreateUpdate) => {
 }
 
 const onFilesChange: UploadProps['onChange'] = async (file) => {
-  const result = await uploadMedia(file.raw!)
+	const result = await uploadMedia(file.raw!)
 
-  avatarUrl.value = result?.url ?? ''
+	avatarUrl.value = result?.url ?? ''
 
 	form.value.avatar_uuid = result?.uuid ?? null
 }
@@ -173,7 +173,7 @@ const resetForm = () => {
 		birthDate: '',
 		role: UserRole.User,
 		status: UserStatus.Active,
-    avatar: '',
+		avatar: '',
 		avatar_uuid: null,
 		city: '',
 		gender: '',
@@ -182,7 +182,7 @@ const resetForm = () => {
 }
 
 const submit = async () => {
-  await formRef.value?.validate()
+	await formRef.value?.validate()
 
 	if (!isEditing.value) {
 		handleSubmit({

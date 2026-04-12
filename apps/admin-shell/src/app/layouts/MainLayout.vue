@@ -13,19 +13,28 @@
 				</div>
 				<div class="header-right">
 					<UiThemeSwitcher />
-					<el-dropdown trigger="click">
-						<div class="user-profile">
-							<el-avatar :size="32" :icon="UserFilled" />
-						</div>
-						<template #dropdown>
-							<el-dropdown-menu>
-								<el-dropdown-item>Профиль</el-dropdown-item>
-								<el-dropdown-item divided>Выйти</el-dropdown-item>
-							</el-dropdown-menu>
-						</template>
-					</el-dropdown>
+
+					<div v-if="isAuthenticated" class="user-info">
+						<el-dropdown trigger="click">
+							<div class="user-profile">
+								<el-avatar :size="32" :src="user?.avatar" :icon="UserFilled" />
+								<span class="user-name">{{ user?.firstName || user?.email }}</span>
+							</div>
+							<template #dropdown>
+								<el-dropdown-menu>
+									<el-dropdown-item>Профиль</el-dropdown-item>
+									<el-dropdown-item divided @click="clearAuth">Выйти</el-dropdown-item>
+								</el-dropdown-menu>
+							</template>
+						</el-dropdown>
+					</div>
+					<el-button v-else type="primary" plain size="small" @click="loginDialogVisible = true"> Войти </el-button>
 				</div>
 			</header>
+
+			<el-dialog v-model="loginDialogVisible" title="" width="400px" custom-class="auth-dialog" :show-close="false">
+				<UiAuthWidget />
+			</el-dialog>
 
 			<main class="page-content">
 				<RouterView />
@@ -35,43 +44,47 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { UserFilled } from '@element-plus/icons-vue'
+import { useAuth } from '@admin-panel/lib'
 import { TheSidebar } from '#widgets/the-sidebar'
-import { UiThemeSwitcher } from '@admin-panel/ui'
+import { UiThemeSwitcher, UiAuthWidget } from '@admin-panel/ui'
 
 const route = useRoute()
 const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard')
+
+const { user, isAuthenticated, clearAuth } = useAuth()
+const loginDialogVisible = ref(false)
 </script>
 
 <style lang="scss" scoped>
 .main-layout {
-	height: 100vh;
 	width: 100vw;
+	height: 100vh;
+	position: relative;
 	display: flex;
 	background: var(--gp-bg-main);
 	overflow: hidden;
-	position: relative;
 }
 
 .ambient-bg {
-	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
+	position: absolute;
+	pointer-events: none;
 	overflow: hidden;
 	z-index: 0;
-	pointer-events: none;
 }
 
 .ambient-orb {
 	position: absolute;
 	border-radius: 50%;
 	filter: blur(100px);
-	opacity: 0.3;
 	animation: float 20s infinite ease-in-out alternate;
+	opacity: 0.3;
 }
 
 .orb-1 {
@@ -83,8 +96,8 @@ const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard'
 }
 
 .orb-2 {
-	bottom: -15%;
 	left: 10%;
+	bottom: -15%;
 	width: 500px;
 	height: 500px;
 	background: #6e39cb;
@@ -92,16 +105,21 @@ const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard'
 }
 
 @keyframes float {
-	0% { transform: translate(0, 0) scale(1); }
-	100% { transform: translate(-50px, 50px) scale(1.1); }
+	0% {
+		transform: translate(0, 0) scale(1);
+	}
+
+	100% {
+		transform: translate(-50px, 50px) scale(1.1);
+	}
 }
 
 .main-layout__content {
-  z-index: 1;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
 	min-width: 0;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	z-index: 1;
 }
 
 .main-header {
@@ -126,8 +144,8 @@ const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard'
 }
 
 .user-profile {
-	cursor: pointer;
 	display: flex;
 	align-items: center;
+	cursor: pointer;
 }
 </style>

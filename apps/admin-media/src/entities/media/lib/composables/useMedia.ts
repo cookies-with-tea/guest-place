@@ -1,159 +1,181 @@
 import { ref, computed, onMounted } from 'vue'
 import { mediaApi } from '@/entities/media/api'
 import { mediaUtils } from '@/entities/media/utils/media.utils'
-import type { MediaItem, MediaResponse, ICreateMedia, IUpdateMedia } from '@/entities/media/model'
+import type { MediaItem, ICreateMedia, IUpdateMedia } from '@/entities/media/model'
 
 export const useMedia = () => {
+	// State
+	const mediaItems = ref<MediaItem[]>([])
+	const loading = ref(false)
+	const error = ref<string | null>(null)
+	const totalItems = ref(0)
+	const currentPage = ref(1)
+	const itemsPerPage = ref(10)
+	const searchQuery = ref('')
 
-  // State
-  const mediaItems = ref<MediaItem[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  const totalItems = ref(0)
-  const currentPage = ref(1)
-  const itemsPerPage = ref(10)
-  const searchQuery = ref('')
+	// Computed
+	const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
 
-  // Computed
-  const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+	// Methods
+	const loadMedia = async (page: number = 1, limit: number = 10, search?: string) => {
+		loading.value = true
 
-  // Methods
-  const loadMedia = async (page: number = 1, limit: number = 10, search?: string) => {
-    loading.value = true
-    error.value = null
+		error.value = null
 
-    currentPage.value = page
-    itemsPerPage.value = limit
-    searchQuery.value = search || ''
+		currentPage.value = page
 
-    const response = await mediaApi.getAll()
-    mediaItems.value = (response.data.items as unknown as MediaItem[]) || []
-    totalItems.value = (response.data.pagination.total as number) || 0
+		itemsPerPage.value = limit
 
-    loading.value = false
-  }
+		searchQuery.value = search || ''
 
-  const createMedia = async (mediaData: ICreateMedia): Promise<MediaItem> => {
-    loading.value = true
-    error.value = null
+		const response = await mediaApi.getAll()
 
-    const formData = new FormData()
+		mediaItems.value = (response.data.items as unknown as MediaItem[]) || []
 
-    Object.entries(mediaData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value)
-      }
-    })
+		totalItems.value = (response.data.pagination.total as number) || 0
 
-    const newMedia = await mediaApi.create(formData)
-    // Refresh the list to include the new item
-    await loadMedia(currentPage.value, itemsPerPage.value, searchQuery.value)
+		loading.value = false
+	}
 
-    loading.value = false
-    return newMedia.data as unknown as MediaItem
-  }
+	const createMedia = async (mediaData: ICreateMedia): Promise<MediaItem> => {
+		loading.value = true
 
-  const updateMedia = async (mediaData: IUpdateMedia): Promise<MediaItem> => {
-    loading.value = true
-    error.value = null
+		error.value = null
 
-    const formData = new FormData()
-    Object.entries(mediaData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value)
-      }
-    })
+		const formData = new FormData()
 
-    const updatedMedia = await mediaApi.update(mediaData.id, formData)
-    // Find and update the item in the local array
-    const index = mediaItems.value.findIndex(m => m.id === mediaData.id)
-    if (index !== -1) {
-      mediaItems.value[index] = { ...mediaItems.value[index], ...updatedMedia.data as unknown as MediaItem }
-    }
+		Object.entries(mediaData).forEach(([key, value]) => {
+			if (value !== undefined && value !== null) {
+				formData.append(key, value)
+			}
+		})
 
-    loading.value = false
-    return updatedMedia.data as unknown as MediaItem
-  }
+		const newMedia = await mediaApi.create(formData)
 
-  const deleteMedia = async (id: string): Promise<void> => {
-    loading.value = true
-    error.value = null
+		// Refresh the list to include the new item
+		await loadMedia(currentPage.value, itemsPerPage.value, searchQuery.value)
 
-    await mediaApi.deleteById(id)
-    // Remove from local array
-    mediaItems.value = mediaItems.value.filter(m => m.id !== id)
-    // Adjust total count
-    totalItems.value -= 1
+		loading.value = false
 
-    loading.value = false
-  }
+		return newMedia.data as unknown as MediaItem
+	}
 
-  const deleteMultipleMedia = async (ids: string[]): Promise<void> => {
-    loading.value = true
-    error.value = null
+	const updateMedia = async (mediaData: IUpdateMedia): Promise<MediaItem> => {
+		loading.value = true
 
-    // Note: The existing API doesn't support bulk delete, so we'll delete one by one
-    for (const id of ids) {
-      await mediaApi.deleteById(id)
-    }
-    // Remove from local array
-    mediaItems.value = mediaItems.value.filter(m => !ids.includes(m.id))
-    // Adjust total count
-    totalItems.value -= ids.length
+		error.value = null
 
-    loading.value = false
-  }
+		const formData = new FormData()
 
-  const getMediaById = async (id: string): Promise<MediaItem> => {
-    loading.value = true
-    error.value = null
+		Object.entries(mediaData).forEach(([key, value]) => {
+			if (value !== undefined && value !== null) {
+				formData.append(key, value)
+			}
+		})
 
-    const media = await mediaApi.getById(id)
+		const updatedMedia = await mediaApi.update(mediaData.id, formData)
+		// Find and update the item in the local array
+		const index = mediaItems.value.findIndex((m) => m.id === mediaData.id)
 
-    loading.value = false
-    return media.data as unknown as MediaItem
-  }
+		if (index !== -1) {
+			mediaItems.value[index] = {
+				...mediaItems.value[index],
+				...(updatedMedia.data as unknown as MediaItem),
+			}
+		}
 
-  const searchMedia = async (query: string) => {
-    await loadMedia(1, itemsPerPage.value, query)
-  }
+		loading.value = false
 
-  const changePage = async (page: number) => {
-    await loadMedia(page, itemsPerPage.value, searchQuery.value)
-  }
+		return updatedMedia.data as unknown as MediaItem
+	}
 
-  const changePageSize = async (limit: number) => {
-    await loadMedia(1, limit, searchQuery.value)
-  }
+	const deleteMedia = async (id: string): Promise<void> => {
+		loading.value = true
 
-  // Lifecycle
-  onMounted(() => {
-    loadMedia()
-  })
+		error.value = null
 
-  return {
-    // State
-    mediaItems,
-    loading,
-    error,
-    totalItems,
-    currentPage,
-    itemsPerPage,
-    searchQuery,
-    totalPages,
+		await mediaApi.deleteById(id)
 
-    // Methods
-    loadMedia,
-    createMedia,
-    updateMedia,
-    deleteMedia,
-    deleteMultipleMedia,
-    getMediaById,
-    searchMedia,
-    changePage,
-    changePageSize,
+		// Remove from local array
+		mediaItems.value = mediaItems.value.filter((m) => m.id !== id)
 
-    // Utilities
-    mediaUtils
-  }
+		// Adjust total count
+		totalItems.value -= 1
+
+		loading.value = false
+	}
+
+	const deleteMultipleMedia = async (ids: string[]): Promise<void> => {
+		loading.value = true
+
+		error.value = null
+
+		// Note: The existing API doesn't support bulk delete, so we'll delete one by one
+		for (const id of ids) {
+			await mediaApi.deleteById(id)
+		}
+
+		// Remove from local array
+		mediaItems.value = mediaItems.value.filter((m) => !ids.includes(m.id))
+
+		// Adjust total count
+		totalItems.value -= ids.length
+
+		loading.value = false
+	}
+
+	const getMediaById = async (id: string): Promise<MediaItem> => {
+		loading.value = true
+
+		error.value = null
+
+		const media = await mediaApi.getById(id)
+
+		loading.value = false
+
+		return media.data as unknown as MediaItem
+	}
+
+	const searchMedia = async (query: string) => {
+		await loadMedia(1, itemsPerPage.value, query)
+	}
+
+	const changePage = async (page: number) => {
+		await loadMedia(page, itemsPerPage.value, searchQuery.value)
+	}
+
+	const changePageSize = async (limit: number) => {
+		await loadMedia(1, limit, searchQuery.value)
+	}
+
+	// Lifecycle
+	onMounted(() => {
+		loadMedia()
+	})
+
+	return {
+		// State
+		mediaItems,
+		loading,
+		error,
+		totalItems,
+		currentPage,
+		itemsPerPage,
+		searchQuery,
+		totalPages,
+
+		// Methods
+		loadMedia,
+		createMedia,
+		updateMedia,
+		deleteMedia,
+		deleteMultipleMedia,
+		getMediaById,
+		searchMedia,
+		changePage,
+		changePageSize,
+
+		// Utilities
+		mediaUtils,
+	}
 }

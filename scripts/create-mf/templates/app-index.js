@@ -1,5 +1,5 @@
 export function getAppIndex() {
-  return `import { createApp } from 'vue'
+	return `import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'

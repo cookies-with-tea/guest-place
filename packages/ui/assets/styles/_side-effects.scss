@@ -2,17 +2,19 @@
 @use 'reset';
 
 html {
-  font-family: 'Inter', sans-serif;
-  scroll-behavior: smooth;
+	font-family: 'Inter', sans-serif;
+	scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--gp-bg-main, #0f172a);
-  color: var(--gp-text-main, #f8fafc);
-  transition: background-color 0.3s, color 0.3s;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: var(--gp-text-main, #f8fafc);
+	background-color: var(--gp-bg-main, #0f172a);
+	transition:
+		background-color 0.3s,
+		color 0.3s;
+	padding: 0;
+	margin: 0;
 }

@@ -10,17 +10,16 @@ type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 const PREFIX = '/api/v1'
 
 export const createApi = (entityName: string) => {
-  let token = ''
-
-  if (typeof localStorage !== 'undefined') {
-		token = localStorage.getItem('authToken') ?? ''
-	}
-
 	const baseUrl = `${PREFIX}/${entityName}`
 
 	const fetchData = async <T>(url: string, options?: JsonFetchOptions): Promise<IResponse<CamelCasedProperties<T>>> => {
 		try {
 			let body = undefined
+			let token = ''
+
+			if (typeof localStorage !== 'undefined') {
+				token = localStorage.getItem('gp_access_token') ?? ''
+			}
 
 			if (options?.body) {
 				if (options.body instanceof FormData) {
@@ -33,11 +32,11 @@ export const createApi = (entityName: string) => {
 			const response = await $fetch<IResponse<SnakeCasedProperties<T>>>(`${baseUrl}${url}`, {
 				...options,
 				body,
-        responseType: 'json',
-        headers: {
-          ...options?.headers,
-          Authorization: `Bearer ${token}`
-        }
+				responseType: 'json',
+				headers: {
+					...options?.headers,
+					Authorization: token ? `Bearer ${token}` : '',
+				},
 			})
 
 			return snakeToCamel(response) as IResponse<CamelCasedProperties<T>>
@@ -45,15 +44,30 @@ export const createApi = (entityName: string) => {
 			const errors = error.data?.errors ? snakeToCamel(error.data.errors) : {}
 			const messages = error.data?.messages ? snakeToCamel(error.data.messages) : []
 
+			if (error.statusCode === 401 || error.statusCode === 403) {
+				if (typeof window !== 'undefined') {
+					localStorage.removeItem('gp_access_token')
+
+					localStorage.removeItem('gp_refresh_token')
+
+					const event = new CustomEvent('auth:unauthorized', { cancelable: true })
+					const notCanceled = window.dispatchEvent(event)
+
+					if (notCanceled && !window.location.pathname.startsWith('/login')) {
+						window.location.href = '/login'
+					}
+				}
+			}
+
 			if (error.statusCode === 500) {
-				// TODO: Need to think about error handling
+				// eslint-disable-next-line no-console
 				console.error('[fetchData] Server error: ', error)
 			}
 
 			throw {
 				errors,
 				messages,
-				status: error.status,
+				status: error.statusCode || error.status,
 				original: error,
 			}
 		}

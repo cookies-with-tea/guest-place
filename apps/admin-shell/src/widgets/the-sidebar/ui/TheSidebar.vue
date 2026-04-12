@@ -44,19 +44,19 @@ const activePath = computed(() => route.path)
 }
 
 .sidebar-logo {
-	padding: 24px;
-	text-align: center;
 	border-bottom: 1px solid var(--gp-glass-border);
+	text-align: center;
+	padding: 24px;
 }
 
 .sidebar-logo h2 {
-	margin: 0;
 	font-size: 1.2rem;
 	letter-spacing: 2px;
+	-webkit-text-fill-color: transparent;
 	background: linear-gradient(120deg, var(--gp-primary), #fff);
 	-webkit-background-clip: text;
 	background-clip: text;
-	-webkit-text-fill-color: transparent;
+	margin: 0;
 }
 
 .sidebar-menu {
@@ -66,10 +66,10 @@ const activePath = computed(() => route.path)
 }
 
 :deep(.el-menu-item) {
-	margin: 4px 12px;
-	border-radius: var(--gp-radius-sm);
 	height: 48px;
+	border-radius: var(--gp-radius-sm);
 	line-height: 48px;
+	margin: 4px 12px;
 }
 
 :deep(.el-menu-item.is-active) {
@@ -77,6 +77,6 @@ const activePath = computed(() => route.path)
 }
 
 :deep(.el-menu-item:hover) {
-	background: rgba(255, 255, 255, 0.05) !important;
+	background: rgb(255, 255, 255, 0.05) !important;
 }
 </style>

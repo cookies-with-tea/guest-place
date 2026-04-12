@@ -19,7 +19,7 @@ export default defineConfig({
 		}),
 		svgSpriteInlinePlugin({
 			inputDir: 'assets/icons',
-			outputTs: 'src/ui-icon/sprite/sprite.ts',
+			outputTs: 'src/components/ui-icon/sprite/sprite.ts',
 			prefix: 'icon',
 		}),
 	],

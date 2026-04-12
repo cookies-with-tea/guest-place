@@ -57,6 +57,7 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 
 			cache.set(currentLocale, { ...current, ...data })
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(`Failed to load i18n dict: ${dictKey}`, e)
 		} finally {
 			loading.delete(cacheKey)

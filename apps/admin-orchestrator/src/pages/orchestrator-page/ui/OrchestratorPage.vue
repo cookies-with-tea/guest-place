@@ -7,7 +7,7 @@
 		<el-tabs v-model="activeTab" class="orchestrator-tabs">
 			<!-- Вкладка Топология -->
 			<el-tab-pane label="Топология" name="topology">
-				<el-card class="stats-card glass-card">
+				<el-card class="stats-card glass-card" v-loading="isLoading">
 					<template #header>
 						<div class="card-header">
 							<span>Карта системы (D3.js Visualization)</span>
@@ -19,14 +19,14 @@
 
 			<!-- Вкладка Микрофронтенды -->
 			<el-tab-pane label="Модули (MFE)" name="modules">
-				<el-card class="mfe-list-card glass-card">
+				<el-card class="mfe-list-card glass-card" v-loading="isLoading">
 					<template #header>
 						<div class="card-header">
 							<span>Список подключенных модулей</span>
 							<el-button type="primary" size="small" @click="handleCreate">Добавить MFE</el-button>
 						</div>
 					</template>
-					
+
 					<el-table :data="microfrontends" style="width: 100%">
 						<el-table-column prop="name" label="ID" width="180" />
 						<el-table-column prop="displayName" label="Название" />
@@ -40,8 +40,22 @@
 						</el-table-column>
 						<el-table-column label="Действия">
 							<template #default="scope">
-								<el-button plain type="primary" size="small" @click="handleEdit(scope.row)">Изменить</el-button>
-								<el-button plain type="danger" size="small" @click="handleDelete(scope.row)">Удалить</el-button>
+								<el-button
+									:disabled="scope.row.name === 'orchestrator'"
+									plain
+									type="primary"
+									size="small"
+									@click="handleEdit(scope.row)"
+									>Изменить</el-button
+								>
+								<el-button
+									:disabled="scope.row.name === 'orchestrator'"
+									plain
+									type="danger"
+									size="small"
+									@click="handleDelete(scope.row)"
+									>Удалить</el-button
+								>
 							</template>
 						</el-table-column>
 					</el-table>
@@ -82,7 +96,7 @@
 					<el-input v-model="form.url" placeholder="http://localhost:3001/assets/remoteEntry.js" />
 				</el-form-item>
 				<el-form-item label="Активен">
-					<el-switch v-model="form.enabled" />
+					<el-switch v-model="form.enabled" :disabled="form.name === 'admin-orchestrator'" />
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -96,83 +110,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useFeatureFlags } from '@admin-panel/lib'
+import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
 import MfeStatsChart from './MfeStatsChart.vue'
 
 const { flags, toggleFlag } = useFeatureFlags()
+
 const activeTab = ref('topology')
 
-const microfrontends = ref([
-	{ id: 'statistics', name: 'statistics', displayName: 'Статистика', url: 'http://localhost:3001/assets/remoteEntry.js', enabled: true },
-	{ id: 'translations', name: 'translations', displayName: 'Переводы', url: 'http://localhost:3002/assets/remoteEntry.js', enabled: true },
-	{ id: 'users', name: 'users', displayName: 'Пользователи', url: 'http://localhost:3003/assets/remoteEntry.js', enabled: true },
-	{ id: 'media', name: 'media', displayName: 'Медиа', url: 'http://localhost:4004/assets/remoteEntry.js', enabled: true },
-])
+const { microfrontends, isLoading, dialogVisible, isEdit, form, handleCreate, handleEdit, handleDelete, saveMfe } =
+	useMfe()
 
 const chartData = computed(() => {
 	const nodes = [
 		{ id: 'Shell', group: 1, status: 'online' as const },
-		...microfrontends.value.map(m => ({
-			id: m.displayName,
-			group: 2,
-			status: m.enabled ? 'online' as const : 'offline' as const
-		}))
+		...(microfrontends.value || []).map((m: any) => {
+			const mId = m.displayName || m.name || `mfe-${m.id}`
+
+			return {
+				id: mId,
+				group: 2,
+				status: m.enabled ? ('online' as const) : ('offline' as const),
+			}
+		}),
 	]
 
-	const links = microfrontends.value.map(m => ({
-		source: 'Shell',
-		target: m.displayName,
-		value: 2
-	}))
+	const links = (microfrontends.value || []).map((m: any) => {
+		const mId = m.displayName || m.name || `mfe-${m.id}`
+
+		return {
+			source: 'Shell',
+			target: mId,
+			value: 2,
+		}
+	})
 
 	return { nodes, links }
 })
-
-const dialogVisible = ref(false)
-const isEdit = ref(false)
-const form = reactive({
-	id: '',
-	name: '',
-	displayName: '',
-	url: '',
-	enabled: true
-})
-
-const handleCreate = () => {
-	isEdit.value = false
-	Object.assign(form, { id: '', name: '', displayName: '', url: '', enabled: true })
-	dialogVisible.value = true
-}
-
-const handleEdit = (row: any) => {
-	isEdit.value = true
-	Object.assign(form, row)
-	dialogVisible.value = true
-}
-
-const handleDelete = (row: any) => {
-	microfrontends.value = microfrontends.value.filter(m => m.id !== row.id)
-}
-
-const saveMfe = () => {
-	if (isEdit.value) {
-		const index = microfrontends.value.findIndex(m => m.id === form.id)
-		if (index !== -1) microfrontends.value[index] = { ...form }
-	} else {
-		const newId = form.name || `mfe-${Date.now()}`
-		microfrontends.value.push({ ...form, id: newId })
-	}
-	dialogVisible.value = false
-}
 </script>
 
 <style scoped>
 .orchestrator-page {
-	padding: 24px;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
+	padding: 24px;
 }
 
 .page-header {
@@ -181,8 +164,8 @@ const saveMfe = () => {
 
 .card-header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
+	justify-content: space-between;
 }
 
 /* Customizing Element Plus Tabs for Glass Theme */
@@ -191,9 +174,9 @@ const saveMfe = () => {
 }
 
 :deep(.el-tabs__item) {
-	color: var(--gp-text-secondary);
-	font-size: 16px;
 	font-weight: 500;
+	font-size: 16px;
+	color: var(--gp-text-secondary);
 	transition: all 0.3s;
 }
 
@@ -203,9 +186,9 @@ const saveMfe = () => {
 }
 
 :deep(.el-tabs__active-bar) {
-	background-color: var(--gp-primary);
 	height: 3px;
 	border-radius: 3px;
+	background-color: var(--gp-primary);
 }
 
 :deep(.el-tabs__content) {

@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv, type UserConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import federation from '@originjs/vite-plugin-federation'
-import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import { builtinModules } from 'node:module'
 import { defu } from 'defu'
@@ -27,6 +26,8 @@ export function createConfig(options: CreateConfigOptions) {
 			vue: { singleton: true },
 			'vue-router': { singleton: true },
 			'element-plus': { singleton: true },
+			pinia: { singleton: true },
+			'@tanstack/vue-query': { singleton: true },
 		},
 		exposes,
 		remotes,
@@ -43,7 +44,6 @@ export function createConfig(options: CreateConfigOptions) {
 
 		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
 		const isProduction = mode === 'production' || command === 'build'
-		const base = isProduction && name !== 'shell' ? './' : '/'
 
 		const baseConfig: UserConfig = {
 			base: '/', // Keep base as / but override URLs for built assets
@@ -84,11 +84,7 @@ export function createConfig(options: CreateConfigOptions) {
 				minify: false,
 				cssCodeSplit: false,
 				rollupOptions: {
-					external: [
-						'fsevents',
-						...builtinModules,
-						...builtinModules.map((m) => `node:${m}`),
-					],
+					external: ['fsevents', ...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
 				},
 			},
 			server: {
@@ -106,6 +102,15 @@ export function createConfig(options: CreateConfigOptions) {
 			},
 			preview: {
 				port: previewPort || portConfig?.preview,
+				proxy: env.VITE_API_BASE
+					? {
+							'/api': {
+								target: env.VITE_API_BASE,
+								changeOrigin: true,
+								secure: false,
+							},
+						}
+					: {},
 			},
 		}
 

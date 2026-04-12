@@ -1,5 +1,5 @@
 export function getAppVue() {
-  return `<template>
+	return `<template>
 	<router-view />
 </template>
 

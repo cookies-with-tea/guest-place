@@ -37,7 +37,7 @@ export interface IUserCreateUpdate {
 	role?: UserRole
 	status?: UserStatus
 	phone?: string
-  avatar?: string
+	avatar?: string
 	avatar_uuid?: string | null
 	street?: string
 	city?: string

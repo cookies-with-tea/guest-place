@@ -25,10 +25,11 @@
 		"@admin-panel/ui": "workspace:*",
 		"@element-plus/icons-vue": "^2.3.2",
 		"@tanstack/vue-query": "^5.92.1",
-		"vue": "^3.5.22",
-		"vue-router": "^4.5.1",
+		"element-plus": "^2.13.0",
+		"pinia": "^2.1.7",
 		"primevue": "^4.0.0",
-		"element-plus": "^2.13.0"
+		"vue": "^3.5.22",
+		"vue-router": "^4.5.1"
 	},
 	"devDependencies": {
 		"@admin-panel/eslint-config": "workspace:*",

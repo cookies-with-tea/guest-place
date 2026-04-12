@@ -21,6 +21,7 @@ export default function svgSpriteInlinePlugin(options: Options): Plugin {
 			const outputDir = path.dirname(absOutputTs)
 
 			if (!fs.existsSync(absInputDir)) {
+				// eslint-disable-next-line no-console
 				console.warn(`[svg-sprite-inline] Input dir not found: ${absInputDir}`)
 
 				return
@@ -29,6 +30,7 @@ export default function svgSpriteInlinePlugin(options: Options): Plugin {
 			const files = fs.readdirSync(absInputDir).filter((f) => f.endsWith('.svg'))
 
 			if (files.length === 0) {
+				// eslint-disable-next-line no-console
 				console.warn(`[svg-sprite-inline] No SVG files in ${absInputDir}`)
 
 				return
@@ -99,6 +101,7 @@ export const iconNames = [${iconNames.map((n) => `'${n}'`).join(', ')}] as const
 
 			fs.writeFileSync(absOutputTs, tsContent)
 
+			// eslint-disable-next-line no-console
 			console.log(`[svg-sprite-inline] Generated: ${absOutputTs}`)
 		},
 	}

@@ -1,5 +1,5 @@
 export function getTsConfig() {
-  return `{
+	return `{
 	"extends": "@admin-panel/typescript-config",
 	"compilerOptions": {
 		"composite": true,
@@ -21,7 +21,7 @@ export function getTsConfig() {
 }
 
 export function getTsConfigApp() {
-  return `{
+	return `{
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
 		"noEmit": true,
@@ -33,7 +33,7 @@ export function getTsConfigApp() {
 }
 
 export function getTsConfigNode() {
-  return `{
+	return `{
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
 		"composite": true,

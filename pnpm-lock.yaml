@@ -111,6 +111,12 @@ importers:
       '@admin-panel/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -184,12 +190,18 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.2
         version: 2.3.2(vue@3.5.22(typescript@5.9.3))
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       '@tanstack/vue-table':
         specifier: ^8.21.3
         version: 8.21.3(vue@3.5.22(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.3.1
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -248,6 +260,9 @@ importers:
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -307,7 +322,7 @@ importers:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
       pinia:
-        specifier: ^2.1.7
+        specifier: ^2.3.1
         version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
@@ -406,9 +421,15 @@ importers:
       '@admin-panel/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -461,6 +482,9 @@ importers:
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -516,6 +540,9 @@ importers:
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       primevue:
         specifier: ^4.0.0
         version: 4.5.4(vue@3.5.22(typescript@5.9.3))
@@ -556,6 +583,9 @@ importers:
 
   packages/eslint-config:
     dependencies:
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       '@typescript-eslint/parser':
         specifier: ^8.46.2
         version: 8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
@@ -577,6 +607,9 @@ importers:
       eslint-plugin-vue:
         specifier: ~10.4.0
         version: 10.4.0(@typescript-eslint/parser@8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.38.0(jiti@2.6.1))(vue-eslint-parser@10.2.0(eslint@9.38.0(jiti@2.6.1)))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       typescript-eslint:
         specifier: ^8.46.2
         version: 8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
@@ -589,9 +622,15 @@ importers:
       '@admin-panel/lib':
         specifier: workspace:*
         version: link:../lib
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       ofetch:
         specifier: ^1.3.4
         version: 1.5.1
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -620,6 +659,9 @@ importers:
       '@originjs/vite-plugin-federation':
         specifier: ^1.4.1
         version: 1.4.1
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
         version: 6.0.1(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.2)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.3))
@@ -633,7 +675,7 @@ importers:
         specifier: ^1.3.4
         version: 1.5.1
       pinia:
-        specifier: ^2.1.7
+        specifier: ^2.3.1
         version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vite:
         specifier: ^7.1.7
@@ -657,6 +699,12 @@ importers:
 
   packages/prettier-config:
     dependencies:
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       prettier:
         specifier: ^3.0.0
         version: 3.6.2
@@ -666,6 +714,12 @@ importers:
       '@stylistic/stylelint-plugin':
         specifier: ^4.0.0
         version: 4.0.0(stylelint@16.25.0(typescript@5.9.3))
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       postcss-html:
         specifier: ^1.8.0
         version: 1.8.0
@@ -693,12 +747,18 @@ importers:
 
   packages/typescript-config:
     dependencies:
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       '@tsconfig/node22':
         specifier: ^22.0.2
         version: 22.0.2
       '@vue/tsconfig':
         specifier: ^0.8.1
         version: 0.8.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -711,9 +771,15 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.2
         version: 2.3.2(vue@3.5.22(typescript@5.9.3))
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.92.1(vue@3.5.22(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.13.0(vue@3.5.22(typescript@5.9.3))
+      pinia:
+        specifier: ^2.1.7
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       svgo:
         specifier: ^4.0.0
         version: 4.0.0

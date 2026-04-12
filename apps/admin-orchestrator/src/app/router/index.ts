@@ -19,6 +19,7 @@ export const router = createRouter({
 
 export const hooks: MFLifecycleHooks = {
 	onMount: async (app: any, context: any) => {
+		// eslint-disable-next-line no-console
 		console.log('[MF orchestrator] Mounted', context)
 	},
 }

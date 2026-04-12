@@ -1,3 +1,1 @@
-{
-  "extends": "@admin-panel/prettier-config"
-}
+"@admin-panel/prettier-config"

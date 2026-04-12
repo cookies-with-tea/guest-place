@@ -19,5 +19,5 @@ export default defineBuildConfig({
 		'vue',
 		'pinia',
 	],
-  failOnWarn: false,
+	failOnWarn: false,
 })

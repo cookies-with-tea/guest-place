@@ -7,11 +7,11 @@ import { initUiStyles } from '@admin-panel/ui'
 initUiStyles()
 
 if (!localStorage.getItem('gp-theme')) {
-  localStorage.setItem('gp-theme', 'dark')
+	localStorage.setItem('gp-theme', 'dark')
 }
 
 if (localStorage.getItem('gp-theme') === 'dark') {
-  document.documentElement.classList.add('dark')
+	document.documentElement.classList.add('dark')
 }
 
 const app = createApp(App)

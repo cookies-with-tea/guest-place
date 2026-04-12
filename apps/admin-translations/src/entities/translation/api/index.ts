@@ -52,8 +52,7 @@ export const updateTranslation = async (data: Translation): Promise<Translation>
 	return data
 }
 
-export const deleteTranslation = async (id: string): Promise<void> => {
-	console.log(id)
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const deleteTranslation = async (_id: string): Promise<void> => {
 	await new Promise((r) => setTimeout(r, 200))
 }

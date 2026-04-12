@@ -1,6 +1,6 @@
-@use "variables" as *;
+@use 'variables' as *;
 
-/* 
-  CSS Variables (tokens) have been moved to _global.scss 
+/*
+  CSS Variables (tokens) have been moved to _global.scss
   to avoid duplication across microfrontends.
 */

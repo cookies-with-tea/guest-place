@@ -1,52 +1,47 @@
 @use 'variables' as *;
 
 :root {
-  /* Premium Design Tokens */
-  --gp-bg-main: #{$gp-bg};
-  --gp-bg-surface: #{$gp-surface};
-  --gp-bg-element: #{$gp-bg-2};
-  
-  --gp-primary: #{$gp-primary};
-  --gp-primary-hover: #3fb27d;
-  --gp-primary-light: rgba(66, 184, 131, 0.2);
-  
-  --gp-text-main: #{$gp-text};
-  --gp-text-secondary: #{$gp-text-secondary};
-  --gp-text-disabled: #{$gp-text-disabled};
-  
-  --gp-border-color: #{$gp-border};
-  --gp-border-color-hover: rgba(255, 255, 255, 0.2);
-  
-  /* Glassmorphism */
-  --gp-bg-glass: rgba(255, 255, 255, 0.03);
-  --gp-bg-glass-hover: rgba(255, 255, 255, 0.06);
-  --gp-glass-blur: 16px;
-  --gp-glass-border: rgba(255, 255, 255, 0.08);
-  --gp-glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+	/* Premium Design Tokens */
+	--gp-bg-main: #{$gp-bg};
+	--gp-bg-surface: #{$gp-surface};
+	--gp-bg-element: #{$gp-bg-2};
+	--gp-primary: #{$gp-primary};
+	--gp-primary-hover: #3fb27d;
+	--gp-primary-light: rgb(66, 184, 131, 0.2);
+	--gp-text-main: #{$gp-text};
+	--gp-text-secondary: #{$gp-text-secondary};
+	--gp-text-disabled: #{$gp-text-disabled};
+	--gp-border-color: #{$gp-border};
+	--gp-border-color-hover: rgb(255, 255, 255, 0.2);
 
-  /* Spacing & Radii */
-  --gp-radius-sm: 16px;
-  --gp-radius-md: 24px;
-  --gp-radius-lg: 32px;
-  --gp-sidebar-width: 260px;
-  --gp-header-height: 64px;
+	/* Glassmorphism */
+	--gp-bg-glass: rgb(255, 255, 255, 0.03);
+	--gp-bg-glass-hover: rgb(255, 255, 255, 0.06);
+	--gp-glass-blur: 16px;
+	--gp-glass-border: rgb(255, 255, 255, 0.08);
+	--gp-glass-shadow: 0 8px 32px 0 rgb(0, 0, 0, 0.37);
+
+	/* Spacing & Radii */
+	--gp-radius-sm: 16px;
+	--gp-radius-md: 24px;
+	--gp-radius-lg: 32px;
+	--gp-sidebar-width: 260px;
+	--gp-header-height: 64px;
 }
 
 html.light {
-  --gp-bg-main: #{$gp-bg-light};
-  --gp-bg-surface: #{$gp-surface-light};
-  --gp-bg-element: #{$gp-bg-2-light};
-  
-  --gp-text-main: #{$gp-text-light};
-  --gp-text-secondary: #{$gp-text-secondary-light};
-  --gp-text-disabled: #{$gp-text-disabled-light};
-  
-  --gp-border-color: #{$gp-border-light};
-  --gp-border-color-hover: rgba(0, 0, 0, 0.1);
-  
-  /* Light Glassmorphism */
-  --gp-bg-glass: rgba(255, 255, 255, 0.6);
-  --gp-bg-glass-hover: rgba(255, 255, 255, 0.8);
-  --gp-glass-border: rgba(0, 0, 0, 0.05);
-  --gp-glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	--gp-bg-main: #{$gp-bg-light};
+	--gp-bg-surface: #{$gp-surface-light};
+	--gp-bg-element: #{$gp-bg-2-light};
+	--gp-text-main: #{$gp-text-light};
+	--gp-text-secondary: #{$gp-text-secondary-light};
+	--gp-text-disabled: #{$gp-text-disabled-light};
+	--gp-border-color: #{$gp-border-light};
+	--gp-border-color-hover: rgb(0, 0, 0, 0.1);
+
+	/* Light Glassmorphism */
+	--gp-bg-glass: rgb(255, 255, 255, 0.6);
+	--gp-bg-glass-hover: rgb(255, 255, 255, 0.8);
+	--gp-glass-border: rgb(0, 0, 0, 0.05);
+	--gp-glass-shadow: 0 4px 12px rgb(0, 0, 0, 0.05);
 }

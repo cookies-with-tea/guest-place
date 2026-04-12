@@ -1,5 +1,5 @@
 import { createApi } from '@admin-panel/lib'
-import { IMedia } from '../model'
+import type { IMedia } from '../model'
 import { useAuthTemp } from '@/shared/lib/composables/useTempAuth'
 
 const { fetchData } = createApi('media')

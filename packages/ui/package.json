@@ -26,7 +26,9 @@
 	"dependencies": {
 		"@admin-panel/lib": "workspace:*",
 		"@element-plus/icons-vue": "^2.3.2",
+		"@tanstack/vue-query": "^5.92.1",
 		"element-plus": "^2.13.0",
+		"pinia": "^2.1.7",
 		"svgo": "^4.0.0",
 		"vue": "^3.5.22"
 	},

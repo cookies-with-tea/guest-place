@@ -11,7 +11,7 @@ const globalStoreRegistry: Record<string, () => Store> = {}
  * @param useStore The store hook function
  */
 export function registerSharedStore(id: string, useStore: () => Store) {
-  globalStoreRegistry[id] = useStore
+	globalStoreRegistry[id] = useStore
 }
 
 /**
@@ -20,12 +20,16 @@ export function registerSharedStore(id: string, useStore: () => Store) {
  * @param id The registered store ID
  */
 export function getSharedStore<T extends Store>(id: string): T | undefined {
-  const useStore = globalStoreRegistry[id]
-  if (!useStore) {
-    console.warn(`[Federation] Shared store with ID "${id}" not found.`)
-    return undefined
-  }
-  return useStore() as T
+	const useStore = globalStoreRegistry[id]
+
+	if (!useStore) {
+		// eslint-disable-next-line no-console
+		console.warn(`[Federation] Shared store with ID "${id}" not found.`)
+
+		return undefined
+	}
+
+	return useStore() as T
 }
 
 /**
@@ -33,10 +37,11 @@ export function getSharedStore<T extends Store>(id: string): T | undefined {
  * If running inside a shell, it will use the shell's Pinia instance.
  */
 export function initializePinia(pinia?: Pinia) {
-  const activePinia = getActivePinia()
-  if (activePinia) return activePinia
-  
-  if (pinia) return pinia
-  
-  throw new Error('[Federation] Pinia not initialized. Provide an instance or ensure a global one exists.')
+	const activePinia = getActivePinia()
+
+	if (activePinia) return activePinia
+
+	if (pinia) return pinia
+
+	throw new Error('[Federation] Pinia not initialized. Provide an instance or ensure a global one exists.')
 }

@@ -9,5 +9,9 @@
 	},
 	"peerDependencies": {
 		"prettier": "^3.0.0"
+	},
+	"dependencies": {
+		"@tanstack/vue-query": "^5.92.1",
+		"pinia": "^2.1.7"
 	}
 }

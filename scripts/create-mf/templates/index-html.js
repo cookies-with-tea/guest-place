@@ -1,7 +1,7 @@
 export function getIndexHtml(name, displayName) {
-  const mfName = name.replace(/^admin-/, '')
-  const mountId = `__MF_${mfName.toUpperCase().replace(/-/g, '_')}__`
-  return `<!DOCTYPE html>
+	const mfName = name.replace(/^admin-/, '')
+	const mountId = `__MF_${mfName.toUpperCase().replace(/-/g, '_')}__`
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
