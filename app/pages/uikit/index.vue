@@ -76,9 +76,9 @@
       </div>
     </div>
 
-    <div class="box">
+    <div class="box tabs">
       <div class="column">
-        <UiTabs class="ui-kit__tabs" with-query :tabs variant="primary" />
+        <UiTabs with-query :tabs variant="primary" />
       </div>
 
       <div class="column">
@@ -176,8 +176,9 @@ const tabs = [
     max-width: 40%;
   }
 
-  &__tabs {
-    width: 900px;
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
   }
 }
 

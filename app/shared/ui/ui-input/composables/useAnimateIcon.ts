@@ -125,7 +125,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
             proxyDiv,
             {
               duration: ENCRYPT_SPEED,
-              scrambleText: { CHARS, text: currentValue },
+              scrambleText: { chars: CHARS, text: currentValue },
               onUpdate: () => {
                 const proxyText = proxyDiv.innerText
                 const placeholder = '•'.repeat(Math.max(0, currentValue.length - proxyText.length))
@@ -165,7 +165,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
             proxyDiv,
             {
               duration: ENCRYPT_SPEED,
-              scrambleText: { CHARS, text: '•'.repeat(currentValue.length) },
+              scrambleText: { chars: CHARS, text: '•'.repeat(currentValue.length) },
               onUpdate: () => {
                 const proxyText = proxyDiv.innerText
 
@@ -192,7 +192,7 @@ export const useAnimateIcon = (modelRef: Ref<string>) => {
   const moveEye = (e: PointerEvent) => {
     const { eye, iconContainer } = getElementReferences(iconEye)
 
-    if (!eye) return
+    if (!eye || !iconContainer) return
 
     if (resetEyeTimer.value) {
       resetEyeTimer.value.kill()

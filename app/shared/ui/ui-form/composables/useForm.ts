@@ -1,6 +1,7 @@
 import { useFormErrors } from './useFormErrors'
 import { useFormValidation } from './useFormValidation'
 import type { IFormSubmitProps } from '../model'
+import type { Ref } from 'vue'
 
 export const useForm = <T extends object, U extends object>({
   submitFn,
