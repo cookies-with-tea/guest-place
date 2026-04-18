@@ -1,6 +1,6 @@
-use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO, PaginationQuery};
+use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
-use crate::user::dto::{CreateUserDTO, UpdateUserDTO, User, UserResponseDTO, UserRole, UserStatus};
+use crate::user::dto::{CreateUserDTO, UpdateUserDTO, User, UserFilterQuery, UserResponseDTO, UserRole, UserStatus};
 use crate::user::utils::{validate_email, validate_phone};
 use crate::AppState;
 use argon2::{
@@ -13,7 +13,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use sqlx::query_as;
+use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -195,7 +195,15 @@ pub async fn create(
     path = "/api/v1/user",
     params(
         ("page" = Option<i32>, Query, description = "Page number"),
-        ("limit" = Option<i32>, Query, description = "Items per page")
+        ("limit" = Option<i32>, Query, description = "Items per page"),
+        ("search" = Option<String>, Query, description = "Search query"),
+        ("email" = Option<String>, Query, description = "Filter by email"),
+        ("first_name" = Option<String>, Query, description = "Filter by first name"),
+        ("last_name" = Option<String>, Query, description = "Filter by last name"),
+        ("role" = Option<UserRole>, Query, description = "Filter by role"),
+        ("status" = Option<UserStatus>, Query, description = "Filter by status"),
+        ("sort_by" = Option<String>, Query, description = "Sort by field"),
+        ("sort_order" = Option<String>, Query, description = "Sort order (ASC/DESC)")
     ),
     responses(
         (status = 200, body = ApiResponseWithPagination<UserResponseDTO>),
@@ -204,25 +212,120 @@ pub async fn create(
     tag = "User",
     operation_id = "get_all_users",
 )]
-async fn get_all(
+pub async fn get_all(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
-    Query(pagination): Query<PaginationQuery>,
+    Query(filter): Query<UserFilterQuery>,
 ) -> Result<
     Json<ApiResponseWithPagination<UserResponseDTO>>,
     (StatusCode, Json<ApiResponseWithPagination<UserResponseDTO>>),
 > {
-    let page = pagination.page.unwrap_or(1);
-    let limit = pagination.limit.unwrap_or(10);
+    let page = filter.page.unwrap_or(1);
+    let limit = filter.limit.unwrap_or(10);
     let offset = (page - 1) * limit;
 
-    let total_query = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM guest_user")
-        .fetch_one(&state.pool)
-        .await;
+    // Build WHERE clause
+    let mut count_builder: QueryBuilder<Postgres> = QueryBuilder::new("SELECT COUNT(*) FROM guest_user");
+    let mut where_clause = false;
+
+    if let Some(search) = &filter.search {
+        count_builder.push(" WHERE (email ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(" OR first_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(" OR last_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(" OR second_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(" OR phone ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(" OR city ILIKE ");
+        count_builder.push_bind(format!("%{}%", search));
+        count_builder.push(")");
+        where_clause = true;
+    }
+
+    if let Some(name) = &filter.name {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("(first_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", name));
+        count_builder.push(" OR last_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", name));
+        count_builder.push(" OR second_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", name));
+        count_builder.push(")");
+    }
+
+    if let Some(email) = &filter.email {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("email ILIKE ");
+        count_builder.push_bind(format!("%{}%", email));
+    }
+    if let Some(first_name) = &filter.first_name {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("first_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", first_name));
+    }
+    if let Some(second_name) = &filter.second_name {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("second_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", second_name));
+    }
+    if let Some(last_name) = &filter.last_name {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("last_name ILIKE ");
+        count_builder.push_bind(format!("%{}%", last_name));
+    }
+    if let Some(phone) = &filter.phone {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("phone ILIKE ");
+        count_builder.push_bind(format!("%{}%", phone));
+    }
+    if let Some(city) = &filter.city {
+        if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+        count_builder.push("city ILIKE ");
+        count_builder.push_bind(format!("%{}%", city));
+    }
+    if let Some(role_str) = &filter.role {
+        let roles: Vec<UserRole> = role_str.split(',')
+            .filter_map(|s| serde_json::from_str::<UserRole>(&format!("\"{}\"", s)).ok())
+            .collect();
+        
+        if !roles.is_empty() {
+            if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+            count_builder.push("role IN (");
+            let mut separated = count_builder.separated(", ");
+            for role in roles {
+                separated.push_bind(role);
+            }
+            count_builder.push(")");
+        }
+    }
+
+    if let Some(status_str) = &filter.status {
+        let statuses: Vec<UserStatus> = status_str.split(',')
+            .filter_map(|s| serde_json::from_str::<UserStatus>(&format!("\"{}\"", s)).ok())
+            .collect();
+
+        if !statuses.is_empty() {
+            if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+            count_builder.push("status IN (");
+            let mut separated = count_builder.separated(", ");
+            for status in statuses {
+                separated.push_bind(status);
+            }
+            count_builder.push(")");
+        }
+    }
+
+    // apply_filters(&mut count_builder, &mut where_clause);
+
+    let total_query = count_builder.build_query_scalar::<i64>().fetch_one(&state.pool).await;
 
     let total = match total_query {
         Ok(count) => count,
-        Err(_) => {
+        Err(e) => {
+            println!("Count error: {:?}", e);
             let msg = state.i18n.t("general.db_error", &locale).await;
             return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -235,29 +338,122 @@ async fn get_all(
 
     let total_pages = (total as f64 / limit as f64).ceil() as i32;
 
-    let users_query = query_as::<_, UserResponseDTO>(
-        "SELECT
-          uuid,
-          first_name,
-          second_name,
-          last_name,
-          phone,
-          email,
-          birth_date,
-          avatar,
-          street,
-          gender,
-          city,
-          role,
-          status,
-          created_at,
-          updated_at
-          FROM guest_user ORDER BY created_at LIMIT $1 OFFSET $2"
-    )
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await;
+    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new("SELECT
+          uuid, first_name, second_name, last_name, phone, email, birth_date, avatar, street, gender, city, role, status, created_at, updated_at
+          FROM guest_user");
+    
+    let mut where_clause_query = false;
+    if let Some(search) = &filter.search {
+        query_builder.push(" WHERE (email ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR first_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR last_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR second_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR phone ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR city ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(")");
+        where_clause_query = true;
+    }
+
+    if let Some(name) = &filter.name {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("(first_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", name));
+        query_builder.push(" OR last_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", name));
+        query_builder.push(" OR second_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", name));
+        query_builder.push(")");
+    }
+    if let Some(email) = &filter.email {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("email ILIKE ");
+        query_builder.push_bind(format!("%{}%", email));
+    }
+    if let Some(first_name) = &filter.first_name {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("first_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", first_name));
+    }
+    if let Some(second_name) = &filter.second_name {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("second_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", second_name));
+    }
+    if let Some(last_name) = &filter.last_name {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("last_name ILIKE ");
+        query_builder.push_bind(format!("%{}%", last_name));
+    }
+    if let Some(phone) = &filter.phone {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("phone ILIKE ");
+        query_builder.push_bind(format!("%{}%", phone));
+    }
+    if let Some(city) = &filter.city {
+        if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+        query_builder.push("city ILIKE ");
+        query_builder.push_bind(format!("%{}%", city));
+    }
+    if let Some(role_str) = &filter.role {
+        let roles: Vec<UserRole> = role_str.split(',')
+            .filter_map(|s| serde_json::from_str::<UserRole>(&format!("\"{}\"", s)).ok())
+            .collect();
+        
+        if !roles.is_empty() {
+            if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+            query_builder.push("role IN (");
+            let mut separated = query_builder.separated(", ");
+            for role in roles {
+                separated.push_bind(role);
+            }
+            query_builder.push(")");
+        }
+    }
+
+    if let Some(status_str) = &filter.status {
+        let statuses: Vec<UserStatus> = status_str.split(',')
+            .filter_map(|s| serde_json::from_str::<UserStatus>(&format!("\"{}\"", s)).ok())
+            .collect();
+
+        if !statuses.is_empty() {
+            if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+            query_builder.push("status IN (");
+            let mut separated = query_builder.separated(", ");
+            for status in statuses {
+                separated.push_bind(status);
+            }
+            query_builder.push(")");
+        }
+    }
+
+    // Sorting
+    let sort_by = filter.sort_by.unwrap_or_else(|| "created_at".to_string());
+    let sort_order = filter.sort_order.unwrap_or_else(|| "DESC".to_string());
+    
+    let allowed_sort_columns = ["email", "first_name", "second_name", "last_name", "phone", "role", "status", "created_at"];
+    let final_sort_by = if allowed_sort_columns.contains(&sort_by.as_str()) {
+        sort_by
+    } else {
+        "created_at".to_string()
+    };
+    
+    let final_sort_order = if sort_order.to_uppercase() == "ASC" { "ASC" } else { "DESC" };
+
+    query_builder.push(format!(" ORDER BY {} {}", final_sort_by, final_sort_order));
+
+    // Pagination
+    query_builder.push(" LIMIT ");
+    query_builder.push_bind(limit as i64);
+    query_builder.push(" OFFSET ");
+    query_builder.push_bind(offset as i64);
+
+    let users_query = query_builder.build_query_as::<UserResponseDTO>().fetch_all(&state.pool).await;
 
     match users_query {
         Ok(users) => {

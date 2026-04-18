@@ -1,13 +1,20 @@
+pub mod handlers;
+
 use crate::core::redis::RedisService;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, utoipa::ToSchema)]
 pub struct FeatureFlag {
     pub id: String,
     pub name: String,
     pub description: String,
     pub enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, utoipa::ToSchema)]
+pub struct FeatureFlagsUpdate {
+    pub flags: Vec<FeatureFlag>,
 }
 
 #[derive(Debug, Clone)]

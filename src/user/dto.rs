@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 use sqlx::FromRow;
 
-#[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
+#[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
 #[sqlx(type_name = "user_role", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum UserRole {
@@ -14,7 +14,7 @@ pub enum UserRole {
     User,
 }
 
-#[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema)]
+#[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
 #[sqlx(type_name = "user_status", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum UserStatus {
@@ -94,4 +94,22 @@ pub struct User {
   pub(crate) status: UserStatus,
   pub(crate) created_at: NaiveDateTime,
   pub(crate) updated_at: NaiveDateTime,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UserFilterQuery {
+    pub page: Option<i32>,
+    pub limit: Option<i32>,
+    pub search: Option<String>,
+    pub name: Option<String>,
+    pub first_name: Option<String>,
+    pub second_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub city: Option<String>,
+    pub role: Option<String>,
+    pub status: Option<String>,
+    pub sort_by: Option<String>,
+    pub sort_order: Option<String>,
 }
