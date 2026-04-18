@@ -5,8 +5,15 @@
 				<router-view />
 			</div>
 		</div>
+		<div class="layout-actions">
+			<UiThemeSwitcher />
+		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+import { UiThemeSwitcher } from '@admin-panel/ui'
+</script>
 
 <style lang="scss" scoped>
 .main-layout {
@@ -26,5 +33,12 @@
 		display: flex;
 		flex-grow: 1;
 	}
+}
+
+.layout-actions {
+	right: 32px;
+	bottom: 32px;
+	position: fixed;
+	z-index: 1000;
 }
 </style>

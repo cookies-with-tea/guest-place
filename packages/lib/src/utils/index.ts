@@ -9,5 +9,3 @@ export * from './federation'
 export * from './lifecycle'
 
 export * from './store'
-
-export * from './features'

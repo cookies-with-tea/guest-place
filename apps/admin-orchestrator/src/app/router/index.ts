@@ -4,10 +4,18 @@ import { ROUTES, type MFLifecycleHooks } from '@admin-panel/lib'
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		name: (ROUTES as any).orchestrator?.name || 'OrchestratorPage',
+		name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorPage',
 		component: () => import('@/pages/orchestrator-page'),
 		meta: {
-			title: (ROUTES as any).orchestrator?.title || 'Оркестратор',
+			title: (ROUTES as any).orchestrator?.list?.title || 'Оркестратор',
+		},
+	},
+	{
+		path: '/features',
+		name: (ROUTES as any).orchestrator?.features?.name || 'FeaturesPage',
+		component: () => import('@/pages/features-page'),
+		meta: {
+			title: (ROUTES as any).orchestrator?.features?.title || 'Флаги фич',
 		},
 	},
 ]

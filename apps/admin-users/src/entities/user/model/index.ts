@@ -47,9 +47,15 @@ export interface IUserCreateUpdate {
 }
 
 export interface UserFilters {
-	status?: UserStatus
-	role?: UserRole
+	status?: UserStatus[]
+	role?: UserRole[]
 	search?: string
+	name?: string
+	email?: string
+	phone?: string
+	city?: string
+	sortBy?: string
+	sortOrder?: 'ASC' | 'DESC'
 }
 
 export const USERS_QUERY_KEY = 'users'

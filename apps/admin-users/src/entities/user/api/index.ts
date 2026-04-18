@@ -19,9 +19,19 @@ export const update = (uuid: string, data: IUserCreateUpdate) => {
 }
 
 export const getAll = (params: IPaginationQuery) => {
+	const processedParams = { ...params } as any
+
+	if (Array.isArray(processedParams.role)) {
+		processedParams.role = processedParams.role.join(',')
+	}
+
+	if (Array.isArray(processedParams.status)) {
+		processedParams.status = processedParams.status.join(',')
+	}
+
 	return fetchData<IWithPagination<IUserResponse>>('', {
 		method: 'GET',
-		params,
+		params: processedParams,
 	})
 }
 

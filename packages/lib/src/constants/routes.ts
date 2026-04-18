@@ -23,8 +23,14 @@ export const ROUTES = {
 		icon: 'Picture',
 	},
 	orchestrator: {
-		name: 'OrchestratorPage',
-		title: 'general.orchestrator',
 		icon: 'Coordinate',
+		list: {
+			name: 'OrchestratorPage',
+			title: 'general.orchestrator',
+		},
+		features: {
+			name: 'FeaturesPage',
+			title: 'general.features',
+		},
 	},
 } as const

@@ -69,9 +69,9 @@ const getInitials = (user: any) => {
 	width: 120px;
 	height: 120px;
 	position: relative;
-	border: 3px solid #409eff;
+	border: 3px solid var(--accent-primary);
 	border-radius: 50%;
-	box-shadow: 0 4px 12px rgb(64, 158, 255, 0.3);
+	box-shadow: 0 4px 12px var(--accent-primary);
 	transition: transform 0.3s ease;
 	overflow: hidden;
 }
@@ -99,8 +99,8 @@ const getInitials = (user: any) => {
 	justify-content: center;
 	font-weight: 700;
 	font-size: 24px;
-	color: #fff;
-	background-color: #409eff;
+	color: var(--text-inverse);
+	background-color: var(--accent-primary);
 }
 
 .drawer-detail-user__loading {

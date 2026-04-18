@@ -206,7 +206,7 @@ Each microfrontend exposes:
 
 ### Authorization
 
-- **RBAC**: Role-Based Access Control
+- **Access Management**: Role-Based Access Control and Permissions
 - **ABAC**: Attribute-Based Access Control
 - **Policy Engine**: Centralized policy management
 
@@ -311,7 +311,7 @@ graph TD
 - **Shell**: Host application that loads and integrates microfrontends
 - **HMR**: Hot Module Replacement for fast development
 - **CORS**: Cross-Origin Resource Sharing for secure resource access
-- **RBAC**: Role-Based Access Control for authorization
+- **Access Management**: Role-Based Access Control for authorization
 - **JWT**: JSON Web Token for authentication
 - **CSP**: Content Security Policy for security headers
 
