@@ -10,29 +10,39 @@ const isDetailDrawerOpen = ref(false)
 
 const { create, update, getAll, deleteById, getById } = userApi
 
+// === Shared State (Singleton) ===
+const filters = ref<UserFilters>({
+	status: [],
+	role: [],
+	search: '',
+	name: '',
+	email: '',
+	phone: '',
+	city: '',
+	sortBy: 'createdAt',
+	sortOrder: 'DESC',
+})
+
+const pagination = ref<IPagination>({
+	page: 1,
+	limit: 10,
+	total: 0,
+	totalPages: 0,
+})
+
 const editingUserUuid = ref<string>('')
 
 export const useUsers = () => {
 	const queryClient = useQueryClient()
 
-	// === State ===
-	const filters = ref<UserFilters>({
-		status: undefined,
-		role: undefined,
-		search: undefined,
-	})
-
-	const pagination = ref<IPagination>({
-		page: 1,
-		limit: 10,
-		total: 0,
-		totalPages: 0,
-	})
-
 	// === Query ===
 	const queryKey = computed(() => [
 		USERS_QUERY_KEY,
-		{ ...filters.value, page: pagination.value.page, limit: pagination.value.limit },
+		{
+			...filters.value,
+			page: pagination.value.page,
+			limit: pagination.value.limit,
+		},
 	])
 
 	const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
@@ -71,10 +81,14 @@ export const useUsers = () => {
 	)
 
 	// === Modal ===
-	const openAddModal = () => {
+	const openAddModal = (email?: string) => {
 		editingUserUuid.value = ''
 
 		isModalOpen.value = true
+
+		if (email) {
+			// Pre-fill email logic could go here
+		}
 	}
 
 	const openEditModal = (userUuid: string) => {
@@ -165,9 +179,46 @@ export const useUsers = () => {
 		pagination.value.page = 1
 	}
 
-	watch(filters, () => {
-		pagination.value.page = 1
-	})
+	const isFetching = computed(() => usersQuery.isFetching.value)
+
+	const setSort = (prop: string, order: string | null) => {
+		if (!order) {
+			filters.value.sortBy = undefined
+
+			filters.value.sortOrder = undefined
+		} else {
+			// Map frontend camelCase to backend snake_case if needed
+			// For simple columns, they might match or need minor adjustment
+			const columnMap: Record<string, string> = {
+				firstName: 'first_name',
+				lastName: 'last_name',
+				secondName: 'second_name',
+				birthDate: 'birth_date',
+			}
+
+			filters.value.sortBy = columnMap[prop] || prop
+
+			filters.value.sortOrder = (order === 'ascending' ? 'ASC' : 'DESC') as any
+		}
+	}
+
+	const removeFilter = (key: keyof UserFilters) => {
+		if (key === 'sortBy' || key === 'sortOrder') return
+
+		if (key === 'role' || key === 'status') {
+			filters.value[key] = []
+		} else {
+			filters.value[key] = undefined as any
+		}
+	}
+
+	watch(
+		filters,
+		() => {
+			pagination.value.page = 1
+		},
+		{ deep: true }
+	)
 
 	return {
 		// state
@@ -181,6 +232,7 @@ export const useUsers = () => {
 		editingUser,
 		editingUserUuid,
 		isLoading: usersQuery.isLoading,
+		isFetching,
 
 		// actions
 		openAddModal,
@@ -192,6 +244,8 @@ export const useUsers = () => {
 		handleDelete,
 		setPage,
 		setlimit,
+		removeFilter,
+		setSort,
 		isSubmitting,
 	}
 }

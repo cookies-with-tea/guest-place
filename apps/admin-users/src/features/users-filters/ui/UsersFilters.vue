@@ -1,51 +1,180 @@
 <template>
 	<div class="users-filters">
-		<el-select v-model="filters.status" clearable placeholder="Status">
-			<el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-		</el-select>
+		<div class="users-filters__card">
+			<div class="users-filters__header">
+				<div class="users-filters__title">
+					<h2>Users Management</h2>
+					<p>Filter and manage your platform users</p>
+				</div>
+				<div class="header-actions">
+					<el-button type="primary" :icon="PlusIcon" @click="openAddModal">Add user</el-button>
+				</div>
+			</div>
 
-		<el-select v-model="filters.role" clearable placeholder="Role">
-			<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-		</el-select>
-
-		<el-input v-model="filters.search" placeholder="Search by email/name" clearable />
-
-		<el-button type="primary" @click="openAddModal">Add user</el-button>
-
-		<TempAuth />
+			<div v-if="activeFilterTags.length > 0" class="users-filters__tags">
+				<span class="tags-label">Active filters:</span>
+				<el-tag
+					v-for="tag in activeFilterTags"
+					:key="tag.key"
+					closable
+					round
+					effect="dark"
+					class="premium-tag"
+					@close="removeFilter(tag.key as any)"
+				>
+					<span class="tag-key">{{ tag.label }}:</span>
+					<span class="tag-value">{{ tag.value }}</span>
+				</el-tag>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { Plus as PlusIcon } from '@element-plus/icons-vue'
 import { useUsers } from '#entities/user/lib/composables'
-import { UserRole, UserStatus } from '#entities/user/model'
-import TempAuth from '#features/temp-auth/TempAuth.vue'
 
-const { filters, openAddModal } = useUsers()
+const { filters, openAddModal, removeFilter } = useUsers()
 
-const statusOptions = [
-	{ value: UserStatus.Active, label: 'Active' },
-	{ value: UserStatus.Inactive, label: 'Inactive' },
-	{ value: UserStatus.InModeration, label: 'In moderation' },
-]
+const filterLabels: Record<string, string> = {
+	search: 'Search Everywhere',
+	name: 'Name',
+	email: 'Email',
+	city: 'City',
+	phone: 'Phone',
+	role: 'Role',
+	status: 'Status',
+}
 
-const roleOptions = [
-	{ value: UserRole.Admin, label: 'Admin' },
-	{ value: UserRole.User, label: 'User' },
-]
+const statusLabels: Record<string, string> = {
+	active: 'Active',
+	inactive: 'Inactive',
+	in_moderation: 'In moderation',
+}
+
+const roleLabels: Record<string, string> = {
+	admin: 'Admin',
+	user: 'User',
+	superadmin: 'Superadmin',
+	editor: 'Editor',
+}
+
+const activeFilterTags = computed(() => {
+	const tags: { key: string; label: string; value: string }[] = []
+	const skipKeys = ['sortBy', 'sortOrder', 'search']
+
+	Object.entries(filters.value).forEach(([key, value]) => {
+		if (value !== undefined && value !== '' && value !== null && !skipKeys.includes(key)) {
+			// Check for non-empty array
+			if (Array.isArray(value)) {
+				if (value.length > 0) {
+					const mappedValues = value.map((val) => {
+						if (key === 'role') return roleLabels[val] || val
+						if (key === 'status') return statusLabels[val] || val
+
+						return val
+					})
+
+					tags.push({
+						key,
+						label: filterLabels[key] || key,
+						value: mappedValues.join(', '),
+					})
+				}
+			} else {
+				tags.push({
+					key,
+					label: filterLabels[key] || key,
+					value: String(value),
+				})
+			}
+		}
+	})
+
+	return tags
+})
 </script>
 
 <style scoped>
 .users-filters {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: end;
 	margin-bottom: 24px;
-	gap: 16px;
 }
 
-.users-filters .el-input,
-.users-filters .el-select {
-	width: 200px;
+.users-filters__card {
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	box-shadow: var(--shadow-sm);
+	background: var(--bg-card);
+	transition: all 0.3s ease;
+	padding: 24px;
+}
+
+.users-filters__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding-bottom: 20px;
+	gap: 24px;
+}
+
+.header-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.users-filters__title h2 {
+	font-weight: 700;
+	font-size: 24px;
+	color: var(--text-primary);
+	margin: 0;
+}
+
+.users-filters__title p {
+	font-size: 15px;
+	color: var(--text-muted);
+	margin: 8px 0 0;
+}
+
+.users-filters__tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	border-top: 1px solid var(--border-color);
+	padding-top: 24px;
+	gap: 12px;
+}
+
+.tags-label {
+	font-weight: 500;
+	font-size: 14px;
+	color: var(--text-muted);
+	margin-right: 8px;
+}
+
+.premium-tag {
+	height: auto;
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	color: var(--text-primary);
+	background: var(--bg-surface);
+	transition: all 0.2s ease;
+	padding: 10px 14px;
+}
+
+.premium-tag:hover {
+	border-color: var(--accent-primary);
+}
+
+.tag-key {
+	font-weight: 500;
+	color: var(--text-muted);
+	margin-right: 6px;
+}
+
+.tag-value {
+	font-weight: 600;
+	color: var(--text-primary);
 }
 </style>

@@ -61,26 +61,6 @@
 					</el-table>
 				</el-card>
 			</el-tab-pane>
-
-			<!-- Вкладка Фича флаги -->
-			<el-tab-pane label="Фича-флаги" name="flags">
-				<el-card class="glass-card">
-					<template #header>
-						<div class="card-header">
-							<span>Глобальные конфигурации</span>
-						</div>
-					</template>
-					<el-table :data="flags" style="width: 100%">
-						<el-table-column prop="name" label="Название" width="200" />
-						<el-table-column prop="description" label="Описание" />
-						<el-table-column label="Состояние" width="120">
-							<template #default="scope">
-								<el-switch :model-value="scope.row.enabled" @change="toggleFlag(scope.row.id)" />
-							</template>
-						</el-table-column>
-					</el-table>
-				</el-card>
-			</el-tab-pane>
 		</el-tabs>
 
 		<!-- Dialog for Add/Edit -->
@@ -111,11 +91,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useFeatureFlags } from '@admin-panel/lib'
 import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
 import MfeStatsChart from './MfeStatsChart.vue'
-
-const { flags, toggleFlag } = useFeatureFlags()
 
 const activeTab = ref('topology')
 

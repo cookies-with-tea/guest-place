@@ -7,8 +7,6 @@
 				<el-button type="danger" :icon="Delete" :disabled="selectedMedia.length === 0" @click="confirmDeleteSelected">
 					Delete Selected
 				</el-button>
-
-				<TempAuth />
 			</div>
 		</div>
 
@@ -52,17 +50,19 @@
 import { ref, onMounted } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
+import { useTheme } from '@admin-panel/ui'
 import MediaManagementWidget from '@/widgets/media/ui/MediaManagementWidget.vue'
 import MediaUploadDialog from '@/features/media/ui/MediaUploadDialog.vue'
 import MediaPreviewDialog from '@/features/media/ui/MediaPreviewDialog.vue'
 import { useMedia } from '@/entities/media/lib/composables/useMedia'
 import type { MediaItem } from '#entities/media'
-import TempAuth from '#features/temp-auth/TempAuth.vue'
 
 // State
 const selectedMedia = ref<MediaItem[]>([])
 
 // Composition API
+useTheme()
+
 const { mediaItems, loading, loadMedia, createMedia, updateMedia, deleteMedia, deleteMultipleMedia } = useMedia()
 
 // Dialog state
@@ -194,7 +194,11 @@ const closePreviewDialog = () => {
 
 <style scoped>
 .media-management {
+	min-height: 100vh;
 	max-width: 1400px;
+	color: var(--text-primary);
+	background-color: var(--bg-page);
+	transition: all 0.3s ease;
 	padding: 2rem;
 	margin: 0 auto;
 }
@@ -209,9 +213,10 @@ const closePreviewDialog = () => {
 }
 
 .media-header h1 {
-	font-weight: 600;
-	font-size: 2rem;
-	color: #303133;
+	font-weight: 800;
+	font-size: 2.5rem;
+	letter-spacing: -0.02em;
+	color: var(--text-primary);
 	margin: 0;
 }
 

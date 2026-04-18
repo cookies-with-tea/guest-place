@@ -29,9 +29,16 @@ export const createApi = (entityName: string) => {
 				}
 			}
 
+			let params = options?.params
+
+			if (params && !(params instanceof URLSearchParams)) {
+				params = camelToSnake(params as Record<string, any>)
+			}
+
 			const response = await $fetch<IResponse<SnakeCasedProperties<T>>>(`${baseUrl}${url}`, {
 				...options,
 				body,
+				params,
 				responseType: 'json',
 				headers: {
 					...options?.headers,

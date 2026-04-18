@@ -34,7 +34,7 @@
 				/>
 			</el-form-item>
 			<el-form-item label="Role">
-				<el-select v-model="form.role" clearable placeholder="Select role">
+				<el-select v-model="form.role" clearable placeholder="Select role" popper-class="premium-dark-select">
 					<el-option label="Superadmin" :value="UserRole.Superadmin" />
 					<el-option label="Admin" :value="UserRole.Admin" />
 					<el-option label="Editor" :value="UserRole.Editor" />
@@ -42,7 +42,7 @@
 				</el-select>
 			</el-form-item>
 			<el-form-item label="Status">
-				<el-select v-model="form.status" clearable placeholder="Select status">
+				<el-select v-model="form.status" clearable placeholder="Select status" popper-class="premium-dark-select">
 					<el-option label="Active" :value="UserStatus.Active" />
 					<el-option label="Inactive" :value="UserStatus.Inactive" />
 					<el-option label="In moderation" :value="UserStatus.InModeration" />
@@ -218,15 +218,16 @@ const submit = async () => {
 <style>
 .avatar-uploader .el-upload {
 	position: relative;
-	border: 1px dashed var(--el-border-color);
+	border: 1px dashed var(--border-color);
 	border-radius: 6px;
+	background-color: var(--bg-surface);
 	transition: var(--el-transition-duration-fast);
 	cursor: pointer;
 	overflow: hidden;
 }
 
 .avatar-uploader .el-upload:hover {
-	border-color: var(--el-color-primary);
+	border-color: var(--accent-primary);
 }
 
 .el-icon.avatar-uploader-icon {
@@ -234,6 +235,6 @@ const submit = async () => {
 	height: 178px;
 	font-size: 28px;
 	text-align: center;
-	color: #8c939d;
+	color: var(--text-muted);
 }
 </style>

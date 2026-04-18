@@ -12,65 +12,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { Moon, Sunny } from '@element-plus/icons-vue'
+import { useTheme } from '../lib/composables/useTheme'
 
-const isDark = ref(true)
-
-const toggleTheme = () => {
-	isDark.value = !isDark.value
-
-	updateTheme()
-}
-
-const updateTheme = () => {
-	if (isDark.value) {
-		document.documentElement.classList.add('dark')
-
-		document.documentElement.classList.remove('light')
-
-		localStorage.setItem('gp-theme', 'dark')
-	} else {
-		document.documentElement.classList.add('light')
-
-		document.documentElement.classList.remove('dark')
-
-		localStorage.setItem('gp-theme', 'light')
-	}
-}
-
-onMounted(() => {
-	const savedTheme = localStorage.getItem('gp-theme')
-
-	if (savedTheme) {
-		isDark.value = savedTheme === 'dark'
-	} else {
-		isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-	}
-
-	updateTheme()
-})
+const { isDark, toggleTheme } = useTheme()
 </script>
 
 <style scoped>
 .ui-theme-switcher {
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 1px solid var(--gp-glass-border);
+	border: 1px solid var(--border-color);
 	border-radius: 50%;
-	box-shadow: var(--gp-glass-shadow);
-	color: var(--gp-text-main);
-	background: var(--gp-bg-glass);
-	transition: all 0.3s ease;
+	box-shadow: var(--shadow-sm);
+	color: var(--text-primary);
+	background: var(--bg-card);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
-	backdrop-filter: blur(10px);
 }
 
 .ui-theme-switcher:hover {
-	background: var(--gp-bg-glass-hover);
+	border-color: var(--accent-primary);
+	background: var(--bg-surface);
 	transform: translateY(-2px);
 }
 
@@ -80,12 +46,12 @@ onMounted(() => {
 	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.switcher-icon.is-dark {
-	color: #f1c40f;
+.is-dark .switcher-icon {
+	color: #fbbf24;
 	transform: rotate(360deg);
 }
 
 .ui-theme-switcher:not(.is-dark) .switcher-icon {
-	color: #ff9f43;
+	color: #f59e0b;
 }
 </style>

@@ -1,0 +1,84 @@
+:root {
+	/* Light Theme Colors */
+	--bg-page: #f8fafc;
+	--bg-card: #fff;
+	--bg-header: #f8fafc;
+	--bg-surface: #f1f5f9;
+	--text-primary: #1e293b;
+	--text-muted: #64748b;
+	--text-inverse: #f8fafc;
+	--border-color: #e2e8f0;
+	--accent-primary: #0284c7; /* Sky blue */
+	--accent-hover: #0ea5e9;
+	--shadow-sm: 0 4px 20px rgb(0, 0, 0, 0.05);
+}
+
+:root.dark {
+	/* Dark Theme Colors */
+	--bg-page: #0f172a;
+	--bg-card: #1e293b;
+	--bg-header: #1e293b;
+	--bg-surface: #334155;
+	--text-primary: #f8fafc;
+	--text-muted: #94a3b8;
+	--text-inverse: #1e293b;
+	--border-color: #334155;
+	--accent-primary: #06b6d4; /* Premium Cyan */
+	--accent-hover: #22d3ee;
+	--shadow-sm: 0 10px 25px -5px rgb(0, 0, 0, 0.3);
+}
+
+/* Global Component Overrides */
+:global(.el-dialog),
+:global(.el-drawer) {
+	color: var(--text-primary) !important;
+	background-color: var(--bg-card) !important;
+}
+
+:global(.el-dialog__title),
+:global(.el-drawer__header) {
+	color: var(--text-primary) !important;
+}
+
+:global(.el-form-item__label) {
+	color: var(--text-muted) !important;
+}
+
+/* Premium Dark Select & Popover */
+:global(.premium-dark-popover) {
+	border: 1px solid var(--border-color) !important;
+	border-radius: 12px !important;
+	box-shadow: var(--shadow-sm) !important;
+	background: var(--bg-card) !important;
+	padding: 16px !important;
+}
+
+:global(.premium-dark-popover .el-input__wrapper),
+:global(.premium-dark-popover .el-select__wrapper) {
+	box-shadow: 0 0 0 1px var(--border-color) inset !important;
+	background-color: var(--bg-page) !important;
+}
+
+:global(.premium-dark-popover .el-input__inner) {
+	color: var(--text-primary) !important;
+}
+
+:global(.premium-dark-select) {
+	border: 1px solid var(--border-color) !important;
+	background-color: var(--bg-card) !important;
+}
+
+:global(.premium-dark-select .el-select-dropdown__item) {
+	color: var(--text-muted) !important;
+}
+
+:global(.premium-dark-select .el-select-dropdown__item.hover),
+:global(.premium-dark-select .el-select-dropdown__item:hover) {
+	color: var(--text-primary) !important;
+	background-color: var(--bg-surface) !important;
+}
+
+:global(.premium-dark-select .el-select-dropdown__item.selected) {
+	color: var(--accent-primary) !important;
+	background-color: var(--bg-page) !important;
+}
