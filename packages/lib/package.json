@@ -11,7 +11,9 @@
 		"prepublishOnly": "npm run build",
 		"prepack": "pnpm unbuild",
 		"build": "unbuild",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test:unit": "vitest --passWithNoTests",
+		"test:coverage": "vitest run --coverage --passWithNoTests"
 	},
 	"main": "dist/index.cjs",
 	"module": "dist/index.mjs",
@@ -52,6 +54,7 @@
 		"@admin-panel/eslint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
 		"@types/node": "^24.9.2",
+		"@vitest/coverage-v8": "^3.2.4",
 		"typescript": "^5.9.3",
 		"unbuild": "^3.6.1"
 	},

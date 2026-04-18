@@ -1,4 +1,5 @@
-import { defineConfig, loadEnv, type UserConfig } from 'vite'
+import { loadEnv } from 'vite'
+import { defineConfig, type UserConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import federation from '@originjs/vite-plugin-federation'
 import { resolve } from 'node:path'
@@ -16,6 +17,7 @@ export interface CreateConfigOptions {
 	plugins?: any[]
 	serverPort?: number
 	previewPort?: number
+	root?: string
 }
 
 export function createConfig(options: CreateConfigOptions) {
@@ -35,10 +37,11 @@ export function createConfig(options: CreateConfigOptions) {
 		plugins = [],
 		serverPort,
 		previewPort,
+		root: rootOption,
 	} = options
 
 	return defineConfig(({ mode, command }) => {
-		const appDir = process.cwd()
+		const appDir = rootOption || process.cwd()
 		const rootDir = resolve(appDir, '../../')
 		const env = loadEnv(mode, rootDir)
 
@@ -46,6 +49,7 @@ export function createConfig(options: CreateConfigOptions) {
 		const isProduction = mode === 'production' || command === 'build'
 
 		const baseConfig: UserConfig = {
+			root: appDir,
 			base: '/', // Keep base as / but override URLs for built assets
 			plugins: [
 				vue(),
@@ -111,6 +115,19 @@ export function createConfig(options: CreateConfigOptions) {
 							},
 						}
 					: {},
+			},
+			test: {
+				globals: true,
+				environment: 'jsdom',
+				setupFiles: [],
+				include: ['src/__tests__/**/*.{test,spec}.{ts,js,tsx,jsx}'],
+				coverage: {
+					provider: 'v8',
+					reporter: ['text', 'json', 'html'],
+					include: ['src/**/*.{ts,vue}'],
+					all: true,
+					exclude: ['node_modules/', 'src/__tests__/**', '**/*.d.ts', 'vite.config.ts', 'dist/**'],
+				},
 			},
 		}
 

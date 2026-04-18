@@ -268,12 +268,28 @@ graph TD
 - **Atomic Design**: Use atoms, molecules, organisms, templates, pages
 - **Layered Architecture**: Separate concerns into layers
 
-### Testing Strategy
+### Тестирование (Testing Strategy)
 
-- **Unit Tests**: Test individual components
-- **Integration Tests**: Test component interactions
-- **E2E Tests**: Test user flows
-- **Visual Regression**: Test UI changes
+Мы придерживаемся стратегии «Пирамиды Тестирования»:
+
+1. **Unit Tests (Основание)**:
+   - **Frontend**: Vitest. Покрывают чистые функции и мелкие компоненты в `packages/lib` и `packages/ui`.
+   - **Цель**: 80%+ покрытие логики.
+
+2. **Integration Tests (Середина)**:
+   - **Frontend**: Vitest + Vue Test Utils. Проверка рендеринга виджетов и страниц с моканием API.
+   - **Backend**: Axum-test. Проверка эндпоинтов API с использованием `TestBearer` для обхода авторизации без обращения к БД.
+   - **Скрипты**: `pnpm -C server test` (интеграционные тесты сервера).
+
+3. **E2E Tests (Вершина)**:
+   - **Инструменты**: Cypress / Playwright.
+   - **Область**: Критические пути пользователя (Login, Dashboard navigation).
+   - **Команды**: `pnpm test:e2e`.
+
+#### Особенности реализации
+
+- **Auth Bypass**: В интеграционных тестах сервера используется заголовок `Authorization: TestBearer`, который позволяет Middleware пропускать запросы для тестирования маршрутов.
+- **Microfrontends**: Тесты МФ запускаются в изоляции, но используют общие конфигурации Vitest из `@admin-panel/lib/vite`.
 
 ### Documentation
 
