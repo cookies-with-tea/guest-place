@@ -4,6 +4,7 @@ import { createConfig } from '@admin-panel/lib/vite'
 export default createConfig({
 	name: 'shell',
 	displayName: 'Shell',
+	root: import.meta.dirname,
 	exposes: {},
 	remotes: {
 		// Placeholder to force federation runtime initialization for dynamic remotes

@@ -1,16 +1,9 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
-import svgSpriteInlinePlugin from './vite-svg-sprite-inline-plugin'
 
 export default defineConfig({
-	plugins: [
-		vue(),
-		svgSpriteInlinePlugin({
-			inputDir: resolve(__dirname, 'assets/icons'),
-			outputTs: resolve(__dirname, 'src/components/ui-icon/sprite/sprite.ts'),
-		}),
-	],
+	plugins: [vue()],
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),
@@ -19,10 +12,12 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'jsdom',
-		include: ['src/**/__tests__/**/*.{test,spec}.{ts,js,tsx,jsx}'],
+		include: ['src/__tests__/**/*.{test,spec}.{ts,js,tsx,jsx}'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
+			include: ['src/**/*.{ts,vue}'],
+			all: true,
 			exclude: ['node_modules/', 'src/__tests__/**', '**/*.d.ts', 'dist/**'],
 		},
 	},

@@ -40,6 +40,11 @@
 			"inputs": ["$TURBO_DEFAULT$"],
 			"outputs": [],
 			"cache": true
+		},
+		"test:coverage": {
+			"inputs": ["$TURBO_DEFAULT$"],
+			"outputs": ["coverage/**"],
+			"cache": true
 		}
 	},
 	"globalDependencies": ["**/package.json"]

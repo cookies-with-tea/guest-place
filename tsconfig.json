@@ -1,0 +1,11 @@
+{
+	"extends": "./packages/typescript-config/base.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["vitest.workspace.ts", "eslint.config.mjs", "stylelint.config.mjs"],
+	"exclude": ["node_modules", "dist"]
+}

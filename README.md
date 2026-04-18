@@ -208,7 +208,7 @@ pnpm build:mf
 
 ## Архитектура
 
-Подробная архитектура проекта описана в [ARCHITECTURE.md](ARCHITECTURE.md).
+Подробная архитектура проекта Подробности в [admin-panel/TESTING.md](TESTING.md) и [server/TESTING.md](../server/TESTING.md).
 
 Для визуализации текущей структуры зависимостей используйте:
 

@@ -22,6 +22,7 @@ export const useFeatureFlags = () => {
 
 			initialized.value = true
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error('Failed to load feature flags', e)
 		} finally {
 			loading.value = false
@@ -41,6 +42,7 @@ export const useFeatureFlags = () => {
 
 			flags.value = newFlags
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error('Failed to update feature flags', e)
 
 			throw e

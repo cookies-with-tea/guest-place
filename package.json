@@ -26,6 +26,8 @@
 		"clean": "turbo run clean && rm -rf node_modules",
 		"test": "pnpm test:unit",
 		"test:unit": "turbo run test:unit --parallel",
+		"test:coverage": "turbo run test:coverage --parallel",
+		"test:changes": "vitest --changed",
 		"e2e:statistics": "pnpm -C apps/admin-statistics test:e2e",
 		"e2e:translations": "pnpm -C apps/admin-translations test:e2e",
 		"e2e:dev:statistics": "pnpm -C apps/admin-statistics test:e2e:dev",
@@ -83,13 +85,14 @@
 	},
 	"lint-staged": {
 		"*.{js,ts,vue}": [
-			"eslint . --ext .ts,.js,.vue"
+			"eslint --fix",
+			"vitest related --run --passWithNoTests"
 		],
 		"*.{css,scss,postcss,vue}": [
-			"stylelint \"**/*.{vue,css,scss,postcss}\""
+			"stylelint --fix"
 		],
 		"*": [
-			"prettier --check ."
+			"prettier --write --ignore-unknown"
 		]
 	},
 	"packageManager": "pnpm@9.0.6"
