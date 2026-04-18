@@ -14,8 +14,8 @@ use crate::core::redis::RedisService;
 use crate::core::features::FeatureFlagService;
 use crate::i18n::middlewares::locale_middleware;
 use crate::i18n::I18nService;
-use axum::Router;
-use axum::{http::HeaderValue, middleware};
+use axum::routing::get;
+use axum::{http::HeaderValue, middleware, Router};
 use sqlx::{Pool, Postgres};
 use std::env;
 use std::sync::Arc;
@@ -74,6 +74,8 @@ struct AppState {
     crate::mfe::handlers::create,
     crate::mfe::handlers::update,
     crate::mfe::handlers::delete_one,
+    crate::core::features::handlers::get_features,
+    crate::core::features::handlers::update_features,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -83,6 +85,13 @@ struct AppState {
         (name = "User", description = "User"),
         (name = "I18n", description = "Translations management"),
         (name = "MFE", description = "Microfrontends management"),
+        (name = "Features", description = "Feature Flags management"),
+  ),
+  components(
+    schemas(
+        crate::core::features::FeatureFlag,
+        crate::core::features::FeatureFlagsUpdate,
+    )
   )
 )]
 struct ApiDoc;
@@ -190,6 +199,8 @@ async fn main() {
         .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
+        .route("/api/v1/features", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
+        .route("/api/v1/features/", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
         .nest_service("/uploads", ServeDir::new("uploads"))
         .with_state(shared_state.clone());
 
