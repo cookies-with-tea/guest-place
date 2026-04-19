@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import App from './pages/AboutPage.vue'
+import App from './pages/PlatformsPage.vue'
 import ElementPlus from 'element-plus'
 import { initUiStyles } from '@admin-panel/ui'
 

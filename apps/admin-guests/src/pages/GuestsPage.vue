@@ -49,28 +49,50 @@
 									</template>
 									<el-form label-position="top">
 										<el-row :gutter="20">
-											<el-col :span="16">
+											<el-col :span="24">
+												<el-form-item label="Card Icon">
+													<div style="max-width: 250px">
+														<UiMediaPicker v-model="opp.iconUuid" />
+													</div>
+												</el-form-item>
+											</el-col>
+											<el-col :span="24">
 												<el-form-item label="Title">
 													<el-input v-model="opp.title" placeholder="e.g., Возможности GP Platform" />
 												</el-form-item>
 											</el-col>
-											<el-col :span="8">
-												<el-form-item label="Card Icon">
-													<UiMediaPicker v-model="opp.iconUuid" />
+										</el-row>
+										<el-row :gutter="20">
+											<el-col :span="12">
+												<el-form-item label="Button Text">
+													<el-input v-model="opp.buttonText" placeholder="e.g., Узнать больше" />
+												</el-form-item>
+											</el-col>
+											<el-col :span="12">
+												<el-form-item label="Link">
+													<el-input v-model="opp.link" placeholder="e.g., /details" />
 												</el-form-item>
 											</el-col>
 										</el-row>
 										<el-form-item label="Features List">
-											<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
-												<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
-													<template #append>
-														<el-button :icon="Delete" @click="removeItem(opp.items, iIdx as number)" />
-													</template>
-												</el-input>
+											<div style=" width: 100%;display: flex; flex-direction: column; gap: 12px">
+												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
+													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
+														<template #append>
+															<el-button :icon="Delete" @click="removeItem(opp.items, iIdx as number)" />
+														</template>
+													</el-input>
+												</div>
+												<el-button
+													type="primary"
+													plain
+													:icon="Plus"
+													@click="addItem(opp.items, '')"
+													style="align-self: flex-start"
+												>
+													Add Feature
+												</el-button>
 											</div>
-											<el-button class="mt-8" type="primary" link :icon="Plus" @click="addItem(opp.items, '')">
-												Add Feature
-											</el-button>
 										</el-form-item>
 									</el-form>
 								</el-card>
@@ -125,14 +147,16 @@
 									</template>
 									<el-form label-position="top">
 										<el-row :gutter="20">
-											<el-col :span="18">
-												<el-form-item label="Title">
-													<el-input v-model="card.title" />
+											<el-col :span="24">
+												<el-form-item label="Icon">
+													<div style="max-width: 250px">
+														<UiMediaPicker v-model="card.iconUuid" />
+													</div>
 												</el-form-item>
 											</el-col>
-											<el-col :span="6">
-												<el-form-item label="Icon">
-													<UiMediaPicker v-model="card.iconUuid" />
+											<el-col :span="24">
+												<el-form-item label="Title">
+													<el-input v-model="card.title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
@@ -189,7 +213,15 @@
 										</el-col>
 									</el-row>
 								</div>
-								<el-button type="primary" link :icon="Plus" @click="addAdditionalService"> Add Service Item </el-button>
+								<el-button
+									type="primary"
+									plain
+									:icon="Plus"
+									@click="addAdditionalService"
+									style="margin-top: 12px; margin-bottom: 24px"
+								>
+									Add Service Item
+								</el-button>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.additionalServicesGuideUuid" />
 									<p class="guide-hint">Additional Services Preview</p>
@@ -221,6 +253,8 @@ interface IGuestsData {
 		title: string
 		iconUuid?: string | null
 		items: string[]
+		buttonText: string
+		link: string
 	}>
 	interactionCards: Array<{
 		title: string
@@ -283,6 +317,8 @@ const fetchData = async () => {
 				title: o.title,
 				iconUuid: o.iconUuid || o.icon?.uuid || null,
 				items: o.items || [],
+				buttonText: o.buttonText || '',
+				link: o.link || '',
 			}))
 
 			form.interactionCards = d.interactionCards.map((c: any) => ({
@@ -320,8 +356,8 @@ const handleSave = async () => {
 			interactionCardsGuideUuid: form.interactionCardsGuideUuid,
 			searchPromoGuideUuid: form.searchPromoGuideUuid,
 			additionalServicesGuideUuid: form.additionalServicesGuideUuid,
-			opportunities: form.opportunities,
-			interactionCards: form.interactionCards,
+			opportunities: form.opportunities || [],
+			interactionCards: form.interactionCards || [],
 			searchPromo: {
 				title: form.searchPromoTitle,
 				description: form.searchPromoDescription,
@@ -355,8 +391,8 @@ const autoSave = async () => {
 			interactionCardsGuideUuid: form.interactionCardsGuideUuid,
 			searchPromoGuideUuid: form.searchPromoGuideUuid,
 			additionalServicesGuideUuid: form.additionalServicesGuideUuid,
-			opportunities: form.opportunities,
-			interactionCards: form.interactionCards,
+			opportunities: form.opportunities || [],
+			interactionCards: form.interactionCards || [],
 			searchPromo: {
 				title: form.searchPromoTitle,
 				description: form.searchPromoDescription,
@@ -408,7 +444,7 @@ const removeItem = (list: any[], index: number) => {
 }
 
 const addOpportunity = () => {
-	form.opportunities.push({ title: '', iconUuid: null, items: [] })
+	form.opportunities.push({ title: '', iconUuid: null, items: [], buttonText: '', link: '' })
 }
 
 const addInteractionCard = () => {

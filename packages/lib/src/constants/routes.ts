@@ -43,6 +43,11 @@ export const ROUTES = {
 		title: 'general.about',
 		icon: 'InfoFilled',
 	},
+	platforms: {
+		name: 'PlatformsPage',
+		title: 'Площадкам',
+		icon: 'Place',
+	},
 	guests: {
 		name: 'GuestsPage',
 		title: 'general.guests',

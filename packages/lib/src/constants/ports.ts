@@ -35,6 +35,10 @@ export const APPS_PORTS = {
 		preview: 3008,
 		dev: 4181,
 	},
+	platforms: {
+		preview: 3009,
+		dev: 4182,
+	},
 } as const
 
 export const PACKAGES_PORTS = {

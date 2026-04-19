@@ -1,8 +1,8 @@
 <template>
-	<div v-if="!loading" class="about-page-editor">
+	<div v-if="!loading" class="platforms-page-editor">
 		<header class="editor-header">
 			<div>
-				<h1>About Platform</h1>
+				<h1>Platforms Platform</h1>
 				<p class="subtitle">Design-first content management</p>
 			</div>
 			<div class="header-actions">
@@ -113,132 +113,47 @@
 								Add New Opportunity Card
 							</el-button>
 						</div>
-
-						<!-- LEADERSHIP SECTION -->
-						<el-card class="section-card mb-24">
-							<template #header>
-								<div class="card-header">
-									<span>Leadership Overview</span>
-								</div>
-							</template>
-							<el-form label-position="top">
-								<el-row :gutter="20">
-									<el-col :span="24">
-										<el-form-item label="Section Logo">
-											<div style="max-width: 250px">
-												<UiMediaPicker v-model="form.leadershipLogoUuid" />
-											</div>
-										</el-form-item>
-									</el-col>
-									<el-col :span="24">
-										<el-form-item label="Header Title">
-											<el-input v-model="form.leadershipTitle" />
-										</el-form-item>
-									</el-col>
-								</el-row>
-								<el-form-item label="Section Introduction">
-									<el-input v-model="form.leadershipDescription" type="textarea" :rows="3" />
-								</el-form-item>
-								<div class="divider">Team Members & Key Points</div>
-								<div v-for="(item, index) in form.leadershipItems" :key="index" class="sub-item-complex">
-									<el-row :gutter="12" align="middle">
-										<el-col :span="14">
-											<el-input v-model="item.text" placeholder="Leader name or description" />
-										</el-col>
-										<el-col :span="6">
-											<UiMediaPicker v-model="item.iconUuid" />
-										</el-col>
-										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.leadershipItems, index)" />
-										</el-col>
-									</el-row>
-								</div>
-								<el-button
-									type="primary"
-									plain
-									:icon="Plus"
-									@click="addLeadershipItem"
-									style="margin-top: 12px; margin-bottom: 24px"
-								>
-									Add Leadership Item
-								</el-button>
-								<div class="mt-16">
-									<UiMediaPicker v-model="form.leadershipGuideUuid" />
-									<p class="guide-hint">Leadership Preview</p>
-								</div>
-							</el-form>
-						</el-card>
 					</div>
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
 				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
 					<div class="content-group">
-						<!-- WHO WE ARE SECTION -->
-						<div class="section-header mb-16">
-							<h2>Who We Are</h2>
-						</div>
-						<div class="dynamic-list">
-							<div v-for="(item, index) in form.whoWeAre" :key="index" class="list-item-wrapper mb-16">
-								<el-card class="section-card">
-									<template #header>
-										<div class="card-header">
-											<span>Member/Section #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.whoWeAre, index)" />
-										</div>
-									</template>
-									<el-form label-position="top">
-										<el-row :gutter="20">
-											<el-col :span="24">
-												<el-form-item label="Member Image">
-													<div style="max-width: 250px">
-														<UiMediaPicker v-model="item.imageUuid" />
-													</div>
-												</el-form-item>
-											</el-col>
-											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="item.title" />
-												</el-form-item>
-											</el-col>
-										</el-row>
-										<el-form-item label="Description">
-											<el-input v-model="item.description" type="textarea" :rows="2" />
-										</el-form-item>
-									</el-form>
-								</el-card>
-							</div>
-							<div class="mb-16">
-								<UiMediaPicker v-model="form.whoWeAreGuideUuid" />
-								<p class="guide-hint">Who We Are Preview</p>
-							</div>
-							<el-button class="add-btn mb-32" type="primary" plain :icon="Plus" @click="addWhoWeAreItem">
-								Add Member/Section
-							</el-button>
-						</div>
-
-						<!-- NEWS SECTION -->
+						<!-- TOOLS AND SERVICES SECTION -->
 						<el-card class="section-card mb-24">
 							<template #header>
 								<div class="card-header">
-									<span>News Highlights</span>
+									<span>Tools & Services Overview</span>
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="News Section Title">
-									<el-input v-model="form.newsTitle" />
-								</el-form-item>
-								<div class="divider">News Items</div>
-								<div v-for="(item, index) in form.newsItems" :key="index" class="sub-item-complex">
+								<el-row :gutter="20">
+									<el-col :span="24">
+										<el-form-item label="Section SVG Logo">
+											<div style="max-width: 250px">
+												<UiMediaPicker v-model="form.toolsLogoUuid" />
+											</div>
+										</el-form-item>
+									</el-col>
+									<el-col :span="24">
+										<el-form-item label="Header Title">
+											<el-input v-model="form.toolsTitle" placeholder="e.g., Инструменты и сервисы от GP Platform" />
+										</el-form-item>
+									</el-col>
+								</el-row>
+								<div class="divider">Service Cards</div>
+								<div v-for="(item, index) in form.toolsItems" :key="index" class="sub-item-complex">
 									<el-row :gutter="12" align="middle">
-										<el-col :span="14">
-											<el-input v-model="item.text" placeholder="News text" />
-										</el-col>
-										<el-col :span="6">
-											<UiMediaPicker v-model="item.iconUuid" />
+										<el-col :span="22">
+											<el-form-item label="Card Title" class="mb-8">
+												<el-input v-model="item.title" placeholder="Card title" />
+											</el-form-item>
+											<el-form-item label="Card Text" class="mb-8">
+												<el-input v-model="item.text" type="textarea" :rows="2" placeholder="Description/Card text" />
+											</el-form-item>
 										</el-col>
 										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.newsItems, index)" />
+											<el-button type="danger" link :icon="Delete" @click="removeItem(form.toolsItems, index)" />
 										</el-col>
 									</el-row>
 								</div>
@@ -246,14 +161,14 @@
 									type="primary"
 									plain
 									:icon="Plus"
-									@click="addNewsItem"
+									@click="addToolItem"
 									style="margin-top: 12px; margin-bottom: 24px"
 								>
-									Add News Item
+									Add Service Card
 								</el-button>
 								<div class="mt-16">
-									<UiMediaPicker v-model="form.newsGuideUuid" />
-									<p class="guide-hint">News Section Preview</p>
+									<UiMediaPicker v-model="form.toolsGuideUuid" />
+									<p class="guide-hint">Tools Section Preview</p>
 								</div>
 							</el-form>
 						</el-card>
@@ -271,19 +186,12 @@ import { ElMessage } from 'element-plus'
 import { Plus, Delete, Refresh, Check } from '@element-plus/icons-vue'
 import { UiMediaPicker } from '@admin-panel/ui'
 
-interface IAboutData {
+interface IPlatformsData {
 	title: string
 	description: string
-	heroGuide?: { url: string }
-	opportunitiesGuide?: { url: string }
-	leadershipGuide?: { url: string }
-	whoWeAreGuide?: { url: string }
-	newsGuide?: { url: string }
 	heroGuideUuid?: string | null
 	opportunitiesGuideUuid?: string | null
-	leadershipGuideUuid?: string | null
-	whoWeAreGuideUuid?: string | null
-	newsGuideUuid?: string | null
+	toolsGuideUuid?: string | null
 	opportunities: {
 		items: Array<{
 			title: string
@@ -293,30 +201,17 @@ interface IAboutData {
 			buttonText: string
 		}>
 	}
-	leadership: {
+	toolsAndServices: {
 		title: string
-		description: string
 		logo?: { uuid: string }
 		items: Array<{
+			title: string
 			text: string
-			icon?: { uuid: string }
-		}>
-	}
-	whoWeAre: Array<{
-		title: string
-		description: string
-		image?: { uuid: string }
-	}>
-	news: {
-		title: string
-		items: Array<{
-			text: string
-			icon?: { uuid: string }
 		}>
 	}
 }
 
-const { fetchData: apiFetch } = createApi('about')
+const { fetchData: apiFetch } = createApi('platforms')
 
 const loading = ref(false)
 const saving = ref(false)
@@ -326,24 +221,18 @@ const form = reactive({
 	description: '',
 	heroGuideUuid: null as string | null,
 	opportunitiesGuideUuid: null as string | null,
-	leadershipGuideUuid: null as string | null,
-	whoWeAreGuideUuid: null as string | null,
-	newsGuideUuid: null as string | null,
+	toolsGuideUuid: null as string | null,
 	opportunities: [] as any[],
-	leadershipTitle: '',
-	leadershipDescription: '',
-	leadershipLogoUuid: null as string | null,
-	leadershipItems: [] as any[],
-	whoWeAre: [] as any[],
-	newsTitle: '',
-	newsItems: [] as any[],
+	toolsTitle: '',
+	toolsLogoUuid: null as string | null,
+	toolsItems: [] as any[],
 })
 
 const fetchData = async () => {
 	loading.value = true
 
 	try {
-		const response = await apiFetch<IAboutData>('')
+		const response = await apiFetch<IPlatformsData>('')
 
 		if (response.data) {
 			const d = response.data
@@ -356,11 +245,7 @@ const fetchData = async () => {
 
 			form.opportunitiesGuideUuid = d.opportunitiesGuideUuid || null
 
-			form.leadershipGuideUuid = d.leadershipGuideUuid || null
-
-			form.whoWeAreGuideUuid = d.whoWeAreGuideUuid || null
-
-			form.newsGuideUuid = d.newsGuideUuid || null
+			form.toolsGuideUuid = d.toolsGuideUuid || null
 
 			form.opportunities = d.opportunities.items.map((o: any) => ({
 				title: o.title,
@@ -370,32 +255,17 @@ const fetchData = async () => {
 				buttonText: o.buttonText || '',
 			}))
 
-			form.leadershipTitle = d.leadership.title
+			form.toolsTitle = d.toolsAndServices?.title || ''
 
-			form.leadershipDescription = d.leadership.description
+			form.toolsLogoUuid = d.toolsAndServices?.logo?.uuid || null
 
-			form.leadershipLogoUuid = d.leadership.logo?.uuid || null
-
-			form.leadershipItems = d.leadership.items.map((i: any) => ({
+			form.toolsItems = (d.toolsAndServices?.items || []).map((i: any) => ({
+				title: i.title,
 				text: i.text,
-				iconUuid: i.icon?.uuid || null,
-			}))
-
-			form.whoWeAre = d.whoWeAre.map((w: any) => ({
-				title: w.title,
-				description: w.description,
-				imageUuid: w.image?.uuid || null,
-			}))
-
-			form.newsTitle = d.news.title
-
-			form.newsItems = d.news.items.map((n: any) => ({
-				text: n.text,
-				iconUuid: n.icon?.uuid || null,
 			}))
 		}
 	} catch {
-		ElMessage.error('Failed to load about data')
+		ElMessage.error('Failed to load platforms data')
 	} finally {
 		loading.value = false
 	}
@@ -410,9 +280,9 @@ const handleSave = async () => {
 			body: form,
 		})
 
-		ElMessage.success('About page updated successfully')
+		ElMessage.success('Platforms page updated successfully')
 
-		fetchData() // Refresh to get URLs
+		fetchData()
 	} catch {
 		ElMessage.error('Failed to save changes')
 	} finally {
@@ -429,24 +299,13 @@ const autoSave = async () => {
 			body: form,
 		})
 
-		// eslint-disable-next-line no-console
-		console.log('Section preview auto-saved')
-
-		fetchData() // Refresh to get URLs for the picker
+		fetchData()
 	} catch (error) {
-		// eslint-disable-next-line no-console
 		console.error('Auto-save failed:', error)
 	}
 }
 
-// Watch section guide UUIDs for auto-save
-const guideUuids = [
-	'heroGuideUuid',
-	'opportunitiesGuideUuid',
-	'leadershipGuideUuid',
-	'whoWeAreGuideUuid',
-	'newsGuideUuid',
-]
+const guideUuids = ['heroGuideUuid', 'opportunitiesGuideUuid', 'toolsGuideUuid']
 
 guideUuids.forEach((field) => {
 	watch(
@@ -471,23 +330,15 @@ const addOpportunity = () => {
 	form.opportunities.push({ title: '', iconUuid: null, items: [], link: '', buttonText: '' })
 }
 
-const addLeadershipItem = () => {
-	form.leadershipItems.push({ text: '', iconUuid: null })
-}
-
-const addWhoWeAreItem = () => {
-	form.whoWeAre.push({ title: '', description: '', imageUuid: null })
-}
-
-const addNewsItem = () => {
-	form.newsItems.push({ text: '', iconUuid: null })
+const addToolItem = () => {
+	form.toolsItems.push({ title: '', text: '' })
 }
 
 onMounted(fetchData)
 </script>
 
 <style scoped lang="scss">
-.about-page-editor {
+.platforms-page-editor {
 	max-width: 1600px;
 	padding: 24px;
 	margin: 0 auto;
@@ -507,6 +358,7 @@ onMounted(fetchData)
 		-webkit-text-fill-color: transparent;
 		background: linear-gradient(to right, var(--gp-primary), var(--gp-text-primary));
 		-webkit-background-clip: text;
+		background-clip: text;
 		margin: 0;
 	}
 
