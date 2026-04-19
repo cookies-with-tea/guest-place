@@ -36,14 +36,3 @@ pub struct Claims {
     pub permissions: Vec<String>,
     pub exp: usize,
 }
-
-#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
-pub struct RolePermissionsDTO {
-    pub role: String,
-    pub permissions: Vec<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
-pub struct PermissionDTO {
-    pub id: String,
-}

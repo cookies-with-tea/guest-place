@@ -15,13 +15,16 @@ async fn setup_test_server() -> TestServer {
     let config = AppConfig::new();
     let pool = create_pool(&config).await;
     let i18n = I18nService::new(pool.clone());
+    let redis = Arc::new(guest_platform::core::redis::RedisService::new(guest_platform::core::db::create_redis_pool(&config)));
+    let features = Arc::new(guest_platform::features::FeatureFlagService::new(redis.clone()));
     
     let state = Arc::new(AppState {
-        pool,
+        pool: pool.clone(),
         i18n,
         media_storage: Arc::new(guest_platform::media::storage::StorageService::new("tmp")),
-        redis: Arc::new(guest_platform::core::redis::RedisService::new(guest_platform::core::db::create_redis_pool(&config))),
-        features: Arc::new(guest_platform::core::features::FeatureFlagService::new(Arc::new(guest_platform::core::redis::RedisService::new(guest_platform::core::db::create_redis_pool(&config))))),
+        redis,
+        features,
+        media_quota: Arc::new(guest_platform::media::quota::QuotaService::new(pool.clone(), 1024 * 1024 * 1024)),
         frontend_url: "http://localhost:3000".to_string(),
         smtp_host: "localhost".to_string(),
         smtp_port: 587,

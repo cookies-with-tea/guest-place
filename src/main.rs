@@ -1,19 +1,24 @@
-mod about;
-mod auth;
-mod core;
-mod i18n;
-mod media;
-mod user;
-mod mailer;
-mod mfe;
+pub mod about;
+pub mod auth;
+pub mod content;
+pub mod core;
+pub mod features;
+pub mod guests;
+pub mod i18n;
+pub mod mailer;
+pub mod media;
+pub mod mfe;
+pub mod user;
+pub mod platforms;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
 use crate::core::db::{create_pool, create_redis_pool};
 use crate::core::redis::RedisService;
-use crate::core::features::FeatureFlagService;
+use crate::features::FeatureFlagService;
 use crate::i18n::middlewares::locale_middleware;
 use crate::i18n::I18nService;
+use crate::media::quota::QuotaService;
 use axum::routing::get;
 use axum::{http::HeaderValue, middleware, Router};
 use sqlx::{Pool, Postgres};
@@ -39,6 +44,7 @@ struct AppState {
     media_storage: Arc<StorageService>,
     redis: Arc<RedisService>,
     features: Arc<FeatureFlagService>,
+    media_quota: Arc<QuotaService>,
     frontend_url: String,
     smtp_host: String,
     smtp_port: u16,
@@ -64,7 +70,6 @@ struct AppState {
     crate::media::handlers::get_all,
     crate::media::handlers::get_one,
     crate::media::handlers::update,
-    crate::about::handlers::get_about,
     crate::i18n::handlers::create_or_update,
     crate::i18n::handlers::get_all,
     crate::i18n::handlers::delete_one,
@@ -74,8 +79,19 @@ struct AppState {
     crate::mfe::handlers::create,
     crate::mfe::handlers::update,
     crate::mfe::handlers::delete_one,
-    crate::core::features::handlers::get_features,
-    crate::core::features::handlers::update_features,
+    crate::features::handlers::get_features,
+    crate::features::handlers::update_features,
+    crate::content::handlers::get_schemas,
+    crate::content::handlers::create_schema,
+    crate::content::handlers::get_schema,
+    crate::content::handlers::update_schema,
+    crate::content::handlers::delete_schema,
+    crate::about::handlers::get_about,
+    crate::about::handlers::update_about,
+    crate::guests::handlers::get_guests,
+    crate::guests::handlers::update_guests,
+    crate::platforms::handlers::get_platforms,
+    crate::platforms::handlers::update_platforms,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -86,11 +102,29 @@ struct AppState {
         (name = "I18n", description = "Translations management"),
         (name = "MFE", description = "Microfrontends management"),
         (name = "Features", description = "Feature Flags management"),
+        (name = "Content", description = "Dynamic Content Management"),
+        (name = "Platforms", description = "Platforms information"),
   ),
   components(
     schemas(
-        crate::core::features::FeatureFlag,
-        crate::core::features::FeatureFlagsUpdate,
+        crate::auth::dto::AuthRequestDTO,
+        crate::auth::dto::RegisterRequestDTO,
+        crate::auth::dto::AuthResponseDTO,
+        crate::about::dto::AboutResponseDTO,
+        crate::content::model::ContentSchema,
+        crate::content::model::CreateSchemaDTO,
+        crate::content::model::UpdateSchemaDTO,
+        crate::content::model::FieldDefinition,
+        crate::content::model::FieldType,
+        crate::features::FeatureFlag,
+        crate::features::FeatureFlagsUpdate,
+        crate::guests::dto::GuestsResponseDTO,
+        crate::guests::dto::UpdateGuestsDTO,
+        crate::guests::dto::GuestOpportunityItemDTO,
+        crate::guests::dto::InteractionCardDTO,
+        crate::guests::dto::SearchPromoDTO,
+        crate::guests::dto::AdditionalServiceDTO,
+        crate::platforms::dto::PlatformsResponseDTO,
     )
   )
 )]
@@ -127,26 +161,30 @@ async fn main() {
     let app_host = config.app_host.clone();
     let app_port = config.app_port.clone();
 
-
     let smtp_host = std::env::var("SMTP_HOST").expect("SMTP_HOST must be set");
-    let smtp_port: u16 = std::env::var("SMTP_PORT").unwrap_or("587".to_string()).parse().expect("Invalid SMTP_PORT");
+    let smtp_port: u16 = std::env::var("SMTP_PORT")
+        .unwrap_or("587".to_string())
+        .parse()
+        .expect("Invalid SMTP_PORT");
     let smtp_username = std::env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
     let smtp_password = std::env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
     let smtp_from = std::env::var("SMTP_FROM").expect("SMTP_FROM must be set");
 
     let i18n = I18nService::new(pool.clone());
     let media_storage = Arc::new(StorageService::new("uploads"));
-    
+
     let redis_pool = create_redis_pool(&config);
     let redis = Arc::new(RedisService::new(redis_pool));
     let features = Arc::new(FeatureFlagService::new(redis.clone()));
-    
+    let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
+
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
         i18n,
-        media_storage,
+        media_storage: media_storage.clone(),
         redis,
         features,
+        media_quota,
         frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
         smtp_host,
         smtp_port,
@@ -199,8 +237,9 @@ async fn main() {
         .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
-        .route("/api/v1/features", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
-        .route("/api/v1/features/", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
+        .nest("/api/v1/guests", guests::router())
+        .nest("/api/v1/platforms", platforms::handlers::router())
+        .nest("/api/v1/features", features::router())
         .nest_service("/uploads", ServeDir::new("uploads"))
         .with_state(shared_state.clone());
 
@@ -208,6 +247,7 @@ async fn main() {
         .nest("/api/v1/user", user::handlers::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
+        .nest("/api/v1/content", content::router())
         .with_state(shared_state.clone())
         .layer(middleware::from_fn_with_state(
             shared_state.clone(),
@@ -222,6 +262,8 @@ async fn main() {
         .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", openapi))
         .layer(cors);
 
+    let _ = sqlx::migrate!().run(&pool.clone()).await;
+
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
         .await
         .unwrap();
@@ -231,8 +273,6 @@ async fn main() {
         "Swagger is running at http://{}:{}/docs",
         app_host, app_port
     );
-
-    let _ = sqlx::migrate!().run(&pool.clone()).await;
 
     if let Err(e) = crate::auth::init::init_superadmin(shared_state.clone()).await {
         eprintln!("[Init] Superadmin initialization failed: {}", e);

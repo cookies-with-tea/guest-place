@@ -6,10 +6,16 @@ pub mod media;
 pub mod user;
 pub mod mailer;
 pub mod mfe;
+pub mod features;
+pub mod content;
+pub mod guests;
+
+pub use crate::core::dto::ApiResponse;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::redis::RedisService;
-use crate::core::features::FeatureFlagService;
+use crate::features::FeatureFlagService;
+use crate::media::quota::QuotaService;
 use crate::i18n::middlewares::locale_middleware;
 use crate::i18n::I18nService;
 use axum::routing::{delete, get, post};
@@ -30,6 +36,7 @@ pub struct AppState {
     pub media_storage: Arc<StorageService>,
     pub redis: Arc<RedisService>,
     pub features: Arc<FeatureFlagService>,
+    pub media_quota: Arc<QuotaService>,
     pub frontend_url: String,
     pub smtp_host: String,
     pub smtp_port: u16,
@@ -60,7 +67,9 @@ pub fn create_app(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, cors:
         .nest("/api/v1/mfe", mfe_router)
         .nest("/api/v1/media", media::handlers::router().layer(auth_layer.clone()))
         .nest("/api/v1/about", about::handlers::router())
-        .route("/api/v1/features", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features).layer(auth_layer))
+        .nest("/api/v1/guests", guests::router())
+        .nest("/api/v1/features", features::router().layer(auth_layer.clone()))
+        .nest("/api/v1/content", content::router().layer(auth_layer))
         .nest_service("/uploads", ServeDir::new("/uploads"))
         .layer(middleware::from_fn(locale_middleware))
         .with_state(state.clone());

@@ -88,6 +88,30 @@ pub async fn create(
         .and_then(|ext| ext.to_str())
         .unwrap_or("bin");
 
+    let file_size = data.len() as i64;
+    
+    // Check quota
+    match state.media_quota.check_quota(file_size).await {
+        Ok(false) => {
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Available storage quota exceeded")),
+                Some(vec!["Failed to upload media: storage quota exceeded".to_string()]),
+            );
+        }
+        Err(e) => {
+            eprintln!("Quota check error: {:?}", e);
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to verify storage quota")),
+                Some(vec!["Internal server error during quota verification".to_string()]),
+            );
+        }
+        Ok(true) => {}
+    }
+
     let (_hash, relative_path) = if media_type == "image" {
         let processed_data = state.media_storage.process_image(&data).await.map_err(|e| {
             eprintln!("Image processing error: {:?}", e);
@@ -124,13 +148,14 @@ pub async fn create(
     );
 
     let db_result = sqlx::query(
-        "INSERT INTO media (uuid, media_type, url, title, alt) VALUES ($1, $2::media_type, $3, $4, $5)",
+        "INSERT INTO media (uuid, media_type, url, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6)",
     )
     .bind(media_uuid)
     .bind(media_type)
     .bind(&full_url)
     .bind(title)
     .bind(alt)
+    .bind(file_size)
     .execute(&state.pool)
     .await;
 

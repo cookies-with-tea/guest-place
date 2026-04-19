@@ -11,6 +11,7 @@ pub struct AppConfig {
     pub redis_host: String,
     pub redis_port: u16,
     pub redis_password: Option<String>,
+    pub media_quota_limit: i64,
 }
 
 impl AppConfig {
@@ -37,6 +38,11 @@ impl AppConfig {
             .expect("REDIS_PORT is not a valid port number");
         let redis_password = env::var("REDIS_PASSWORD").ok().filter(|s| !s.is_empty());
 
+        let media_quota_limit = env::var("MEDIA_QUOTA_LIMIT")
+            .unwrap_or_else(|_| (1024 * 1024 * 1024).to_string()) // 1GB default
+            .parse()
+            .expect("MEDIA_QUOTA_LIMIT is not a valid number");
+
         AppConfig {
             app_host,
             app_port,
@@ -45,6 +51,7 @@ impl AppConfig {
             redis_host,
             redis_port,
             redis_password,
+            media_quota_limit,
         }
     }
 }

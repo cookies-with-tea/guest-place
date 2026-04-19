@@ -1,6 +1,6 @@
 use crate::auth::dto::{
     AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
-    RegisterRequestDTO, RolePermissionsDTO, PermissionDTO,
+    RegisterRequestDTO,
 };
 use crate::core::dto::ApiResponse;
 use crate::core::response::{error_map, into_api_response};
@@ -11,7 +11,7 @@ use crate::AppState;
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
 use axum::routing::{get, post};
 use axum::Router;
-use axum::{extract::Extension, extract::State, extract::Path, http::StatusCode, response::IntoResponse, Json};
+use axum::{extract::Extension, extract::Path, extract::State, http::StatusCode, Json};
 use chrono::{Duration, Utc};
 use dotenv::dotenv;
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -505,110 +505,6 @@ async fn logout(
 }
 
 
-#[utoipa::path(
-    get,
-    path = "/api/v1/auth/roles",
-    responses(
-        (status = 200, description = "Список ролей", body = ApiResponse<Vec<String>>)
-    ),
-    tag = "Auth"
-)]
-pub async fn list_roles() -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
-    let roles = vec![
-        "superadmin".to_string(),
-        "admin".to_string(),
-        "editor".to_string(),
-        "user".to_string(),
-    ];
-    into_api_response(StatusCode::OK, Some(roles), None, None)
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/v1/auth/permissions",
-    responses(
-        (status = 200, description = "Список всех разрешений", body = ApiResponse<Vec<String>>)
-    ),
-    tag = "Auth"
-)]
-pub async fn list_permissions(
-    State(state): State<Arc<AppState>>,
-) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
-    let permissions = sqlx::query("SELECT id FROM permissions")
-        .fetch_all(&state.pool)
-        .await
-        .map_err(|e| {
-            eprintln!("Database error: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
-        })?;
-
-    let ids = permissions.iter().map(|r| r.get::<String, _>(0)).collect();
-    into_api_response(StatusCode::OK, Some(ids), None, None)
-}
-
-#[utoipa::path(
-    get,
-    path = "/api/v1/auth/roles/{role}/permissions",
-    responses(
-        (status = 200, description = "Права роли", body = ApiResponse<Vec<String>>)
-    ),
-    tag = "Auth"
-)]
-pub async fn get_role_permissions(
-    State(state): State<Arc<AppState>>,
-    Path(role): Path<String>,
-) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
-    let permissions = sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1::user_role")
-        .bind(&role)
-        .fetch_all(&state.pool)
-        .await
-        .map_err(|e| {
-            eprintln!("Database error: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
-        })?;
-
-    let ids = permissions.iter().map(|r| r.get::<String, _>(0)).collect();
-    into_api_response(StatusCode::OK, Some(ids), None, None)
-}
-
-#[utoipa::path(
-    post,
-    path = "/api/v1/auth/roles/{role}/permissions",
-    request_body = Vec<String>,
-    responses(
-        (status = 200, description = "Права обновлены")
-    ),
-    tag = "Auth"
-)]
-pub async fn update_role_permissions(
-    State(state): State<Arc<AppState>>,
-    Path(role): Path<String>,
-    Json(permissions): Json<Vec<String>>,
-) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let mut tx = state.pool.begin().await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
-
-    sqlx::query("DELETE FROM roles_permissions WHERE role = $1::user_role")
-        .bind(&role)
-        .execute(&mut *tx)
-        .await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
-
-    for perm in permissions {
-        sqlx::query("INSERT INTO roles_permissions (role, permission_id) VALUES ($1::user_role, $2)")
-            .bind(&role)
-            .bind(perm)
-            .execute(&mut *tx)
-            .await
-            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
-    }
-
-    tx.commit().await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
-
-    into_api_response(StatusCode::OK, None, None, None)
-}
-
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
@@ -616,7 +512,4 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
-        .route("/roles", get(list_roles))
-        .route("/permissions", get(list_permissions))
-        .route("/roles/{role}/permissions", get(get_role_permissions).post(update_role_permissions))
 }
