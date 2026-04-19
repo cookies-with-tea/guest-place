@@ -33,8 +33,16 @@ pub async fn get_about(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<ApiResponse<AboutResponseDTO>>, (StatusCode, Json<ApiResponse<()>>)> {
 
-    let about_row = sqlx::query_as::<_, (String, String)>(
-        "SELECT title, description FROM about LIMIT 1"
+    let about_row = sqlx::query_as::<_, (
+        String, 
+        String, 
+        Option<uuid::Uuid>, 
+        Option<uuid::Uuid>, 
+        Option<uuid::Uuid>, 
+        Option<uuid::Uuid>, 
+        Option<uuid::Uuid>
+    )>(
+        "SELECT title, description, hero_guide_uuid, opportunities_guide_uuid, leadership_guide_uuid, who_we_are_guide_uuid, news_guide_uuid FROM about LIMIT 1"
     )
     .fetch_optional(&state.pool)
     .await;
@@ -67,9 +75,25 @@ pub async fn get_about(
                 e
             })?;
 
+            let hero_guide = get_media_by_uuid(&state, row.2).await.unwrap_or(None);
+            let opportunities_guide = get_media_by_uuid(&state, row.3).await.unwrap_or(None);
+            let leadership_guide = get_media_by_uuid(&state, row.4).await.unwrap_or(None);
+            let who_we_are_guide = get_media_by_uuid(&state, row.5).await.unwrap_or(None);
+            let news_guide = get_media_by_uuid(&state, row.6).await.unwrap_or(None);
+
             AboutResponseDTO {
                 title: row.0,
                 description: row.1,
+                hero_guide,
+                opportunities_guide,
+                leadership_guide,
+                who_we_are_guide,
+                news_guide,
+                hero_guide_uuid: row.2,
+                opportunities_guide_uuid: row.3,
+                leadership_guide_uuid: row.4,
+                who_we_are_guide_uuid: row.5,
+                news_guide_uuid: row.6,
                 opportunities,
                 leadership,
                 who_we_are,
@@ -109,8 +133,8 @@ pub async fn get_about(
 async fn fetch_opportunities(
     state: &Arc<AppState>,
 ) -> Result<Vec<OpportunityItemDTO>, (StatusCode, Json<ApiResponse<()>>)> {
-    let opportunities = sqlx::query_as::<_, (i32, Option<uuid::Uuid>, String)>(
-        "SELECT id, icon_uuid, title FROM about_opportunities ORDER BY id"
+    let opportunities = sqlx::query_as::<_, (i32, Option<uuid::Uuid>, String, String, String)>(
+        "SELECT id, icon_uuid, title, link, button_text FROM about_opportunities ORDER BY id"
     )
     .fetch_all(&state.pool)
     .await
@@ -176,6 +200,8 @@ async fn fetch_opportunities(
             }),
             title: opp.2,
             items,
+            link: opp.3,
+            button_text: opp.4,
         });
     }
 
@@ -463,12 +489,28 @@ pub async fn update_about(
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Server error".to_string()]) }))
     })?;
 
-    // 1. Update main about table
+    // 1. Upsert main about table
     let about_id = sqlx::query_scalar::<_, i32>(
-        "UPDATE about SET title = $1, description = $2, updated_at = NOW() RETURNING id"
+        "INSERT INTO about (id, title, description, hero_guide_uuid, opportunities_guide_uuid, leadership_guide_uuid, who_we_are_guide_uuid, news_guide_uuid, updated_at) 
+         VALUES (1, $1, $2, $3, $4, $5, $6, $7, NOW())
+         ON CONFLICT (id) DO UPDATE SET 
+            title = EXCLUDED.title, 
+            description = EXCLUDED.description, 
+            hero_guide_uuid = EXCLUDED.hero_guide_uuid,
+            opportunities_guide_uuid = EXCLUDED.opportunities_guide_uuid,
+            leadership_guide_uuid = EXCLUDED.leadership_guide_uuid,
+            who_we_are_guide_uuid = EXCLUDED.who_we_are_guide_uuid,
+            news_guide_uuid = EXCLUDED.news_guide_uuid,
+            updated_at = NOW() 
+         RETURNING id"
     )
     .bind(&payload.title)
     .bind(&payload.description)
+    .bind(payload.hero_guide_uuid)
+    .bind(payload.opportunities_guide_uuid)
+    .bind(payload.leadership_guide_uuid)
+    .bind(payload.who_we_are_guide_uuid)
+    .bind(payload.news_guide_uuid)
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| {
@@ -485,11 +527,13 @@ pub async fn update_about(
 
     for opp in payload.opportunities {
         let opp_id = sqlx::query_scalar::<_, i32>(
-            "INSERT INTO about_opportunities (title, about_id, icon_uuid) VALUES ($1, $2, $3) RETURNING id"
+            "INSERT INTO about_opportunities (title, about_id, icon_uuid, link, button_text) VALUES ($1, $2, $3, $4, $5) RETURNING id"
         )
         .bind(&opp.title)
         .bind(about_id)
         .bind(opp.icon_uuid)
+        .bind(&opp.link)
+        .bind(&opp.button_text)
         .fetch_one(&mut *tx)
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert opportunity".to_string()]) })))?;

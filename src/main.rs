@@ -1,12 +1,14 @@
-mod about;
-mod auth;
-mod core;
-mod i18n;
-mod media;
-mod user;
-mod mailer;
-mod mfe;
-mod features;
+pub mod about;
+pub mod auth;
+pub mod core;
+pub mod i18n;
+pub mod media;
+pub mod user;
+pub mod mailer;
+pub mod mfe;
+pub mod features;
+pub mod content;
+pub mod guests;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
@@ -68,13 +70,25 @@ struct AppState {
     crate::media::handlers::get_one,
     crate::media::handlers::update,
     crate::about::handlers::get_about,
+    crate::about::handlers::update_about,
     crate::i18n::handlers::create_or_update,
     crate::i18n::handlers::get_all,
     crate::i18n::handlers::delete_one,
     crate::i18n::handlers::get_by_dict_key,
+    crate::mfe::handlers::get_manifest,
+    crate::mfe::handlers::get_all,
+    crate::mfe::handlers::create,
+    crate::mfe::handlers::update,
     crate::mfe::handlers::delete_one,
     crate::features::handlers::get_features,
     crate::features::handlers::update_features,
+    crate::content::handlers::get_schemas,
+    crate::content::handlers::create_schema,
+    crate::content::handlers::get_schema,
+    crate::content::handlers::update_schema,
+    crate::content::handlers::delete_schema,
+    crate::guests::handlers::get_guests,
+    crate::guests::handlers::update_guests,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -85,11 +99,27 @@ struct AppState {
         (name = "I18n", description = "Translations management"),
         (name = "MFE", description = "Microfrontends management"),
         (name = "Features", description = "Feature Flags management"),
+        (name = "Content", description = "Dynamic Content Management"),
   ),
   components(
     schemas(
+        crate::auth::dto::AuthRequestDTO,
+        crate::auth::dto::RegisterRequestDTO,
+        crate::auth::dto::AuthResponseDTO,
+        crate::about::dto::AboutResponseDTO,
+        crate::content::model::ContentSchema,
+        crate::content::model::CreateSchemaDTO,
+        crate::content::model::UpdateSchemaDTO,
+        crate::content::model::FieldDefinition,
+        crate::content::model::FieldType,
         crate::features::FeatureFlag,
         crate::features::FeatureFlagsUpdate,
+        crate::guests::dto::GuestsResponseDTO,
+        crate::guests::dto::UpdateGuestsDTO,
+        crate::guests::dto::GuestOpportunityItemDTO,
+        crate::guests::dto::InteractionCardDTO,
+        crate::guests::dto::SearchPromoDTO,
+        crate::guests::dto::AdditionalServiceDTO,
     )
   )
 )]
@@ -200,6 +230,7 @@ async fn main() {
         .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
+        .nest("/api/v1/guests", guests::router())
         .nest("/api/v1/features", features::router())
         .nest_service("/uploads", ServeDir::new("uploads"))
         .with_state(shared_state.clone());
@@ -208,6 +239,7 @@ async fn main() {
         .nest("/api/v1/user", user::handlers::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
+        .nest("/api/v1/content", content::router())
         .with_state(shared_state.clone())
         .layer(middleware::from_fn_with_state(
             shared_state.clone(),

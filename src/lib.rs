@@ -7,6 +7,10 @@ pub mod user;
 pub mod mailer;
 pub mod mfe;
 pub mod features;
+pub mod content;
+pub mod guests;
+
+pub use crate::core::dto::ApiResponse;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::redis::RedisService;
@@ -63,7 +67,9 @@ pub fn create_app(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, cors:
         .nest("/api/v1/mfe", mfe_router)
         .nest("/api/v1/media", media::handlers::router().layer(auth_layer.clone()))
         .nest("/api/v1/about", about::handlers::router())
-        .nest("/api/v1/features", features::router().layer(auth_layer))
+        .nest("/api/v1/guests", guests::router())
+        .nest("/api/v1/features", features::router().layer(auth_layer.clone()))
+        .nest("/api/v1/content", content::router().layer(auth_layer))
         .nest_service("/uploads", ServeDir::new("/uploads"))
         .layer(middleware::from_fn(locale_middleware))
         .with_state(state.clone());

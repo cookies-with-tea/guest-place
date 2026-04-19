@@ -14,7 +14,7 @@ impl QuotaService {
 
     /// Calculate total bytes used by all media
     pub async fn get_total_usage(&self) -> Result<i64> {
-        let total: Option<i64> = sqlx::query_scalar("SELECT SUM(size_bytes) FROM media")
+        let total: Option<i64> = sqlx::query_scalar("SELECT SUM(size_bytes)::BIGINT FROM media")
             .fetch_one(&self.pool)
             .await?;
         

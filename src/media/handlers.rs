@@ -91,13 +91,25 @@ pub async fn create(
     let file_size = data.len() as i64;
     
     // Check quota
-    if !state.media_quota.check_quota(file_size).await.unwrap_or(false) {
-        return into_api_response(
-            StatusCode::PAYLOAD_TOO_LARGE,
-            None,
-            Some(error_map("quota", "Available storage quota exceeded")),
-            Some(vec!["Failed to upload media".to_string()]),
-        );
+    match state.media_quota.check_quota(file_size).await {
+        Ok(false) => {
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Available storage quota exceeded")),
+                Some(vec!["Failed to upload media: storage quota exceeded".to_string()]),
+            );
+        }
+        Err(e) => {
+            eprintln!("Quota check error: {:?}", e);
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to verify storage quota")),
+                Some(vec!["Internal server error during quota verification".to_string()]),
+            );
+        }
+        Ok(true) => {}
     }
 
     let (_hash, relative_path) = if media_type == "image" {
