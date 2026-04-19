@@ -5,6 +5,7 @@ export interface RemoteManifestItem {
 	scope: string
 	module: string
 	icon?: string
+	category: string
 	order?: number
 }
 

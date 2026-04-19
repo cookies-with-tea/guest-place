@@ -15,6 +15,7 @@ export const useMfe = () => {
 		scope: '',
 		module: '',
 		icon: '',
+		category: 'system',
 		orderIndex: 0,
 		enabled: true,
 	})
@@ -92,6 +93,7 @@ export const useMfe = () => {
 			scope: 'mfe',
 			module: './Routes',
 			icon: '',
+			category: 'system',
 			orderIndex: 0,
 			enabled: true,
 		})

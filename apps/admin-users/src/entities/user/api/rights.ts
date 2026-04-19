@@ -1,6 +1,6 @@
 import { createApi } from '@admin-panel/lib'
 
-const { fetchData } = createApi('auth')
+const { fetchData } = createApi('user')
 
 export const getRoles = () => fetchData<string[]>('/roles')
 

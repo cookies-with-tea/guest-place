@@ -40,7 +40,7 @@ export interface IUserCreateUpdate {
 	status?: UserStatus
 	phone?: string
 	avatar?: string
-	avatar_uuid?: string | null
+	avatarUuid?: string | null
 	street?: string
 	city?: string
 	gender?: string

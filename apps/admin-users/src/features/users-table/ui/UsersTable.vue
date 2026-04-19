@@ -58,12 +58,12 @@
 								<span>Full Name</span>
 								<div class="sort-controls">
 									<el-icon
-										:class="{ active: filters.sortBy === 'first_name' && filters.sortOrder === 'ASC' }"
+										:class="{ active: filters.sortBy === 'firstName' && filters.sortOrder === 'ASC' }"
 										@click.stop="setSort('firstName', 'ascending')"
 										><CaretTop
 									/></el-icon>
 									<el-icon
-										:class="{ active: filters.sortBy === 'first_name' && filters.sortOrder === 'DESC' }"
+										:class="{ active: filters.sortBy === 'firstName' && filters.sortOrder === 'DESC' }"
 										@click.stop="setSort('firstName', 'descending')"
 										><CaretBottom
 									/></el-icon>

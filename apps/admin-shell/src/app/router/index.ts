@@ -32,8 +32,9 @@ const loadRemoteRoutes = async (app: any) => {
 
 		if (!response.ok) throw new Error('Failed to fetch manifest from API')
 
-		const manifest: RemoteManifest = await response.json()
-		const remotes = manifest.remotes.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+		const json = await response.json()
+		const manifest: RemoteManifest = json.data
+		const remotes = (manifest.remotes || []).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
 		for (const remote of remotes) {
 			try {
@@ -51,6 +52,7 @@ const loadRemoteRoutes = async (app: any) => {
 					name: remote.name,
 					title: routeConfig?.title || `general.${remote.name}`,
 					icon: routeConfig?.icon || 'Menu',
+					category: remote.category,
 					routes: modifiedRoutes,
 				})
 			} catch {
@@ -90,12 +92,24 @@ export const initRouter = async (app: any) => {
 
 	const { setData } = useSidebar()
 
-	setData(routesToSidebar(sidebarGroups))
+	const systemGroups = sidebarGroups.filter((g) => !g.category || g.category === 'system' || g.name === 'orchestrator')
+	const websiteGroups = sidebarGroups.filter((g) => g.category === 'website')
+
+	setData('system', routesToSidebar(systemGroups))
+
+	setData('website', routesToSidebar(websiteGroups))
 
 	window.addEventListener('mfe:updated', async () => {
 		const { sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
 
-		setData(routesToSidebar(updatedGroups))
+		const newSystemGroups = updatedGroups.filter(
+			(g) => !g.category || g.category === 'system' || g.name === 'orchestrator'
+		)
+		const newWebsiteGroups = updatedGroups.filter((g) => g.category === 'website')
+
+		setData('system', routesToSidebar(newSystemGroups))
+
+		setData('website', routesToSidebar(newWebsiteGroups))
 	})
 
 	const router = createRouter({
