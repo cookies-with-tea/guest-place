@@ -17,7 +17,7 @@ use uuid::Uuid;
 )]
 pub async fn get_manifest(
     State(state): State<Arc<AppState>>,
-) -> Result<Json<ManifestDto>, (StatusCode, Json<ApiResponse<()>>)> {
+) -> Result<Json<ApiResponse<ManifestDto>>, (StatusCode, Json<ApiResponse<()>>)> {
     let result = sqlx::query_as::<_, Mfe>(
         "SELECT * FROM microfrontends WHERE enabled = true ORDER BY order_index ASC"
     )
@@ -33,15 +33,26 @@ pub async fn get_manifest(
                 scope: m.scope,
                 module: m.module,
                 icon: m.icon,
+                category: m.category,
                 order: m.order_index,
             }).collect();
-            Ok(Json(ManifestDto { remotes }))
+            
+            into_api_response(StatusCode::OK, Some(ManifestDto { remotes }), None, None)
+                .map_err(|(s, r)| (s, Json(ApiResponse { 
+                    data: None, 
+                    errors: r.0.errors.clone(), 
+                    messages: r.0.messages.clone() 
+                })))
         }
         Err(e) => {
             eprintln!("DB error fetching manifest: {}", e);
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
-                into_api_response_raw("Failed to generate manifest".to_string()),
+                Json(ApiResponse {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Failed to generate manifest".to_string()]),
+                }),
             ))
         }
     }
@@ -96,8 +107,8 @@ pub async fn create(
 ) -> Result<Json<ApiResponse<Mfe>>, (StatusCode, Json<ApiResponse<Mfe>>)> {
     let result = sqlx::query_as::<_, Mfe>(
         r#"
-        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, order_index)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, category, order_index)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
         "#
     )
@@ -107,6 +118,7 @@ pub async fn create(
     .bind(&dto.scope)
     .bind(&dto.module)
     .bind(&dto.icon)
+    .bind(dto.category.unwrap_or_else(|| "system".to_string()))
     .bind(dto.order_index.unwrap_or(0))
     .fetch_one(&state.pool)
     .await;
@@ -150,15 +162,23 @@ pub async fn update(
         .await
         .map_err(|e| {
             eprintln!("DB error fetching mfe: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_raw_mfe("Database error".to_string()))
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }))
         })?
-        .ok_or((StatusCode::NOT_FOUND, into_api_response_raw_mfe("MFE not found".to_string())))?;
+        .ok_or((StatusCode::NOT_FOUND, Json(ApiResponse {
+            data: None,
+            errors: None,
+            messages: Some(vec!["MFE not found".to_string()]),
+        })))?;
 
     let result = sqlx::query_as::<_, Mfe>(
         r#"
         UPDATE microfrontends
-        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, order_index = $6, enabled = $7, updated_at = NOW()
-        WHERE id = $8
+        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, category = $6, order_index = $7, enabled = $8, updated_at = NOW()
+        WHERE id = $9
         RETURNING *
         "#
     )
@@ -167,6 +187,7 @@ pub async fn update(
     .bind(dto.scope.unwrap_or(current.scope))
     .bind(dto.module.unwrap_or(current.module))
     .bind(dto.icon.or(current.icon))
+    .bind(dto.category.unwrap_or(current.category))
     .bind(dto.order_index.unwrap_or(current.order_index))
     .bind(dto.enabled.unwrap_or(current.enabled))
     .bind(id)
@@ -222,22 +243,6 @@ pub async fn delete_one(
             )
         }
     }
-}
-
-fn into_api_response_raw(message: String) -> Json<ApiResponse<()>> {
-    Json(ApiResponse {
-        data: None,
-        errors: None,
-        messages: Some(vec![message]),
-    })
-}
-
-fn into_api_response_raw_mfe(message: String) -> Json<ApiResponse<Mfe>> {
-    Json(ApiResponse {
-        data: None,
-        errors: None,
-        messages: Some(vec![message]),
-    })
 }
 
 pub fn public_router() -> Router<Arc<AppState>> {

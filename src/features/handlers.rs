@@ -6,7 +6,7 @@ use axum::{
 };
 use crate::AppState;
 use crate::core::dto::ApiResponse;
-use crate::core::features::FeatureFlagsUpdate;
+use crate::features::{FeatureFlagsUpdate};
 use std::sync::Arc;
 
 

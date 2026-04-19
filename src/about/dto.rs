@@ -58,3 +58,43 @@ pub struct AboutResponseDTO {
     pub who_we_are: Vec<WhoWeAreItemDTO>,
     pub news: NewsDTO,
 }
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateOpportunityItemDTO {
+    pub icon_uuid: Option<uuid::Uuid>,
+    pub title: String,
+    pub items: Vec<String>,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateLeadershipItemDTO {
+    pub icon_uuid: Option<uuid::Uuid>,
+    pub text: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateWhoWeAreItemDTO {
+    pub title: String,
+    pub description: String,
+    pub image_uuid: Option<uuid::Uuid>,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateNewsItemDTO {
+    pub icon_uuid: Option<uuid::Uuid>,
+    pub text: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct UpdateAboutDTO {
+    pub title: String,
+    pub description: String,
+    pub opportunities: Vec<UpdateOpportunityItemDTO>,
+    pub leadership_title: String,
+    pub leadership_description: String,
+    pub leadership_logo_uuid: Option<uuid::Uuid>,
+    pub leadership_items: Vec<UpdateLeadershipItemDTO>,
+    pub who_we_are: Vec<UpdateWhoWeAreItemDTO>,
+    pub news_title: String,
+    pub news_items: Vec<UpdateNewsItemDTO>,
+}

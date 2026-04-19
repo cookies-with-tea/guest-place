@@ -6,12 +6,14 @@ mod media;
 mod user;
 mod mailer;
 mod mfe;
+mod features;
 
 use crate::auth::middlewares::auth_middleware;
 use crate::core::app::AppConfig;
 use crate::core::db::{create_pool, create_redis_pool};
 use crate::core::redis::RedisService;
-use crate::core::features::FeatureFlagService;
+use crate::features::FeatureFlagService;
+use crate::media::quota::QuotaService;
 use crate::i18n::middlewares::locale_middleware;
 use crate::i18n::I18nService;
 use axum::routing::get;
@@ -39,6 +41,7 @@ struct AppState {
     media_storage: Arc<StorageService>,
     redis: Arc<RedisService>,
     features: Arc<FeatureFlagService>,
+    media_quota: Arc<QuotaService>,
     frontend_url: String,
     smtp_host: String,
     smtp_port: u16,
@@ -69,13 +72,9 @@ struct AppState {
     crate::i18n::handlers::get_all,
     crate::i18n::handlers::delete_one,
     crate::i18n::handlers::get_by_dict_key,
-    crate::mfe::handlers::get_manifest,
-    crate::mfe::handlers::get_all,
-    crate::mfe::handlers::create,
-    crate::mfe::handlers::update,
     crate::mfe::handlers::delete_one,
-    crate::core::features::handlers::get_features,
-    crate::core::features::handlers::update_features,
+    crate::features::handlers::get_features,
+    crate::features::handlers::update_features,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -89,8 +88,8 @@ struct AppState {
   ),
   components(
     schemas(
-        crate::core::features::FeatureFlag,
-        crate::core::features::FeatureFlagsUpdate,
+        crate::features::FeatureFlag,
+        crate::features::FeatureFlagsUpdate,
     )
   )
 )]
@@ -140,13 +139,15 @@ async fn main() {
     let redis_pool = create_redis_pool(&config);
     let redis = Arc::new(RedisService::new(redis_pool));
     let features = Arc::new(FeatureFlagService::new(redis.clone()));
+    let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
     
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
         i18n,
-        media_storage,
+        media_storage: media_storage.clone(),
         redis,
         features,
+        media_quota,
         frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
         smtp_host,
         smtp_port,
@@ -199,8 +200,7 @@ async fn main() {
         .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
         .nest("/api/v1/about", about::handlers::router())
-        .route("/api/v1/features", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
-        .route("/api/v1/features/", get(crate::core::features::handlers::get_features).post(crate::core::features::handlers::update_features))
+        .nest("/api/v1/features", features::router())
         .nest_service("/uploads", ServeDir::new("uploads"))
         .with_state(shared_state.clone());
 

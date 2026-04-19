@@ -3,6 +3,8 @@ pub mod handlers;
 use crate::core::redis::RedisService;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use axum::{Router, routing::get};
+use crate::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone, utoipa::ToSchema)]
 pub struct FeatureFlag {
@@ -43,4 +45,9 @@ impl FeatureFlagService {
         self.redis.set(FEATURE_FLAGS_KEY, &flags, None).await?;
         Ok(())
     }
+}
+
+pub fn router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/", get(handlers::get_features).post(handlers::update_features))
 }

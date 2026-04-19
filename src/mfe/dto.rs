@@ -14,6 +14,7 @@ pub struct Mfe {
     pub scope: String,
     pub module: String,
     pub icon: Option<String>,
+    pub category: String,
     pub order_index: i32,
     pub enabled: bool,
     pub created_at: DateTime<Utc>,
@@ -28,6 +29,7 @@ pub struct CreateMfeDto {
     pub scope: String,
     pub module: String,
     pub icon: Option<String>,
+    pub category: Option<String>,
     pub order_index: Option<i32>,
 }
 
@@ -38,6 +40,7 @@ pub struct UpdateMfeDto {
     pub scope: Option<String>,
     pub module: Option<String>,
     pub icon: Option<String>,
+    pub category: Option<String>,
     pub order_index: Option<i32>,
     pub enabled: Option<bool>,
 }
@@ -55,5 +58,6 @@ pub struct RemoteDto {
     pub scope: String,
     pub module: String,
     pub icon: Option<String>,
+    pub category: String,
     pub order: i32,
 }

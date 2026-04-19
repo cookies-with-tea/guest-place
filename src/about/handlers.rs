@@ -6,15 +6,16 @@ use axum::{
 use std::sync::Arc;
 
 use crate::{
-    AppState, about::dto::OpportunitiesDTO, core::{
+    AppState, core::{
         dto::ApiResponse,
         handlers::get_media_by_uuid,
+        response::into_api_response,
     }
 };
 
 use super::dto::{
-    AboutResponseDTO, OpportunityItemDTO, LeadershipDTO,
-    LeadershipItemDTO, WhoWeAreItemDTO, NewsDTO, NewsItemDTO
+    AboutResponseDTO, NewsDTO, NewsItemDTO, UpdateAboutDTO, WhoWeAreItemDTO,
+    LeadershipDTO, LeadershipItemDTO, OpportunitiesDTO, OpportunityItemDTO,
 };
 
 #[utoipa::path(
@@ -443,7 +444,144 @@ async fn fetch_news(
     Ok(news_data)
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/about",
+    request_body = UpdateAboutDTO,
+    responses(
+        (status = 200, description = "About page updated"),
+        (status = 500, description = "Database error")
+    ),
+    tag = "About"
+)]
+pub async fn update_about(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<UpdateAboutDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut tx = state.pool.begin().await.map_err(|e| {
+        eprintln!("Error starting transaction: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Server error".to_string()]) }))
+    })?;
+
+    // 1. Update main about table
+    let about_id = sqlx::query_scalar::<_, i32>(
+        "UPDATE about SET title = $1, description = $2, updated_at = NOW() RETURNING id"
+    )
+    .bind(&payload.title)
+    .bind(&payload.description)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|e| {
+        eprintln!("Error updating about: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to update about title".to_string()]) }))
+    })?;
+
+    // 2. Update Opportunities
+    sqlx::query("DELETE FROM about_opportunities WHERE about_id = $1")
+        .bind(about_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to clear opportunities".to_string()]) })))?;
+
+    for opp in payload.opportunities {
+        let opp_id = sqlx::query_scalar::<_, i32>(
+            "INSERT INTO about_opportunities (title, about_id, icon_uuid) VALUES ($1, $2, $3) RETURNING id"
+        )
+        .bind(&opp.title)
+        .bind(about_id)
+        .bind(opp.icon_uuid)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert opportunity".to_string()]) })))?;
+
+        for item_text in opp.items {
+            sqlx::query("INSERT INTO about_opportunity_items (opportunity_id, item_text) VALUES ($1, $2)")
+                .bind(opp_id)
+                .bind(item_text)
+                .execute(&mut *tx)
+                .await
+                .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert opportunity item".to_string()]) })))?;
+        }
+    }
+
+    // 3. Update Leadership
+    sqlx::query("DELETE FROM about_leadership WHERE about_id = $1")
+        .bind(about_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to clear leadership".to_string()]) })))?;
+
+    let lead_id = sqlx::query_scalar::<_, i32>(
+        "INSERT INTO about_leadership (about_id, logo_uuid, title, description) VALUES ($1, $2, $3, $4) RETURNING id"
+    )
+    .bind(about_id)
+    .bind(payload.leadership_logo_uuid)
+    .bind(&payload.leadership_title)
+    .bind(&payload.leadership_description)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert leadership".to_string()]) })))?;
+
+    for item in payload.leadership_items {
+        sqlx::query("INSERT INTO about_leadership_items (leadership_id, icon_uuid, text) VALUES ($1, $2, $3)")
+            .bind(lead_id)
+            .bind(item.icon_uuid)
+            .bind(item.text)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert leadership item".to_string()]) })))?;
+    }
+
+    // 4. Update Who We Are
+    sqlx::query("DELETE FROM about_who_we_are WHERE about_id = $1")
+        .bind(about_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to clear who we are".to_string()]) })))?;
+
+    for item in payload.who_we_are {
+        sqlx::query("INSERT INTO about_who_we_are (about_id, title, description, image_uuid) VALUES ($1, $2, $3, $4)")
+            .bind(about_id)
+            .bind(item.title)
+            .bind(item.description)
+            .bind(item.image_uuid)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert who we are item".to_string()]) })))?;
+    }
+
+    // 5. Update News
+    sqlx::query("DELETE FROM about_news WHERE about_id = $1")
+        .bind(about_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to clear news".to_string()]) })))?;
+
+    let news_id = sqlx::query_scalar::<_, i32>(
+        "INSERT INTO about_news (about_id, title) VALUES ($1, $2) RETURNING id"
+    )
+    .bind(about_id)
+    .bind(payload.news_title)
+    .fetch_one(&mut *tx)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert news".to_string()]) })))?;
+
+    for item in payload.news_items {
+        sqlx::query("INSERT INTO about_news_items (news_id, icon_uuid, text) VALUES ($1, $2, $3)")
+            .bind(news_id)
+            .bind(item.icon_uuid)
+            .bind(item.text)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to insert news item".to_string()]) })))?;
+    }
+
+    tx.commit().await.map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Failed to commit transaction".to_string()]) })))?;
+
+    into_api_response(StatusCode::OK, None, None, Some(vec!["About page updated successfully".to_string()]))
+}
+
 pub fn router() -> axum::Router<Arc<AppState>> {
     axum::Router::new()
-        .route("/", axum::routing::get(get_about))
+        .route("/", axum::routing::get(get_about).put(update_about))
 }
