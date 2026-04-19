@@ -28,17 +28,25 @@
 					</template>
 
 					<el-table :data="microfrontends" style="width: 100%">
-						<el-table-column prop="name" label="ID" width="180" />
+						<el-table-column prop="name" label="ID" width="120" />
 						<el-table-column prop="displayName" label="Название" />
-						<el-table-column prop="url" label="URL (entry)" />
-						<el-table-column label="Статус">
+						<el-table-column prop="url" label="URL" width="200" show-overflow-tooltip />
+						<el-table-column prop="category" label="Категория" width="100">
+							<template #default="scope">
+								<el-tag size="small" :type="scope.row.category === 'system' ? 'info' : 'warning'">
+									{{ scope.row.category }}
+								</el-tag>
+							</template>
+						</el-table-column>
+						<el-table-column prop="orderIndex" label="Порядок" width="90" align="center" />
+						<el-table-column label="Статус" width="100">
 							<template #default="scope">
 								<el-tag :type="scope.row.enabled ? 'success' : 'info'">
 									{{ scope.row.enabled ? 'Активен' : 'Отключен' }}
 								</el-tag>
 							</template>
 						</el-table-column>
-						<el-table-column label="Действия">
+						<el-table-column label="Действия" width="180">
 							<template #default="scope">
 								<el-button
 									:disabled="scope.row.name === 'orchestrator'"
@@ -67,16 +75,46 @@
 		<el-dialog v-model="dialogVisible" :title="isEdit ? 'Редактировать MFE' : 'Добавить MFE'" width="500px">
 			<el-form :model="form" label-width="120px">
 				<el-form-item label="ID (name)">
-					<el-input v-model="form.name" placeholder="напр. admin-analytics" />
+					<el-input v-model="form.name" placeholder="напр. admin-about" :disabled="isEdit" />
 				</el-form-item>
 				<el-form-item label="Название">
-					<el-input v-model="form.displayName" placeholder="напр. Аналитика" />
+					<el-input v-model="form.displayName" placeholder="напр. About Page" />
 				</el-form-item>
 				<el-form-item label="URL (entry)">
-					<el-input v-model="form.url" placeholder="http://localhost:3001/assets/remoteEntry.js" />
+					<el-input v-model="form.url" placeholder="http://localhost:3006/assets/remoteEntry.js" />
+				</el-form-item>
+				<el-row :gutter="20">
+					<el-col :span="12">
+						<el-form-item label="Scope">
+							<el-input v-model="form.scope" placeholder="about" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="Module">
+							<el-input v-model="form.module" placeholder="./AboutRoutes" />
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row :gutter="20">
+					<el-col :span="12">
+						<el-form-item label="Icon">
+							<el-input v-model="form.icon" placeholder="EditPen" />
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="Категория">
+							<el-select v-model="form.category" placeholder="System/Website">
+								<el-option label="System" value="system" />
+								<el-option label="Website" value="website" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-form-item label="Порядок">
+					<el-input-number v-model="form.orderIndex" :min="0" :max="100" />
 				</el-form-item>
 				<el-form-item label="Активен">
-					<el-switch v-model="form.enabled" :disabled="form.name === 'admin-orchestrator'" />
+					<el-switch v-model="form.enabled" :disabled="form.name === 'orchestrator'" />
 				</el-form-item>
 			</el-form>
 			<template #footer>

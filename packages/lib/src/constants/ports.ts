@@ -23,6 +23,10 @@ export const APPS_PORTS = {
 		preview: 3005,
 		dev: 4178,
 	},
+	about: {
+		preview: 3006,
+		dev: 4179,
+	},
 } as const
 
 export const PACKAGES_PORTS = {
