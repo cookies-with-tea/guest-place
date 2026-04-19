@@ -1,1 +1,1 @@
-export * from './playwright.config';
+export * from './playwright.config'

@@ -1,12 +1,12 @@
 <template>
-  <div class="admin-content-app">
-    <router-view />
-  </div>
+	<div class="admin-content-app">
+		<router-view />
+	</div>
 </template>
 
 <style>
 .admin-content-app {
-  padding: 20px;
-  min-height: 100vh;
+	min-height: 100vh;
+	padding: 20px;
 }
 </style>

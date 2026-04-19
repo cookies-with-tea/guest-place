@@ -92,20 +92,18 @@ export const initRouter = async (app: any) => {
 
 	const { setData } = useSidebar()
 
-	const systemGroups = sidebarGroups.filter(
-		(g) => !g.category || g.category === 'system' || g.name === 'orchestrator',
-	)
+	const systemGroups = sidebarGroups.filter((g) => !g.category || g.category === 'system' || g.name === 'orchestrator')
 	const websiteGroups = sidebarGroups.filter((g) => g.category === 'website')
 
 	setData('system', routesToSidebar(systemGroups))
-	setData('website', routesToSidebar(websiteGroups))
 
+	setData('website', routesToSidebar(websiteGroups))
 
 	window.addEventListener('mfe:updated', async () => {
 		const { sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
 
 		const newSystemGroups = updatedGroups.filter(
-			(g) => !g.category || g.category === 'system' || g.name === 'orchestrator',
+			(g) => !g.category || g.category === 'system' || g.name === 'orchestrator'
 		)
 		const newWebsiteGroups = updatedGroups.filter((g) => g.category === 'website')
 

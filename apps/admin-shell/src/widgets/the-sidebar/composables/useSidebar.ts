@@ -8,9 +8,7 @@ const sidebarData = ref<Record<SidebarContext, ISidebarItem[]>>({
 	website: [],
 })
 
-const activeContext = ref<SidebarContext>(
-	(localStorage.getItem('gp-sidebar-context') as SidebarContext) || 'system',
-)
+const activeContext = ref<SidebarContext>((localStorage.getItem('gp-sidebar-context') as SidebarContext) || 'system')
 
 export const useSidebar = () => {
 	const setData = (context: SidebarContext, data: ISidebarItem[]) => {
@@ -19,6 +17,7 @@ export const useSidebar = () => {
 
 	const setContext = (context: SidebarContext) => {
 		activeContext.value = context
+
 		localStorage.setItem('gp-sidebar-context', context)
 	}
 

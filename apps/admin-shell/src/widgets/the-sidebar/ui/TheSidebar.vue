@@ -11,21 +11,13 @@
 
 		<div class="context-switcher" :class="{ 'is-collapsed': isCollapsed }">
 			<el-tooltip :content="t('general.system_admin')" placement="right" :disabled="!isCollapsed">
-				<div 
-					class="context-item" 
-					:class="{ active: activeContext === 'system' }"
-					@click="setContext('system')"
-				>
+				<div class="context-item" :class="{ active: activeContext === 'system' }" @click="setContext('system')">
 					<el-icon><Setting /></el-icon>
 					<span v-show="!isCollapsed">Admin</span>
 				</div>
 			</el-tooltip>
 			<el-tooltip :content="t('general.website_content')" placement="right" :disabled="!isCollapsed">
-				<div 
-					class="context-item" 
-					:class="{ active: activeContext === 'website' }"
-					@click="setContext('website')"
-				>
+				<div class="context-item" :class="{ active: activeContext === 'website' }" @click="setContext('website')">
 					<el-icon><EditPen /></el-icon>
 					<span v-show="!isCollapsed">Website</span>
 				</div>
@@ -85,6 +77,7 @@ const route = useRoute()
 
 const { sidebarData, activeContext, setContext } = useSidebar()
 const { t } = useI18n()
+
 import { Setting, EditPen } from '@element-plus/icons-vue'
 
 const isCollapsed = ref(localStorage.getItem('gp-sidebar-collapsed') === 'true')
@@ -159,11 +152,11 @@ const getIcon = (name: string) => {
 }
 
 .context-switcher {
-	padding: 8px;
 	display: flex;
-	gap: 4px;
 	border-bottom: 1px solid var(--gp-glass-border);
-	background: rgba(255, 255, 255, 0.02);
+	background: rgb(255, 255, 255, 0.02);
+	padding: 8px;
+	gap: 4px;
 }
 
 .context-switcher.is-collapsed {
@@ -172,29 +165,29 @@ const getIcon = (name: string) => {
 }
 
 .context-item {
-	flex: 1;
 	height: 36px;
 	display: flex;
+	flex: 1;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
 	border-radius: var(--gp-radius-sm);
-	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.85rem;
 	color: var(--gp-text-secondary);
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	font-size: 0.85rem;
-	font-weight: 600;
+	cursor: pointer;
+	gap: 8px;
 }
 
 .context-item:hover {
-	background: var(--gp-glass-hover);
 	color: var(--gp-text-primary);
+	background: var(--gp-glass-hover);
 }
 
 .context-item.active {
-	background: var(--gp-primary);
+	box-shadow: 0 4px 12px rgb(var(--gp-primary-rgb), 0.3);
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(var(--gp-primary-rgb), 0.3);
+	background: var(--gp-primary);
 }
 
 .is-collapsed .context-item {

@@ -14,7 +14,7 @@
 		<div class="editor-content">
 			<el-row :gutter="24">
 				<!-- LEFT COLUMN -->
-				<el-col :lg="12" :md="24">
+				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
 					<div class="content-group">
 						<!-- GENERAL SECTION -->
 						<el-card class="section-card mb-24">
@@ -152,7 +152,7 @@
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
-				<el-col :lg="12" :md="24">
+				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
 					<div class="content-group">
 						<!-- WHO WE ARE SECTION -->
 						<div class="section-header mb-16">
@@ -236,7 +236,6 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import { useI18n } from '@admin-panel/i18n'
 import { createApi } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
 import { Plus, Delete, Refresh, Check } from '@element-plus/icons-vue'
@@ -287,10 +286,8 @@ interface IAboutData {
 	}
 }
 
-const { t } = useI18n()
 const { fetchData: apiFetch } = createApi('about')
 
-const activeTab = ref('general')
 const loading = ref(false)
 const saving = ref(false)
 
@@ -314,17 +311,25 @@ const form = reactive({
 
 const fetchData = async () => {
 	loading.value = true
+
 	try {
 		const response = await apiFetch<IAboutData>('')
+
 		if (response.data) {
 			const d = response.data
+
 			form.title = d.title
+
 			form.description = d.description
-			
+
 			form.heroGuideUuid = d.heroGuideUuid || null
+
 			form.opportunitiesGuideUuid = d.opportunitiesGuideUuid || null
+
 			form.leadershipGuideUuid = d.leadershipGuideUuid || null
+
 			form.whoWeAreGuideUuid = d.whoWeAreGuideUuid || null
+
 			form.newsGuideUuid = d.newsGuideUuid || null
 
 			form.opportunities = d.opportunities.items.map((o: any) => ({
@@ -334,25 +339,32 @@ const fetchData = async () => {
 				link: o.link || '',
 				buttonText: o.buttonText || '',
 			}))
+
 			form.leadershipTitle = d.leadership.title
+
 			form.leadershipDescription = d.leadership.description
+
 			form.leadershipLogoUuid = d.leadership.logo?.uuid || null
+
 			form.leadershipItems = d.leadership.items.map((i: any) => ({
 				text: i.text,
 				iconUuid: i.icon?.uuid || null,
 			}))
+
 			form.whoWeAre = d.whoWeAre.map((w: any) => ({
 				title: w.title,
 				description: w.description,
 				imageUuid: w.image?.uuid || null,
 			}))
+
 			form.newsTitle = d.news.title
+
 			form.newsItems = d.news.items.map((n: any) => ({
 				text: n.text,
 				iconUuid: n.icon?.uuid || null,
 			}))
 		}
-	} catch (error) {
+	} catch {
 		ElMessage.error('Failed to load about data')
 	} finally {
 		loading.value = false
@@ -361,14 +373,17 @@ const fetchData = async () => {
 
 const handleSave = async () => {
 	saving.value = true
+
 	try {
 		await apiFetch('', {
 			method: 'PUT',
 			body: form,
 		})
+
 		ElMessage.success('About page updated successfully')
+
 		fetchData() // Refresh to get URLs
-	} catch (error) {
+	} catch {
 		ElMessage.error('Failed to save changes')
 	} finally {
 		saving.value = false
@@ -377,14 +392,19 @@ const handleSave = async () => {
 
 const autoSave = async () => {
 	if (loading.value || saving.value) return
+
 	try {
 		await apiFetch('', {
 			method: 'PUT',
 			body: form,
 		})
+
+		// eslint-disable-next-line no-console
 		console.log('Section preview auto-saved')
+
 		fetchData() // Refresh to get URLs for the picker
 	} catch (error) {
+		// eslint-disable-next-line no-console
 		console.error('Auto-save failed:', error)
 	}
 }
@@ -437,44 +457,93 @@ onMounted(fetchData)
 </script>
 
 <style scoped lang="scss">
+.about-page-editor {
+	max-width: 1600px;
+	padding: 24px;
+	margin: 0 auto;
+}
+
+.editor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--gp-glass-border);
+	padding-bottom: 24px;
+	margin-bottom: 32px;
+
+	h1 {
+		font-weight: 800;
+		font-size: 1.75rem;
+		-webkit-text-fill-color: transparent;
+		background: linear-gradient(to right, var(--gp-primary), var(--gp-text-primary));
+		-webkit-background-clip: text;
+		margin: 0;
+	}
+
+	.subtitle {
+		font-size: 0.95rem;
+		color: var(--gp-text-secondary);
+		margin: 4px 0 0;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 12px;
+	}
+}
+
 .section-header {
 	h2 {
-		font-size: 1.25rem;
 		font-weight: 700;
-		margin: 0;
+		font-size: 1.25rem;
 		color: var(--gp-primary);
+		margin: 0;
 	}
 }
 
 .content-group {
 	display: flex;
 	flex-direction: column;
+	gap: 24px;
 }
 
-.mb-8 { margin-bottom: 8px; }
-.mb-16 { margin-bottom: 16px; }
-.mb-24 { margin-bottom: 24px; }
-.mb-32 { margin-bottom: 32px; }
+.mb-8 {
+	margin-bottom: 8px;
+}
 
-.mt-16 { margin-top: 16px; }
+.mb-16 {
+	margin-bottom: 16px;
+}
+
+.mb-24 {
+	margin-bottom: 24px;
+}
+
+.mb-32 {
+	margin-bottom: 32px;
+}
+
+.mt-16 {
+	margin-top: 16px;
+}
 
 .section-card {
-	background: var(--gp-bg-card);
 	border: 1px solid var(--gp-glass-border);
+	background: var(--gp-bg-card);
 	backdrop-filter: blur(8px);
 }
 
 .card-header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
+	justify-content: space-between;
 	font-weight: 600;
 }
 
 .dynamic-list {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: 24px;
 }
 
 .list-item-wrapper {
@@ -490,9 +559,9 @@ onMounted(fetchData)
 }
 
 .sub-item-complex {
-	margin-bottom: 12px;
-	padding-bottom: 12px;
 	border-bottom: 1px dashed var(--gp-glass-border);
+	padding-bottom: 12px;
+	margin-bottom: 12px;
 
 	&:last-child {
 		border-bottom: none;
@@ -500,17 +569,17 @@ onMounted(fetchData)
 }
 
 .divider {
-	font-size: 0.9rem;
-	font-weight: 600;
-	color: var(--gp-primary);
-	margin: 24px 0 16px 0;
 	display: flex;
 	align-items: center;
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: var(--gp-primary);
+	margin: 24px 0 16px;
 
 	&::after {
 		content: '';
-		flex: 1;
 		height: 1px;
+		flex: 1;
 		background: linear-gradient(to right, var(--gp-primary), transparent);
 		margin-left: 16px;
 	}
@@ -518,22 +587,24 @@ onMounted(fetchData)
 
 .add-btn {
 	align-self: flex-start;
+	padding: 12px 24px;
+	margin-top: 16px;
 }
 
 .guide-hint {
-	font-size: 0.85rem;
-	color: var(--gp-primary);
-	margin: 8px 0 0 0;
-	text-align: center;
 	font-weight: 600;
+	font-size: 0.85rem;
+	text-align: center;
+	color: var(--gp-primary);
+	margin: 8px 0 0;
 }
 
 .section-guide-embed {
-	margin-top: 20px;
-	padding: 16px;
-	background: rgba(var(--gp-primary-rgb), 0.05);
 	border: 1px dashed var(--gp-glass-border);
 	border-radius: 8px;
+	background: rgb(var(--gp-primary-rgb), 0.05);
+	padding: 16px;
+	margin-top: 20px;
 }
 
 :deep(.el-form-item__label) {

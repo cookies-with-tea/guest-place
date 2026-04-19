@@ -14,7 +14,7 @@
 		<div class="editor-content">
 			<el-row :gutter="24">
 				<!-- LEFT COLUMN -->
-				<el-col :lg="12" :md="24">
+				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
 					<div class="content-group">
 						<!-- GENERAL SECTION -->
 						<el-card class="section-card mb-24">
@@ -23,15 +23,15 @@
 									<span>General Settings</span>
 								</div>
 							</template>
-								<el-form label-position="top">
-									<el-form-item label="Page Title">
-										<el-input v-model="form.title" placeholder="e.g., Гостям" />
-									</el-form-item>
-									<div class="section-guide-embed">
-										<UiMediaPicker v-model="form.heroGuideUuid" />
-										<p class="guide-hint">Hero Section Preview</p>
-									</div>
-								</el-form>
+							<el-form label-position="top">
+								<el-form-item label="Page Title">
+									<el-input v-model="form.title" placeholder="e.g., Гостям" />
+								</el-form-item>
+								<div class="section-guide-embed">
+									<UiMediaPicker v-model="form.heroGuideUuid" />
+									<p class="guide-hint">Hero Section Preview</p>
+								</div>
+							</el-form>
 						</el-card>
 
 						<!-- OPPORTUNITIES SECTION -->
@@ -108,7 +108,7 @@
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
-				<el-col :lg="12" :md="24">
+				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
 					<div class="content-group">
 						<!-- INTERACTION CARDS SECTION -->
 						<div class="section-header mb-16">
@@ -180,7 +180,12 @@
 											<UiMediaPicker v-model="item.iconUuid" />
 										</el-col>
 										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.additionalServices, index)" />
+											<el-button
+												type="danger"
+												link
+												:icon="Delete"
+												@click="removeItem(form.additionalServices, index)"
+											/>
 										</el-col>
 									</el-row>
 								</div>
@@ -236,7 +241,6 @@ interface IGuestsData {
 
 const { fetchData: apiFetch } = createApi('guests')
 
-const activeTab = ref('general')
 const loading = ref(false)
 const saving = ref(false)
 
@@ -256,22 +260,31 @@ const form = reactive({
 
 const fetchData = async () => {
 	loading.value = true
+
 	try {
 		const response = await apiFetch<IGuestsData>('')
+
 		if (response.data) {
 			const d = response.data
+
 			form.title = d.title
+
 			form.heroGuideUuid = d.heroGuideUuid || null
+
 			form.opportunitiesGuideUuid = d.opportunitiesGuideUuid || null
+
 			form.interactionCardsGuideUuid = d.interactionCardsGuideUuid || null
+
 			form.searchPromoGuideUuid = d.searchPromoGuideUuid || null
+
 			form.additionalServicesGuideUuid = d.additionalServicesGuideUuid || null
-			
+
 			form.opportunities = d.opportunities.map((o: any) => ({
 				title: o.title,
 				iconUuid: o.iconUuid || o.icon?.uuid || null,
 				items: o.items || [],
 			}))
+
 			form.interactionCards = d.interactionCards.map((c: any) => ({
 				title: c.title,
 				text: c.text,
@@ -279,14 +292,17 @@ const fetchData = async () => {
 				link: c.link,
 				iconUuid: c.iconUuid || c.icon?.uuid || null,
 			}))
+
 			form.searchPromoTitle = d.searchPromo?.title || ''
+
 			form.searchPromoDescription = d.searchPromo?.description || ''
+
 			form.additionalServices = d.additionalServices.map((s: any) => ({
 				text: s.text,
 				iconUuid: s.iconUuid || s.icon?.uuid || null,
 			}))
 		}
-	} catch (error) {
+	} catch {
 		ElMessage.error('Failed to load guests data')
 	} finally {
 		loading.value = false
@@ -295,6 +311,7 @@ const fetchData = async () => {
 
 const handleSave = async () => {
 	saving.value = true
+
 	try {
 		const body = {
 			title: form.title,
@@ -311,13 +328,16 @@ const handleSave = async () => {
 			},
 			additionalServices: form.additionalServices,
 		}
+
 		await apiFetch('', {
 			method: 'PUT',
 			body,
 		})
+
 		ElMessage.success('Guests page updated successfully')
+
 		fetchData()
-	} catch (error) {
+	} catch {
 		ElMessage.error('Failed to save changes')
 	} finally {
 		saving.value = false
@@ -326,6 +346,7 @@ const handleSave = async () => {
 
 const autoSave = async () => {
 	if (loading.value || saving.value) return
+
 	try {
 		const body = {
 			title: form.title,
@@ -342,13 +363,18 @@ const autoSave = async () => {
 			},
 			additionalServices: form.additionalServices,
 		}
+
 		await apiFetch('', {
 			method: 'PUT',
 			body,
 		})
+
+		// eslint-disable-next-line no-console
 		console.log('Section preview auto-saved')
+
 		fetchData()
 	} catch (error) {
+		// eslint-disable-next-line no-console
 		console.error('Auto-save failed:', error)
 	}
 }
@@ -397,24 +423,72 @@ onMounted(fetchData)
 </script>
 
 <style scoped lang="scss">
+.guests-page-editor {
+	max-width: 1600px;
+	padding: 24px;
+	margin: 0 auto;
+}
+
+.editor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--gp-glass-border);
+	padding-bottom: 24px;
+	margin-bottom: 32px;
+
+	h1 {
+		font-weight: 800;
+		font-size: 1.75rem;
+		-webkit-text-fill-color: transparent;
+		background: linear-gradient(to right, var(--gp-primary), var(--gp-text-primary));
+		-webkit-background-clip: text;
+		background-clip: text;
+		margin: 0;
+	}
+
+	.subtitle {
+		font-size: 0.95rem;
+		color: var(--gp-text-secondary);
+		margin: 4px 0 0;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 12px;
+	}
+}
+
 .section-header {
 	h2 {
-		font-size: 1.25rem;
 		font-weight: 700;
-		margin: 0;
+		font-size: 1.25rem;
 		color: var(--gp-primary);
+		margin: 0;
 	}
 }
 
 .content-group {
 	display: flex;
 	flex-direction: column;
+	gap: 24px;
 }
 
-.mb-8 { margin-bottom: 8px; }
-.mb-16 { margin-bottom: 16px; }
-.mb-24 { margin-bottom: 24px; }
-.mb-32 { margin-bottom: 32px; }
+.mb-8 {
+	margin-bottom: 8px;
+}
+
+.mb-16 {
+	margin-bottom: 16px;
+}
+
+.mb-24 {
+	margin-bottom: 24px;
+}
+
+.mb-32 {
+	margin-bottom: 32px;
+}
 
 .mt-8 {
 	margin-top: 8px;
@@ -422,6 +496,8 @@ onMounted(fetchData)
 
 .add-btn {
 	align-self: flex-start;
+	padding: 12px 24px;
+	margin-top: 16px;
 }
 
 .glass-tabs {
@@ -430,30 +506,30 @@ onMounted(fetchData)
 	}
 
 	:deep(.el-tabs__item) {
-		color: var(--gp-text-secondary);
 		font-weight: 500;
+		color: var(--gp-text-secondary);
 
 		&.is-active {
-			color: var(--gp-primary);
 			font-weight: 700;
+			color: var(--gp-primary);
 		}
 	}
 }
 
 .guide-hint {
-	font-size: 0.85rem;
-	color: var(--gp-primary);
-	margin: 8px 0 0 0;
-	text-align: center;
 	font-weight: 600;
+	font-size: 0.85rem;
+	text-align: center;
+	color: var(--gp-primary);
+	margin: 8px 0 0;
 }
 
 .section-guide-embed {
-	margin-top: 20px;
-	padding: 16px;
-	background: rgba(var(--gp-primary-rgb), 0.05);
 	border: 1px dashed var(--gp-glass-border);
 	border-radius: 8px;
+	background: rgb(var(--gp-primary-rgb), 0.05);
+	padding: 16px;
+	margin-top: 20px;
 }
 
 :deep(.el-form-item__label) {

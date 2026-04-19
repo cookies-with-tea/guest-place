@@ -1,8 +1,6 @@
 import { createApi } from '.'
 import { removeFileExtension } from '../utils'
 
-
-
 const { fetchData } = createApi('media')
 
 export const uploadMedia = async (rawFile: File) => {
