@@ -33,4 +33,19 @@ export const ROUTES = {
 			title: 'general.features',
 		},
 	},
+	content: {
+		name: 'SchemaBuilder',
+		title: 'Схемы',
+		icon: 'Document',
+	},
+	about: {
+		name: 'AboutPage',
+		title: 'general.about',
+		icon: 'InfoFilled',
+	},
+	guests: {
+		name: 'GuestsPage',
+		title: 'general.guests',
+		icon: 'UserFilled',
+	},
 } as const

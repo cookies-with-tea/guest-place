@@ -187,16 +187,7 @@ export const useUsers = () => {
 
 			filters.value.sortOrder = undefined
 		} else {
-			// Map frontend camelCase to backend snake_case if needed
-			// For simple columns, they might match or need minor adjustment
-			const columnMap: Record<string, string> = {
-				firstName: 'first_name',
-				lastName: 'last_name',
-				secondName: 'second_name',
-				birthDate: 'birth_date',
-			}
-
-			filters.value.sortBy = columnMap[prop] || prop
+			filters.value.sortBy = prop
 
 			filters.value.sortOrder = (order === 'ascending' ? 'ASC' : 'DESC') as any
 		}

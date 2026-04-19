@@ -4,10 +4,10 @@ import { ROUTES } from '@admin-panel/lib'
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		name: ROUTES.about.name,
-		component: () => import('../../pages/AboutPage.vue'),
+		name: ROUTES.content.name,
+		component: () => import('../../pages/SchemaBuilderPage.vue'),
 		meta: {
-			title: ROUTES.about.title,
+			title: ROUTES.content.title,
 		},
 	},
 ]

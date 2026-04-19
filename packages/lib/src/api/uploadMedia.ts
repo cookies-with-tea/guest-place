@@ -1,14 +1,11 @@
 import { createApi } from '.'
 import { removeFileExtension } from '../utils'
 
-interface UploadRawFile extends File {
-	uid: number
-	isDirectory?: boolean
-}
+
 
 const { fetchData } = createApi('media')
 
-export const uploadMedia = async (rawFile: UploadRawFile) => {
+export const uploadMedia = async (rawFile: File) => {
 	const formData = new FormData()
 
 	formData.append('file', rawFile)
