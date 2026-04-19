@@ -91,8 +91,8 @@ async fn fetch_opportunities(
     state: &Arc<AppState>,
     guests_id: i32,
 ) -> Result<Vec<GuestOpportunityItemDTO>, (StatusCode, Json<ApiResponse<GuestsResponseDTO>>)> {
-    let opportunities = sqlx::query_as::<_, (i32, String, Option<uuid::Uuid>)>(
-        "SELECT id, title, icon_uuid FROM guests_opportunities WHERE guests_id = $1 ORDER BY id"
+    let opportunities = sqlx::query_as::<_, (i32, String, Option<uuid::Uuid>, String, String)>(
+        "SELECT id, title, icon_uuid, button_text, link FROM guests_opportunities WHERE guests_id = $1 ORDER BY id"
     )
     .bind(guests_id)
     .fetch_all(&state.pool)
@@ -124,6 +124,8 @@ async fn fetch_opportunities(
             items,
             icon,
             icon_uuid: opp.2,
+            button_text: opp.3,
+            link: opp.4,
         });
     }
     Ok(result)
@@ -264,10 +266,12 @@ pub async fn update_guests(
     sqlx::query("DELETE FROM guests_additional_services WHERE guests_id = $1").bind(guests_id).execute(&mut *tx).await.ok();
 
     for opp in payload.opportunities {
-        let opp_id: i32 = sqlx::query_scalar("INSERT INTO guests_opportunities (guests_id, title, icon_uuid) VALUES ($1, $2, $3) RETURNING id")
+        let opp_id: i32 = sqlx::query_scalar("INSERT INTO guests_opportunities (guests_id, title, icon_uuid, button_text, link) VALUES ($1, $2, $3, $4, $5) RETURNING id")
             .bind(guests_id)
             .bind(&opp.title)
             .bind(opp.icon_uuid)
+            .bind(&opp.button_text)
+            .bind(&opp.link)
             .fetch_one(&mut *tx)
             .await
             .map_err(|_| into_api_response::<()>(StatusCode::INTERNAL_SERVER_ERROR, None, Some(error_map("database", "Failed to insert opportunity")), None).expect_err("Error"))?;
