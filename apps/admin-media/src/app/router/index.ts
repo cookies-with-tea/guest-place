@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
+
 import { ROUTES } from '@admin-panel/lib'
 
 export const routes: RouteRecordRaw[] = [

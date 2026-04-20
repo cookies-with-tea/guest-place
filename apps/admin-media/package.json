@@ -1,25 +1,6 @@
 {
 	"name": "admin-media",
-	"private": true,
 	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "vue-tsc -b && vite build",
-		"preview": "vite preview",
-		"test:unit": "vitest --passWithNoTests",
-		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:e2e": "start-server-and-test 'vite dev' http://localhost:4177 'cypress run --e2e'",
-		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4177 'cypress open --e2e'",
-		"eslint": "eslint . --ext .ts,.js,.vue",
-		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
-		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
-		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
-		"prettier": "prettier --check .",
-		"prettier:fix": "prettier --write .",
-		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
-		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix"
-	},
 	"dependencies": {
 		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
@@ -44,5 +25,24 @@
 		"typescript": "~5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
-	}
+	},
+	"private": true,
+	"scripts": {
+		"build": "vue-tsc -b && vite build",
+		"dev": "vite",
+		"eslint": "eslint . --ext .ts,.js,.vue",
+		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
+		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
+		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"preview": "vite preview",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
+		"test:coverage": "vitest run --coverage --passWithNoTests",
+		"test:e2e": "start-server-and-test 'vite dev' http://localhost:4177 'cypress run --e2e'",
+		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4177 'cypress open --e2e'",
+		"test:unit": "vitest --passWithNoTests"
+	},
+	"type": "module"
 }

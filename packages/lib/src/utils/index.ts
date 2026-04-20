@@ -1,11 +1,6 @@
-export * from './formatNumbers'
-
-export * from './mappers'
-
-export * from './string'
-
 export * from './federation'
-
+export * from './formatNumbers'
 export * from './lifecycle'
-
+export * from './mappers'
 export * from './store'
+export * from './string'

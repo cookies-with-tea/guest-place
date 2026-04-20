@@ -1,4 +1,5 @@
-import { ref, reactive, computed } from 'vue'
+import { computed, reactive, ref } from 'vue'
+
 import { authApi, useAuth } from '@admin-panel/lib'
 
 export type AuthMode = 'login' | 'register' | 'forgot-password' | 'mfa'

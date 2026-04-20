@@ -1,9 +1,11 @@
-import { ref, watch, computed } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { UserFilters, IUserCreateUpdate } from '../../model'
-import { USERS_QUERY_KEY } from '../../model'
-import { userApi } from '../../api'
+import { computed, ref, watch } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+
 import type { IPagination } from '@admin-panel/lib'
+
+import { userApi } from '../../api'
+import type { IUserCreateUpdate, UserFilters } from '../../model'
+import { USERS_QUERY_KEY } from '../../model'
 
 const isModalOpen = ref(false)
 const isDetailDrawerOpen = ref(false)

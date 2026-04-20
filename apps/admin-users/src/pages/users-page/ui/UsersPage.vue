@@ -11,9 +11,11 @@
 
 <script setup lang="ts">
 import { useTheme } from '@admin-panel/ui'
+
 import { UsersFilters } from '#features/users-filters'
-import { UsersUpdateModal } from '#features/users-update-modal'
 import { UsersTable } from '#features/users-table'
+import { UsersUpdateModal } from '#features/users-update-modal'
+
 import { DrawerDetailUser } from './components/drawer-detail-user'
 
 useTheme()

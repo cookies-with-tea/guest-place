@@ -1,16 +1,16 @@
 <template>
-	<el-drawer v-model="isDetailDrawerOpen" title="User Details" direction="rtl" size="50%" @closed="closeDetailDrawer">
+	<el-drawer v-model="isDetailDrawerOpen" direction="rtl" size="50%" title="User Details" @closed="closeDetailDrawer">
 		<div v-if="userData" class="drawer-detail-user">
 			<div class="avatar-section">
 				<div class="avatar-container">
-					<img v-if="userData.avatar" :src="userData.avatar" alt="User Avatar" class="avatar-image" />
+					<img v-if="userData.avatar" alt="User Avatar" class="avatar-image" :src="userData.avatar" />
 					<div v-else class="avatar-placeholder">
 						<span>{{ getInitials(userData) }}</span>
 					</div>
 				</div>
 			</div>
 
-			<el-descriptions title="User Information" border :column="1" class="user-info">
+			<el-descriptions border class="user-info" :column="1" title="User Information">
 				<el-descriptions-item label="UUID">{{ userData.uuid }}</el-descriptions-item>
 				<el-descriptions-item label="Email">{{ userData.email }}</el-descriptions-item>
 				<el-descriptions-item label="First Name">{{ userData.firstName || '-' }}</el-descriptions-item>
@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import { useUsers } from '#entities/user/lib/composables'
 
 const { editingUser, isDetailDrawerOpen, closeDetailDrawer } = useUsers()

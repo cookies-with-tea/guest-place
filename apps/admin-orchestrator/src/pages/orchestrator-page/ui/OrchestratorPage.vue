@@ -7,7 +7,7 @@
 		<el-tabs v-model="activeTab" class="orchestrator-tabs">
 			<!-- Вкладка Топология -->
 			<el-tab-pane label="Топология" name="topology">
-				<el-card class="stats-card glass-card" v-loading="isLoading">
+				<el-card v-loading="isLoading" class="stats-card glass-card">
 					<template #header>
 						<div class="card-header">
 							<span>Карта системы (D3.js Visualization)</span>
@@ -19,26 +19,26 @@
 
 			<!-- Вкладка Микрофронтенды -->
 			<el-tab-pane label="Модули (MFE)" name="modules">
-				<el-card class="mfe-list-card glass-card" v-loading="isLoading">
+				<el-card v-loading="isLoading" class="mfe-list-card glass-card">
 					<template #header>
 						<div class="card-header">
 							<span>Список подключенных модулей</span>
-							<el-button type="primary" size="small" @click="handleCreate">Добавить MFE</el-button>
+							<el-button size="small" type="primary" @click="handleCreate">Добавить MFE</el-button>
 						</div>
 					</template>
 
 					<el-table :data="microfrontends" style="width: 100%">
-						<el-table-column prop="name" label="ID" width="120" />
-						<el-table-column prop="displayName" label="Название" />
-						<el-table-column prop="url" label="URL" width="200" show-overflow-tooltip />
-						<el-table-column prop="category" label="Категория" width="100">
+						<el-table-column label="ID" prop="name" width="120" />
+						<el-table-column label="Название" prop="displayName" />
+						<el-table-column label="URL" prop="url" show-overflow-tooltip width="200" />
+						<el-table-column label="Категория" prop="category" width="100">
 							<template #default="scope">
 								<el-tag size="small" :type="scope.row.category === 'system' ? 'info' : 'warning'">
 									{{ scope.row.category }}
 								</el-tag>
 							</template>
 						</el-table-column>
-						<el-table-column prop="orderIndex" label="Порядок" width="90" align="center" />
+						<el-table-column align="center" label="Порядок" prop="orderIndex" width="90" />
 						<el-table-column label="Статус" width="100">
 							<template #default="scope">
 								<el-tag :type="scope.row.enabled ? 'success' : 'info'">
@@ -51,16 +51,16 @@
 								<el-button
 									:disabled="scope.row.name === 'orchestrator'"
 									plain
-									type="primary"
 									size="small"
+									type="primary"
 									@click="handleEdit(scope.row)"
 									>Изменить</el-button
 								>
 								<el-button
 									:disabled="scope.row.name === 'orchestrator'"
 									plain
-									type="danger"
 									size="small"
+									type="danger"
 									@click="handleDelete(scope.row)"
 									>Удалить</el-button
 								>
@@ -73,9 +73,9 @@
 
 		<!-- Dialog for Add/Edit -->
 		<el-dialog v-model="dialogVisible" :title="isEdit ? 'Редактировать MFE' : 'Добавить MFE'" width="500px">
-			<el-form :model="form" label-width="120px">
+			<el-form label-width="120px" :model="form">
 				<el-form-item label="ID (name)">
-					<el-input v-model="form.name" placeholder="напр. admin-about" :disabled="isEdit" />
+					<el-input v-model="form.name" :disabled="isEdit" placeholder="напр. admin-about" />
 				</el-form-item>
 				<el-form-item label="Название">
 					<el-input v-model="form.displayName" placeholder="напр. About Page" />
@@ -111,7 +111,7 @@
 					</el-col>
 				</el-row>
 				<el-form-item label="Порядок">
-					<el-input-number v-model="form.orderIndex" :min="0" :max="100" />
+					<el-input-number v-model="form.orderIndex" :max="100" :min="0" />
 				</el-form-item>
 				<el-form-item label="Активен">
 					<el-switch v-model="form.enabled" :disabled="form.name === 'orchestrator'" />
@@ -128,8 +128,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+
 import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
+
 import MfeStatsChart from './MfeStatsChart.vue'
 
 const activeTab = ref('topology')

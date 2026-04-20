@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { snakeToCamel, camelToSnake } from '../../utils/mappers'
+import { describe, expect, it } from 'vitest'
+
+import { camelToSnake, snakeToCamel } from '../../utils/mappers'
 
 describe('mappers', () => {
 	describe('snakeToCamel', () => {

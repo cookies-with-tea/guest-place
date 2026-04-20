@@ -1,4 +1,4 @@
-import type { TranslationFilters, Translation, Pagination } from '../model'
+import type { Pagination, Translation, TranslationFilters } from '../model'
 
 export interface FetchTranslationsParams extends TranslationFilters {
 	page: number

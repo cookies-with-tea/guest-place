@@ -1,8 +1,8 @@
 <template>
 	<div
 		class="ui-theme-switcher"
-		@click="toggleTheme"
 		:title="isDark ? 'Переключить на светлую тему' : 'Переключить на темную тему'"
+		@click="toggleTheme"
 	>
 		<div class="switcher-icon" :class="{ 'is-dark': isDark }">
 			<el-icon v-if="isDark"><Moon /></el-icon>
@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
 import { Moon, Sunny } from '@element-plus/icons-vue'
+
 import { useTheme } from '../lib/composables/useTheme'
 
 const { isDark, toggleTheme } = useTheme()

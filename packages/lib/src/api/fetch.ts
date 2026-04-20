@@ -1,6 +1,7 @@
 import { $fetch, type FetchOptions } from 'ofetch'
+
 import type { CamelCasedProperties, IResponse, SnakeCasedProperties } from '../model'
-import { snakeToCamel, camelToSnake } from '../utils'
+import { camelToSnake, snakeToCamel } from '../utils'
 
 type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -37,6 +38,7 @@ export const createApi = (entityName: string) => {
 
 			const response = await $fetch<IResponse<SnakeCasedProperties<T>>>(`${baseUrl}${url}`, {
 				...options,
+				method: options?.method || 'GET',
 				body,
 				params,
 				responseType: 'json',

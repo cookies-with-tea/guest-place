@@ -1,22 +1,22 @@
 {
 	"name": "@admin-panel/typescript-config",
 	"version": "1.0.0",
-	"private": true,
-	"type": "module",
-	"main": "base.json",
-	"exports": {
-		".": "./base.json",
-		"./vue": "./vue.json",
-		"./node": "./node.json",
-		"./vitest": "./vitest.json"
-	},
 	"dependencies": {
 		"@tanstack/vue-query": "^5.92.1",
 		"@tsconfig/node22": "^22.0.2",
 		"@vue/tsconfig": "^0.8.1",
 		"pinia": "^2.1.7"
 	},
+	"exports": {
+		".": "./base.json",
+		"./vue": "./vue.json",
+		"./node": "./node.json",
+		"./vitest": "./vitest.json"
+	},
+	"main": "base.json",
 	"peerDependencies": {
 		"typescript": "^5.0.0"
-	}
+	},
+	"private": true,
+	"type": "module"
 }

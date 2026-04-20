@@ -1,5 +1,5 @@
-import { defineConfig } from '@playwright/test'
 import { baseConfig } from '@admin-panel/testing-utils'
+import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
 	...baseConfig,

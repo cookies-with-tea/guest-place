@@ -6,15 +6,15 @@
 				<p class="subtitle">Design-first content management</p>
 			</div>
 			<div class="header-actions">
-				<el-button @click="fetchData" :icon="Refresh" circle />
-				<el-button type="primary" :loading="saving" :icon="Check" @click="handleSave"> Save Changes </el-button>
+				<el-button circle :icon="Refresh" @click="fetchData" />
+				<el-button :icon="Check" :loading="saving" type="primary" @click="handleSave"> Save Changes </el-button>
 			</div>
 		</header>
 
 		<div class="editor-content">
 			<el-row :gutter="24">
 				<!-- LEFT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- GENERAL SECTION -->
 						<el-card class="section-card mb-24">
@@ -30,9 +30,9 @@
 								<el-form-item label="Main Hero Description">
 									<el-input
 										v-model="form.description"
-										type="textarea"
-										:rows="4"
 										placeholder="Platform main vision and mission"
+										:rows="4"
+										type="textarea"
 									/>
 								</el-form-item>
 								<div class="section-guide-embed">
@@ -52,7 +52,7 @@
 									<template #header>
 										<div class="card-header">
 											<span>Opportunity Card #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.opportunities, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.opportunities, index)" />
 										</div>
 									</template>
 									<el-form label-position="top">
@@ -83,7 +83,7 @@
 											</el-col>
 										</el-row>
 										<el-form-item label="Features List">
-											<div style=" width: 100%;display: flex; flex-direction: column; gap: 12px">
+											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
 													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
 														<template #append>
@@ -92,11 +92,11 @@
 													</el-input>
 												</div>
 												<el-button
-													type="primary"
-													plain
 													:icon="Plus"
-													@click="addItem(opp.items, '')"
+													plain
 													style="align-self: flex-start"
+													type="primary"
+													@click="addItem(opp.items, '')"
 												>
 													Add Feature
 												</el-button>
@@ -109,7 +109,7 @@
 								<UiMediaPicker v-model="form.opportunitiesGuideUuid" />
 								<p class="guide-hint">Opportunities Preview</p>
 							</div>
-							<el-button class="add-btn mb-32" type="primary" plain :icon="Plus" @click="addOpportunity">
+							<el-button class="add-btn mb-32" :icon="Plus" plain type="primary" @click="addOpportunity">
 								Add New Opportunity Card
 							</el-button>
 						</div>
@@ -137,11 +137,11 @@
 									</el-col>
 								</el-row>
 								<el-form-item label="Section Introduction">
-									<el-input v-model="form.leadershipDescription" type="textarea" :rows="3" />
+									<el-input v-model="form.leadershipDescription" :rows="3" type="textarea" />
 								</el-form-item>
 								<div class="divider">Team Members & Key Points</div>
 								<div v-for="(item, index) in form.leadershipItems" :key="index" class="sub-item-complex">
-									<el-row :gutter="12" align="middle">
+									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
 											<el-input v-model="item.text" placeholder="Leader name or description" />
 										</el-col>
@@ -149,16 +149,16 @@
 											<UiMediaPicker v-model="item.iconUuid" />
 										</el-col>
 										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.leadershipItems, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.leadershipItems, index)" />
 										</el-col>
 									</el-row>
 								</div>
 								<el-button
-									type="primary"
-									plain
 									:icon="Plus"
-									@click="addLeadershipItem"
+									plain
 									style="margin-top: 12px; margin-bottom: 24px"
+									type="primary"
+									@click="addLeadershipItem"
 								>
 									Add Leadership Item
 								</el-button>
@@ -172,7 +172,7 @@
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- WHO WE ARE SECTION -->
 						<div class="section-header mb-16">
@@ -184,7 +184,7 @@
 									<template #header>
 										<div class="card-header">
 											<span>Member/Section #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.whoWeAre, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.whoWeAre, index)" />
 										</div>
 									</template>
 									<el-form label-position="top">
@@ -203,7 +203,7 @@
 											</el-col>
 										</el-row>
 										<el-form-item label="Description">
-											<el-input v-model="item.description" type="textarea" :rows="2" />
+											<el-input v-model="item.description" :rows="2" type="textarea" />
 										</el-form-item>
 									</el-form>
 								</el-card>
@@ -212,7 +212,7 @@
 								<UiMediaPicker v-model="form.whoWeAreGuideUuid" />
 								<p class="guide-hint">Who We Are Preview</p>
 							</div>
-							<el-button class="add-btn mb-32" type="primary" plain :icon="Plus" @click="addWhoWeAreItem">
+							<el-button class="add-btn mb-32" :icon="Plus" plain type="primary" @click="addWhoWeAreItem">
 								Add Member/Section
 							</el-button>
 						</div>
@@ -230,7 +230,7 @@
 								</el-form-item>
 								<div class="divider">News Items</div>
 								<div v-for="(item, index) in form.newsItems" :key="index" class="sub-item-complex">
-									<el-row :gutter="12" align="middle">
+									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
 											<el-input v-model="item.text" placeholder="News text" />
 										</el-col>
@@ -238,16 +238,16 @@
 											<UiMediaPicker v-model="item.iconUuid" />
 										</el-col>
 										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.newsItems, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.newsItems, index)" />
 										</el-col>
 									</el-row>
 								</div>
 								<el-button
-									type="primary"
-									plain
 									:icon="Plus"
-									@click="addNewsItem"
+									plain
 									style="margin-top: 12px; margin-bottom: 24px"
+									type="primary"
+									@click="addNewsItem"
 								>
 									Add News Item
 								</el-button>
@@ -266,10 +266,11 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
+
 import { createApi } from '@admin-panel/lib'
-import { ElMessage } from 'element-plus'
-import { Plus, Delete, Refresh, Check } from '@element-plus/icons-vue'
 import { UiMediaPicker } from '@admin-panel/ui'
+import { Check, Delete, Plus, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 interface IAboutData {
 	title: string

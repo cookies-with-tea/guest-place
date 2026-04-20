@@ -9,9 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { TranslationsUpdateModal } from '#features/translations-update-modal'
-import { TranslationsTable } from '#features/translations-table'
 import { TranslationsFilters } from '#features/translations-filters'
+import { TranslationsTable } from '#features/translations-table'
+import { TranslationsUpdateModal } from '#features/translations-update-modal'
+
 import { useTranslations } from '#entities/translation/lib/composables'
 
 useTranslations()

@@ -1,11 +1,12 @@
 <template>
-	<div class="mfe-stats-chart" ref="chartContainer">
+	<div ref="chartContainer" class="mfe-stats-chart">
 		<svg ref="svgRef"></svg>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+
 import * as d3 from 'd3'
 
 interface Node extends d3.SimulationNodeDatum {

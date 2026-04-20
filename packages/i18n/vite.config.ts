@@ -1,7 +1,7 @@
-import { resolve } from 'path'
-import federation from '@originjs/vite-plugin-federation'
-import { defineConfig, loadEnv } from 'vite'
 import { PACKAGES_PORTS } from '@admin-panel/lib'
+import federation from '@originjs/vite-plugin-federation'
+import { resolve } from 'path'
+import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
 	const rootDir = resolve(__dirname, '../../')

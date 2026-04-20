@@ -3,26 +3,26 @@
 		<div class="media-header">
 			<h1>Media Management</h1>
 			<div class="media-actions">
-				<el-button type="success" :icon="Plus" @click="showAddMediaDialog"> Add Media </el-button>
-				<el-button type="danger" :icon="Delete" :disabled="selectedMedia.length === 0" @click="confirmDeleteSelected">
+				<el-button :icon="Plus" type="success" @click="showAddMediaDialog"> Add Media </el-button>
+				<el-button :disabled="selectedMedia.length === 0" :icon="Delete" type="danger" @click="confirmDeleteSelected">
 					Delete Selected
 				</el-button>
 			</div>
 		</div>
 
 		<MediaManagementWidget
-			:media-items="mediaItems"
 			:loading="loading"
-			:show-selection="true"
+			:media-items="mediaItems"
+			:paginator-enabled="true"
+			:rows-per-page="10"
 			:show-actions="true"
+			:rows-per-page-options="[5, 10, 20, 50]"
 			:show-add-button="false"
 			:show-delete-button="false"
 			:show-search="true"
-			:paginator-enabled="true"
-			:rows-per-page="10"
-			:rows-per-page-options="[5, 10, 20, 50]"
-			@edit-media="editMedia"
+			:show-selection="true"
 			@delete-media="confirmDelete"
+			@edit-media="editMedia"
 			@preview-media="previewMedia"
 			@selection-change="onSelectionChange"
 		/>
@@ -32,30 +32,34 @@
 			v-model="mediaDialog.visible"
 			:is-edit="mediaDialog.isEdit"
 			:media="mediaDialog.isEdit && currentMediaForEdit ? currentMediaForEdit : undefined"
-			@submit="saveMedia"
 			@cancel="closeMediaDialog"
+			@submit="saveMedia"
 		/>
 
 		<!-- Media Preview Dialog -->
 		<MediaPreviewDialog
 			v-model="previewDialog.visible"
 			:media="previewDialog.media"
-			@edit="editMedia"
 			@close="closePreviewDialog"
+			@edit="editMedia"
 		/>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import { onMounted, ref } from 'vue'
+
 import { useTheme } from '@admin-panel/ui'
-import MediaManagementWidget from '@/widgets/media/ui/MediaManagementWidget.vue'
-import MediaUploadDialog from '@/features/media/ui/MediaUploadDialog.vue'
-import MediaPreviewDialog from '@/features/media/ui/MediaPreviewDialog.vue'
-import { useMedia } from '@/entities/media/lib/composables/useMedia'
+import { Delete, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+import MediaManagementWidget from '#widgets/media/ui/MediaManagementWidget.vue'
+
+import MediaPreviewDialog from '#features/media/ui/MediaPreviewDialog.vue'
+import MediaUploadDialog from '#features/media/ui/MediaUploadDialog.vue'
+
 import type { MediaItem } from '#entities/media'
+import { useMedia } from '#entities/media/lib/composables/useMedia'
 
 // State
 const selectedMedia = ref<MediaItem[]>([])

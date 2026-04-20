@@ -7,7 +7,7 @@
 					<p>Filter and manage your platform users</p>
 				</div>
 				<div class="header-actions">
-					<el-button type="primary" :icon="PlusIcon" @click="openAddModal">Add user</el-button>
+					<el-button :icon="PlusIcon" type="primary" @click="openAddModal">Add user</el-button>
 				</div>
 			</div>
 
@@ -16,10 +16,10 @@
 				<el-tag
 					v-for="tag in activeFilterTags"
 					:key="tag.key"
-					closable
-					round
-					effect="dark"
 					class="premium-tag"
+					closable
+					effect="dark"
+					round
 					@close="removeFilter(tag.key as any)"
 				>
 					<span class="tag-key">{{ tag.label }}:</span>
@@ -32,7 +32,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import { Plus as PlusIcon } from '@element-plus/icons-vue'
+
 import { useUsers } from '#entities/user/lib/composables'
 
 const { filters, openAddModal, removeFilter } = useUsers()

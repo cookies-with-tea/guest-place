@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { setActivePinia, createPinia, defineStore } from 'pinia'
-import { registerSharedStore, getSharedStore, initializePinia } from '../../utils/store'
+import { createPinia, defineStore, setActivePinia } from 'pinia'
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { getSharedStore, initializePinia, registerSharedStore } from '../../utils/store'
 
 describe('store utils', () => {
 	beforeEach(() => {

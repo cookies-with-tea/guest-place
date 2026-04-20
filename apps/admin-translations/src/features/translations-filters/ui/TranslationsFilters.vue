@@ -2,27 +2,27 @@
 	<div class="translations-filters">
 		<el-select
 			v-model="filters.namespace"
-			filterable
-			clearable
-			placeholder="Namespace"
 			class="translations-filters__select"
+			clearable
+			filterable
+			placeholder="Namespace"
 		>
 			<el-option v-for="ns in namespaces" :key="ns" :label="ns" :value="ns" />
 		</el-select>
 
 		<el-select
 			v-model="filters.language"
-			filterable
-			clearable
-			placeholder="Language"
 			class="translations-filters__select"
+			clearable
+			filterable
+			placeholder="Language"
 		>
 			<el-option v-for="lang in languages" :key="lang" :label="lang" :value="lang" />
 		</el-select>
 
-		<el-input v-model="filters.search" placeholder="Search by key" clearable class="translations-filters__search" />
+		<el-input v-model="filters.search" class="translations-filters__search" clearable placeholder="Search by key" />
 
-		<el-button type="primary" @click="openAddModal" class="translations-filters__add-btn"> Add translation </el-button>
+		<el-button class="translations-filters__add-btn" type="primary" @click="openAddModal"> Add translation </el-button>
 	</div>
 </template>
 

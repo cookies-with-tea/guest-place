@@ -2,8 +2,8 @@
 	<div class="ui-input">
 		<input
 			:class="['ui-input__control', `ui-input__control--${size}`]"
-			:type="type"
 			:placeholder="placeholder"
+			:type="type"
 			:value="modelValue"
 			@input="onInput"
 		/>

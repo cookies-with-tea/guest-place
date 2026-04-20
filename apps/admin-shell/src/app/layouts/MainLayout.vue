@@ -17,7 +17,7 @@
 					<div v-if="isAuthenticated" class="user-info">
 						<el-dropdown trigger="click">
 							<div class="user-profile">
-								<el-avatar :size="32" :src="user?.avatar" :icon="UserFilled" />
+								<el-avatar :icon="UserFilled" :size="32" :src="user?.avatar" />
 								<span class="user-name">{{ user?.firstName || user?.email }}</span>
 							</div>
 							<template #dropdown>
@@ -28,11 +28,11 @@
 							</template>
 						</el-dropdown>
 					</div>
-					<el-button v-else type="primary" plain size="small" @click="loginDialogVisible = true"> Войти </el-button>
+					<el-button v-else plain size="small" type="primary" @click="loginDialogVisible = true"> Войти </el-button>
 				</div>
 			</header>
 
-			<el-dialog v-model="loginDialogVisible" title="" width="400px" custom-class="auth-dialog" :show-close="false">
+			<el-dialog v-model="loginDialogVisible" custom-class="auth-dialog" :show-close="false" title="" width="400px">
 				<UiAuthWidget />
 			</el-dialog>
 
@@ -46,10 +46,12 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { UserFilled } from '@element-plus/icons-vue'
+
 import { useAuth } from '@admin-panel/lib'
+import { UiAuthWidget, UiThemeSwitcher } from '@admin-panel/ui'
+import { UserFilled } from '@element-plus/icons-vue'
+
 import { TheSidebar } from '#widgets/the-sidebar'
-import { UiThemeSwitcher, UiAuthWidget } from '@admin-panel/ui'
 
 const route = useRoute()
 const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard')

@@ -1,11 +1,11 @@
 <template>
 	<el-dialog
-		:title="isEditing ? 'Edit user' : 'Add user'"
 		v-model="isModalOpen"
+		:title="isEditing ? 'Edit user' : 'Add user'"
 		width="600px"
 		@closed="handleModalClose"
 	>
-		<el-form :model="form" :rules="rules" ref="formRef" label-width="120px" @submit.prevent>
+		<el-form ref="formRef" label-width="120px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Email" prop="email">
 				<el-input v-model="form.email" />
 			</el-form-item>
@@ -27,10 +27,10 @@
 			<el-form-item label="Birth date">
 				<el-date-picker
 					v-model="form.birthDate"
-					type="date"
 					format="YYYY-MM-DD"
-					value-format="YYYY-MM-DD"
 					placeholder="Pick a date"
+					type="date"
+					value-format="YYYY-MM-DD"
 				/>
 			</el-form-item>
 			<el-form-item label="Role">
@@ -61,20 +61,20 @@
 				</el-radio-group>
 			</el-form-item>
 			<el-upload
-				:auto-upload="false"
 				action="#"
+				:auto-upload="false"
 				class="avatar-uploader"
 				:on-change="onFilesChange"
 				:show-file-list="false"
 			>
-				<img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
+				<img v-if="avatarUrl" class="avatar" :src="avatarUrl" />
 				<el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
 			</el-upload>
 		</el-form>
 
 		<template #footer>
 			<el-button @click="handleModalClose">Cancel</el-button>
-			<el-button type="primary" :loading="isSubmitting" @click="submit">
+			<el-button :loading="isSubmitting" type="primary" @click="submit">
 				{{ isEditing ? 'Save' : 'Create' }}
 			</el-button>
 		</template>
@@ -82,12 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import type { IUserCreateUpdate } from '#entities/user'
-import { UserRole, UserStatus, useUsers } from '#entities/user'
+import { computed, ref, useTemplateRef, watch } from 'vue'
+
 import { uploadMedia } from '@admin-panel/lib'
 import { Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadProps } from 'element-plus'
-import { computed, ref, useTemplateRef, watch } from 'vue'
+
+import type { IUserCreateUpdate } from '#entities/user'
+import { UserRole, UserStatus, useUsers } from '#entities/user'
 
 const rules = computed<FormRules>(() => ({
 	email: [{ required: true, message: 'Email is required', trigger: 'blur' }],

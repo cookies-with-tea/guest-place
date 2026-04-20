@@ -1,5 +1,6 @@
-import { ref, reactive, computed } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { computed, reactive, ref } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+
 import { mfeApi } from '../../api'
 
 export const useMfe = () => {

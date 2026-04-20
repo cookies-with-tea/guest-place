@@ -1,5 +1,3 @@
 export * from './api'
-
-export * from './general'
-
 export * from './feature-flag'
+export * from './general'

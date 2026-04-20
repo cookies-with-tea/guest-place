@@ -1,15 +1,6 @@
 {
 	"name": "@admin-panel/i18n",
 	"version": "1.0.0",
-	"type": "module",
-	"exports": {
-		".": "./index.ts"
-	},
-	"scripts": {
-		"dev": "vite",
-		"build": "vue-tsc -b && vite build",
-		"preview": "vite preview"
-	},
 	"dependencies": {
 		"@admin-panel/lib": "workspace:*",
 		"@tanstack/vue-query": "^5.92.1",
@@ -24,5 +15,14 @@
 		"@types/node": "^24.6.0",
 		"typescript": "~5.9.3",
 		"vite": "^7.1.7"
-	}
+	},
+	"exports": {
+		".": "./index.ts"
+	},
+	"scripts": {
+		"build": "vue-tsc -b && vite build",
+		"dev": "vite",
+		"preview": "vite preview"
+	},
+	"type": "module"
 }

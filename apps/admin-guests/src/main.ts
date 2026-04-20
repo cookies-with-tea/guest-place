@@ -1,7 +1,9 @@
 import { createApp } from 'vue'
-import App from './pages/GuestsPage.vue'
-import ElementPlus from 'element-plus'
+
 import { initUiStyles } from '@admin-panel/ui'
+import ElementPlus from 'element-plus'
+
+import App from './pages/GuestsPage.vue'
 
 initUiStyles()
 

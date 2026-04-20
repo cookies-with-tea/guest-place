@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { ROUTES, type MFLifecycleHooks } from '@admin-panel/lib'
+
+import { type MFLifecycleHooks, ROUTES } from '@admin-panel/lib'
 
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
 		name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorPage',
-		component: () => import('@/pages/orchestrator-page'),
+		component: () => import('#pages/orchestrator-page'),
 		meta: {
 			title: (ROUTES as any).orchestrator?.list?.title || 'Оркестратор',
 		},
@@ -13,7 +14,7 @@ export const routes: RouteRecordRaw[] = [
 	{
 		path: '/features',
 		name: (ROUTES as any).orchestrator?.features?.name || 'FeaturesPage',
-		component: () => import('@/pages/features-page'),
+		component: () => import('#pages/features-page'),
 		meta: {
 			title: (ROUTES as any).orchestrator?.features?.title || 'Флаги фич',
 		},

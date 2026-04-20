@@ -1,21 +1,21 @@
 <template>
 	<el-dialog
 		v-model="visible"
-		:title="isEdit ? 'Edit Media' : 'Upload New Media'"
-		width="600px"
 		class="media-upload-dialog"
 		destroy-on-close
+		:title="isEdit ? 'Edit Media' : 'Upload New Media'"
+		width="600px"
 	>
-		<el-form label-position="top" @submit.prevent="handleSubmit" class="upload-form">
-			<el-form-item label="Title" :error="errors.title">
-				<el-input v-model="formData.title" placeholder="Enter media title" clearable />
+		<el-form class="upload-form" label-position="top" @submit.prevent="handleSubmit">
+			<el-form-item :error="errors.title" label="Title">
+				<el-input v-model="formData.title" clearable placeholder="Enter media title" />
 			</el-form-item>
 
-			<el-form-item label="Alt Text" :error="errors.alt">
-				<el-input v-model="formData.alt" placeholder="Enter alt text for accessibility" clearable />
+			<el-form-item :error="errors.alt" label="Alt Text">
+				<el-input v-model="formData.alt" clearable placeholder="Enter alt text for accessibility" />
 			</el-form-item>
 
-			<el-form-item label="File" :error="errors.file">
+			<el-form-item :error="errors.file" label="File">
 				<div
 					class="file-upload-area"
 					:class="{ 'has-file': !!formData.file }"
@@ -24,12 +24,12 @@
 					@drop.prevent="handleDrop"
 				>
 					<input
-						type="file"
 						id="mediaFileInput"
 						ref="fileInput"
-						@change="handleFileChange"
 						accept="image/*,video/*,.svg"
 						style="display: none"
+						type="file"
+						@change="handleFileChange"
 					/>
 
 					<div v-if="!formData.file" class="upload-placeholder">
@@ -40,14 +40,14 @@
 
 					<div v-else class="file-preview">
 						<div v-if="isImage(formData.file)" class="image-preview">
-							<el-image :src="formData.file.preview" fit="contain" class="preview-content" />
+							<el-image class="preview-content" fit="contain" :src="formData.file.preview" />
 							<div class="file-info">
 								<span class="file-name">{{ formData.file.name }}</span>
 								<span class="file-size">{{ formatFileSize(formData.file.size) }}</span>
 							</div>
 						</div>
 						<div v-else class="video-preview">
-							<video controls class="preview-content">
+							<video class="preview-content" controls>
 								<source :src="formData.file.preview" :type="getMimeType(formData.file.name)" />
 							</video>
 							<div class="file-info">
@@ -56,7 +56,7 @@
 							</div>
 						</div>
 
-						<el-button type="danger" :icon="Delete" circle class="remove-btn" @click.stop="removeFile" />
+						<el-button circle class="remove-btn" :icon="Delete" type="danger" @click.stop="removeFile" />
 					</div>
 				</div>
 			</el-form-item>
@@ -65,7 +65,7 @@
 		<template #footer>
 			<div class="dialog-footer">
 				<el-button @click="handleCancel">Cancel</el-button>
-				<el-button type="primary" @click="handleSubmit" :disabled="!isFormValid" :loading="loading">
+				<el-button :disabled="!isFormValid" :loading="loading" type="primary" @click="handleSubmit">
 					{{ isEdit ? 'Save Changes' : 'Upload Media' }}
 				</el-button>
 			</div>
@@ -74,10 +74,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { Upload, Delete } from '@element-plus/icons-vue'
-import type { MediaItem, MediaFile } from '@/entities/media/model'
+import { computed, ref, watch } from 'vue'
+
+import { Delete, Upload } from '@element-plus/icons-vue'
+
 import { mediaUtils } from '#entities/media'
+import type { MediaFile, MediaItem } from '#entities/media/model'
 
 export interface Props {
 	isEdit?: boolean

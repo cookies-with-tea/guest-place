@@ -1,15 +1,15 @@
 <template>
 	<div class="translations-table">
-		<el-table :data="translations" v-loading="isLoading" border>
-			<el-table-column prop="id" label="ID" width="120" />
-			<el-table-column prop="key" label="Key" min-width="200" />
-			<el-table-column prop="value" label="Translation" min-width="200" />
+		<el-table v-loading="isLoading" border :data="translations">
+			<el-table-column label="ID" prop="id" width="120" />
+			<el-table-column label="Key" min-width="200" prop="key" />
+			<el-table-column label="Translation" min-width="200" prop="value" />
 			<el-table-column label="Actions" width="160">
 				<template #default="scope">
-					<el-button v-if="scope && scope.row" size="small" type="primary" plain @click="openEditModal(scope.row)">
+					<el-button v-if="scope && scope.row" plain size="small" type="primary" @click="openEditModal(scope.row)">
 						Edit
 					</el-button>
-					<el-button v-if="scope && scope.row" size="small" type="danger" plain @click="confirmDelete(scope.row.id)">
+					<el-button v-if="scope && scope.row" plain size="small" type="danger" @click="confirmDelete(scope.row.id)">
 						Delete
 					</el-button>
 				</template>
@@ -20,10 +20,10 @@
 			<el-pagination
 				v-model:current-page="currentPage"
 				v-model:page-size="currentlimit"
-				:total="pagination.total"
 				layout="prev, pager, next, total"
-				@size-change="setlimit"
+				:total="pagination.total"
 				@current-change="setPage"
+				@size-change="setlimit"
 			/>
 		</div>
 	</div>
@@ -31,7 +31,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import { ElMessageBox } from 'element-plus'
+
 import { useTranslations } from '#entities/translation/lib/composables'
 
 const { translations, isLoading, pagination, openEditModal, handleDelete, setPage, setlimit } = useTranslations()

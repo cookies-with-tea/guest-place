@@ -1,17 +1,17 @@
 {
 	"name": "@admin-panel/prettier-config",
 	"version": "1.0.0",
-	"private": true,
-	"type": "module",
-	"main": "index.js",
-	"exports": {
-		".": "./index.js"
-	},
-	"peerDependencies": {
-		"prettier": "^3.0.0"
-	},
 	"dependencies": {
 		"@tanstack/vue-query": "^5.92.1",
 		"pinia": "^2.1.7"
-	}
+	},
+	"exports": {
+		".": "./index.js"
+	},
+	"main": "index.js",
+	"peerDependencies": {
+		"prettier": "^3.0.0"
+	},
+	"private": true,
+	"type": "module"
 }

@@ -1,15 +1,6 @@
 {
 	"name": "admin-docs",
-	"private": true,
 	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"storybook": "storybook dev -p 6006",
-		"build": "storybook build --docs",
-		"preview-storybook": "serve storybook-static",
-		"clean": "rm -rf .turbo node_modules",
-		"lint": "eslint ./stories/*.stories.ts --max-warnings 0"
-	},
 	"dependencies": {
 		"@admin-panel/lib": "workspace:*",
 		"@admin-panel/ui": "workspace:*",
@@ -36,5 +27,14 @@
 		"typescript": "~5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
-	}
+	},
+	"private": true,
+	"scripts": {
+		"build": "storybook build --docs",
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "eslint ./stories/*.stories.ts --max-warnings 0",
+		"preview-storybook": "serve storybook-static",
+		"storybook": "storybook dev -p 6006"
+	},
+	"type": "module"
 }

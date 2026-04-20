@@ -6,15 +6,15 @@
 				<p class="subtitle">Manage content for the "Guests" client page</p>
 			</div>
 			<div class="header-actions">
-				<el-button @click="fetchData" :icon="Refresh" circle />
-				<el-button type="primary" :loading="saving" :icon="Check" @click="handleSave"> Save Changes </el-button>
+				<el-button circle :icon="Refresh" @click="fetchData" />
+				<el-button :icon="Check" :loading="saving" type="primary" @click="handleSave"> Save Changes </el-button>
 			</div>
 		</header>
 
 		<div class="editor-content">
 			<el-row :gutter="24">
 				<!-- LEFT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- GENERAL SECTION -->
 						<el-card class="section-card mb-24">
@@ -44,7 +44,7 @@
 									<template #header>
 										<div class="card-header">
 											<span>Opportunity Card #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.opportunities, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.opportunities, index)" />
 										</div>
 									</template>
 									<el-form label-position="top">
@@ -75,7 +75,7 @@
 											</el-col>
 										</el-row>
 										<el-form-item label="Features List">
-											<div style=" width: 100%;display: flex; flex-direction: column; gap: 12px">
+											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
 													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
 														<template #append>
@@ -84,11 +84,11 @@
 													</el-input>
 												</div>
 												<el-button
-													type="primary"
-													plain
 													:icon="Plus"
-													@click="addItem(opp.items, '')"
+													plain
 													style="align-self: flex-start"
+													type="primary"
+													@click="addItem(opp.items, '')"
 												>
 													Add Feature
 												</el-button>
@@ -101,7 +101,7 @@
 								<UiMediaPicker v-model="form.opportunitiesGuideUuid" />
 								<p class="guide-hint">Opportunities Preview</p>
 							</div>
-							<el-button class="add-btn mb-24" type="primary" plain :icon="Plus" @click="addOpportunity">
+							<el-button class="add-btn mb-24" :icon="Plus" plain type="primary" @click="addOpportunity">
 								Add Opportunity Card
 							</el-button>
 						</div>
@@ -118,7 +118,7 @@
 									<el-input v-model="form.searchPromoTitle" placeholder="Main promo title" />
 								</el-form-item>
 								<el-form-item label="Promo Description">
-									<el-input v-model="form.searchPromoDescription" type="textarea" :rows="3" />
+									<el-input v-model="form.searchPromoDescription" :rows="3" type="textarea" />
 								</el-form-item>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.searchPromoGuideUuid" />
@@ -130,7 +130,7 @@
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- INTERACTION CARDS SECTION -->
 						<div class="section-header mb-16">
@@ -142,7 +142,7 @@
 									<template #header>
 										<div class="card-header">
 											<span>Interaction Card #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.interactionCards, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.interactionCards, index)" />
 										</div>
 									</template>
 									<el-form label-position="top">
@@ -161,7 +161,7 @@
 											</el-col>
 										</el-row>
 										<el-form-item label="Description">
-											<el-input v-model="card.text" type="textarea" :rows="2" />
+											<el-input v-model="card.text" :rows="2" type="textarea" />
 										</el-form-item>
 										<el-row :gutter="20">
 											<el-col :span="12">
@@ -182,7 +182,7 @@
 								<UiMediaPicker v-model="form.interactionCardsGuideUuid" />
 								<p class="guide-hint">Interaction Cards Preview</p>
 							</div>
-							<el-button class="add-btn mb-24" type="primary" plain :icon="Plus" @click="addInteractionCard">
+							<el-button class="add-btn mb-24" :icon="Plus" plain type="primary" @click="addInteractionCard">
 								Add Interaction Card
 							</el-button>
 						</div>
@@ -196,7 +196,7 @@
 							</template>
 							<el-form label-position="top">
 								<div v-for="(item, index) in form.additionalServices" :key="index" class="sub-item-complex">
-									<el-row :gutter="12" align="middle">
+									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
 											<el-input v-model="item.text" placeholder="Service text" />
 										</el-col>
@@ -205,20 +205,20 @@
 										</el-col>
 										<el-col :span="2">
 											<el-button
-												type="danger"
-												link
 												:icon="Delete"
+												link
+												type="danger"
 												@click="removeItem(form.additionalServices, index)"
 											/>
 										</el-col>
 									</el-row>
 								</div>
 								<el-button
-									type="primary"
-									plain
 									:icon="Plus"
-									@click="addAdditionalService"
+									plain
 									style="margin-top: 12px; margin-bottom: 24px"
+									type="primary"
+									@click="addAdditionalService"
 								>
 									Add Service Item
 								</el-button>
@@ -237,10 +237,11 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+
 import { createApi } from '@admin-panel/lib'
-import { ElMessage } from 'element-plus'
-import { Plus, Delete, Refresh, Check } from '@element-plus/icons-vue'
 import { UiMediaPicker } from '@admin-panel/ui'
+import { Check, Delete, Plus, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 interface IGuestsData {
 	title: string

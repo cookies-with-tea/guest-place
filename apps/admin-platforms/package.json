@@ -1,18 +1,14 @@
 {
 	"name": "admin-platforms",
 	"version": "0.0.0",
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "vite build",
-		"preview": "vite preview"
-	},
 	"dependencies": {
 		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
 		"@admin-panel/ui": "workspace:*",
+		"@element-plus/icons-vue": "^2.3.2",
+		"@tanstack/vue-query": "^5.92.1",
 		"element-plus": "^2.13.0",
+		"pinia": "^2.1.7",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},
@@ -21,5 +17,21 @@
 		"@vitejs/plugin-vue": "^6.0.1",
 		"typescript": "^5.9.3",
 		"vite": "^7.1.7"
-	}
+	},
+	"private": true,
+	"scripts": {
+		"build": "vue-tsc -b && vite build",
+		"dev": "vite",
+		"eslint": "eslint .",
+		"eslint:fix": "eslint . --fix",
+		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
+		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"preview": "vite preview",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
+		"test:unit": "vitest --passWithNoTests"
+	},
+	"type": "module"
 }

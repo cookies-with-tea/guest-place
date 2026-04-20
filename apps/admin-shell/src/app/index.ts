@@ -12,12 +12,13 @@ if (localStorage.getItem('gp-theme') === 'dark') {
 	document.documentElement.classList.add('light')
 }
 
-import { useI18n } from '@admin-panel/i18n'
 import * as vue from 'vue'
 import * as vueRouter from 'vue-router'
-import * as elementPlus from 'element-plus'
 import * as piniaPkg from 'pinia'
 import * as vueQueryPkg from '@tanstack/vue-query'
+
+import { useI18n } from '@admin-panel/i18n'
+import * as elementPlus from 'element-plus'
 
 // Manually populate federation shared scope for dynamic remotes
 // @ts-ignore
@@ -47,15 +48,15 @@ setShared('pinia', piniaPkg, '2.1.0')
 
 setShared('@tanstack/vue-query', vueQueryPkg, '5.92.1')
 
-import App from './App.vue'
-import { initRouter } from './router'
 import { createApp } from 'vue'
-import ElementPlus from 'element-plus'
+// Styles handled by initUiStyles
+import { createPinia } from 'pinia'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
-// Styles handled by initUiStyles
+import ElementPlus from 'element-plus'
 
-import { createPinia } from 'pinia'
+import App from './App.vue'
+import { initRouter } from './router'
 
 const app = createApp(App)
 const pinia = createPinia()

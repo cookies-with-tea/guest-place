@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Delete, Edit } from '@element-plus/icons-vue'
+import { onMounted, reactive, ref } from 'vue'
+
 import { createApi } from '@admin-panel/lib'
+import { Delete, Edit, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 interface FieldDefinition {
 	name: string
@@ -154,12 +155,12 @@ onMounted(fetchSchemas)
 	<div class="schema-builder">
 		<div class="header">
 			<h1>Content Schemas</h1>
-			<el-button type="primary" :icon="Plus" @click="handleAddSchema"> Create Schema </el-button>
+			<el-button :icon="Plus" type="primary" @click="handleAddSchema"> Create Schema </el-button>
 		</div>
 
-		<el-table :data="schemas" v-loading="loading" style="width: 100%">
-			<el-table-column prop="name" label="Name" />
-			<el-table-column prop="slug" label="Slug" />
+		<el-table v-loading="loading" :data="schemas" style="width: 100%">
+			<el-table-column label="Name" prop="name" />
+			<el-table-column label="Slug" prop="slug" />
 			<el-table-column label="Fields count">
 				<template #default="scope">
 					{{ scope.row.fields?.length || 0 }}
@@ -174,7 +175,7 @@ onMounted(fetchSchemas)
 		</el-table>
 
 		<el-dialog v-model="dialogVisible" :title="isEdit ? 'Edit Schema' : 'Create Schema'" width="60%">
-			<el-form :model="form" label-width="100px">
+			<el-form label-width="100px" :model="form">
 				<el-form-item label="Name">
 					<el-input v-model="form.name" placeholder="e.g. Products" />
 				</el-form-item>
@@ -185,10 +186,10 @@ onMounted(fetchSchemas)
 				<div class="fields-section">
 					<div class="fields-header">
 						<h3>Fields</h3>
-						<el-button type="success" size="small" :icon="Plus" @click="addField"> Add Field </el-button>
+						<el-button :icon="Plus" size="small" type="success" @click="addField"> Add Field </el-button>
 					</div>
 
-					<el-table :data="form.fields" border style="width: 100%">
+					<el-table border :data="form.fields" style="width: 100%">
 						<el-table-column label="Label">
 							<template #default="scope">
 								<el-input v-model="scope.row.label" size="small" />
@@ -214,7 +215,7 @@ onMounted(fetchSchemas)
 						</el-table-column>
 						<el-table-column label="" width="60">
 							<template #default="scope">
-								<el-button type="danger" size="small" :icon="Delete" circle @click="removeField(scope.$index)" />
+								<el-button circle :icon="Delete" size="small" type="danger" @click="removeField(scope.$index)" />
 							</template>
 						</el-table-column>
 					</el-table>

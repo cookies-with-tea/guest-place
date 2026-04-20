@@ -1,13 +1,14 @@
 <template>
-	<svg class="ui-icon" :class="iconClass" :width="props.width" :height="props.height" aria-hidden="true">
+	<svg aria-hidden="true" class="ui-icon" :class="iconClass" :height="props.height" :width="props.width">
 		<use :href="symbolId" />
 	</svg>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted } from 'vue'
-import type { IconNamesType } from '../types/iconTypes'
+
 import { useUiIcon } from '../composables'
+import type { IconNamesType } from '../types/iconTypes'
 
 type Props = {
 	name: IconNamesType

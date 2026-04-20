@@ -1,7 +1,8 @@
 import { computed, ref, watch } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { fetchTranslations, createTranslation, updateTranslation, deleteTranslation } from '../../api'
-import type { TranslationFilters, Translation } from '../../model'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+
+import { createTranslation, deleteTranslation, fetchTranslations, updateTranslation } from '../../api'
+import type { Translation, TranslationFilters } from '../../model'
 import { TRANSLATIONS_QUERY_KEY } from '../../model'
 
 export const useTranslations = () => {

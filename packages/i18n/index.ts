@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+
 import { ofetch } from 'ofetch'
 
 type TranslationDict = Record<string, string>

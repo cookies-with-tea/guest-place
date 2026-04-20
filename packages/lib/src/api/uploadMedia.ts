@@ -1,5 +1,6 @@
-import { createApi } from '.'
 import { removeFileExtension } from '../utils'
+
+import { createApi } from '.'
 
 const { fetchData } = createApi('media')
 

@@ -1,34 +1,6 @@
 {
 	"name": "admin-shell",
 	"version": "0.0.0",
-	"private": true,
-	"type": "module",
-	"engines": {
-		"node": ">=22.12.0"
-	},
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc && vite build",
-		"preview": "vite preview",
-		"test:unit": "vitest --passWithNoTests",
-		"test:e2e": "start-server-and-test preview http://localhost:3000 'cypress run --e2e'",
-		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4173 'cypress open --e2e'",
-		"test:e2e:pw": "playwright test",
-		"test:e2e:pw:ui": "playwright test --ui",
-		"test:e2e:pw:report": "playwright show-report",
-		"prepare": "husky",
-		"build-only": "vite build",
-		"type-check": "vue-tsc --build",
-		"format": "prettier --write src/",
-		"eslint": "eslint . --ext .ts,.js,.vue",
-		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
-		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
-		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
-		"prettier": "prettier --check .",
-		"prettier:fix": "prettier --write .",
-		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
-		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix"
-	},
 	"dependencies": {
 		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
@@ -71,6 +43,9 @@
 		"vitest": "^3.2.4",
 		"vue-tsc": "^3.1.0"
 	},
+	"engines": {
+		"node": ">=22.12.0"
+	},
 	"lint-staged": {
 		"*.{js,ts,vue}": [
 			"eslint --fix"
@@ -81,5 +56,30 @@
 		"*": [
 			"prettier --write --ignore-unknown"
 		]
-	}
+	},
+	"private": true,
+	"scripts": {
+		"build": "tsc && vite build",
+		"build-only": "vite build",
+		"dev": "vite",
+		"eslint": "eslint . --ext .ts,.js,.vue",
+		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
+		"format": "prettier --write src/",
+		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
+		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
+		"prepare": "husky",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"preview": "vite preview",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
+		"test:e2e": "start-server-and-test preview http://localhost:3000 'cypress run --e2e'",
+		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4173 'cypress open --e2e'",
+		"test:e2e:pw": "playwright test",
+		"test:e2e:pw:report": "playwright show-report",
+		"test:e2e:pw:ui": "playwright test --ui",
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
+	},
+	"type": "module"
 }

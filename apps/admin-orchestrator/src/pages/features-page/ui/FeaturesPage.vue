@@ -5,17 +5,17 @@
 				<h1>System Feature Flags</h1>
 				<p>Toggle system features and experiments in real-time</p>
 			</div>
-			<el-button type="primary" :icon="Plus" @click="showAddDialog = true"> Add Flag </el-button>
+			<el-button :icon="Plus" type="primary" @click="showAddDialog = true"> Add Flag </el-button>
 		</div>
 
-		<el-table v-loading="loading" :data="flags" style="width: 100%" class="feature-table">
-			<el-table-column prop="id" label="ID" width="180">
+		<el-table v-loading="loading" class="feature-table" :data="flags" style="width: 100%">
+			<el-table-column label="ID" prop="id" width="180">
 				<template #default="{ row }">
 					<code class="flag-id">{{ row.id }}</code>
 				</template>
 			</el-table-column>
-			<el-table-column prop="name" label="Name" width="200" />
-			<el-table-column prop="description" label="Description" />
+			<el-table-column label="Name" prop="name" width="200" />
+			<el-table-column label="Description" prop="description" />
 			<el-table-column label="Status" width="120">
 				<template #default="{ row }">
 					<el-switch v-model="row.enabled" @change="handleToggle(row)" />
@@ -23,18 +23,18 @@
 			</el-table-column>
 			<el-table-column label="Actions" width="100">
 				<template #default="{ $index }">
-					<el-button type="danger" :icon="Delete" circle @click="removeFlag($index)" />
+					<el-button circle :icon="Delete" type="danger" @click="removeFlag($index)" />
 				</template>
 			</el-table-column>
 		</el-table>
 
 		<div class="footer-actions">
-			<el-button type="success" :loading="saving" @click="handleSave()"> Save All Changes </el-button>
+			<el-button :loading="saving" type="success" @click="handleSave()"> Save All Changes </el-button>
 		</div>
 
 		<!-- Add Flag Dialog -->
-		<el-dialog v-model="showAddDialog" title="Add New Feature Flag" width="400px" append-to-body>
-			<el-form :model="newFlag" label-position="top">
+		<el-dialog v-model="showAddDialog" append-to-body title="Add New Feature Flag" width="400px">
+			<el-form label-position="top" :model="newFlag">
 				<el-form-item label="ID (snake_case)">
 					<el-input v-model="newFlag.id" placeholder="e.g. new_dashboard" />
 				</el-form-item>
@@ -42,7 +42,7 @@
 					<el-input v-model="newFlag.name" placeholder="Feature name" />
 				</el-form-item>
 				<el-form-item label="Description">
-					<el-input v-model="newFlag.description" type="textarea" placeholder="What this flag controls" />
+					<el-input v-model="newFlag.description" placeholder="What this flag controls" type="textarea" />
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -54,10 +54,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Plus, Delete } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { onMounted, ref } from 'vue'
+
 import { useFeatureFlags } from '@admin-panel/lib'
+import { Delete, Plus } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const { flags, loading, loadFlags, updateFlags } = useFeatureFlags()
 

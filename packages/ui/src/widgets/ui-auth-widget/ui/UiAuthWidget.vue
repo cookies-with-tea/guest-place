@@ -4,7 +4,7 @@
 			<h2 class="ui-auth-widget__title">{{ title }}</h2>
 			<p class="ui-auth-widget__subtitle">{{ subtitle }}</p>
 
-			<el-form :model="authForm" class="ui-auth-widget__form" label-position="top">
+			<el-form class="ui-auth-widget__form" label-position="top" :model="authForm">
 				<el-form-item v-if="mode === 'register'" label="Имя">
 					<el-input v-model="authForm.name" placeholder="Введите ваше имя" />
 				</el-form-item>
@@ -14,12 +14,12 @@
 				</el-form-item>
 
 				<el-form-item v-if="mode !== 'forgot-password'" label="Пароль">
-					<el-input v-model="authForm.password" type="password" show-password placeholder="••••••••" />
+					<el-input v-model="authForm.password" placeholder="••••••••" show-password type="password" />
 				</el-form-item>
 
-				<el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="ui-auth-widget__error" />
+				<el-alert v-if="error" class="ui-auth-widget__error" :closable="false" show-icon :title="error" type="error" />
 
-				<el-button type="primary" class="ui-auth-widget__submit" :loading="loading" @click="handleSubmit">
+				<el-button class="ui-auth-widget__submit" :loading="loading" type="primary" @click="handleSubmit">
 					{{ submitButtonText }}
 				</el-button>
 			</el-form>
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthWidget, type AuthMode } from '../lib/useAuthWidget'
+import { type AuthMode, useAuthWidget } from '../lib/useAuthWidget'
 
 const props = defineProps<{
 	initialMode?: AuthMode

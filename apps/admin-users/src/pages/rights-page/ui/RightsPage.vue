@@ -8,18 +8,18 @@
 		<el-tabs v-model="activeRole" class="role-tabs" @tab-change="handleTabChange">
 			<el-tab-pane v-for="role in roles" :key="role" :label="role.toUpperCase()" :name="role">
 				<div v-if="loadingPermissions" class="loading-state">
-					<el-skeleton :rows="5" animated />
+					<el-skeleton animated :rows="5" />
 				</div>
 				<div v-else class="permissions-container">
 					<h3>Permissions for {{ role }}</h3>
 					<el-checkbox-group v-model="selectedPermissions" class="permissions-grid">
-						<el-checkbox v-for="perm in allPermissions" :key="perm" :label="perm" border class="perm-checkbox">
+						<el-checkbox v-for="perm in allPermissions" :key="perm" border class="perm-checkbox" :label="perm">
 							{{ perm }}
 						</el-checkbox>
 					</el-checkbox-group>
 
 					<div class="actions">
-						<el-button type="primary" :loading="saving" @click="savePermissions"> Save Changes </el-button>
+						<el-button :loading="saving" type="primary" @click="savePermissions"> Save Changes </el-button>
 						<el-button @click="resetPermissions">Reset</el-button>
 					</div>
 				</div>
@@ -29,9 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { rightsApi } from '#entities/user/api/rights'
+import { onMounted, ref } from 'vue'
+
 import { ElMessage } from 'element-plus'
+
+import { rightsApi } from '#entities/user/api/rights'
 
 const roles = ref<string[]>([])
 const allPermissions = ref<string[]>([])

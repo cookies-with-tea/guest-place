@@ -1,13 +1,13 @@
-import { globalIgnores } from 'eslint/config'
+import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import storybook from 'eslint-plugin-storybook'
 
-import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
-
+import { globalIgnores } from 'eslint/config'
 // @ts-ignore
 import pluginCypress from 'eslint-plugin-cypress'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
+import storybook from 'eslint-plugin-storybook'
+import pluginVue from 'eslint-plugin-vue'
 
 export default defineConfigWithVueTs(
 	{
@@ -27,6 +27,9 @@ export default defineConfigWithVueTs(
 	pluginVue.configs['flat/essential'],
 	vueTsConfigs.recommended,
 	{
+		plugins: {
+			'simple-import-sort': pluginSimpleImportSort,
+		},
 		files: ['**/*.{js,ts,jsx,tsx,vue}'],
 		languageOptions: {
 			ecmaVersion: 'latest',
@@ -51,11 +54,12 @@ export default defineConfigWithVueTs(
 				{ blankLine: 'always', prev: '*', next: 'block' },
 				{ blankLine: 'always', prev: 'block', next: '*' },
 				{ blankLine: 'any', prev: 'cjs-import', next: 'cjs-import' },
-				{ blankLine: 'any', prev: 'import', next: 'import' },
 				{ blankLine: 'always', prev: '*', next: 'export' },
 				{ blankLine: 'always', prev: 'export', next: '*' },
 				{ blankLine: 'always', prev: '*', next: 'function' },
 				{ blankLine: 'always', prev: 'try', next: '*' },
+				{ blankLine: 'any', prev: 'import', next: 'import' },
+				{ blankLine: 'any', prev: 'export', next: 'export' },
 			],
 
 			'@typescript-eslint/consistent-type-imports': 'error',
@@ -90,6 +94,25 @@ export default defineConfigWithVueTs(
 			'vue/component-name-in-template-casing': ['error', 'PascalCase', { ignores: [] }],
 			'vue/v-on-event-hyphenation': ['error', 'always', { ignore: ['update:modelValue'] }],
 			'vue/padding-line-between-blocks': ['warn', 'always'],
+			'vue/attributes-order': [
+				'error',
+				{
+					order: [
+						'DEFINITION',
+						'LIST_RENDERING',
+						'CONDITIONALS',
+						'RENDER_MODIFIERS',
+						'GLOBAL',
+						'UNIQUE',
+						'TWO_WAY_BINDING',
+						'OTHER_DIRECTIVES',
+						'OTHER_ATTR',
+						'EVENTS',
+						'CONTENT',
+					],
+					alphabetical: false,
+				},
+			],
 
 			'vue/html-self-closing': [
 				'error',
@@ -104,11 +127,32 @@ export default defineConfigWithVueTs(
 				{
 					singleline: 2,
 					multiline: {
-						max: 2,
+						max: 1,
 						allowFirstLine: false,
 					},
 				},
 			],
+			'simple-import-sort/imports': [
+				'error',
+				{
+					groups: [
+						['^\\u0000'],
+						['^vue', '^@vue', '^pinia', '^@tanstack/vue-query'],
+						['^@?\\w'],
+						['^#apps(/.*|$)'],
+						['^#pages(/.*|$)'],
+						['^#widgets(/.*|$)'],
+						['^#features(/.*|$)'],
+						['^#entities(/.*|$)'],
+						['^#shared(/.*|$)'],
+						['^#'],
+						['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+						['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+						['^.+\\.?(css|scss|sass|less)$'],
+					],
+				},
+			],
+			'simple-import-sort/exports': 'error',
 
 			'@typescript-eslint/no-var-requires': 'off',
 			'@typescript-eslint/ban-ts-comment': 'off',

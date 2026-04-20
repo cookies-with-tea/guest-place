@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest'
 /** @vitest-environment jsdom */
 import { mount } from '@vue/test-utils'
+
+import { describe, expect, it } from 'vitest'
+
 import UiButton from '../ui/UiButton.vue'
 
 describe('UiButton', () => {

@@ -3,15 +3,15 @@
 		<div class="widget-header">
 			<h2>{{ title }}</h2>
 			<div class="widget-actions">
-				<el-button v-if="showAddButton" type="success" :icon="Plus" @click="addMedia" size="small">
+				<el-button v-if="showAddButton" :icon="Plus" size="small" type="success" @click="addMedia">
 					Add Media
 				</el-button>
 				<el-button
 					v-if="showDeleteButton && selectedMedia.length > 0"
-					type="danger"
 					:icon="Delete"
-					@click="deleteSelected"
 					size="small"
+					type="danger"
+					@click="deleteSelected"
 				>
 					Delete Selected
 				</el-button>
@@ -21,20 +21,20 @@
 		<div v-if="showSearch" class="table-toolbar">
 			<el-input
 				v-model="searchQuery"
+				class="search-input"
+				clearable
 				:placeholder="searchPlaceholder"
 				:prefix-icon="Search"
-				clearable
-				class="search-input"
 				@input="onSearch"
 			/>
 		</div>
 
 		<el-table
 			v-loading="loading"
-			:data="mediaItems"
-			style="width: 100%"
-			@selection-change="handleSelectionChange"
 			class="media-table"
+			style="width: 100%"
+			:data="mediaItems"
+			@selection-change="handleSelectionChange"
 		>
 			<el-table-column v-if="showSelection" type="selection" width="55" />
 
@@ -42,10 +42,10 @@
 				<template #default="scope">
 					<div class="media-thumbnail" @click="emit('preview-media', scope.row)">
 						<el-image
-							:src="scope.row.url"
 							:alt="scope.row.alt || 'Media thumbnail'"
 							class="thumbnail-image"
 							fit="cover"
+							:src="scope.row.url"
 						>
 							<template #error>
 								<div class="image-slot">
@@ -57,35 +57,35 @@
 				</template>
 			</el-table-column>
 
-			<el-table-column prop="title" label="Title" sortable>
+			<el-table-column label="Title" prop="title" sortable>
 				<template #default="scope">
 					<span class="media-title" :title="scope.row.title">{{ scope.row.title || 'Untitled' }}</span>
 				</template>
 			</el-table-column>
 
-			<el-table-column prop="alt" label="Alt Text" sortable>
+			<el-table-column label="Alt Text" prop="alt" sortable>
 				<template #default="scope">
 					<span class="media-alt" :title="scope.row.alt">{{ scope.row.alt || '-' }}</span>
 				</template>
 			</el-table-column>
 
-			<el-table-column prop="size" label="Size" sortable width="120">
+			<el-table-column label="Size" prop="size" sortable width="120">
 				<template #default="scope">
 					<span>{{ formatFileSize(scope.row.size) }}</span>
 				</template>
 			</el-table-column>
 
-			<el-table-column prop="createdAt" label="Date Added" sortable width="180">
+			<el-table-column label="Date Added" prop="createdAt" sortable width="180">
 				<template #default="scope">
 					<span>{{ formatDate(scope.row.createdAt) }}</span>
 				</template>
 			</el-table-column>
 
-			<el-table-column v-if="showActions" label="Actions" width="150" fixed="right">
+			<el-table-column v-if="showActions" fixed="right" label="Actions" width="150">
 				<template #default="scope">
 					<el-button-group>
-						<el-button size="small" type="primary" plain @click="editMedia(scope.row)"> Edit </el-button>
-						<el-button size="small" type="danger" plain @click="deleteMedia(scope.row)"> Delete </el-button>
+						<el-button plain size="small" type="primary" @click="editMedia(scope.row)"> Edit </el-button>
+						<el-button plain size="small" type="danger" @click="deleteMedia(scope.row)"> Delete </el-button>
 					</el-button-group>
 				</template>
 			</el-table-column>
@@ -95,8 +95,8 @@
 			<el-pagination
 				v-model:current-page="currentPage"
 				v-model:page-size="pageSize"
-				:page-sizes="rowsPerPageOptions"
 				layout="total, sizes, prev, pager, next, jumper"
+				:page-sizes="rowsPerPageOptions"
 				:total="mediaItems.length"
 			/>
 		</div>
@@ -105,8 +105,10 @@
 
 <script setup lang="ts" generic="T extends MediaItem">
 import { ref, watch } from 'vue'
-import { Plus, Delete, Search, Picture } from '@element-plus/icons-vue'
-import type { MediaItem } from '@/entities/media/model'
+
+import { Delete, Picture, Plus, Search } from '@element-plus/icons-vue'
+
+import type { MediaItem } from '#entities/media/model'
 
 export interface Props<T> {
 	title?: string

@@ -4,7 +4,7 @@
 			<slot />
 		</div>
 
-		<slot v-if="$slots.postfix" name="postfix" class="ui-button__postfix" />
+		<slot v-if="$slots.postfix" class="ui-button__postfix" name="postfix" />
 	</component>
 </template>
 

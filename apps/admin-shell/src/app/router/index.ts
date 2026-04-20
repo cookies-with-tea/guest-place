@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MainLayout from '#app/layouts/MainLayout.vue'
-import { useSidebar } from '#widgets/the-sidebar'
-import { ROUTES } from '@admin-panel/lib'
 
+import { ROUTES } from '@admin-panel/lib'
 import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
+
+import { useSidebar } from '#widgets/the-sidebar'
+
+import MainLayout from '#app/layouts/MainLayout.vue'
 
 // Загружаем роуты асинхронно
 const loadRemoteRoutes = async (app: any) => {

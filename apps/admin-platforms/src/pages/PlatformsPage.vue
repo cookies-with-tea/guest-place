@@ -6,15 +6,15 @@
 				<p class="subtitle">Design-first content management</p>
 			</div>
 			<div class="header-actions">
-				<el-button @click="fetchData" :icon="Refresh" circle />
-				<el-button type="primary" :loading="saving" :icon="Check" @click="handleSave"> Save Changes </el-button>
+				<el-button circle :icon="Refresh" @click="fetchData" />
+				<el-button :icon="Check" :loading="saving" type="primary" @click="handleSave"> Save Changes </el-button>
 			</div>
 		</header>
 
 		<div class="editor-content">
 			<el-row :gutter="24">
 				<!-- LEFT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- GENERAL SECTION -->
 						<el-card class="section-card mb-24">
@@ -30,9 +30,9 @@
 								<el-form-item label="Main Hero Description">
 									<el-input
 										v-model="form.description"
-										type="textarea"
-										:rows="4"
 										placeholder="Platform main vision and mission"
+										:rows="4"
+										type="textarea"
 									/>
 								</el-form-item>
 								<div class="section-guide-embed">
@@ -52,7 +52,7 @@
 									<template #header>
 										<div class="card-header">
 											<span>Opportunity Card #{{ index + 1 }}</span>
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.opportunities, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.opportunities, index)" />
 										</div>
 									</template>
 									<el-form label-position="top">
@@ -83,7 +83,7 @@
 											</el-col>
 										</el-row>
 										<el-form-item label="Features List">
-											<div style=" width: 100%;display: flex; flex-direction: column; gap: 12px">
+											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
 													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
 														<template #append>
@@ -92,11 +92,11 @@
 													</el-input>
 												</div>
 												<el-button
-													type="primary"
-													plain
 													:icon="Plus"
-													@click="addItem(opp.items, '')"
+													plain
 													style="align-self: flex-start"
+													type="primary"
+													@click="addItem(opp.items, '')"
 												>
 													Add Feature
 												</el-button>
@@ -109,7 +109,7 @@
 								<UiMediaPicker v-model="form.opportunitiesGuideUuid" />
 								<p class="guide-hint">Opportunities Preview</p>
 							</div>
-							<el-button class="add-btn mb-32" type="primary" plain :icon="Plus" @click="addOpportunity">
+							<el-button class="add-btn mb-32" :icon="Plus" plain type="primary" @click="addOpportunity">
 								Add New Opportunity Card
 							</el-button>
 						</div>
@@ -117,7 +117,7 @@
 				</el-col>
 
 				<!-- RIGHT COLUMN -->
-				<el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+				<el-col :lg="12" :md="24" :sm="24" :xl="12" :xs="24">
 					<div class="content-group">
 						<!-- TOOLS AND SERVICES SECTION -->
 						<el-card class="section-card mb-24">
@@ -143,26 +143,26 @@
 								</el-row>
 								<div class="divider">Service Cards</div>
 								<div v-for="(item, index) in form.toolsItems" :key="index" class="sub-item-complex">
-									<el-row :gutter="12" align="middle">
+									<el-row align="middle" :gutter="12">
 										<el-col :span="22">
-											<el-form-item label="Card Title" class="mb-8">
+											<el-form-item class="mb-8" label="Card Title">
 												<el-input v-model="item.title" placeholder="Card title" />
 											</el-form-item>
-											<el-form-item label="Card Text" class="mb-8">
-												<el-input v-model="item.text" type="textarea" :rows="2" placeholder="Description/Card text" />
+											<el-form-item class="mb-8" label="Card Text">
+												<el-input v-model="item.text" placeholder="Description/Card text" :rows="2" type="textarea" />
 											</el-form-item>
 										</el-col>
 										<el-col :span="2">
-											<el-button type="danger" link :icon="Delete" @click="removeItem(form.toolsItems, index)" />
+											<el-button :icon="Delete" link type="danger" @click="removeItem(form.toolsItems, index)" />
 										</el-col>
 									</el-row>
 								</div>
 								<el-button
-									type="primary"
-									plain
 									:icon="Plus"
-									@click="addToolItem"
+									plain
 									style="margin-top: 12px; margin-bottom: 24px"
+									type="primary"
+									@click="addToolItem"
 								>
 									Add Service Card
 								</el-button>
@@ -181,10 +181,11 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
+
 import { createApi } from '@admin-panel/lib'
-import { ElMessage } from 'element-plus'
-import { Plus, Delete, Refresh, Check } from '@element-plus/icons-vue'
 import { UiMediaPicker } from '@admin-panel/ui'
+import { Check, Delete, Plus, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 interface IPlatformsData {
 	title: string

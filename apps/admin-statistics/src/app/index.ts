@@ -1,8 +1,9 @@
-import App from './App.vue'
-import { router } from './router'
 import { createApp } from 'vue'
 
 import { initUiStyles } from '@admin-panel/ui'
+
+import App from './App.vue'
+import { router } from './router'
 
 initUiStyles()
 

@@ -1,22 +1,22 @@
 <template>
 	<div class="users-table-feature" :class="{ 'is-dark': isDark }">
 		<el-table
-			:data="users"
 			v-loading="isLoading || isFetching"
-			element-loading-text="Loading data..."
 			border
 			class="premium-table"
+			:data="users"
+			element-loading-text="Loading data..."
 			@row-click="(row: IUserResponse) => openDetailDrawer(row.uuid!)"
 		>
 			<!-- Email Column -->
-			<el-table-column prop="email" label="Email" min-width="200">
+			<el-table-column label="Email" min-width="200" prop="email">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.email }">
@@ -37,21 +37,21 @@
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Email</span>
-							<el-input v-model="filters.email" placeholder="Enter email..." clearable />
+							<el-input v-model="filters.email" clearable placeholder="Enter email..." />
 						</div>
 					</el-popover>
 				</template>
 			</el-table-column>
 
 			<!-- Name Column -->
-			<el-table-column prop="firstName" label="Full Name" min-width="220">
+			<el-table-column label="Full Name" min-width="220" prop="firstName">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.name }">
@@ -72,7 +72,7 @@
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Name</span>
-							<el-input v-model="filters.name" placeholder="Enter name..." clearable />
+							<el-input v-model="filters.name" clearable placeholder="Enter name..." />
 						</div>
 					</el-popover>
 				</template>
@@ -84,14 +84,14 @@
 			</el-table-column>
 
 			<!-- Role Column -->
-			<el-table-column prop="role" label="Role" width="160">
+			<el-table-column label="Role" prop="role" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.role && filters.role.length > 0 }">
@@ -114,12 +114,12 @@
 							<span class="popover-label">Filter by Role</span>
 							<el-select
 								v-model="filters.role"
-								multiple
+								clearable
 								collapse-tags
 								collapse-tags-tooltip
-								clearable
-								placeholder="Select roles"
 								filterable
+								multiple
+								placeholder="Select roles"
 								popper-class="premium-dark-select"
 							>
 								<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
@@ -128,19 +128,19 @@
 					</el-popover>
 				</template>
 				<template #default="{ row }">
-					<el-tag :type="row.role === 'admin' ? 'danger' : 'info'" size="small" effect="plain">{{ row.role }}</el-tag>
+					<el-tag effect="plain" size="small" :type="row.role === 'admin' ? 'danger' : 'info'">{{ row.role }}</el-tag>
 				</template>
 			</el-table-column>
 
 			<!-- Status Column -->
-			<el-table-column prop="status" label="Status" width="160">
+			<el-table-column label="Status" prop="status" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.status && filters.status.length > 0 }">
@@ -163,12 +163,12 @@
 							<span class="popover-label">Filter by Status</span>
 							<el-select
 								v-model="filters.status"
-								multiple
+								clearable
 								collapse-tags
 								collapse-tags-tooltip
-								clearable
-								placeholder="Select statuses"
 								filterable
+								multiple
+								placeholder="Select statuses"
 								popper-class="premium-dark-select"
 							>
 								<el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
@@ -177,21 +177,21 @@
 					</el-popover>
 				</template>
 				<template #default="{ row }">
-					<el-tag :type="row.status === 'active' ? 'success' : 'warning'" size="small" effect="plain">{{
+					<el-tag effect="plain" size="small" :type="row.status === 'active' ? 'success' : 'warning'">{{
 						row.status
 					}}</el-tag>
 				</template>
 			</el-table-column>
 
 			<!-- Phone Column -->
-			<el-table-column prop="phone" label="Phone" width="160">
+			<el-table-column label="Phone" prop="phone" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.phone }">
@@ -200,21 +200,21 @@
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Phone</span>
-							<el-input v-model="filters.phone" placeholder="Enter phone..." clearable />
+							<el-input v-model="filters.phone" clearable placeholder="Enter phone..." />
 						</div>
 					</el-popover>
 				</template>
 			</el-table-column>
 
 			<!-- City Column -->
-			<el-table-column prop="city" label="City" width="140">
+			<el-table-column label="City" prop="city" width="140">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						:width="240"
-						trigger="click"
 						popper-class="premium-dark-popover"
 						:show-arrow="true"
+						trigger="click"
+						:width="240"
 					>
 						<template #reference>
 							<div class="header-interactive" :class="{ 'is-active': filters.city }">
@@ -223,7 +223,7 @@
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by City</span>
-							<el-input v-model="filters.city" placeholder="Enter city..." clearable />
+							<el-input v-model="filters.city" clearable placeholder="Enter city..." />
 						</div>
 					</el-popover>
 				</template>
@@ -232,10 +232,10 @@
 			<el-table-column label="Actions" width="200">
 				<template #default="scope">
 					<div class="action-buttons">
-						<el-button v-if="scope.row" size="small" type="warning" plain @click.stop="openEditModal(scope.row.uuid)">
+						<el-button v-if="scope.row" plain size="small" type="warning" @click.stop="openEditModal(scope.row.uuid)">
 							Edit
 						</el-button>
-						<el-button v-if="scope.row" size="small" type="danger" plain @click.stop="confirmDelete(scope.row.uuid)">
+						<el-button v-if="scope.row" plain size="small" type="danger" @click.stop="confirmDelete(scope.row.uuid)">
 							Delete
 						</el-button>
 					</div>
@@ -247,10 +247,10 @@
 			<el-pagination
 				v-model:current-page="pagination.page"
 				v-model:page-size="pagination.limit"
-				:total="pagination.total"
-				:page-sizes="[10, 20, 50, 100]"
-				layout="total, sizes, prev, pager, next, jumper"
 				background
+				layout="total, sizes, prev, pager, next, jumper"
+				:page-sizes="[10, 20, 50, 100]"
+				:total="pagination.total"
 				@current-change="setPage"
 				@size-change="setlimit"
 			/>
@@ -265,11 +265,12 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { CaretTop, CaretBottom } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
-import { useUsers, type IUserResponse } from '#entities/user'
-import { UserRole, UserStatus } from '#entities/user/model'
 import { useTheme } from '@admin-panel/ui'
+import { CaretBottom, CaretTop } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
+
+import { type IUserResponse, useUsers } from '#entities/user'
+import { UserRole, UserStatus } from '#entities/user/model'
 
 const {
 	users,

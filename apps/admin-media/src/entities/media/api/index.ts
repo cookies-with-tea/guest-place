@@ -1,4 +1,5 @@
 import { createApi } from '@admin-panel/lib'
+
 import type { IMedia } from '../model'
 
 const { fetchData } = createApi('media')

@@ -5,15 +5,15 @@
 		width="500px"
 		@closed="closeModal"
 	>
-		<el-form ref="formRef" :model="form" :rules="rules" label-width="100px" @submit.prevent>
+		<el-form ref="formRef" label-width="100px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Namespace" prop="namespace">
-				<el-select v-model="form.namespace" filterable clearable placeholder="Select namespace" style="width: 100%">
+				<el-select v-model="form.namespace" clearable filterable placeholder="Select namespace" style="width: 100%">
 					<el-option v-for="ns in namespaces" :key="ns" :label="ns" :value="ns" />
 				</el-select>
 			</el-form-item>
 
 			<el-form-item label="Language" prop="language">
-				<el-select v-model="form.language" filterable clearable placeholder="Select language" style="width: 100%">
+				<el-select v-model="form.language" clearable filterable placeholder="Select language" style="width: 100%">
 					<el-option v-for="lang in languages" :key="lang" :label="lang" :value="lang" />
 				</el-select>
 			</el-form-item>
@@ -23,13 +23,13 @@
 			</el-form-item>
 
 			<el-form-item label="Value" prop="value">
-				<el-input v-model="form.value" type="textarea" :rows="3" />
+				<el-input v-model="form.value" :rows="3" type="textarea" />
 			</el-form-item>
 		</el-form>
 
 		<template #footer>
 			<el-button @click="closeModal">Cancel</el-button>
-			<el-button type="primary" :loading="isSubmitting" @click="submitForm">
+			<el-button :loading="isSubmitting" type="primary" @click="submitForm">
 				{{ isEditing ? 'Save' : 'Add' }}
 			</el-button>
 		</template>
@@ -37,8 +37,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+
 import type { FormInstance, FormRules } from 'element-plus'
+
 import { useTranslations } from '#entities/translation/lib/composables'
 
 const { isModalOpen, editingTranslation, closeModal, handleSubmit } = useTranslations()

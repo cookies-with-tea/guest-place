@@ -1,8 +1,10 @@
-import { app } from './app'
-import { router } from './app/router'
-import ElementPlus from 'element-plus'
 import { VueQueryPlugin } from '@tanstack/vue-query'
+
 import { initUiStyles } from '@admin-panel/ui'
+import ElementPlus from 'element-plus'
+
+import { router } from './app/router'
+import { app } from './app'
 
 initUiStyles()
 

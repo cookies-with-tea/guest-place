@@ -1,10 +1,11 @@
+import federation from '@originjs/vite-plugin-federation'
+import vue from '@vitejs/plugin-vue'
+import { defu } from 'defu'
+import { builtinModules } from 'node:module'
+import { resolve } from 'node:path'
 import { loadEnv } from 'vite'
 import { defineConfig, type UserConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
-import federation from '@originjs/vite-plugin-federation'
-import { resolve } from 'node:path'
-import { builtinModules } from 'node:module'
-import { defu } from 'defu'
+
 import { APPS_PORTS } from '../constants/ports'
 
 export interface CreateConfigOptions {

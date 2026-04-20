@@ -1,5 +1,5 @@
-import vueDevTools from 'vite-plugin-vue-devtools'
 import { createConfig } from '@admin-panel/lib/vite'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default createConfig({
 	name: 'shell',

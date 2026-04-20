@@ -1,7 +1,8 @@
-import { ref, computed, onMounted } from 'vue'
-import { mediaApi } from '@/entities/media/api'
-import { mediaUtils } from '@/entities/media/utils/media.utils'
-import type { MediaItem, ICreateMedia, IUpdateMedia } from '@/entities/media/model'
+import { computed, onMounted, ref } from 'vue'
+
+import { mediaApi } from '#entities/media/api'
+import type { ICreateMedia, IUpdateMedia, MediaItem } from '#entities/media/model'
+import { mediaUtils } from '#entities/media/utils/media.utils'
 
 export const useMedia = () => {
 	// State

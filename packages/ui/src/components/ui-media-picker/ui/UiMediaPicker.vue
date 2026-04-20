@@ -3,23 +3,23 @@
 		<div v-if="loading" class="media-picker-loading">
 			<el-skeleton animated>
 				<template #template>
-					<el-skeleton-item variant="image" class="skeleton-image" />
+					<el-skeleton-item class="skeleton-image" variant="image" />
 				</template>
 			</el-skeleton>
 		</div>
 
 		<div v-else-if="currentMediaUrl" class="media-preview">
-			<el-image :src="currentMediaUrl" fit="cover" class="preview-image" :preview-src-list="[currentMediaUrl]" />
+			<el-image class="preview-image" fit="cover" :preview-src-list="[currentMediaUrl]" :src="currentMediaUrl" />
 			<div class="media-actions">
-				<el-button type="danger" circle :icon="Delete" @click="handleRemove" />
+				<el-button circle :icon="Delete" type="danger" @click="handleRemove" />
 				<el-upload
 					action="#"
 					:auto-upload="false"
-					:show-file-list="false"
-					:on-change="handleUpload"
 					class="upload-trigger"
+					:on-change="handleUpload"
+					:show-file-list="false"
 				>
-					<el-button type="primary" circle :icon="Refresh" />
+					<el-button circle :icon="Refresh" type="primary" />
 				</el-upload>
 			</div>
 		</div>
@@ -28,10 +28,10 @@
 			<el-upload
 				action="#"
 				:auto-upload="false"
-				:show-file-list="false"
-				:on-change="handleUpload"
 				class="empty-upload"
 				drag
+				:on-change="handleUpload"
+				:show-file-list="false"
 			>
 				<el-icon class="el-icon--upload"><UploadFilled /></el-icon>
 				<div class="el-upload__text">
@@ -47,9 +47,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { Delete, Refresh, UploadFilled } from '@element-plus/icons-vue'
+import { onMounted, ref, watch } from 'vue'
+
 import { createApi, uploadMedia } from '@admin-panel/lib'
+import { Delete, Refresh, UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 interface Props {

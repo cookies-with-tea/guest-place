@@ -1,7 +1,7 @@
 <template>
 	<aside class="the-sidebar glass-sidebar" :class="{ 'is-collapsed': isCollapsed }">
 		<div class="sidebar-header">
-			<div class="sidebar-logo" v-show="!isCollapsed">
+			<div v-show="!isCollapsed" class="sidebar-logo">
 				<h2>GUEST PLACE</h2>
 			</div>
 			<div class="collapse-trigger" @click="toggleCollapse">
@@ -10,13 +10,13 @@
 		</div>
 
 		<div class="context-switcher" :class="{ 'is-collapsed': isCollapsed }">
-			<el-tooltip :content="t('general.system_admin')" placement="right" :disabled="!isCollapsed">
+			<el-tooltip :content="t('general.system_admin')" :disabled="!isCollapsed" placement="right">
 				<div class="context-item" :class="{ active: activeContext === 'system' }" @click="setContext('system')">
 					<el-icon><Setting /></el-icon>
 					<span v-show="!isCollapsed">Admin</span>
 				</div>
 			</el-tooltip>
-			<el-tooltip :content="t('general.website_content')" placement="right" :disabled="!isCollapsed">
+			<el-tooltip :content="t('general.website_content')" :disabled="!isCollapsed" placement="right">
 				<div class="context-item" :class="{ active: activeContext === 'website' }" @click="setContext('website')">
 					<el-icon><EditPen /></el-icon>
 					<span v-show="!isCollapsed">Website</span>
@@ -25,14 +25,14 @@
 		</div>
 
 		<el-menu
-			:default-active="activePath"
-			:collapse="isCollapsed"
-			mode="vertical"
-			background-color="transparent"
-			text-color="var(--gp-text-secondary)"
 			active-text-color="var(--gp-primary)"
-			router
+			background-color="transparent"
 			class="sidebar-menu"
+			:collapse="isCollapsed"
+			:default-active="activePath"
+			mode="vertical"
+			router
+			text-color="var(--gp-text-secondary)"
 		>
 			<template v-for="item in sidebarData" :key="item.path || item.title">
 				<!-- Single Item -->
@@ -68,17 +68,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useSidebar } from '../composables'
+
 import { useI18n } from '@admin-panel/i18n'
 import * as Icons from '@element-plus/icons-vue'
 import { Expand, Fold } from '@element-plus/icons-vue'
+
+import { useSidebar } from '../composables'
 
 const route = useRoute()
 
 const { sidebarData, activeContext, setContext } = useSidebar()
 const { t } = useI18n()
 
-import { Setting, EditPen } from '@element-plus/icons-vue'
+import { EditPen, Setting } from '@element-plus/icons-vue'
 
 const isCollapsed = ref(localStorage.getItem('gp-sidebar-collapsed') === 'true')
 
