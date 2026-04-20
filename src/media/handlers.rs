@@ -4,7 +4,6 @@ use crate::media::dto::{
   CreateMediaDTO,
   MediaItemDTO,
   MediaItemFromDb,
-  MediaUploadResponseDTO,
   UpdateMediaDTO,
 };
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
@@ -24,36 +23,39 @@ use uuid::Uuid;
     tag = "Media",
     request_body(content = CreateMediaDTO, content_type = "multipart/form-data"),
     responses(
-        (status = 201, description = "Media uploaded successfully", body = ApiResponse<MediaUploadResponseDTO>),
-        (status = 400, description = "Invalid file or content type", body = ApiResponse<MediaUploadResponseDTO>),
-        (status = 500, description = "Internal server error", body = ApiResponse<MediaUploadResponseDTO>)
+        (status = 201, description = "Media uploaded successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 400, description = "Invalid file or content type", body = ApiResponse<MediaItemDTO>),
+        (status = 500, description = "Internal server error", body = ApiResponse<MediaItemDTO>)
     ),
     operation_id = "upload_media",
 )]
 pub async fn create(
     State(state): State<Arc<AppState>>,
     mut multipart: Multipart,
-) -> Result<Json<ApiResponse<MediaUploadResponseDTO>>, (StatusCode, Json<ApiResponse<MediaUploadResponseDTO>>)> {
+) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let mut file_name = String::new();
     let mut data = Vec::new();
     let mut content_type = None;
+    let mut name = None;
     let mut title = None;
     let mut alt = None;
 
     while let Some(field) = multipart.next_field().await.unwrap() {
-        if field.name() == Some("file") {
-            file_name = field
-                .file_name()
-                .map(|f| f.to_string())
-                .unwrap_or_else(|| "file".to_string());
-            data = field.bytes().await.unwrap().to_vec();
-            content_type = mime_guess::from_path(&file_name)
-                .first()
-                .map(|mime| mime.to_string());
-        } else if field.name() == Some("title") {
-            title = Some(field.text().await.unwrap());
-        } else if field.name() == Some("alt") {
-            alt = Some(field.text().await.unwrap());
+        match field.name() {
+            Some("file") => {
+                file_name = field
+                    .file_name()
+                    .map(|f| f.to_string())
+                    .unwrap_or_else(|| "file.bin".to_string());
+                data = field.bytes().await.unwrap().to_vec();
+                content_type = mime_guess::from_path(&file_name)
+                    .first()
+                    .map(|mime| mime.to_string());
+            },
+            Some("name") => name = Some(field.text().await.unwrap()),
+            Some("title") => title = Some(field.text().await.unwrap()),
+            Some("alt") => alt = Some(field.text().await.unwrap()),
+            _ => {}
         }
     }
 
@@ -69,18 +71,26 @@ pub async fn create(
         }
     };
 
-    let media_type = if content_type.starts_with("image/") {
-        "image"
+    let (media_type_str, media_type_enum) = if content_type.starts_with("image/") {
+        ("image", crate::media::dto::MediaType::Image)
     } else if content_type.starts_with("video/") {
-        "video"
+        ("video", crate::media::dto::MediaType::Video)
+    } else if content_type.contains("pdf") || content_type.contains("document") || content_type.contains("msword") || content_type.contains("officedocument") || content_type.contains("text/csv") || content_type.contains("text/plain") {
+        ("document", crate::media::dto::MediaType::Document)
+    } else if content_type.contains("zip") || content_type.contains("tar") || content_type.contains("compressed") {
+        ("archive", crate::media::dto::MediaType::Archive)
     } else {
-        return into_api_response(
-            StatusCode::BAD_REQUEST,
-            None,
-            Some(error_map("content_type", "Unsupported media type")),
-            Some(vec!["Only images and videos are allowed".to_string()]),
-        );
+        ("other", crate::media::dto::MediaType::Other)
     };
+
+    // If name is missing, use file_name (without extension if possible)
+    let final_name = name.unwrap_or_else(|| {
+        std::path::Path::new(&file_name)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or(&file_name)
+            .to_string()
+    });
 
     let media_uuid = Uuid::new_v4();
     let extension = std::path::Path::new(&file_name)
@@ -112,7 +122,7 @@ pub async fn create(
         Ok(true) => {}
     }
 
-    let (_hash, relative_path) = if media_type == "image" {
+    let (_hash, relative_path) = if media_type_str == "image" {
         let processed_data = state.media_storage.process_image(&data).await.map_err(|e| {
             eprintln!("Image processing error: {:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
@@ -148,20 +158,21 @@ pub async fn create(
     );
 
     let db_result = sqlx::query(
-        "INSERT INTO media (uuid, media_type, url, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6)",
+        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8)",
     )
     .bind(media_uuid)
-    .bind(media_type)
+    .bind(media_type_str)
     .bind(&full_url)
-    .bind(title)
-    .bind(alt)
+    .bind(&final_name)
+    .bind(extension)
+    .bind(&title)
+    .bind(&alt)
     .bind(file_size)
     .execute(&state.pool)
     .await;
 
     if let Err(e) = db_result {
         eprintln!("DB error: {:?}", e);
-        // В CAS мы не удаляем файл, так как он может использоваться другими записями (дедупликация)
         return into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
             None,
@@ -172,9 +183,14 @@ pub async fn create(
 
     into_api_response(
         StatusCode::CREATED,
-        Some(MediaUploadResponseDTO {
+        Some(MediaItemDTO {
             uuid: media_uuid.to_string(),
             url: full_url,
+            name: Some(final_name),
+            extension: Some(extension.to_string()),
+            title,
+            alt,
+            media_type: media_type_enum,
         }),
         None,
         Some(vec!["Media uploaded successfully".to_string()]),
@@ -224,7 +240,7 @@ pub async fn get_all(
 
     let rows = sqlx::query_as::<_, MediaItemFromDb>(
         r#"
-        SELECT uuid, media_type, url, title, alt
+        SELECT uuid, media_type, url, name, extension, title, alt
         FROM media
         ORDER BY uuid DESC
         LIMIT $1 OFFSET $2
@@ -242,6 +258,8 @@ pub async fn get_all(
                 .map(|row| MediaItemDTO {
                     uuid: row.uuid.to_string(),
                     url: row.url,
+                    name: row.name,
+                    extension: row.extension,
                     title: row.title,
                     alt: row.alt,
                     media_type: row.media_type,
@@ -298,7 +316,7 @@ pub async fn get_one(
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, title, alt FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -309,6 +327,8 @@ pub async fn get_one(
             let media_response = MediaItemDTO {
                 uuid: media.uuid.to_string(),
                 url: media.url,
+                name: media.name,
+                extension: media.extension,
                 title: media.title,
                 alt: media.alt,
                 media_type: media.media_type,
@@ -363,7 +383,7 @@ pub async fn update(
     Json(payload): Json<UpdateMediaDTO>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, title, alt FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -374,6 +394,18 @@ pub async fn update(
             let mut update_query = "UPDATE media SET ".to_string();
             let mut query_param_index = 1;
             let mut has_updates = false;
+
+            if let Some(_name) = &payload.name {
+                update_query.push_str(&format!("name = ${}, ", query_param_index));
+                query_param_index += 1;
+                has_updates = true;
+            }
+
+            if let Some(_extension) = &payload.extension {
+                update_query.push_str(&format!("extension = ${}, ", query_param_index));
+                query_param_index += 1;
+                has_updates = true;
+            }
 
             if let Some(_title) = &payload.title {
                 update_query.push_str(&format!("title = ${}, ", query_param_index));
@@ -400,6 +432,14 @@ pub async fn update(
 
             let mut query = sqlx::query(&update_query);
 
+            if let Some(name) = &payload.name {
+                query = query.bind(name.clone());
+            }
+
+            if let Some(extension) = &payload.extension {
+                query = query.bind(extension.clone());
+            }
+
             if let Some(title) = &payload.title {
                 query = query.bind(title.clone());
             }
@@ -415,7 +455,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, title, alt FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -426,6 +466,8 @@ pub async fn update(
                             let media_response = MediaItemDTO {
                                 uuid: media.uuid.to_string(),
                                 url: media.url,
+                                name: media.name,
+                                extension: media.extension,
                                 title: media.title,
                                 alt: media.alt,
                                 media_type: media.media_type,

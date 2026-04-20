@@ -1,25 +1,21 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Deserialize, ToSchema)]
-#[allow(unused)]
-pub struct CreateMediaDTO {
-    title: Option<String>,
-    alt: Option<String>,
-    #[schema(format = Binary, content_media_type = "application/octet-stream")]
-    file: String,
-}
-
 #[derive(Serialize, ToSchema)]
-pub struct MediaUploadResponseDTO {
-    pub(crate) uuid: String,
-    pub(crate) url: String,
+pub struct CreateMediaDTO {
+    pub name: Option<String>,
+    pub title: Option<String>,
+    pub alt: Option<String>,
+    #[schema(format = Binary, content_media_type = "application/octet-stream")]
+    pub file: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct MediaItemDTO {
   pub uuid: String,
   pub url: String,
+  pub name: Option<String>,
+  pub extension: Option<String>,
   pub title: Option<String>,
   pub alt: Option<String>,
   pub media_type: MediaType,
@@ -27,6 +23,8 @@ pub struct MediaItemDTO {
 
 #[derive(Deserialize, Debug, ToSchema)]
 pub struct UpdateMediaDTO {
+    pub name: Option<String>,
+    pub extension: Option<String>,
     pub title: Option<String>,
     pub alt: Option<String>,
 }
@@ -35,6 +33,8 @@ pub struct UpdateMediaDTO {
 pub struct MediaItemFromDb {
   pub uuid: uuid::Uuid,
   pub url: String,
+  pub name: Option<String>,
+  pub extension: Option<String>,
   pub title: Option<String>,
   pub alt: Option<String>,
   pub media_type: MediaType,
@@ -46,4 +46,7 @@ pub enum MediaType {
   Image,
   Video,
   Icon,
+  Document,
+  Archive,
+  Other,
 }
