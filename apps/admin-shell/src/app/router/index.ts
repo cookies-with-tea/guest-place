@@ -81,10 +81,12 @@ const routesToSidebar = (groups: any[]) => {
 		return {
 			title: group.title,
 			icon: group.icon,
-			children: group.routes.map((route: any) => ({
-				title: route.meta?.title || route.name,
-				path: route.path,
-			})),
+			children: group.routes
+				.filter((route: any) => !route.meta?.hideInSidebar && !route.path.includes(':'))
+				.map((route: any) => ({
+					title: route.meta?.title || route.name,
+					path: route.path,
+				})),
 		}
 	})
 }

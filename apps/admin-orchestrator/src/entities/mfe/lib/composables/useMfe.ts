@@ -42,6 +42,17 @@ export const useMfe = () => {
 		return []
 	})
 
+	/** Quick stats for the dashboard header cards */
+	const stats = computed(() => {
+		const all = microfrontends.value
+		const online = all.filter((m: any) => m.enabled).length
+		const offline = all.length - online
+		const system = all.filter((m: any) => m.category === 'system').length
+		const website = all.filter((m: any) => m.category === 'website').length
+
+		return { total: all.length, online, offline, system, website }
+	})
+
 	// === Mutations ===
 	const createMutation = useMutation({
 		mutationFn: (data: any) => mfeApi.create(data),
@@ -114,6 +125,13 @@ export const useMfe = () => {
 		deleteMutation.mutate(row.id)
 	}
 
+	/** Toggle enabled status inline without opening dialog */
+	const toggleEnabled = (row: any) => {
+		const { id, ...rest } = row
+
+		updateMutation.mutate({ id, data: { ...rest, enabled: !row.enabled } })
+	}
+
 	const closeDialog = () => {
 		dialogVisible.value = false
 	}
@@ -137,12 +155,14 @@ export const useMfe = () => {
 		dialogVisible,
 		isEdit,
 		form,
+		stats,
 		isSubmitting: computed(() => createMutation.isPending.value || updateMutation.isPending.value),
 
 		// actions
 		handleCreate,
 		handleEdit,
 		handleDelete,
+		toggleEnabled,
 		closeDialog,
 		saveMfe,
 	}

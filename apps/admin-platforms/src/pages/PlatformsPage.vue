@@ -301,8 +301,8 @@ const autoSave = async () => {
 		})
 
 		fetchData()
-	} catch (error) {
-		console.error('Auto-save failed:', error)
+	} catch {
+		ElMessage.error('Auto-save failed')
 	}
 }
 

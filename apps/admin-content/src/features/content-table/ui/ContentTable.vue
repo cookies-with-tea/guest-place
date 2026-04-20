@@ -1,0 +1,131 @@
+<template>
+	<div class="content-table-feature" :class="{ 'is-dark': isDark }">
+		<el-table v-loading="isLoading" border class="premium-table" :data="entries" element-loading-text="Loading data...">
+			<el-table-column label="ID" prop="id" width="100">
+				<template #default="{ row }">
+					<span class="uuid-cell">{{ row.id.slice(0, 8) }}</span>
+				</template>
+			</el-table-column>
+
+			<el-table-column
+				v-for="field in previewFields"
+				:key="field.name"
+				:label="field.label"
+				:prop="`data.${field.name}`"
+			>
+				<template #default="{ row }">
+					{{ formatCellValue(row.data[field.name], field) }}
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Updated At" prop="updatedAt" width="180">
+				<template #default="{ row }">
+					{{ formatDate(row.updatedAt) }}
+				</template>
+			</el-table-column>
+
+			<el-table-column label="Actions" width="200">
+				<template #default="scope">
+					<div class="action-buttons">
+						<el-button plain size="small" type="warning" @click="emit('edit', scope.row.id)"> Edit </el-button>
+						<el-button plain size="small" type="danger" @click="confirmDelete(scope.row.id)"> Delete </el-button>
+					</div>
+				</template>
+			</el-table-column>
+		</el-table>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+
+import type { ContentEntry, ContentSchema, FieldDefinition } from '@admin-panel/lib'
+import { FieldType } from '@admin-panel/lib'
+import { useTheme } from '@admin-panel/ui'
+import { ElMessageBox } from 'element-plus'
+
+interface Props {
+	entries: ContentEntry[]
+	schema: ContentSchema | null
+	isLoading?: boolean
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+	edit: [id: string]
+	delete: [id: string]
+}>()
+
+const { isDark } = useTheme()
+
+const previewFields = computed(() => {
+	if (!props.schema) return []
+
+	return props.schema.fields.slice(0, 3)
+})
+
+const formatCellValue = (value: any, field: FieldDefinition) => {
+	if (value === null || value === undefined) return '-'
+	if (field.fieldType === FieldType.Boolean) return value ? 'Yes' : 'No'
+	if (field.fieldType === FieldType.Media) return '[Media]'
+
+	return value
+}
+
+const formatDate = (dateStr: string) => {
+	if (!dateStr) return '-'
+
+	return new Date(dateStr).toLocaleString()
+}
+
+const confirmDelete = (id: string) => {
+	ElMessageBox.confirm('Delete entry?', 'Confirm', {
+		confirmButtonText: 'Delete',
+		cancelButtonText: 'Cancel',
+		type: 'warning',
+	}).then(() => emit('delete', id))
+}
+</script>
+
+<style scoped>
+.content-table-feature {
+	width: 100%;
+}
+
+.premium-table {
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	box-shadow: var(--shadow-sm);
+	background-color: var(--bg-card) !important;
+	overflow: hidden;
+}
+
+:deep(.el-table) {
+	--el-table-header-bg-color: var(--bg-header);
+	--el-table-row-hover-bg-color: var(--bg-surface);
+	--el-table-border-color: var(--border-color);
+
+	color: var(--text-primary);
+	background-color: var(--bg-card) !important;
+}
+
+:deep(.el-table__header-wrapper th) {
+	height: 60px;
+	border-bottom: 1px solid var(--border-color) !important;
+	font-weight: 700;
+	color: var(--text-muted);
+	background-color: var(--bg-header) !important;
+}
+
+.uuid-cell {
+	font-family: monospace;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.action-buttons {
+	display: flex;
+	gap: 8px;
+}
+</style>

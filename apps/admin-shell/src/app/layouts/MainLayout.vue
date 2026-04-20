@@ -17,7 +17,7 @@
 					<div v-if="isAuthenticated" class="user-info">
 						<el-dropdown trigger="click">
 							<div class="user-profile">
-								<el-avatar :icon="UserFilled" :size="32" :src="user?.avatar" />
+								<el-avatar :icon="UserFilled" :size="32" />
 								<span class="user-name">{{ user?.firstName || user?.email }}</span>
 							</div>
 							<template #dropdown>
@@ -37,7 +37,11 @@
 			</el-dialog>
 
 			<main class="page-content">
-				<RouterView />
+				<RouterView v-slot="{ Component, route: currentRoute }">
+					<Transition :key="currentRoute.path" mode="out-in" name="fade-transform">
+						<component :is="Component" />
+					</Transition>
+				</RouterView>
 			</main>
 		</div>
 	</div>
@@ -139,6 +143,13 @@ const loginDialogVisible = ref(false)
 	gap: 16px;
 }
 
+.page-title {
+	font-weight: 600;
+	font-size: 1rem;
+	letter-spacing: 0.2px;
+	color: var(--gp-text-main);
+}
+
 .page-content {
 	flex: 1;
 	padding: 24px;
@@ -148,6 +159,24 @@ const loginDialogVisible = ref(false)
 .user-profile {
 	display: flex;
 	align-items: center;
+	border-radius: var(--gp-radius-sm);
+	transition: background 0.2s ease;
 	cursor: pointer;
+	padding: 4px 8px;
+	gap: 10px;
+
+	&:hover {
+		background: var(--gp-bg-glass-hover);
+	}
+}
+
+.user-name {
+	max-width: 140px;
+	font-weight: 500;
+	font-size: 0.875rem;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	color: var(--gp-text-main);
+	overflow: hidden;
 }
 </style>

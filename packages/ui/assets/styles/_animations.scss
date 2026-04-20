@@ -1,0 +1,193 @@
+/* ============================================================
+   GP Animations — Phase 3: Polished UI
+   - Page transitions (fade-transform)
+   - Skeleton loading shimmer
+   - Micro-interactions
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Page Transitions: fade-transform
+   ---------------------------------------------------------- */
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+	transition:
+		opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+		transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-transform-enter-from {
+	transform: translateY(12px);
+	opacity: 0;
+}
+
+.fade-transform-leave-to {
+	transform: translateY(-8px);
+	opacity: 0;
+}
+
+/* Slide-in from right (for sub-pages/drawers) */
+.slide-right-enter-active,
+.slide-right-leave-active {
+	transition:
+		opacity 0.3s ease,
+		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right-enter-from {
+	transform: translateX(20px);
+	opacity: 0;
+}
+
+.slide-right-leave-to {
+	transform: translateX(-20px);
+	opacity: 0;
+}
+
+/* Fade only (for dialogs, overlays) */
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
+
+/* ----------------------------------------------------------
+   Skeleton Loading
+   ---------------------------------------------------------- */
+@keyframes gp-shimmer {
+	0% {
+		background-position: -400px 0;
+	}
+
+	100% {
+		background-position: 400px 0;
+	}
+}
+
+.skeleton {
+	border-radius: 8px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+}
+
+.skeleton-text {
+	height: 1em;
+	border-radius: 4px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	margin-bottom: 0.5em;
+}
+
+.skeleton-title {
+	width: 60%;
+	height: 1.5em;
+	border-radius: 6px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	margin-bottom: 1em;
+}
+
+.skeleton-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+}
+
+.skeleton-card {
+	border: 1px solid var(--gp-glass-border);
+	border-radius: var(--gp-radius-md);
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	padding: 20px;
+}
+
+/* ----------------------------------------------------------
+   Micro-interactions
+   ---------------------------------------------------------- */
+
+/* Pulse glow for primary actions */
+@keyframes gp-pulse-glow {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 var(--gp-primary-light);
+	}
+
+	50% {
+		box-shadow: 0 0 0 8px transparent;
+	}
+}
+
+.pulse-glow {
+	animation: gp-pulse-glow 2s infinite;
+}
+
+/* Online indicator pulse */
+@keyframes gp-status-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	50% {
+		transform: scale(1.4);
+		opacity: 0.5;
+	}
+}
+
+.status-dot {
+	width: 8px;
+	height: 8px;
+	display: inline-block;
+	border-radius: 50%;
+
+	&.is-online {
+		background: var(--gp-primary);
+		animation: gp-status-pulse 2s infinite;
+	}
+
+	&.is-offline {
+		background: var(--gp-text-disabled);
+	}
+
+	&.is-warning {
+		background: #f59e0b;
+		animation: gp-status-pulse 2s infinite;
+	}
+}
+
+/* Float animation (ambient orbs, reused from MainLayout) */
+@keyframes float {
+	0% {
+		transform: translate(0, 0) scale(1);
+	}
+
+	100% {
+		transform: translate(-50px, 50px) scale(1.1);
+	}
+}
+
+/* Spin (loading indicator) */
+@keyframes gp-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.spin {
+	animation: gp-spin 1s linear infinite;
+}
