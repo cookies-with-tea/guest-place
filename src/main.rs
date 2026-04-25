@@ -40,6 +40,7 @@ use crate::media::storage::StorageService;
 #[derive(Clone, Debug)]
 struct AppState {
     pool: Pool<Postgres>,
+    config: crate::core::app::AppConfig,
     i18n: I18nService,
     media_storage: Arc<StorageService>,
     redis: Arc<RedisService>,
@@ -180,6 +181,7 @@ async fn main() {
 
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
+        config: config.clone(),
         i18n,
         media_storage: media_storage.clone(),
         redis,

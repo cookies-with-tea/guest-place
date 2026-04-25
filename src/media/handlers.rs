@@ -1,200 +1,159 @@
-use crate::core::app::AppConfig;
-use crate::core::dto::{ApiResponse, ApiResponseWithPagination, ApiPaginationDTO, PaginationDTO, PaginationQuery};
+use crate::core::dto::{ApiResponse, ApiResponseWithPagination, ApiPaginationDTO, PaginationDTO};
 use crate::media::dto::{
   CreateMediaDTO,
+  MediaFilterQuery,
   MediaItemDTO,
   MediaItemFromDb,
   UpdateMediaDTO,
 };
+use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
+use serde_json::json;
 use crate::AppState;
 use axum::{
-    extract::{Multipart, Path, Query, State},
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
     http::StatusCode,
     routing::{delete, get, post, put},
     Json, Router,
 };
 use std::sync::Arc;
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 #[utoipa::path(
     post,
     path = "/api/v1/media",
     tag = "Media",
-    request_body(content = CreateMediaDTO, content_type = "multipart/form-data"),
+    request_body(content = Vec<CreateMediaDTO>, content_type = "multipart/form-data"),
     responses(
-        (status = 201, description = "Media uploaded successfully", body = ApiResponse<MediaItemDTO>),
-        (status = 400, description = "Invalid file or content type", body = ApiResponse<MediaItemDTO>),
-        (status = 500, description = "Internal server error", body = ApiResponse<MediaItemDTO>)
+        (status = 201, description = "Media uploaded successfully", body = ApiResponse<serde_json::Value>),
+        (status = 500, description = "Internal server error")
     ),
     operation_id = "upload_media",
 )]
 pub async fn create(
     State(state): State<Arc<AppState>>,
     mut multipart: Multipart,
-) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
-    let mut file_name = String::new();
-    let mut data = Vec::new();
-    let mut content_type = None;
-    let mut name = None;
-    let mut title = None;
-    let mut alt = None;
+) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<serde_json::Value>>)> {
+    let mut uploaded_items = Vec::new();
+    let mut files = Vec::new();
+    let mut titles = BTreeMap::new();
+    let mut alts = BTreeMap::new();
+    let mut is_multiple = false;
 
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        match field.name() {
-            Some("file") => {
-                file_name = field
-                    .file_name()
-                    .map(|f| f.to_string())
-                    .unwrap_or_else(|| "file.bin".to_string());
-                data = field.bytes().await.unwrap().to_vec();
-                content_type = mime_guess::from_path(&file_name)
-                    .first()
-                    .map(|mime| mime.to_string());
-            },
-            Some("name") => name = Some(field.text().await.unwrap()),
-            Some("title") => title = Some(field.text().await.unwrap()),
-            Some("alt") => alt = Some(field.text().await.unwrap()),
-            _ => {}
+    while let Some(field) = multipart.next_field().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("multipart", &format!("Stream error: {}", e))), messages: Some(vec!["Invalid multipart request".to_string()]) })))? {
+        let name = field.name().map(|n| n.to_string()).unwrap_or_default();
+        if name == "file" {
+            let file_name = field.file_name().map(|f| f.to_string()).unwrap_or_else(|| "file.bin".to_string());
+            let data = field.bytes().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Read error: {}", e))), messages: Some(vec!["Could not read file data".to_string()]) })))?.to_vec();
+            files.push((file_name, data));
+        } else if name.starts_with("title_") {
+            is_multiple = true;
+            if let Ok(idx) = name["title_".len()..].parse::<u32>() {
+                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+                titles.insert(idx, text);
+            }
+        } else if name.starts_with("alt_") {
+            is_multiple = true;
+            if let Ok(idx) = name["alt_".len()..].parse::<u32>() {
+                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+                alts.insert(idx, text);
+            }
+        } else if name == "title" {
+            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+            titles.insert(0, text);
+        } else if name == "alt" {
+            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+            alts.insert(0, text);
         }
     }
 
-    let content_type = match content_type {
-        Some(ct) if !ct.is_empty() => ct,
-        _ => {
-            return into_api_response(
-                StatusCode::BAD_REQUEST,
-                None,
-                Some(error_map("content_type", "Unable to determine content type from file")),
-                Some(vec!["Failed to upload media".to_string()]),
-            );
-        }
-    };
+    if files.len() > 1 {
+        is_multiple = true;
+    }
 
-    let (media_type_str, media_type_enum) = if content_type.starts_with("image/") {
-        ("image", crate::media::dto::MediaType::Image)
-    } else if content_type.starts_with("video/") {
-        ("video", crate::media::dto::MediaType::Video)
-    } else if content_type.contains("pdf") || content_type.contains("document") || content_type.contains("msword") || content_type.contains("officedocument") || content_type.contains("text/csv") || content_type.contains("text/plain") {
-        ("document", crate::media::dto::MediaType::Document)
-    } else if content_type.contains("zip") || content_type.contains("tar") || content_type.contains("compressed") {
-        ("archive", crate::media::dto::MediaType::Archive)
+    for (i, (file_name, data)) in files.into_iter().enumerate() {
+        let content_type = mime_guess::from_path(&file_name).first().map(|mime| mime.to_string()).unwrap_or_else(|| "application/octet-stream".to_string());
+        
+        let (media_type_str, _) = if content_type.starts_with("image/") {
+            ("image", crate::media::dto::MediaType::Image)
+        } else if content_type.starts_with("video/") {
+            ("video", crate::media::dto::MediaType::Video)
+        } else if content_type.contains("pdf") || content_type.contains("document") || content_type.contains("msword") || content_type.contains("officedocument") || content_type.contains("text/csv") || content_type.contains("text/plain") {
+            ("document", crate::media::dto::MediaType::Document)
+        } else if content_type.contains("zip") || content_type.contains("tar") || content_type.contains("compressed") {
+            ("archive", crate::media::dto::MediaType::Archive)
+        } else {
+            ("other", crate::media::dto::MediaType::Other)
+        };
+
+        let file_size = data.len() as i64;
+        
+        // Quota check
+        if let Ok(true) = state.media_quota.check_quota(file_size).await {
+            let media_uuid = Uuid::new_v4();
+            let extension = std::path::Path::new(&file_name).extension().and_then(|ext| ext.to_str()).unwrap_or("bin");
+            let final_name = std::path::Path::new(&file_name).file_stem().and_then(|s| s.to_str()).unwrap_or(&file_name).to_string();
+
+            let save_result = if media_type_str == "image" {
+                let processed_data = state.media_storage.process_image(&data).await;
+                if let Ok(p_data) = processed_data {
+                    state.media_storage.save_cas(&p_data, "webp").await
+                } else {
+                    state.media_storage.save_cas(&data, extension).await
+                }
+            } else {
+                state.media_storage.save_cas(&data, extension).await
+            };
+
+            if let Ok((_hash, relative_path)) = save_result {
+                let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
+                let title = titles.get(&(i as u32)).cloned();
+                let alt = alts.get(&(i as u32)).cloned();
+
+                let db_result = sqlx::query_as::<_, MediaItemFromDb>(
+                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at",
+                )
+                .bind(media_uuid)
+                .bind(media_type_str)
+                .bind(&full_url)
+                .bind(&final_name)
+                .bind(extension)
+                .bind(&title)
+                .bind(&alt)
+                .bind(file_size)
+                .fetch_one(&state.pool)
+                .await;
+
+                if let Ok(row) = db_result {
+                    uploaded_items.push(MediaItemDTO {
+                        uuid: row.uuid.to_string(),
+                        url: row.url,
+                        name: row.name,
+                        extension: row.extension,
+                        title: row.title,
+                        alt: row.alt,
+                        size_bytes: row.size_bytes,
+                        created_at: row.created_at,
+                        media_type: row.media_type,
+                    });
+                }
+            }
+        }
+    }
+
+    let count = uploaded_items.len();
+    let response_data = if is_multiple {
+        json!(uploaded_items)
     } else {
-        ("other", crate::media::dto::MediaType::Other)
+        json!(uploaded_items.first())
     };
 
-    // If name is missing, use file_name (without extension if possible)
-    let final_name = name.unwrap_or_else(|| {
-        std::path::Path::new(&file_name)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or(&file_name)
-            .to_string()
-    });
-
-    let media_uuid = Uuid::new_v4();
-    let extension = std::path::Path::new(&file_name)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .unwrap_or("bin");
-
-    let file_size = data.len() as i64;
-    
-    // Check quota
-    match state.media_quota.check_quota(file_size).await {
-        Ok(false) => {
-            return into_api_response(
-                StatusCode::PAYLOAD_TOO_LARGE,
-                None,
-                Some(error_map("quota", "Available storage quota exceeded")),
-                Some(vec!["Failed to upload media: storage quota exceeded".to_string()]),
-            );
-        }
-        Err(e) => {
-            eprintln!("Quota check error: {:?}", e);
-            return into_api_response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                None,
-                Some(error_map("quota", "Failed to verify storage quota")),
-                Some(vec!["Internal server error during quota verification".to_string()]),
-            );
-        }
-        Ok(true) => {}
-    }
-
-    let (_hash, relative_path) = if media_type_str == "image" {
-        let processed_data = state.media_storage.process_image(&data).await.map_err(|e| {
-            eprintln!("Image processing error: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
-                data: None,
-                errors: Some(error_map("image", "Failed to process image")),
-                messages: Some(vec!["Could not process uploaded image".to_string()]),
-            }))
-        })?;
-        state.media_storage.save_cas(&processed_data, "webp").await.map_err(|e| {
-            eprintln!("Storage error (CAS image): {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
-                data: None,
-                errors: Some(error_map("storage", "Failed to save processed image")),
-                messages: Some(vec!["Could not save file to disk".to_string()]),
-            }))
-        })?
-    } else {
-        state.media_storage.save_cas(&data, extension).await.map_err(|e| {
-            eprintln!("Storage error (CAS): {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
-                data: None,
-                errors: Some(error_map("storage", "Failed to save file")),
-                messages: Some(vec!["Could not save file to disk".to_string()]),
-            }))
-        })?
-    };
-
-    let config = AppConfig::new();
-    let full_url = format!(
-        "{}/uploads/{}",
-        config.public_url.trim_end_matches('/'),
-        &relative_path
-    );
-
-    let db_result = sqlx::query(
-        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8)",
-    )
-    .bind(media_uuid)
-    .bind(media_type_str)
-    .bind(&full_url)
-    .bind(&final_name)
-    .bind(extension)
-    .bind(&title)
-    .bind(&alt)
-    .bind(file_size)
-    .execute(&state.pool)
-    .await;
-
-    if let Err(e) = db_result {
-        eprintln!("DB error: {:?}", e);
-        return into_api_response(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            None,
-            Some(error_map("database", "Failed to save media record")),
-            Some(vec!["Could not register file in database".to_string()]),
-        );
-    }
-
-    into_api_response(
-        StatusCode::CREATED,
-        Some(MediaItemDTO {
-            uuid: media_uuid.to_string(),
-            url: full_url,
-            name: Some(final_name),
-            extension: Some(extension.to_string()),
-            title,
-            alt,
-            media_type: media_type_enum,
-        }),
-        None,
-        Some(vec!["Media uploaded successfully".to_string()]),
-    )
+    Ok(Json(ApiResponse {
+        data: Some(response_data),
+        errors: None,
+        messages: Some(vec![format!("{} files processed successfully", count)]),
+    }))
 }
 
 #[utoipa::path(
@@ -213,7 +172,7 @@ pub async fn create(
 )]
 pub async fn get_all(
     State(state): State<Arc<AppState>>,
-    Query(pagination): Query<PaginationQuery>,
+    Query(pagination): Query<MediaFilterQuery>,
 ) -> Result<Json<ApiResponseWithPagination<MediaItemDTO>>, (StatusCode, Json<ApiResponseWithPagination<MediaItemDTO>>)> {
     let page = pagination.page.unwrap_or(1);
     let limit = pagination.limit.unwrap_or(10);
@@ -238,18 +197,30 @@ pub async fn get_all(
 
     let total_pages = (total as f64 / limit as f64).ceil() as i32;
 
-    let rows = sqlx::query_as::<_, MediaItemFromDb>(
-        r#"
-        SELECT uuid, media_type, url, name, extension, title, alt
-        FROM media
-        ORDER BY uuid DESC
-        LIMIT $1 OFFSET $2
-        "#,
-    )
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(&state.pool)
-    .await;
+    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media"
+    );
+
+    // Sorting logic
+    let sort_by = pagination.sort_by.unwrap_or_else(|| "created_at".to_string());
+    let sort_order = pagination.sort_order.unwrap_or_else(|| "DESC".to_string());
+    
+    let allowed_sort_columns = ["name", "extension", "title", "alt", "size_bytes", "created_at"];
+    let final_sort_by = if allowed_sort_columns.contains(&sort_by.as_str()) {
+        sort_by
+    } else {
+        "created_at".to_string()
+    };
+    
+    let final_sort_order = if sort_order.to_uppercase() == "ASC" { "ASC" } else { "DESC" };
+
+    query_builder.push(format!(" ORDER BY {} {}", final_sort_by, final_sort_order));
+    query_builder.push(" LIMIT ");
+    query_builder.push_bind(limit as i64);
+    query_builder.push(" OFFSET ");
+    query_builder.push_bind(offset as i64);
+
+    let rows = query_builder.build_query_as::<MediaItemFromDb>().fetch_all(&state.pool).await;
 
     match rows {
         Ok(db_items) => {
@@ -262,6 +233,8 @@ pub async fn get_all(
                     extension: row.extension,
                     title: row.title,
                     alt: row.alt,
+                    size_bytes: row.size_bytes,
+                    created_at: row.created_at,
                     media_type: row.media_type,
                 })
                 .collect();
@@ -316,7 +289,7 @@ pub async fn get_one(
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -331,6 +304,8 @@ pub async fn get_one(
                 extension: media.extension,
                 title: media.title,
                 alt: media.alt,
+                size_bytes: media.size_bytes,
+                created_at: media.created_at,
                 media_type: media.media_type,
             };
 
@@ -383,7 +358,7 @@ pub async fn update(
     Json(payload): Json<UpdateMediaDTO>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -455,7 +430,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, name, extension, title, alt FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -470,6 +445,8 @@ pub async fn update(
                                 extension: media.extension,
                                 title: media.title,
                                 alt: media.alt,
+                                size_bytes: media.size_bytes,
+                                created_at: media.created_at,
                                 media_type: media.media_type,
                             };
 
@@ -609,10 +586,11 @@ pub async fn delete_all(
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", post(create))
+        .route("/", post(create).layer(DefaultBodyLimit::disable()))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))
         .route("/{uuid}", put(update))
         .route("/{uuid}", delete(delete_one))
         .route("/", delete(delete_all))
 }
+

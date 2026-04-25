@@ -1,0 +1,2 @@
+-- Add created_at to media table
+ALTER TABLE media ADD COLUMN created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;

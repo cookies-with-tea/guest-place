@@ -1,7 +1,7 @@
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
 use crate::user::dto::{
-    CreateUserDTO, PermissionDTO, RolePermissionsDTO, UpdateUserDTO, User, UserFilterQuery,
+    CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
     UserResponseDTO, UserRole, UserStatus,
 };
 use crate::user::utils::{validate_email, validate_phone};
@@ -311,7 +311,7 @@ pub async fn get_all(
             .collect();
 
         if !statuses.is_empty() {
-            if !where_clause { count_builder.push(" WHERE "); where_clause = true; } else { count_builder.push(" AND "); }
+            if !where_clause { count_builder.push(" WHERE "); } else { count_builder.push(" AND "); }
             count_builder.push("status IN (");
             let mut separated = count_builder.separated(", ");
             for status in statuses {
@@ -425,7 +425,7 @@ pub async fn get_all(
             .collect();
 
         if !statuses.is_empty() {
-            if !where_clause_query { query_builder.push(" WHERE "); where_clause_query = true; } else { query_builder.push(" AND "); }
+            if !where_clause_query { query_builder.push(" WHERE "); } else { query_builder.push(" AND "); }
             query_builder.push("status IN (");
             let mut separated = query_builder.separated(", ");
             for status in statuses {

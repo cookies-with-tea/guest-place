@@ -3,7 +3,7 @@ pub mod handlers;
 
 use axum::Router;
 use axum::{
-    routing::{get, put},
+    routing::get,
 };
 use std::sync::Arc;
 use crate::AppState;

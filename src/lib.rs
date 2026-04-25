@@ -32,6 +32,7 @@ use crate::media::storage::StorageService;
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub pool: Pool<Postgres>,
+    pub config: crate::core::app::AppConfig,
     pub i18n: I18nService,
     pub media_storage: Arc<StorageService>,
     pub redis: Arc<RedisService>,
@@ -70,7 +71,7 @@ pub fn create_app(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, cors:
         .nest("/api/v1/guests", guests::router())
         .nest("/api/v1/features", features::router().layer(auth_layer.clone()))
         .nest("/api/v1/content", content::router().layer(auth_layer))
-        .nest_service("/uploads", ServeDir::new("/uploads"))
+        .nest_service("/uploads", ServeDir::new("uploads"))
         .layer(middleware::from_fn(locale_middleware))
         .with_state(state.clone());
 

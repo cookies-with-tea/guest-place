@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::AppState;
 use crate::core::dto::ApiResponse;
-use crate::core::response::{into_api_response, error_map};
+
 use super::model::{
     ContentSchema, CreateSchemaDTO, UpdateSchemaDTO,
     ContentEntry, ContentEntryStatus, CreateContentEntryDTO, UpdateContentEntryDTO,
