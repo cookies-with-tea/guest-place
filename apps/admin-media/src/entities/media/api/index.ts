@@ -1,6 +1,6 @@
 import { createApi } from '@admin-panel/lib'
 
-import type { IMedia } from '../model'
+import type { MediaFilters, MediaItem } from '../model'
 
 const { fetchData } = createApi('media')
 
@@ -11,22 +11,33 @@ const create = (data: FormData) => {
 	})
 }
 
-export const getAll = (params?: any) => {
-	return fetchData<{ items: IMedia[]; pagination: any }>('', {
+export const getAll = (params?: MediaFilters) => {
+	const query: Record<string, any> = {}
+
+	if (params) {
+		if (params.search) query.search = params.search
+		if (params.sortBy) query.sort_by = params.sortBy
+		if (params.sortOrder) query.sort_order = params.sortOrder
+		if (params.mediaTypes) query.media_types = params.mediaTypes
+		if (params.page) query.page = params.page
+		if (params.limit) query.limit = params.limit
+	}
+
+	return fetchData<{ items: MediaItem[]; pagination: any }>('', {
 		method: 'GET',
-		query: params,
+		query,
 	})
 }
 
-export const update = (uuid: string, data: FormData) => {
+export const update = (uuid: string, data: Partial<MediaItem>) => {
 	return fetchData(`/${uuid}`, {
-		method: 'PATCH',
+		method: 'PUT',
 		body: data,
 	})
 }
 
 const getById = (uuid: string) => {
-	return fetchData<IMedia>(`/${uuid}`, {
+	return fetchData<MediaItem>(`/${uuid}`, {
 		method: 'GET',
 	})
 }

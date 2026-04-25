@@ -21,7 +21,7 @@ const filters = ref<UserFilters>({
 	email: '',
 	phone: '',
 	city: '',
-	sortBy: 'createdAt',
+	sortBy: 'created_at',
 	sortOrder: 'DESC',
 })
 
@@ -175,7 +175,7 @@ export const useUsers = () => {
 		pagination.value.page = page
 	}
 
-	const setlimit = (limit: number) => {
+	const setLimit = (limit: number) => {
 		pagination.value.limit = limit
 
 		pagination.value.page = 1
@@ -183,7 +183,7 @@ export const useUsers = () => {
 
 	const isFetching = computed(() => usersQuery.isFetching.value)
 
-	const setSort = (prop: string, order: string | null) => {
+	const setSort = (prop: string, order: 'ASC' | 'DESC' | null) => {
 		if (!order) {
 			filters.value.sortBy = undefined
 
@@ -191,7 +191,7 @@ export const useUsers = () => {
 		} else {
 			filters.value.sortBy = prop
 
-			filters.value.sortOrder = (order === 'ascending' ? 'ASC' : 'DESC') as any
+			filters.value.sortOrder = order
 		}
 	}
 
@@ -236,7 +236,7 @@ export const useUsers = () => {
 		handleSubmit,
 		handleDelete,
 		setPage,
-		setlimit,
+		setLimit,
 		removeFilter,
 		setSort,
 		isSubmitting,

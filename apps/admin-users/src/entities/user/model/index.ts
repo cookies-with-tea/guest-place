@@ -54,6 +54,9 @@ export interface UserFilters {
 	email?: string
 	phone?: string
 	city?: string
+	firstName?: string
+	lastName?: string
+	secondName?: string
 	sortBy?: string
 	sortOrder?: 'ASC' | 'DESC'
 }

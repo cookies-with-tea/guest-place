@@ -47,7 +47,7 @@ export const mediaUtils = {
 	/**
 	 * Format date in human-readable format
 	 */
-	formatDate: (date: Date): string => {
+	formatDate: (date: Date | string): string => {
 		return new Date(date).toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',

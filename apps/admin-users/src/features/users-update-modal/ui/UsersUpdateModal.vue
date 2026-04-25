@@ -5,7 +5,7 @@
 		width="600px"
 		@closed="handleModalClose"
 	>
-		<el-form ref="formRef" label-width="120px" :model="form" :rules="rules" @submit.prevent>
+		<el-form ref="formRef" v-loading="isSubmitting" label-width="120px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Email" prop="email">
 				<el-input v-model="form.email" />
 			</el-form-item>

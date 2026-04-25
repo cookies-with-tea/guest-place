@@ -1,12 +1,24 @@
+export const MEDIA_QUERY_KEY = 'media'
+
 export interface MediaItem {
-	id: string
+	uuid: string
 	title?: string
 	alt?: string
 	url: string
-	filename: string
-	size: number
-	createdAt: Date
-	type: 'image' | 'video'
+	name?: string
+	extension?: string
+	sizeBytes: number
+	createdAt: Date | string
+	mediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
+}
+
+export interface MediaFilters {
+	search?: string
+	sortBy?: string
+	sortOrder?: 'ASC' | 'DESC'
+	mediaTypes?: string[]
+	page?: number
+	limit?: number
 }
 
 export interface MediaFile {
@@ -18,9 +30,10 @@ export interface MediaFile {
 }
 
 export interface IMedia {
-	alt?: string
+	uuid: string
+	url: string
 	title?: string
-	file: File
+	alt?: string
 }
 
 export interface ICreateMedia {
@@ -30,14 +43,19 @@ export interface ICreateMedia {
 }
 
 export interface IUpdateMedia {
-	id: string
+	uuid: string
 	title?: string
 	alt?: string
 }
 
 export interface MediaResponse {
-	data: MediaItem[]
-	total: number
-	page: number
-	limit: number
+	data: {
+		items: MediaItem[]
+		pagination: {
+			page: number
+			limit: number
+			total: number
+			totalPages: number
+		}
+	}
 }

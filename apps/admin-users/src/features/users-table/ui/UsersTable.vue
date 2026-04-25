@@ -6,10 +6,9 @@
 			class="premium-table"
 			:data="users"
 			element-loading-text="Loading data..."
-			@row-click="(row: IUserResponse) => openDetailDrawer(row.uuid!)"
 		>
 			<!-- Email Column -->
-			<el-table-column label="Email" min-width="200" prop="email">
+			<el-table-column min-width="200" prop="email">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -19,21 +18,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.email }">
-								<span>Email</span>
-								<div class="sort-controls">
-									<el-icon
-										:class="{ active: filters.sortBy === 'email' && filters.sortOrder === 'ASC' }"
-										@click.stop="setSort('email', 'ascending')"
-										><CaretTop
-									/></el-icon>
-									<el-icon
-										:class="{ active: filters.sortBy === 'email' && filters.sortOrder === 'DESC' }"
-										@click.stop="setSort('email', 'descending')"
-										><CaretBottom
-									/></el-icon>
-								</div>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								label="Email"
+								prop="email"
+								:show-filter-active="!!filters.email"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Email</span>
@@ -44,7 +36,7 @@
 			</el-table-column>
 
 			<!-- Name Column -->
-			<el-table-column label="Full Name" min-width="220" prop="firstName">
+			<el-table-column min-width="220" prop="first_name">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -54,21 +46,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.name }">
-								<span>Full Name</span>
-								<div class="sort-controls">
-									<el-icon
-										:class="{ active: filters.sortBy === 'firstName' && filters.sortOrder === 'ASC' }"
-										@click.stop="setSort('firstName', 'ascending')"
-										><CaretTop
-									/></el-icon>
-									<el-icon
-										:class="{ active: filters.sortBy === 'firstName' && filters.sortOrder === 'DESC' }"
-										@click.stop="setSort('firstName', 'descending')"
-										><CaretBottom
-									/></el-icon>
-								</div>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								label="Full Name"
+								prop="first_name"
+								:show-filter-active="!!filters.name"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Name</span>
@@ -84,7 +69,7 @@
 			</el-table-column>
 
 			<!-- Role Column -->
-			<el-table-column label="Role" prop="role" width="160">
+			<el-table-column prop="role" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -94,21 +79,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.role && filters.role.length > 0 }">
-								<span>{{ getRoleLabels() }}</span>
-								<div class="sort-controls">
-									<el-icon
-										:class="{ active: filters.sortBy === 'role' && filters.sortOrder === 'ASC' }"
-										@click.stop="setSort('role', 'ascending')"
-										><CaretTop
-									/></el-icon>
-									<el-icon
-										:class="{ active: filters.sortBy === 'role' && filters.sortOrder === 'DESC' }"
-										@click.stop="setSort('role', 'descending')"
-										><CaretBottom
-									/></el-icon>
-								</div>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								:label="getRoleLabels()"
+								prop="role"
+								:show-filter-active="filters.role && filters.role.length > 0"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Role</span>
@@ -133,7 +111,7 @@
 			</el-table-column>
 
 			<!-- Status Column -->
-			<el-table-column label="Status" prop="status" width="160">
+			<el-table-column prop="status" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -143,21 +121,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.status && filters.status.length > 0 }">
-								<span>{{ getStatusLabels() }}</span>
-								<div class="sort-controls">
-									<el-icon
-										:class="{ active: filters.sortBy === 'status' && filters.sortOrder === 'ASC' }"
-										@click.stop="setSort('status', 'ascending')"
-										><CaretTop
-									/></el-icon>
-									<el-icon
-										:class="{ active: filters.sortBy === 'status' && filters.sortOrder === 'DESC' }"
-										@click.stop="setSort('status', 'descending')"
-										><CaretBottom
-									/></el-icon>
-								</div>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								:label="getStatusLabels()"
+								prop="status"
+								:show-filter-active="filters.status && filters.status.length > 0"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Status</span>
@@ -184,7 +155,7 @@
 			</el-table-column>
 
 			<!-- Phone Column -->
-			<el-table-column label="Phone" prop="phone" width="160">
+			<el-table-column prop="phone" width="160">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -194,9 +165,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.phone }">
-								<span>Phone</span>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								label="Phone"
+								prop="phone"
+								:show-filter-active="!!filters.phone"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by Phone</span>
@@ -207,7 +183,7 @@
 			</el-table-column>
 
 			<!-- City Column -->
-			<el-table-column label="City" prop="city" width="140">
+			<el-table-column prop="city" width="140">
 				<template #header>
 					<el-popover
 						placement="bottom-start"
@@ -217,9 +193,14 @@
 						:width="240"
 					>
 						<template #reference>
-							<div class="header-interactive" :class="{ 'is-active': filters.city }">
-								<span>City</span>
-							</div>
+							<UiSortableHeader
+								v-model:sortBy="filters.sortBy"
+								v-model:sortOrder="filters.sortOrder"
+								label="City"
+								prop="city"
+								:show-filter-active="!!filters.city"
+								@sort="setSort"
+							/>
 						</template>
 						<div class="filter-popover-content">
 							<span class="popover-label">Filter by City</span>
@@ -229,15 +210,31 @@
 				</template>
 			</el-table-column>
 
-			<el-table-column label="Actions" width="200">
+			<el-table-column label="Actions" width="120">
 				<template #default="scope">
 					<div class="action-buttons">
-						<el-button v-if="scope.row" plain size="small" type="warning" @click.stop="openEditModal(scope.row.uuid)">
-							Edit
-						</el-button>
-						<el-button v-if="scope.row" plain size="small" type="danger" @click.stop="confirmDelete(scope.row.uuid)">
-							Delete
-						</el-button>
+						<el-tooltip content="Edit User" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="warning"
+								:icon="Edit"
+								@click.stop="openEditModal(scope.row.uuid)"
+							/>
+						</el-tooltip>
+						<el-tooltip content="Delete User" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="danger"
+								:icon="Delete"
+								@click.stop="confirmDelete(scope.row.uuid)"
+							/>
+						</el-tooltip>
 					</div>
 				</template>
 			</el-table-column>
@@ -252,7 +249,7 @@
 				:page-sizes="[10, 20, 50, 100]"
 				:total="pagination.total"
 				@current-change="setPage"
-				@size-change="setlimit"
+				@size-change="setLimit"
 			/>
 		</div>
 	</div>
@@ -265,26 +262,15 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useTheme } from '@admin-panel/ui'
-import { CaretBottom, CaretTop } from '@element-plus/icons-vue'
+import { UiSortableHeader, useTheme } from '@admin-panel/ui'
+import { Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
-import { type IUserResponse, useUsers } from '#entities/user'
+import { useUsers } from '#entities/user'
 import { UserRole, UserStatus } from '#entities/user/model'
 
-const {
-	users,
-	filters,
-	isLoading,
-	isFetching,
-	pagination,
-	openEditModal,
-	openDetailDrawer,
-	handleDelete,
-	setPage,
-	setlimit,
-	setSort,
-} = useUsers()
+const { users, filters, isLoading, isFetching, pagination, openEditModal, handleDelete, setPage, setLimit, setSort } =
+	useUsers()
 
 const { isDark } = useTheme()
 
@@ -353,54 +339,6 @@ const confirmDelete = (uuid: string) => {
 	padding: 0 !important;
 }
 
-.header-interactive {
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	transition: all 0.2s ease;
-	cursor: pointer;
-	user-select: none;
-	padding: 12px 16px;
-}
-
-.header-interactive:hover {
-	background-color: var(--bg-surface);
-}
-
-.header-interactive.is-active {
-	color: var(--accent-primary);
-	background-color: var(--bg-surface);
-}
-
-.sort-controls {
-	display: flex;
-	flex-direction: column;
-	transition: opacity 0.2s;
-	margin-left: 8px;
-	opacity: 0.3;
-	gap: 0;
-}
-
-.header-interactive:hover .sort-controls {
-	opacity: 1;
-}
-
-.sort-controls .el-icon {
-	font-size: 12px;
-	transition: color 0.2s;
-	cursor: pointer;
-}
-
-.sort-controls .el-icon:hover {
-	color: var(--accent-hover);
-}
-
-.sort-controls .el-icon.active {
-	color: var(--accent-primary);
-	opacity: 1;
-}
-
 .pagination-container {
 	width: 100%;
 	display: flex;
@@ -419,11 +357,6 @@ const confirmDelete = (uuid: string) => {
 	padding: 16px !important;
 }
 
-:deep(.premium-dark-popover .el-popper__arrow::before) {
-	border: 1px solid #334155 !important;
-	background: #1e293b !important;
-}
-
 .filter-popover-content {
 	display: flex;
 	flex-direction: column;
@@ -436,49 +369,6 @@ const confirmDelete = (uuid: string) => {
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	color: #94a3b8;
-}
-
-/* Dark Select & Input Overrides */
-:deep(.premium-dark-popover .el-input__wrapper),
-:deep(.premium-dark-popover .el-select__wrapper) {
-	box-shadow: 0 0 0 1px #334155 inset !important;
-	background-color: #0f172a !important;
-}
-
-:deep(.premium-dark-popover .el-input__inner) {
-	color: #f8fafc !important;
-}
-
-/* Popover Arrow fix - ensuring it doesn't look like a square */
-:deep(.el-popper.is-light.premium-dark-popover .el-popper__arrow::before) {
-	border: 1px solid #334155 !important;
-	background: #1e293b !important;
-}
-
-/* Dark Select Dropdown Styles (often teleported) */
-:global(.premium-dark-select) {
-	border: 1px solid #334155 !important;
-	background-color: #1e293b !important;
-}
-
-:global(.premium-dark-select .el-select-dropdown__item) {
-	color: #94a3b8 !important;
-}
-
-:global(.premium-dark-select .el-select-dropdown__item.hover),
-:global(.premium-dark-select .el-select-dropdown__item:hover) {
-	color: #f8fafc !important;
-	background-color: #334155 !important;
-}
-
-:global(.premium-dark-select .el-select-dropdown__item.selected) {
-	color: #409eff !important;
-	background-color: #0f172a !important;
-}
-
-:global(.premium-dark-select .el-popper__arrow::before) {
-	border: 1px solid #334155 !important;
-	background: #1e293b !important;
 }
 
 .action-buttons {

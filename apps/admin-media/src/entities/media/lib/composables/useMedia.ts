@@ -1,182 +1,208 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import { mediaApi } from '#entities/media/api'
-import type { ICreateMedia, IUpdateMedia, MediaItem } from '#entities/media/model'
-import { mediaUtils } from '#entities/media/utils/media.utils'
+import type { IPagination } from '@admin-panel/lib'
+
+import { mediaApi } from '../../api'
+import { MEDIA_QUERY_KEY, type MediaFilters, type MediaItem } from '../../model'
+
+// === Shared State (Singleton) ===
+const isUploadModalOpen = ref(false)
+const isPreviewDialogOpen = ref(false)
+const isEditModalOpen = ref(false)
+
+const filters = ref<MediaFilters>({
+	search: '',
+	sortBy: 'created_at',
+	sortOrder: 'DESC',
+	mediaTypes: [],
+})
+
+const pagination = ref<IPagination>({
+	page: 1,
+	limit: 10,
+	total: 0,
+	totalPages: 0,
+})
+
+const currentMediaUuid = ref<string>('')
 
 export const useMedia = () => {
-	// State
-	const mediaItems = ref<MediaItem[]>([])
-	const loading = ref(false)
-	const error = ref<string | null>(null)
-	const totalItems = ref(0)
-	const currentPage = ref(1)
-	const itemsPerPage = ref(10)
-	const searchQuery = ref('')
+	const queryClient = useQueryClient()
 
-	// Computed
-	const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+	const { create, update, getAll, deleteById, getById } = mediaApi
 
-	// Methods
-	const loadMedia = async (page: number = 1, limit: number = 10, search?: string) => {
-		loading.value = true
+	// === Query ===
+	const queryKey = computed(() => [
+		MEDIA_QUERY_KEY,
+		{
+			...filters.value,
+			page: pagination.value.page,
+			limit: pagination.value.limit,
+		},
+	])
 
-		error.value = null
-
-		currentPage.value = page
-
-		itemsPerPage.value = limit
-
-		searchQuery.value = search || ''
-
-		const response = await mediaApi.getAll()
-
-		mediaItems.value = (response.data.items as unknown as MediaItem[]) || []
-
-		totalItems.value = (response.data.pagination.total as number) || 0
-
-		loading.value = false
-	}
-
-	const createMedia = async (mediaData: ICreateMedia): Promise<MediaItem> => {
-		loading.value = true
-
-		error.value = null
-
-		const formData = new FormData()
-
-		Object.entries(mediaData).forEach(([key, value]) => {
-			if (value !== undefined && value !== null) {
-				formData.append(key, value)
-			}
-		})
-
-		const newMedia = await mediaApi.create(formData)
-
-		// Refresh the list to include the new item
-		await loadMedia(currentPage.value, itemsPerPage.value, searchQuery.value)
-
-		loading.value = false
-
-		return newMedia.data as unknown as MediaItem
-	}
-
-	const updateMedia = async (mediaData: IUpdateMedia): Promise<MediaItem> => {
-		loading.value = true
-
-		error.value = null
-
-		const formData = new FormData()
-
-		Object.entries(mediaData).forEach(([key, value]) => {
-			if (value !== undefined && value !== null) {
-				formData.append(key, value)
-			}
-		})
-
-		const updatedMedia = await mediaApi.update(mediaData.id, formData)
-		// Find and update the item in the local array
-		const index = mediaItems.value.findIndex((m) => m.id === mediaData.id)
-
-		if (index !== -1) {
-			mediaItems.value[index] = {
-				...mediaItems.value[index],
-				...(updatedMedia.data as unknown as MediaItem),
-			}
-		}
-
-		loading.value = false
-
-		return updatedMedia.data as unknown as MediaItem
-	}
-
-	const deleteMedia = async (id: string): Promise<void> => {
-		loading.value = true
-
-		error.value = null
-
-		await mediaApi.deleteById(id)
-
-		// Remove from local array
-		mediaItems.value = mediaItems.value.filter((m) => m.id !== id)
-
-		// Adjust total count
-		totalItems.value -= 1
-
-		loading.value = false
-	}
-
-	const deleteMultipleMedia = async (ids: string[]): Promise<void> => {
-		loading.value = true
-
-		error.value = null
-
-		// Note: The existing API doesn't support bulk delete, so we'll delete one by one
-		for (const id of ids) {
-			await mediaApi.deleteById(id)
-		}
-
-		// Remove from local array
-		mediaItems.value = mediaItems.value.filter((m) => !ids.includes(m.id))
-
-		// Adjust total count
-		totalItems.value -= ids.length
-
-		loading.value = false
-	}
-
-	const getMediaById = async (id: string): Promise<MediaItem> => {
-		loading.value = true
-
-		error.value = null
-
-		const media = await mediaApi.getById(id)
-
-		loading.value = false
-
-		return media.data as unknown as MediaItem
-	}
-
-	const searchMedia = async (query: string) => {
-		await loadMedia(1, itemsPerPage.value, query)
-	}
-
-	const changePage = async (page: number) => {
-		await loadMedia(page, itemsPerPage.value, searchQuery.value)
-	}
-
-	const changePageSize = async (limit: number) => {
-		await loadMedia(1, limit, searchQuery.value)
-	}
-
-	// Lifecycle
-	onMounted(() => {
-		loadMedia()
+	const mediaQuery = useQuery({
+		queryKey,
+		queryFn: () =>
+			getAll({
+				...filters.value,
+				page: pagination.value.page,
+				limit: pagination.value.limit,
+			}),
 	})
 
+	const mediaItems = computed(() => mediaQuery.data.value?.data.items || [])
+
+	const { data: currentMedia, refetch: refetchCurrentMedia } = useQuery({
+		queryKey: [MEDIA_QUERY_KEY, currentMediaUuid.value],
+		queryFn: () => getById(currentMediaUuid.value || ''),
+		enabled: !!currentMediaUuid.value,
+	})
+
+	watch(
+		() => mediaQuery.data?.value?.data.pagination,
+		(newPagination) => {
+			if (newPagination) {
+				pagination.value = { ...newPagination }
+			}
+		}
+	)
+
+	// === Modals / Dialogs ===
+	const openUploadModal = () => {
+		isUploadModalOpen.value = true
+	}
+
+	const closeUploadModal = () => {
+		isUploadModalOpen.value = false
+	}
+
+	const openPreviewDialog = (uuid: string) => {
+		currentMediaUuid.value = uuid
+
+		isPreviewDialogOpen.value = true
+
+		refetchCurrentMedia()
+	}
+
+	const closePreviewDialog = () => {
+		isPreviewDialogOpen.value = false
+
+		currentMediaUuid.value = ''
+	}
+
+	const closeEditModal = () => {
+		isEditModalOpen.value = false
+
+		currentMediaUuid.value = ''
+	}
+
+	const openEditModal = (uuid: string) => {
+		currentMediaUuid.value = uuid
+
+		isEditModalOpen.value = true
+
+		refetchCurrentMedia()
+	}
+
+	// === Mutations ===
+	const createMutation = useMutation({
+		mutationFn: create,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		},
+	})
+
+	const updateMutation = useMutation({
+		mutationFn: ({ uuid, data }: { uuid: string; data: Partial<MediaItem> }) => update(uuid, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+
+			closeEditModal()
+		},
+	})
+
+	const deleteMutation = useMutation({
+		mutationFn: deleteById,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		},
+	})
+
+	const handleDelete = (uuid: string) => {
+		deleteMutation.mutate(uuid)
+	}
+
+	const handleMultipleDelete = async (uuids: string[]) => {
+		// Since there's no bulk delete API yet, we delete sequentially
+		for (const uuid of uuids) {
+			await deleteById(uuid)
+		}
+
+		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+	}
+
+	// === Pagination & Filters ===
+	const setPage = (page: number) => {
+		pagination.value.page = page
+	}
+
+	const setLimit = (limit: number) => {
+		pagination.value.limit = limit
+
+		pagination.value.page = 1
+	}
+
+	const setSort = (prop: string, order: 'ASC' | 'DESC' | null) => {
+		if (!order) {
+			filters.value.sortBy = undefined
+
+			filters.value.sortOrder = undefined
+		} else {
+			filters.value.sortBy = prop
+
+			filters.value.sortOrder = order
+		}
+	}
+
+	watch(
+		filters,
+		() => {
+			pagination.value.page = 1
+		},
+		{ deep: true }
+	)
+
 	return {
-		// State
+		// state
+		filters,
+		pagination,
+		isUploadModalOpen,
+		isPreviewDialogOpen,
+		isEditModalOpen,
+		currentMediaUuid,
+
+		// data
 		mediaItems,
-		loading,
-		error,
-		totalItems,
-		currentPage,
-		itemsPerPage,
-		searchQuery,
-		totalPages,
+		currentMedia,
+		isLoading: mediaQuery.isLoading,
+		isFetching: mediaQuery.isFetching,
+		isSubmitting: createMutation.isPending || updateMutation.isPending,
 
-		// Methods
-		loadMedia,
-		createMedia,
-		updateMedia,
-		deleteMedia,
-		deleteMultipleMedia,
-		getMediaById,
-		searchMedia,
-		changePage,
-		changePageSize,
-
-		// Utilities
-		mediaUtils,
+		// actions
+		openUploadModal,
+		closeUploadModal,
+		openPreviewDialog,
+		closePreviewDialog,
+		openEditModal,
+		closeEditModal,
+		handleDelete,
+		handleMultipleDelete,
+		createMedia: createMutation.mutateAsync,
+		updateMedia: updateMutation.mutate,
+		setPage,
+		setLimit,
+		setSort,
 	}
 }
