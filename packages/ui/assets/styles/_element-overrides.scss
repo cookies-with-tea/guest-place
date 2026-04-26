@@ -16,7 +16,7 @@ html.light {
 	--el-font-family: 'Inter', sans-serif !important;
 }
 
-/* Premium Glass Cards (Fixing ugly gray cards) */
+/* Glass Cards */
 .el-card {
 	--el-card-bg-color: var(--gp-bg-glass) !important;
 	--el-card-border-color: var(--gp-glass-border);
@@ -33,7 +33,7 @@ html.light {
 	color: var(--gp-text-main);
 }
 
-/* Premium Tables */
+/* Global Tables */
 .el-table {
 	--el-table-bg-color: transparent !important;
 	--el-table-tr-bg-color: transparent !important;
@@ -61,7 +61,7 @@ p {
 	margin-bottom: 1em;
 }
 
-/* Premium Buttons (Glass Pills) */
+/* Glass Buttons (Glass Pills) */
 .el-button {
 	--el-border-radius-base: 100px; /* Pill shaped buttons */
 
@@ -105,7 +105,7 @@ p {
 	background: #ff4747 !important;
 }
 
-/* Premium Inputs */
+/* Inputs Styles */
 .el-input {
 	--el-input-border-radius: var(--gp-radius-md);
 }
@@ -124,7 +124,7 @@ p {
 	background-color: transparent !important;
 }
 
-/* Premium Modals (Glassmorphism) */
+/* Modals (Glassmorphism) */
 .el-dialog {
 	border: 1px solid var(--gp-glass-border) !important;
 	border-radius: var(--gp-radius-md) !important;
@@ -179,7 +179,7 @@ p {
 	backdrop-filter: blur(5px);
 }
 
-/* Premium Poppers (Selects, Dropdowns, Tooltips) */
+/* Poppers (Selects, Dropdowns, Tooltips) */
 body .el-popper.is-light,
 body .el-popper.is-dark,
 .el-popper.is-light,

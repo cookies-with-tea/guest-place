@@ -1,5 +1,5 @@
 <template>
-	<el-dialog
+	<UiModal
 		v-model="isUploadModalOpen"
 		class="media-upload-dialog"
 		title="Bulk Media Upload"
@@ -84,11 +84,13 @@
 				</el-badge>
 			</div>
 		</template>
-	</el-dialog>
+	</UiModal>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+
+import { UiModal } from '@admin-panel/ui'
 
 import { Edit, UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'

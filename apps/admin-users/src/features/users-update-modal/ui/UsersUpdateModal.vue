@@ -1,9 +1,9 @@
 <template>
-	<el-dialog
+	<UiModal
 		v-model="isModalOpen"
 		:title="isEditing ? 'Edit user' : 'Add user'"
 		width="600px"
-		@closed="handleModalClose"
+		@close="handleModalClose"
 	>
 		<el-form ref="formRef" v-loading="isSubmitting" label-width="120px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Email" prop="email">
@@ -34,7 +34,7 @@
 				/>
 			</el-form-item>
 			<el-form-item label="Role">
-				<el-select v-model="form.role" clearable placeholder="Select role" popper-class="premium-dark-select">
+				<el-select v-model="form.role" clearable placeholder="Select role" popper-class="gp-select">
 					<el-option label="Superadmin" :value="UserRole.Superadmin" />
 					<el-option label="Admin" :value="UserRole.Admin" />
 					<el-option label="Editor" :value="UserRole.Editor" />
@@ -42,7 +42,7 @@
 				</el-select>
 			</el-form-item>
 			<el-form-item label="Status">
-				<el-select v-model="form.status" clearable placeholder="Select status" popper-class="premium-dark-select">
+				<el-select v-model="form.status" clearable placeholder="Select status" popper-class="gp-select">
 					<el-option label="Active" :value="UserStatus.Active" />
 					<el-option label="Inactive" :value="UserStatus.Inactive" />
 					<el-option label="In moderation" :value="UserStatus.InModeration" />
@@ -78,13 +78,14 @@
 				{{ isEditing ? 'Save' : 'Create' }}
 			</el-button>
 		</template>
-	</el-dialog>
+	</UiModal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch } from 'vue'
 
 import { uploadMedia } from '@admin-panel/lib'
+import { UiModal } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules, UploadProps } from 'element-plus'
 

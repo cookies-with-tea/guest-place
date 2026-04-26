@@ -1,9 +1,7 @@
 <template>
-	<el-dialog
+	<UiModal
 		v-model="isEditModalOpen"
-		class="media-edit-dialog"
-		destroy-on-close
-		title="Edit Media Properties"
+		title="Edit Media"
 		:width="600"
 		@close="closeEditModal"
 	>
@@ -30,16 +28,16 @@
 		</div>
 
 		<template #footer>
-			<div class="dialog-footer">
-				<el-button @click="closeEditModal">Cancel</el-button>
-				<el-button :loading="isSubmitting" type="primary" @click="handleSave"> Save Changes </el-button>
-			</div>
+			<el-button @click="closeEditModal">Cancel</el-button>
+			<el-button :loading="isSubmitting" type="primary" @click="handleSave"> Save Changes </el-button>
 		</template>
-	</el-dialog>
+	</UiModal>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+
+import { UiModal } from '@admin-panel/ui'
 
 import { Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'

@@ -1,6 +1,6 @@
 <template>
 	<div class="translations-table">
-		<el-table v-loading="isLoading" border :data="translations">
+		<UiTable v-loading="isLoading" border :data="translations">
 			<el-table-column label="ID" prop="id" width="120" />
 			<el-table-column label="Key" min-width="200" prop="key" />
 			<el-table-column label="Translation" min-width="200" prop="value" />
@@ -14,7 +14,7 @@
 					</el-button>
 				</template>
 			</el-table-column>
-		</el-table>
+		</UiTable>
 
 		<div class="translations-table__pagination">
 			<el-pagination
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import { UiTable } from '@admin-panel/ui'
 import { ElMessageBox } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'

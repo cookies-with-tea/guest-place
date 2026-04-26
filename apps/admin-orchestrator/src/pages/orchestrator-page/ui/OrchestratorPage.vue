@@ -87,7 +87,7 @@
 						</div>
 					</template>
 
-					<el-table :data="microfrontends" style="width: 100%">
+					<UiTable :data="microfrontends" style="width: 100%">
 						<el-table-column label="Модуль" min-width="180">
 							<template #default="scope">
 								<div class="mfe-name-cell">
@@ -172,13 +172,13 @@
 								</div>
 							</template>
 						</el-table-column>
-					</el-table>
+					</UiTable>
 				</el-card>
 			</el-tab-pane>
 		</el-tabs>
 
 		<!-- Dialog for Add/Edit -->
-		<el-dialog v-model="dialogVisible" :title="isEdit ? 'Редактировать MFE' : 'Добавить MFE'" width="560px">
+		<UiModal v-model="dialogVisible" :title="isEdit ? 'Редактировать MFE' : 'Добавить MFE'" width="560px">
 			<el-form class="mfe-form" label-position="top" :model="form">
 				<el-row :gutter="16">
 					<el-col :span="12">
@@ -245,26 +245,25 @@
 			</el-form>
 
 			<template #footer>
-				<span class="dialog-footer">
-					<el-button plain @click="dialogVisible = false">Отмена</el-button>
-					<el-button :loading="isSubmitting" type="primary" @click="saveMfe">
-						{{ isEdit ? 'Сохранить изменения' : 'Создать' }}
-					</el-button>
-				</span>
+				<el-button plain @click="dialogVisible = false">Отмена</el-button>
+				<el-button :loading="isSubmitting" type="primary" @click="saveMfe">
+					{{ isEdit ? 'Сохранить изменения' : 'Создать' }}
+				</el-button>
 			</template>
-		</el-dialog>
+		</UiModal>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 
 import * as Icons from '@element-plus/icons-vue'
 import { CircleCheck, CircleClose, Delete, EditPen, Grid, Link, Monitor, Plus, Setting } from '@element-plus/icons-vue'
+import { UiModal, UiTable } from '@admin-panel/ui'
 
 import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
 
-import MfeStatsChart from './MfeStatsChart.vue'
+const MfeStatsChart = defineAsyncComponent(() => import('./MfeStatsChart.vue'))
 
 const activeTab = ref('topology')
 

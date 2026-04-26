@@ -1,8 +1,6 @@
 <template>
-	<el-dialog
+	<UiModal
 		v-model="isPreviewDialogOpen"
-		class="media-preview-dialog"
-		destroy-on-close
 		title="Media Preview"
 		:width="800"
 		@close="closePreviewDialog"
@@ -59,11 +57,12 @@
 				</el-link>
 			</div>
 		</template>
-	</el-dialog>
+	</UiModal>
 </template>
 
 <script setup lang="ts">
 import { Document } from '@element-plus/icons-vue'
+import { UiModal } from '@admin-panel/ui'
 
 import { useMedia } from '#entities/media'
 import { mediaUtils } from '#entities/media/utils/media.utils'

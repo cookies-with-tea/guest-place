@@ -1,6 +1,6 @@
 <template>
 	<div class="content-table-feature" :class="{ 'is-dark': isDark }">
-		<el-table v-loading="isLoading" border class="premium-table" :data="entries" element-loading-text="Loading data...">
+		<UiTable v-loading="isLoading" border :data="entries" element-loading-text="Loading data...">
 			<el-table-column label="ID" prop="id" width="100">
 				<template #default="{ row }">
 					<span class="uuid-cell">{{ row.id.slice(0, 8) }}</span>
@@ -32,7 +32,7 @@
 					</div>
 				</template>
 			</el-table-column>
-		</el-table>
+		</UiTable>
 	</div>
 </template>
 
@@ -41,7 +41,7 @@ import { computed } from 'vue'
 
 import type { ContentEntry, ContentSchema, FieldDefinition } from '@admin-panel/lib'
 import { FieldType } from '@admin-panel/lib'
-import { useTheme } from '@admin-panel/ui'
+import { UiTable, useTheme } from '@admin-panel/ui'
 import { ElMessageBox } from 'element-plus'
 
 interface Props {
@@ -91,31 +91,6 @@ const confirmDelete = (id: string) => {
 <style scoped>
 .content-table-feature {
 	width: 100%;
-}
-
-.premium-table {
-	border: 1px solid var(--border-color);
-	border-radius: 16px;
-	box-shadow: var(--shadow-sm);
-	background-color: var(--bg-card) !important;
-	overflow: hidden;
-}
-
-:deep(.el-table) {
-	--el-table-header-bg-color: var(--bg-header);
-	--el-table-row-hover-bg-color: var(--bg-surface);
-	--el-table-border-color: var(--border-color);
-
-	color: var(--text-primary);
-	background-color: var(--bg-card) !important;
-}
-
-:deep(.el-table__header-wrapper th) {
-	height: 60px;
-	border-bottom: 1px solid var(--border-color) !important;
-	font-weight: 700;
-	color: var(--text-muted);
-	background-color: var(--bg-header) !important;
 }
 
 .uuid-cell {

@@ -1,9 +1,9 @@
 <template>
-	<el-dialog
+	<UiModal
 		v-model="isModalOpen"
 		:title="isEditing ? 'Edit translation' : 'Add translation'"
 		width="500px"
-		@closed="closeModal"
+		@close="closeModal"
 	>
 		<el-form ref="formRef" label-width="100px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Namespace" prop="namespace">
@@ -33,12 +33,13 @@
 				{{ isEditing ? 'Save' : 'Add' }}
 			</el-button>
 		</template>
-	</el-dialog>
+	</UiModal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
+import { UiModal } from '@admin-panel/ui'
 import type { FormInstance, FormRules } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'

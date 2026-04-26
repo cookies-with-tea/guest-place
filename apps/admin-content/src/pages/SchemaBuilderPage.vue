@@ -6,7 +6,7 @@
 		</div>
 
 		<div class="page-content">
-			<el-table v-loading="loading" border class="premium-table" :data="schemas">
+			<UiTable v-loading="loading" border :data="schemas">
 				<el-table-column label="Name" prop="name" />
 				<el-table-column label="Slug" prop="slug" />
 				<el-table-column label="Fields count">
@@ -27,12 +27,11 @@
 						</div>
 					</template>
 				</el-table-column>
-			</el-table>
+			</UiTable>
 		</div>
 
-		<el-dialog
+		<UiModal
 			v-model="dialogVisible"
-			class="premium-dialog"
 			:title="isEdit ? 'Edit Schema' : 'Create Schema'"
 			width="800px"
 		>
@@ -89,7 +88,7 @@
 					<el-button :loading="saving" type="primary" @click="saveSchema">Save Schema</el-button>
 				</div>
 			</template>
-		</el-dialog>
+		</UiModal>
 	</div>
 </template>
 
@@ -98,9 +97,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import type { ContentSchema, FieldDefinition } from '@admin-panel/lib'
-import { createApi } from '@admin-panel/lib'
-import { FieldType } from '@admin-panel/lib'
-import { useTheme } from '@admin-panel/ui'
+import { createApi, FieldType } from '@admin-panel/lib'
+import { UiModal, UiTable, useTheme } from '@admin-panel/ui'
 import { Delete, Document, Edit, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -259,12 +257,6 @@ onMounted(fetchSchemas)
 	font-weight: 800;
 	font-size: 32px;
 	color: var(--text-primary);
-}
-
-.premium-table {
-	border: 1px solid var(--border-color);
-	border-radius: 16px;
-	background-color: var(--bg-card) !important;
 }
 
 .form-grid {

@@ -16,7 +16,7 @@
 				<el-tag
 					v-for="tag in activeFilterTags"
 					:key="tag.key"
-					class="premium-tag"
+					class="gp-tag"
 					closable
 					effect="dark"
 					round
@@ -155,7 +155,7 @@ const activeFilterTags = computed(() => {
 	margin-right: 8px;
 }
 
-.premium-tag {
+.gp-tag {
 	height: auto;
 	border: 1px solid var(--border-color);
 	border-radius: 20px;
@@ -165,7 +165,7 @@ const activeFilterTags = computed(() => {
 	padding: 10px 14px;
 }
 
-.premium-tag:hover {
+.gp-tag:hover {
 	border-color: var(--accent-primary);
 }
 

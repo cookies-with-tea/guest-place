@@ -1,9 +1,9 @@
 <template>
 	<div class="users-table-feature" :class="{ 'is-dark': isDark }">
-		<el-table
+		<UiTable
 			v-loading="isLoading || isFetching"
 			border
-			class="premium-table"
+			class="ui-table"
 			:data="users"
 			element-loading-text="Loading data..."
 		>
@@ -12,7 +12,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -40,7 +40,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -73,7 +73,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -115,7 +115,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -159,7 +159,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -187,7 +187,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -238,7 +238,7 @@
 					</div>
 				</template>
 			</el-table-column>
-		</el-table>
+		</UiTable>
 
 		<div class="pagination-container">
 			<el-pagination
@@ -262,7 +262,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { UiSortableHeader, useTheme } from '@admin-panel/ui'
+import { UiSortableHeader, UiTable, useTheme } from '@admin-panel/ui'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
@@ -313,7 +313,7 @@ const confirmDelete = (uuid: string) => {
 	width: 100%;
 }
 
-.premium-table {
+.ui-table {
 	border: 1px solid var(--border-color);
 	border-radius: 16px;
 	box-shadow: var(--shadow-sm);

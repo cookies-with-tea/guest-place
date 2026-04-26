@@ -2,7 +2,7 @@
 	<el-popover
 		v-if="filterable"
 		placement="bottom-start"
-		popper-class="premium-dark-popover"
+		popper-class="gp-popover"
 		:show-arrow="true"
 		trigger="click"
 		:width="240"
@@ -135,7 +135,7 @@ const onSort = (order: 'ASC' | 'DESC') => {
 	color: #94a3b8;
 }
 
-:deep(.premium-dark-popover) {
+:deep(.gp-popover) {
 	border: 1px solid var(--border-color) !important;
 	border-radius: 12px !important;
 	box-shadow: var(--shadow-sm) !important;

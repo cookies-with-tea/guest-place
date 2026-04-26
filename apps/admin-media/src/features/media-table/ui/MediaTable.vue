@@ -1,9 +1,9 @@
 <template>
 	<div class="media-table-feature" :class="{ 'is-dark': isDark }">
-		<el-table
+		<UiTable
 			v-loading="isLoading || isFetching"
 			border
-			class="premium-table"
+			class="ui-table"
 			:data="mediaItems"
 			element-loading-text="Loading data..."
 			@selection-change="handleSelectionChange"
@@ -42,7 +42,7 @@
 				<template #header>
 					<el-popover
 						placement="bottom-start"
-						popper-class="premium-dark-popover"
+						popper-class="gp-popover"
 						:show-arrow="true"
 						trigger="click"
 						:width="240"
@@ -115,7 +115,7 @@
 					</div>
 				</template>
 			</el-table-column>
-		</el-table>
+		</UiTable>
 
 		<div class="pagination-container">
 			<el-pagination
@@ -134,11 +134,10 @@
 		<MediaUploadDialog />
 	</div>
 </template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { UiSortableHeader, useTheme } from '@admin-panel/ui'
+import { UiSortableHeader, UiTable, useTheme } from '@admin-panel/ui'
 import { Delete, Document, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
@@ -193,30 +192,12 @@ defineExpose({
 	width: 100%;
 }
 
-.premium-table {
+.ui-table {
 	border: 1px solid var(--border-color);
 	border-radius: 16px;
 	box-shadow: var(--shadow-sm);
 	background-color: var(--bg-card) !important;
 	overflow: hidden;
-}
-
-:deep(.el-table) {
-	--el-table-header-bg-color: var(--bg-header);
-	--el-table-row-hover-bg-color: var(--bg-surface);
-	--el-table-border-color: var(--border-color);
-
-	color: var(--text-primary);
-	background-color: var(--bg-card) !important;
-}
-
-:deep(.el-table__header-wrapper th) {
-	height: 60px;
-	border-bottom: 1px solid var(--border-color) !important;
-	font-weight: 700;
-	color: var(--text-muted);
-	background-color: var(--bg-header) !important;
-	padding: 0 !important;
 }
 
 .media-preview-cell {
@@ -241,8 +222,8 @@ defineExpose({
 	margin-top: 40px;
 }
 
-/* Premium Dark Popover Styles */
-:deep(.premium-dark-popover) {
+/* Popover Styles */
+:deep(.gp-popover) {
 	border: 1px solid var(--border-color) !important;
 	border-radius: 12px !important;
 	box-shadow: var(--shadow-sm) !important;
