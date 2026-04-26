@@ -1,1 +1,1 @@
-{"root":["./src/uitranslation.vue","./index.ts","./vite.config.ts","./env.d.ts","./vue-shim.d.ts"],"version":"5.9.3"}
+{"root":["./src/uitranslation.vue","./__tests__/uitranslation.test.ts","./__tests__/i18n.test.ts","./__tests__/parser.test.ts","./index.ts","./vite.config.ts","./vitest.config.ts","./env.d.ts","./vue-shim.d.ts"],"version":"5.9.3"}

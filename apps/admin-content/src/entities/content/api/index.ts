@@ -24,20 +24,28 @@ export const deleteSchema = (id: string) =>
 		method: 'DELETE',
 	})
 
-export const getEntries = (schemaId: string) => fetchData<ContentEntry[]>(`/schemas/${schemaId}/entries`)
+export const getEntries = (schemaId: string, params?: { search?: string }) => {
+	let url = `/schemas/${schemaId}/entries`
+
+	if (params?.search) {
+		url += `?search=${encodeURIComponent(params.search)}`
+	}
+
+	return fetchData<ContentEntry[]>(url)
+}
 
 export const getEntry = (id: string) => fetchData<ContentEntry>(`/entries/${id}`)
 
-export const createEntry = (payload: { schema_id: string; slug: string; data: Record<string, any> }) =>
+export const createEntry = (payload: { schema_id: string; slug: string; data: Record<string, any>; status?: string }) =>
 	fetchData<ContentEntry>('/entries', {
 		method: 'POST',
 		body: payload,
 	})
 
-export const updateEntry = (id: string, data: Record<string, any>) =>
+export const updateEntry = (id: string, payload: { data?: Record<string, any>; status?: string }) =>
 	fetchData<ContentEntry>(`/entries/${id}`, {
 		method: 'PATCH',
-		body: { data },
+		body: payload,
 	})
 
 export const deleteEntry = (id: string) =>
@@ -52,6 +60,12 @@ export const rollbackEntryVersion = (id: string, versionId: string) =>
 		method: 'POST',
 	})
 
+export const getLanguages = () => {
+	const { fetchData: fetchI18n } = createApi('i18n')
+
+	return fetchI18n<any[]>('/languages')
+}
+
 export const contentApi = {
 	getSchemas,
 	getSchemaByIdentifier,
@@ -60,6 +74,7 @@ export const contentApi = {
 	deleteSchema,
 	getEntries,
 	getEntry,
+	getLanguages,
 	createEntry,
 	updateEntry,
 	deleteEntry,

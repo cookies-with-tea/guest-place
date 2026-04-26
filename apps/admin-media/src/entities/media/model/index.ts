@@ -7,6 +7,8 @@ export interface MediaItem {
 	url: string
 	name?: string
 	extension?: string
+	category?: string
+	tags?: string[]
 	sizeBytes: number
 	createdAt: Date | string
 	mediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
@@ -17,6 +19,8 @@ export interface MediaFilters {
 	sortBy?: string
 	sortOrder?: 'ASC' | 'DESC'
 	mediaTypes?: string[]
+	category?: string[]
+	tags?: string[]
 	page?: number
 	limit?: number
 }
@@ -46,6 +50,8 @@ export interface IUpdateMedia {
 	uuid: string
 	title?: string
 	alt?: string
+	category?: string
+	tags?: string[]
 }
 
 export interface MediaResponse {

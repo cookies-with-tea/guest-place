@@ -26,8 +26,112 @@
 				</template>
 			</UiTableColumn>
 
+			<!-- Media Type Column -->
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Type"
+				prop="media_type"
+				sortable
+				width="140"
+				:show-filter-active="filters.mediaTypes && filters.mediaTypes.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.mediaTypes"
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						multiple
+						placeholder="Select types"
+						popper-class="premium-dark-select"
+					>
+						<el-option label="Image" value="image" />
+						<el-option label="Video" value="video" />
+						<el-option label="Document" value="document" />
+						<el-option label="Archive" value="archive" />
+						<el-option label="Other" value="other" />
+					</el-select>
+				</template>
+				<template #default="{ row }">
+					<el-tag effect="plain" size="small">{{ row.mediaType }}</el-tag>
+				</template>
+			</UiTableColumn>
+
+			<!-- Category Column -->
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Category"
+				prop="category"
+				sortable
+				width="140"
+				:show-filter-active="filters.category && filters.category.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.category"
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						filterable
+						multiple
+						placeholder="Select categories"
+						popper-class="premium-dark-select"
+					>
+						<!-- These would ideally come from a separate API -->
+						<el-option label="Marketing" value="Marketing" />
+						<el-option label="UI/UX" value="UI/UX" />
+						<el-option label="Content" value="Content" />
+					</el-select>
+				</template>
+				<template #default="{ row }">
+					<span class="media-category">{{ row.category || '—' }}</span>
+				</template>
+			</UiTableColumn>
+
+			<!-- Tags Column -->
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Tags"
+				prop="tags"
+				width="180"
+				:show-filter-active="filters.tags && filters.tags.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.tags"
+						allow-create
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						default-first-option
+						filterable
+						multiple
+						placeholder="Filter by tags"
+						popper-class="premium-dark-select"
+					>
+						<!-- Tags would also ideally be fetched -->
+					</el-select>
+				</template>
+				<template #default="{ row }">
+					<div class="tags-container">
+						<el-tag v-for="tag in row.tags" :key="tag" class="media-tag" effect="light" size="small">
+							{{ tag }}
+						</el-tag>
+					</div>
+				</template>
+			</UiTableColumn>
+
 			<!-- Preview Column -->
-			<el-table-column label="Preview" width="120">
+			<el-table-column label="Preview" width="100">
 				<template #default="{ row }">
 					<div class="media-preview-cell">
 						<el-image v-if="row.mediaType === 'image'" class="preview-img" fit="cover" lazy :src="row.url" />
@@ -36,28 +140,6 @@
 				</template>
 			</el-table-column>
 
-			<!-- Title Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				filterable
-				label="Title"
-				min-width="200"
-				prop="title"
-				sortable
-				:show-filter-active="!!filters.search"
-				@sort="setSort"
-			>
-				<template #filter>
-					<el-input v-model="filters.search" clearable placeholder="Search by title or alt..." />
-				</template>
-				<template #default="{ row }">
-					<div class="media-title-cell">
-						{{ row.title || row.filename }}
-					</div>
-				</template>
-			</UiTableColumn>
-
 			<!-- Size Column -->
 			<UiTableColumn
 				v-model:sortBy="filters.sortBy"
@@ -65,7 +147,7 @@
 				label="Size"
 				prop="size_bytes"
 				sortable
-				width="140"
+				width="120"
 				@sort="setSort"
 			>
 				<template #default="{ row }">
@@ -80,7 +162,7 @@
 				label="Added"
 				prop="created_at"
 				sortable
-				width="180"
+				width="160"
 				@sort="setSort"
 			>
 				<template #default="{ row }">

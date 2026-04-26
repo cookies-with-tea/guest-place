@@ -19,6 +19,30 @@
 				<el-form-item label="Alt Text">
 					<el-input v-model="form.alt" placeholder="Enter alternative text for accessibility" type="textarea" />
 				</el-form-item>
+				<el-form-item label="Category">
+					<el-select v-model="form.category" clearable filterable placeholder="Select category">
+						<el-option label="Marketing" value="Marketing" />
+						<el-option label="UI/UX" value="UI/UX" />
+						<el-option label="Content" value="Content" />
+					</el-select>
+				</el-form-item>
+				<el-form-item label="Tags">
+					<el-select
+						v-model="form.tags"
+						allow-create
+						clearable
+						default-first-option
+						filterable
+						multiple
+						placeholder="Add tags..."
+					>
+						<el-option label="Hero" value="Hero" />
+						<el-option label="Banner" value="Banner" />
+						<el-option label="Mobile" value="Mobile" />
+						<el-option label="Icon" value="Icon" />
+						<el-option label="Dark" value="Dark" />
+					</el-select>
+				</el-form-item>
 			</el-form>
 		</div>
 
@@ -43,6 +67,8 @@ const { currentMedia, isEditModalOpen, closeEditModal, updateMedia, isSubmitting
 const form = ref({
 	title: '',
 	alt: '',
+	category: '',
+	tags: [] as string[],
 })
 
 watch(
@@ -52,6 +78,10 @@ watch(
 			form.value.title = newData.title || ''
 
 			form.value.alt = newData.alt || ''
+
+			form.value.category = newData.category || ''
+
+			form.value.tags = newData.tags || []
 		}
 	},
 	{ immediate: true }
@@ -65,6 +95,8 @@ const handleSave = () => {
 		data: {
 			title: form.value.title,
 			alt: form.value.alt,
+			category: form.value.category,
+			tags: form.value.tags,
 		},
 	})
 

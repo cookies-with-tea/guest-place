@@ -18,6 +18,14 @@
 				</template>
 			</el-table-column>
 
+			<el-table-column label="Status" prop="status" width="120">
+				<template #default="{ row }">
+					<el-tag :type="getStatusType(row.status)" size="small">
+						{{ row.status.toUpperCase() }}
+					</el-tag>
+				</template>
+			</el-table-column>
+
 			<el-table-column label="Updated At" prop="updatedAt" width="180">
 				<template #default="{ row }">
 					{{ formatDate(row.updatedAt) }}
@@ -77,6 +85,17 @@ const formatDate = (dateStr: string) => {
 	if (!dateStr) return '-'
 
 	return new Date(dateStr).toLocaleString()
+}
+
+const getStatusType = (status: string) => {
+	switch (status) {
+		case 'published':
+			return 'success'
+		case 'review':
+			return 'warning'
+		default:
+			return 'info'
+	}
 }
 
 const confirmDelete = (id: string) => {

@@ -4,6 +4,8 @@
 			<ContentEditor
 				v-if="schema"
 				v-model="formData"
+				v-model:status="entryStatus"
+				v-model:i18n="i18nData"
 				:entry-id="entryId"
 				:errors="errors"
 				:is-edit="isEdit"
@@ -38,6 +40,8 @@ const schema = ref<ContentSchema | null>(null)
 const formData = reactive<Record<string, any>>({})
 const errors = ref<Record<string, string[]>>({})
 const isSaving = ref(false)
+const entryStatus = ref('draft')
+const i18nData = reactive<Record<string, any>>({})
 
 const fetchData = async () => {
 	try {
@@ -54,6 +58,14 @@ const fetchData = async () => {
 					Object.keys(formData).forEach((key) => delete formData[key])
 
 					Object.assign(formData, entryRes.data.data)
+
+					entryStatus.value = entryRes.data.status
+
+					if (entryRes.data.i18n) {
+						Object.keys(i18nData).forEach((k) => delete i18nData[k])
+
+						Object.assign(i18nData, entryRes.data.i18n)
+					}
 				}
 			}
 		}
@@ -81,8 +93,14 @@ const onSave = async (seoData?: any) => {
 	})
 
 	try {
+		const payload = {
+			data: finalData,
+			status: entryStatus.value,
+			i18n: i18nData,
+		}
+
 		if (isEdit.value && entryId) {
-			await contentApi.updateEntry(entryId, finalData)
+			await contentApi.updateEntry(entryId, payload)
 
 			ElMessage.success('Entry updated')
 		} else {
@@ -92,7 +110,7 @@ const onSave = async (seoData?: any) => {
 			await contentApi.createEntry({
 				schema_id: schema.value.id,
 				slug: entrySlug,
-				data: finalData,
+				...payload,
 			})
 
 			ElMessage.success('Entry created')

@@ -12,6 +12,7 @@
 				<template v-if="field.fieldType === FieldType.Text || field.fieldType === FieldType.RichText">
 					<el-input
 						v-model="modelValue[field.name]"
+						:disabled="readonly"
 						:placeholder="field.label"
 						:rows="field.fieldType === FieldType.RichText ? 4 : 1"
 						:type="field.fieldType === FieldType.RichText ? 'textarea' : 'text'"
@@ -20,22 +21,44 @@
 
 				<!-- Number -->
 				<template v-else-if="field.fieldType === FieldType.Number">
-					<el-input-number v-model="modelValue[field.name]" :placeholder="field.label" style="width: 100%" />
+					<el-input-number
+						v-model="modelValue[field.name]"
+						:disabled="readonly"
+						:placeholder="field.label"
+						style="width: 100%"
+					/>
 				</template>
 
 				<!-- Boolean -->
 				<template v-else-if="field.fieldType === FieldType.Boolean">
-					<el-switch v-model="modelValue[field.name]" />
+					<el-switch v-model="modelValue[field.name]" :disabled="readonly" />
 				</template>
 
 				<!-- Media -->
 				<template v-else-if="field.fieldType === FieldType.Media">
-					<UiMediaPicker v-model="modelValue[field.name]" />
+					<UiMediaPicker v-model="modelValue[field.name]" :disabled="readonly" />
 				</template>
 
 				<!-- Date -->
 				<template v-else-if="field.fieldType === FieldType.Date">
-					<el-date-picker v-model="modelValue[field.name]" placeholder="Pick a date" style="width: 100%" type="date" />
+					<el-date-picker
+						v-model="modelValue[field.name]"
+						:disabled="readonly"
+						placeholder="Pick a date"
+						style="width: 100%"
+						type="date"
+					/>
+				</template>
+
+				<!-- Relation -->
+				<template v-else-if="field.fieldType === FieldType.Relation">
+					<UiRelationPicker
+						v-model="modelValue[field.name]"
+						:disabled="readonly"
+						:multiple="field.multiple"
+						:placeholder="field.label"
+						:schema-slug="field.relationTo"
+					/>
 				</template>
 
 				<!-- Fallback -->
@@ -62,11 +85,14 @@ import { FieldType } from '@admin-panel/lib'
 import { useTheme } from '@admin-panel/ui'
 import { UiMediaPicker } from '@admin-panel/ui'
 
+import UiRelationPicker from './UiRelationPicker.vue'
+
 const modelValue = defineModel<Record<string, any>>({ required: true })
 
 interface Props {
 	fields: FieldDefinition[]
 	errors?: Record<string, string[]>
+	readonly?: boolean
 }
 
 defineProps<Props>()

@@ -3,6 +3,25 @@
 		<div class="editor-header">
 			<h3>{{ isEdit ? 'Edit entry' : 'Create entry' }}</h3>
 			<div class="header-actions">
+				<el-select
+					v-model="status"
+					placeholder="Status"
+					size="default"
+					style="width: 130px; vertical-align: middle; margin-right: 8px"
+				>
+					<el-option label="Draft" value="draft">
+						<div class="status-option"><el-tag size="small" type="info">DRAFT</el-tag></div>
+					</el-option>
+					<el-option label="Review" value="review">
+						<div class="status-option"><el-tag size="small" type="warning">REVIEW</el-tag></div>
+					</el-option>
+					<el-option label="Published" value="published">
+						<div class="status-option"><el-tag size="small" type="success">PUBLISHED</el-tag></div>
+					</el-option>
+				</el-select>
+				<el-button :type="isTranslationMode ? 'warning' : 'default'" @click="isTranslationMode = !isTranslationMode">
+					{{ isTranslationMode ? 'Exit Translation' : 'Translation Mode' }}
+				</el-button>
 				<el-button @click="isPreviewing = !isPreviewing">
 					{{ isPreviewing ? 'Edit Mode' : 'Live Preview' }}
 				</el-button>
@@ -31,8 +50,37 @@
 
 		<el-tabs v-else v-model="activeTab" class="editor-tabs">
 			<el-tab-pane label="Content" name="content">
-				<div class="editor-content">
-					<ContentFormGenerator v-if="schema" v-model="modelValue" :errors="errors" :fields="schema.fields" />
+				<div class="editor-content" :class="{ 'is-translation': isTranslationMode }">
+					<template v-if="!isTranslationMode">
+						<ContentFormGenerator v-if="schema" v-model="modelValue" :errors="errors" :fields="schema.fields" />
+					</template>
+					<template v-else>
+						<div class="translation-mode-container">
+							<div class="translation-column source-column">
+								<div class="column-header">
+									<el-select v-model="sourceLocale" placeholder="Source Language" size="small">
+										<el-option v-for="lang in languages" :key="lang.code" :label="lang.name" :value="lang.code" />
+									</el-select>
+									<span class="column-label">SOURCE</span>
+								</div>
+								<div class="column-body">
+									<ContentFormGenerator v-if="schema" v-model="sourceData" :fields="schema.fields" readonly />
+								</div>
+							</div>
+
+							<div class="translation-column target-column">
+								<div class="column-header">
+									<el-select v-model="targetLocale" placeholder="Target Language" size="small">
+										<el-option v-for="lang in languages" :key="lang.code" :label="lang.name" :value="lang.code" />
+									</el-select>
+									<span class="column-label">TARGET</span>
+								</div>
+								<div class="column-body">
+									<ContentFormGenerator v-if="schema" v-model="targetData" :errors="errors" :fields="schema.fields" />
+								</div>
+							</div>
+						</div>
+					</template>
 				</div>
 			</el-tab-pane>
 
@@ -85,6 +133,8 @@ interface Props {
 const props = defineProps<Props>()
 
 const modelValue = defineModel<Record<string, any>>({ required: true })
+const status = defineModel<string>('status', { default: 'draft' })
+const i18n = defineModel<Record<string, any>>('i18n', { default: () => ({}) })
 
 const emit = defineEmits<{
 	save: [seo: any]
@@ -101,6 +151,42 @@ const previewIframe = ref<HTMLIFrameElement | null>(null)
 const seoData = ref<any>({})
 const history = ref<any[]>([])
 const isLoadingHistory = ref(false)
+
+// Translation states
+const isTranslationMode = ref(false)
+const languages = ref<any[]>([])
+const sourceLocale = ref('en')
+const targetLocale = ref('ru')
+
+const fetchLanguages = async () => {
+	try {
+		const res = await contentApi.getLanguages()
+
+		if (res.data) {
+			languages.value = res.data
+		}
+	} catch {
+		console.warn('Failed to fetch languages')
+	}
+}
+
+fetchLanguages()
+
+const sourceData = computed(() => {
+	if (sourceLocale.value === 'en') return modelValue.value
+
+	return i18n.value?.[sourceLocale.value] || {}
+})
+
+const targetData = computed({
+	get: () => {
+		return i18n.value?.[targetLocale.value] || {}
+	},
+	set: (val) => {
+		if (!i18n.value) i18n.value = {}
+		i18n.value[targetLocale.value] = val
+	},
+})
 
 // In a real app, this would be a config-driven URL
 const previewUrl = computed(() => {
@@ -282,5 +368,52 @@ watch(activeTab, (tab) => {
 	border: 8px solid #334155;
 	border-radius: 32px;
 	margin: 20px auto;
+}
+
+.status-option {
+	height: 34px;
+	display: flex;
+	align-items: center;
+}
+
+.translation-mode-container {
+	width: 100%;
+	display: flex;
+	gap: 24px;
+}
+
+.translation-column {
+	min-width: 0;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+}
+
+.column-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px dashed var(--border-color);
+	padding-bottom: 12px;
+	margin-bottom: 16px;
+}
+
+.column-label {
+	font-weight: 800;
+	font-size: 10px;
+	letter-spacing: 0.1em;
+	color: var(--text-muted);
+}
+
+.column-body {
+	flex: 1;
+}
+
+.source-column {
+	opacity: 0.8;
+}
+
+.is-translation {
+	max-width: 1200px !important;
 }
 </style>

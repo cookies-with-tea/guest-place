@@ -43,7 +43,7 @@ describe('UsersPage', () => {
 				config: {
 					globalProperties: {
 						$T: mockT,
-					},
+					} as any,
 				},
 				stubs: {
 					UsersFilters: true,

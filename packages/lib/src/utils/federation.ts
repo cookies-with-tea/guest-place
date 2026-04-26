@@ -5,6 +5,7 @@ export interface RemoteManifestItem {
 	scope: string
 	module: string
 	icon?: string
+	version?: string
 	category: string
 	order?: number
 }
@@ -19,6 +20,8 @@ const initializedRemotes = new Set<string>()
  * Dynamically loads a remote module using Vite Module Federation runtime logic.
  */
 export async function loadRemoteModule(remote: RemoteManifestItem, context?: any) {
+	const startTime = performance.now()
+
 	try {
 		// 1. Import the remote entry as an ES module
 		// @ts-ignore
@@ -49,7 +52,30 @@ export async function loadRemoteModule(remote: RemoteManifestItem, context?: any
 			await hooks.onMount(context?.app, context)
 		}
 
-		return module
+		const endTime = performance.now()
+		const loadTime = Math.round(endTime - startTime)
+
+		// Cache stats in window for later retrieval
+		// @ts-ignore
+		window.__gp_mfe_stats = window.__gp_mfe_stats || {}
+
+		// @ts-ignore
+		window.__gp_mfe_stats[remote.name] = { loadTime }
+
+		// Dispatch event for real-time updates
+		window.dispatchEvent(
+			new CustomEvent('mfe:load-stat', {
+				detail: {
+					name: remote.name,
+					loadTime,
+				},
+			})
+		)
+
+		return {
+			...module,
+			__loadTime: loadTime,
+		}
 	} catch (error) {
 		// eslint-disable-next-line no-console
 		console.error(`Failed to load remote module: ${remote.name}`, error)

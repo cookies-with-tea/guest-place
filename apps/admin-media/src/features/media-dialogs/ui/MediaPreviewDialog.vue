@@ -16,7 +16,13 @@
 			</div>
 
 			<div class="media-info">
-				<el-descriptions border :column="1" title="Information">
+				<el-descriptions
+					border
+					:column="1"
+					label-width="100px"
+					title="Information"
+					:content-style="{ 'word-break': 'break-all' }"
+				>
 					<el-descriptions-item label="Title">
 						{{ currentMedia.data.title || 'no title' }}
 					</el-descriptions-item>
@@ -25,6 +31,17 @@
 					</el-descriptions-item>
 					<el-descriptions-item label="Type">
 						<el-tag size="small" type="info">{{ currentMedia.data.mediaType }}</el-tag>
+					</el-descriptions-item>
+					<el-descriptions-item label="Category">
+						{{ currentMedia.data.category || '—' }}
+					</el-descriptions-item>
+					<el-descriptions-item label="Tags">
+						<div class="tags-list">
+							<el-tag v-for="tag in currentMedia.data.tags" :key="tag" class="media-tag" size="small">
+								{{ tag }}
+							</el-tag>
+							<span v-if="!currentMedia.data.tags?.length" class="no-tags">—</span>
+						</div>
 					</el-descriptions-item>
 					<el-descriptions-item label="name">
 						{{ currentMedia.data.name || 'unknown' }}
@@ -109,9 +126,25 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 }
 
 .media-info {
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 	gap: 16px;
+}
+
+.tags-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.media-tag {
+	border-radius: 4px;
+}
+
+.no-tags {
+	color: var(--text-muted);
 }
 
 .dialog-footer {

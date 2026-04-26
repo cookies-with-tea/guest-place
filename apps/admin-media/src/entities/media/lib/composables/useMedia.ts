@@ -16,6 +16,8 @@ const filters = ref<MediaFilters>({
 	sortBy: 'created_at',
 	sortOrder: 'DESC',
 	mediaTypes: [],
+	category: [],
+	tags: [],
 })
 
 const pagination = ref<IPagination>({
@@ -166,6 +168,16 @@ export const useMedia = () => {
 		}
 	}
 
+	const removeFilter = (key: keyof MediaFilters) => {
+		if (key === 'search') {
+			filters.value.search = ''
+		} else if (Array.isArray(filters.value[key])) {
+			;(filters.value[key] as any) = []
+		} else {
+			;(filters.value[key] as any) = undefined
+		}
+	}
+
 	watch(
 		filters,
 		() => {
@@ -204,5 +216,6 @@ export const useMedia = () => {
 		setPage,
 		setLimit,
 		setSort,
+		removeFilter,
 	}
 }

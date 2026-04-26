@@ -21,12 +21,42 @@
 					</div>
 				</template>
 				<div class="global-inputs">
-					<el-input v-model="globalTitle" placeholder="Shared Title (e.g. Portfolio 2024)" :disabled="!isApplyToAll">
-						<template #prefix>Title</template>
-					</el-input>
-					<el-input v-model="globalAlt" placeholder="Shared Alt Text" :disabled="!isApplyToAll">
-						<template #prefix>Alt</template>
-					</el-input>
+					<div class="input-row">
+						<el-input v-model="globalTitle" placeholder="Shared Title" :disabled="!isApplyToAll">
+							<template #prepend>Title</template>
+						</el-input>
+						<el-input v-model="globalAlt" placeholder="Shared Alt Text" :disabled="!isApplyToAll">
+							<template #prepend>Alt</template>
+						</el-input>
+					</div>
+					<div class="input-row">
+						<el-select
+							v-model="globalCategory"
+							clearable
+							filterable
+							placeholder="Shared Category"
+							:disabled="!isApplyToAll"
+						>
+							<el-option label="Marketing" value="Marketing" />
+							<el-option label="UI/UX" value="UI/UX" />
+							<el-option label="Content" value="Content" />
+						</el-select>
+						<el-select
+							v-model="globalTags"
+							allow-create
+							clearable
+							default-first-option
+							filterable
+							multiple
+							placeholder="Shared Tags"
+							:disabled="!isApplyToAll"
+						>
+							<el-option label="Marketing" value="Marketing" />
+							<el-option label="Product" value="Product" />
+							<el-option label="UI/UX" value="UI/UX" />
+							<el-option label="Hero" value="Hero" />
+						</el-select>
+					</div>
 				</div>
 			</el-card>
 
@@ -63,6 +93,25 @@
 						<div v-if="file.isCustom" class="item-custom-fields">
 							<el-input v-model="file.title" placeholder="Custom Title" size="small" />
 							<el-input v-model="file.alt" placeholder="Custom Alt" size="small" />
+							<el-select v-model="file.category" clearable filterable placeholder="Category" size="small">
+								<el-option label="Marketing" value="Marketing" />
+								<el-option label="UI/UX" value="UI/UX" />
+								<el-option label="Content" value="Content" />
+							</el-select>
+							<el-select
+								v-model="file.tags"
+								allow-create
+								clearable
+								default-first-option
+								filterable
+								multiple
+								placeholder="Tags"
+								size="small"
+							>
+								<el-option label="Logo" value="Logo" />
+								<el-option label="Social" value="Social" />
+								<el-option label="Document" value="Document" />
+							</el-select>
 						</div>
 					</el-collapse-transition>
 				</div>
@@ -100,12 +149,16 @@ const { isUploadModalOpen, closeUploadModal, createMedia, isSubmitting } = useMe
 
 const globalTitle = ref('')
 const globalAlt = ref('')
+const globalCategory = ref('')
+const globalTags = ref<string[]>([])
 const isApplyToAll = ref(true)
 
 interface FileWithMeta {
 	file: File
 	title: string
 	alt: string
+	category: string
+	tags: string[]
 	isCustom: boolean
 }
 
@@ -116,6 +169,8 @@ const handleFileChange = (file: any) => {
 		file: file.raw,
 		title: '',
 		alt: '',
+		category: '',
+		tags: [],
 		isCustom: false,
 	})
 }
@@ -140,12 +195,21 @@ const handleUpload = async () => {
 			formData.append('file', item.file)
 
 			const finalTitle = isApplyToAll.value && !item.isCustom ? globalTitle.value : item.title
+
 			const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
+
+			const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
+
+			const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
 
 			// Using indexed keys for better reliability as suggested by user
 			formData.append(`title_${index}`, finalTitle || '')
 
 			formData.append(`alt_${index}`, finalAlt || '')
+
+			formData.append(`category_${index}`, finalCategory || '')
+
+			formData.append(`tags_${index}`, (finalTags || []).join(','))
 		})
 
 		await createMedia(formData as any)
@@ -164,6 +228,10 @@ const closeAndReset = () => {
 	globalTitle.value = ''
 
 	globalAlt.value = ''
+
+	globalCategory.value = ''
+
+	globalTags.value = []
 
 	isApplyToAll.value = true
 
@@ -199,6 +267,15 @@ const closeAndReset = () => {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
+}
+
+.input-row {
+	display: flex;
+	gap: 12px;
+}
+
+.input-row > * {
+	flex: 1;
 }
 
 :deep(.el-input-group__prepend) {
