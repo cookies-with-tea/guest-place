@@ -1,3 +1,4 @@
+use axum::http::HeaderValue;
 use guest_platform::core::app::AppConfig;
 use guest_platform::core::db::{create_pool, create_redis_pool};
 use guest_platform::core::redis::RedisService;
@@ -5,16 +6,15 @@ use guest_platform::features::FeatureFlagService;
 use guest_platform::i18n::I18nService;
 use guest_platform::media::quota::QuotaService;
 use guest_platform::media::storage::StorageService;
-use guest_platform::{AppState, create_router};
-use axum::http::HeaderValue;
+use guest_platform::{create_router, AppState};
+use std::env;
+use std::sync::Arc;
+use std::time::Duration;
 use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use utoipa::{
     openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
     Modify, OpenApi,
 };
-use std::env;
-use std::sync::Arc;
-use std::time::Duration;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -219,7 +219,10 @@ async fn main() {
 
     let router = create_router(shared_state.clone(), ApiDoc::openapi(), cors);
 
-    sqlx::migrate!().run(&pool.clone()).await.expect("Failed to run migrations");
+    sqlx::migrate!()
+        .run(&pool.clone())
+        .await
+        .expect("Failed to run migrations");
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
         .await
