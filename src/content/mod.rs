@@ -14,4 +14,6 @@ pub fn router() -> AxRouter<Arc<AppState>> {
         .route("/schemas/{schema_id}/entries", get(handlers::get_entries))
         .route("/entries", post(handlers::create_entry))
         .route("/entries/{id}", get(handlers::get_entry).patch(handlers::update_entry).delete(handlers::delete_entry))
+        .route("/entries/{id}/versions", get(handlers::get_entry_versions))
+        .route("/entries/{id}/versions/{version_id}/rollback", post(handlers::rollback_entry_version))
 }

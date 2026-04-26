@@ -264,7 +264,7 @@ async fn main() {
         .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", openapi))
         .layer(cors);
 
-    let _ = sqlx::migrate!().run(&pool.clone()).await;
+    sqlx::migrate!().run(&pool.clone()).await.expect("Failed to run migrations");
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
         .await

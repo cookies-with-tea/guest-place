@@ -34,7 +34,7 @@ impl DatabaseConfig {
     pub fn connect_url(&self) -> String {
         let engine = if self.db_engine == "pg" { "postgres" } else { &self.db_engine };
         format!(
-            "{}://{}:{}@{}:{}/{}?sslmode=disable",
+            "{}://{}:{}@{}:{}/{}?sslmode=prefer",
             engine, self.db_user, self.db_password, self.db_host, self.db_port, self.db_name
         )
     }
@@ -49,7 +49,7 @@ pub async fn create_pool(config: &AppConfig) -> sqlx::Pool<sqlx::Postgres> {
         .max_connections(5)
         .connect(&connect_url)
         .await
-        .expect("Error")
+        .expect(&format!("Failed to connect to database at {}", connect_url))
 }
 
 pub fn create_redis_pool(config: &AppConfig) -> deadpool_redis::Pool {

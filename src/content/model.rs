@@ -37,6 +37,7 @@ pub struct ContentSchema {
     pub slug: String,
     #[schema(value_type = Vec<FieldDefinition>)]
     pub fields: sqlx::types::Json<Vec<FieldDefinition>>,
+    pub is_singleton: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -46,6 +47,8 @@ pub struct CreateSchemaDTO {
     pub name: String,
     pub slug: String,
     pub fields: Vec<FieldDefinition>,
+    #[serde(default)]
+    pub is_singleton: bool,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -53,6 +56,7 @@ pub struct UpdateSchemaDTO {
     pub name: Option<String>,
     pub slug: Option<String>,
     pub fields: Option<Vec<FieldDefinition>>,
+    pub is_singleton: Option<bool>,
 }
 
 #[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
@@ -92,4 +96,17 @@ pub struct UpdateContentEntryDTO {
     pub data: Option<serde_json::Value>,
     pub status: Option<ContentEntryStatus>,
     pub i18n: Option<serde_json::Value>,
+}
+#[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
+pub struct ContentEntryVersion {
+    pub id: Uuid,
+    pub entry_id: Uuid,
+    #[schema(value_type = Object)]
+    pub data: sqlx::types::Json<serde_json::Value>,
+    #[schema(value_type = Object)]
+    pub i18n: sqlx::types::Json<serde_json::Value>,
+    pub version_number: i32,
+    pub created_at: DateTime<Utc>,
+    pub created_by: Option<Uuid>,
+    pub comment: Option<String>,
 }

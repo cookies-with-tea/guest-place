@@ -11,6 +11,13 @@ pub struct CreateTranslationDTO {
     pub value: String,
 }
 
+#[derive(Deserialize, ToSchema)]
+#[serde(untagged)]
+pub enum TranslationInput {
+    Single(CreateTranslationDTO),
+    Multiple(Vec<CreateTranslationDTO>),
+}
+
 #[derive(Serialize, ToSchema, FromRow)]
 pub struct TranslationDTO {
     id: uuid::Uuid,
@@ -19,4 +26,10 @@ pub struct TranslationDTO {
     value: String,
     created_at: NaiveDateTime,
     updated_at: NaiveDateTime,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct LanguageDTO {
+    pub code: String,
+    pub name: String,
 }
