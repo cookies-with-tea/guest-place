@@ -1,98 +1,71 @@
-pub mod about;
-pub mod auth;
-pub mod content;
-pub mod core;
-pub mod features;
-pub mod guests;
-pub mod i18n;
-pub mod mailer;
-pub mod media;
-pub mod mfe;
-pub mod user;
-pub mod platforms;
-
-use crate::auth::middlewares::auth_middleware;
-use crate::core::app::AppConfig;
-use crate::core::db::{create_pool, create_redis_pool};
-use crate::core::redis::RedisService;
-use crate::features::FeatureFlagService;
-use crate::i18n::middlewares::locale_middleware;
-use crate::i18n::I18nService;
-use crate::media::quota::QuotaService;
-use axum::routing::get;
-use axum::{http::HeaderValue, middleware, Router};
-use sqlx::{Pool, Postgres};
-use std::env;
-use std::sync::Arc;
-use std::time::Duration;
-use tower_http::{
-    cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer},
-    services::ServeDir,
-};
+use guest_platform::core::app::AppConfig;
+use guest_platform::core::db::{create_pool, create_redis_pool};
+use guest_platform::core::redis::RedisService;
+use guest_platform::features::FeatureFlagService;
+use guest_platform::i18n::I18nService;
+use guest_platform::media::quota::QuotaService;
+use guest_platform::media::storage::StorageService;
+use guest_platform::{AppState, create_router};
+use axum::http::HeaderValue;
+use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use utoipa::{
     openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
     Modify, OpenApi,
 };
-use utoipa_swagger_ui::SwaggerUi;
-
-use crate::media::storage::StorageService;
-
-#[derive(Clone, Debug)]
-struct AppState {
-    pool: Pool<Postgres>,
-    config: crate::core::app::AppConfig,
-    i18n: I18nService,
-    media_storage: Arc<StorageService>,
-    redis: Arc<RedisService>,
-    features: Arc<FeatureFlagService>,
-    media_quota: Arc<QuotaService>,
-    frontend_url: String,
-    smtp_host: String,
-    smtp_port: u16,
-    smtp_username: String,
-    smtp_password: String,
-    smtp_from: String,
-}
+use std::env;
+use std::sync::Arc;
+use std::time::Duration;
 
 #[derive(OpenApi)]
 #[openapi(
   security(("bearer_auth" = [])),
   paths(
-    crate::auth::handlers::login,
-    crate::auth::handlers::logout,
-    crate::auth::handlers::refresh,
-    crate::auth::handlers::register,
-    crate::auth::handlers::check_register_key,
-    crate::user::handlers::create,
-    crate::user::handlers::get_all,
-    crate::user::handlers::get_one,
-    crate::user::handlers::delete_one,
-    crate::media::handlers::create,
-    crate::media::handlers::get_all,
-    crate::media::handlers::get_one,
-    crate::media::handlers::update,
-    crate::i18n::handlers::create_or_update,
-    crate::i18n::handlers::get_all,
-    crate::i18n::handlers::delete_one,
-    crate::i18n::handlers::get_by_dict_key,
-    crate::mfe::handlers::get_manifest,
-    crate::mfe::handlers::get_all,
-    crate::mfe::handlers::create,
-    crate::mfe::handlers::update,
-    crate::mfe::handlers::delete_one,
-    crate::features::handlers::get_features,
-    crate::features::handlers::update_features,
-    crate::content::handlers::get_schemas,
-    crate::content::handlers::create_schema,
-    crate::content::handlers::get_schema,
-    crate::content::handlers::update_schema,
-    crate::content::handlers::delete_schema,
-    crate::about::handlers::get_about,
-    crate::about::handlers::update_about,
-    crate::guests::handlers::get_guests,
-    crate::guests::handlers::update_guests,
-    crate::platforms::handlers::get_platforms,
-    crate::platforms::handlers::update_platforms,
+    guest_platform::auth::handlers::login,
+    guest_platform::auth::handlers::logout,
+    guest_platform::auth::handlers::refresh,
+    guest_platform::auth::handlers::register,
+    guest_platform::auth::handlers::check_register_key,
+    guest_platform::user::handlers::create,
+    guest_platform::user::handlers::get_all,
+    guest_platform::user::handlers::get_one,
+    guest_platform::user::handlers::delete_one,
+    guest_platform::media::handlers::create,
+    guest_platform::media::handlers::get_all,
+    guest_platform::media::handlers::get_one,
+    guest_platform::media::handlers::update,
+    guest_platform::media::handlers::delete_one,
+    guest_platform::media::handlers::delete_all,
+    guest_platform::i18n::handlers::create_or_update,
+    guest_platform::i18n::handlers::get_all,
+    guest_platform::i18n::handlers::delete_one,
+    guest_platform::i18n::handlers::get_by_dict_key,
+    guest_platform::i18n::handlers::get_languages,
+    guest_platform::i18n::handlers::get_namespaces,
+    guest_platform::mfe::handlers::get_manifest,
+    guest_platform::mfe::handlers::get_all,
+    guest_platform::mfe::handlers::create,
+    guest_platform::mfe::handlers::update,
+    guest_platform::mfe::handlers::delete_one,
+    guest_platform::features::handlers::get_features,
+    guest_platform::features::handlers::update_features,
+    guest_platform::content::handlers::get_schemas,
+    guest_platform::content::handlers::create_schema,
+    guest_platform::content::handlers::get_schema,
+    guest_platform::content::handlers::update_schema,
+    guest_platform::content::handlers::delete_schema,
+    guest_platform::content::handlers::get_entries,
+    guest_platform::content::handlers::create_entry,
+    guest_platform::content::handlers::get_entry,
+    guest_platform::content::handlers::update_entry,
+    guest_platform::content::handlers::delete_entry,
+    guest_platform::content::handlers::get_entry_versions,
+    guest_platform::content::handlers::rollback_entry_version,
+    guest_platform::about::handlers::get_about,
+    guest_platform::about::handlers::update_about,
+    guest_platform::guests::handlers::get_guests,
+    guest_platform::guests::handlers::update_guests,
+    guest_platform::platforms::handlers::get_platforms,
+    guest_platform::platforms::handlers::update_platforms,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -108,24 +81,38 @@ struct AppState {
   ),
   components(
     schemas(
-        crate::auth::dto::AuthRequestDTO,
-        crate::auth::dto::RegisterRequestDTO,
-        crate::auth::dto::AuthResponseDTO,
-        crate::about::dto::AboutResponseDTO,
-        crate::content::model::ContentSchema,
-        crate::content::model::CreateSchemaDTO,
-        crate::content::model::UpdateSchemaDTO,
-        crate::content::model::FieldDefinition,
-        crate::content::model::FieldType,
-        crate::features::FeatureFlag,
-        crate::features::FeatureFlagsUpdate,
-        crate::guests::dto::GuestsResponseDTO,
-        crate::guests::dto::UpdateGuestsDTO,
-        crate::guests::dto::GuestOpportunityItemDTO,
-        crate::guests::dto::InteractionCardDTO,
-        crate::guests::dto::SearchPromoDTO,
-        crate::guests::dto::AdditionalServiceDTO,
-        crate::platforms::dto::PlatformsResponseDTO,
+        guest_platform::auth::dto::AuthRequestDTO,
+        guest_platform::auth::dto::RegisterRequestDTO,
+        guest_platform::auth::dto::AuthResponseDTO,
+        guest_platform::about::dto::AboutResponseDTO,
+        guest_platform::content::model::ContentSchema,
+        guest_platform::content::model::CreateSchemaDTO,
+        guest_platform::content::model::UpdateSchemaDTO,
+        guest_platform::content::model::FieldDefinition,
+        guest_platform::content::model::FieldType,
+        guest_platform::content::model::ContentEntry,
+        guest_platform::content::model::ContentEntryVersion,
+        guest_platform::content::model::ContentEntryStatus,
+        guest_platform::content::model::CreateContentEntryDTO,
+        guest_platform::content::model::UpdateContentEntryDTO,
+        guest_platform::content::model::EntryFilterQuery,
+        guest_platform::media::dto::MediaItemDTO,
+        guest_platform::media::dto::UpdateMediaDTO,
+        guest_platform::media::dto::MediaType,
+        guest_platform::media::dto::MediaFilterQuery,
+        guest_platform::i18n::dto::LanguageDTO,
+        guest_platform::i18n::dto::TranslationDTO,
+        guest_platform::i18n::dto::CreateTranslationDTO,
+        guest_platform::features::FeatureFlag,
+        guest_platform::features::FeatureFlagsUpdate,
+        guest_platform::guests::dto::GuestsResponseDTO,
+        guest_platform::guests::dto::UpdateGuestsDTO,
+        guest_platform::guests::dto::GuestOpportunityItemDTO,
+        guest_platform::guests::dto::InteractionCardDTO,
+        guest_platform::guests::dto::SearchPromoDTO,
+        guest_platform::guests::dto::AdditionalServiceDTO,
+        guest_platform::platforms::dto::PlatformsResponseDTO,
+        guest_platform::core::dto::PaginationDTO,
     )
   )
 )]
@@ -230,39 +217,7 @@ async fn main() {
             .max_age(Duration::from_secs(3600))
     };
 
-    let openapi = ApiDoc::openapi();
-
-    let public_router = Router::new()
-        .nest("/api/v1/auth", auth::handlers::router())
-        .nest("/api/v1/user", user::handlers::public_router())
-        .nest("/api/v1/i18n", i18n::handlers::public_router())
-        .nest("/api/v1/mfe", mfe::handlers::public_router())
-        .nest("/api/v1/media", media::handlers::router())
-        .nest("/api/v1/about", about::handlers::router())
-        .nest("/api/v1/guests", guests::router())
-        .nest("/api/v1/platforms", platforms::handlers::router())
-        .nest("/api/v1/features", features::router())
-        .nest_service("/uploads", ServeDir::new("uploads"))
-        .with_state(shared_state.clone());
-
-    let protected_router = Router::new()
-        .nest("/api/v1/user", user::handlers::protected_router())
-        .nest("/api/v1/i18n", i18n::handlers::protected_router())
-        .nest("/api/v1/mfe", mfe::handlers::protected_router())
-        .nest("/api/v1/content", content::router())
-        .with_state(shared_state.clone())
-        .layer(middleware::from_fn_with_state(
-            shared_state.clone(),
-            auth_middleware,
-        ));
-
-    let app_router = public_router
-        .merge(protected_router)
-        .layer(middleware::from_fn(locale_middleware));
-
-    let router = app_router
-        .merge(SwaggerUi::new("/docs").url("/swagger/openapi.json", openapi))
-        .layer(cors);
+    let router = create_router(shared_state.clone(), ApiDoc::openapi(), cors);
 
     sqlx::migrate!().run(&pool.clone()).await.expect("Failed to run migrations");
 
@@ -276,7 +231,7 @@ async fn main() {
         app_host, app_port
     );
 
-    if let Err(e) = crate::auth::init::init_superadmin(shared_state.clone()).await {
+    if let Err(e) = guest_platform::auth::init::init_superadmin(shared_state.clone()).await {
         eprintln!("[Init] Superadmin initialization failed: {}", e);
     }
 

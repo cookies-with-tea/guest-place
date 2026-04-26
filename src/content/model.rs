@@ -64,6 +64,7 @@ pub struct UpdateSchemaDTO {
 #[serde(rename_all = "snake_case")]
 pub enum ContentEntryStatus {
     Draft,
+    Review,
     Published,
 }
 
@@ -109,4 +110,8 @@ pub struct ContentEntryVersion {
     pub created_at: DateTime<Utc>,
     pub created_by: Option<Uuid>,
     pub comment: Option<String>,
+}
+#[derive(Deserialize, Debug, ToSchema, Clone)]
+pub struct EntryFilterQuery {
+    pub search: Option<String>,
 }

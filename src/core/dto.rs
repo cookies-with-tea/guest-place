@@ -52,7 +52,7 @@ pub struct MediaDTO {
     pub(crate) title: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, FromRow)]
+#[derive(Serialize, Deserialize, Debug, FromRow, ToSchema)]
 pub struct AttractionRowDTO {
     pub icon: Option<String>,
     pub text: String,

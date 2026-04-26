@@ -39,6 +39,8 @@ pub async fn create(
     let mut files = Vec::new();
     let mut titles = BTreeMap::new();
     let mut alts = BTreeMap::new();
+    let mut categories = BTreeMap::new();
+    let mut tags_map = BTreeMap::new();
     let mut is_multiple = false;
 
     while let Some(field) = multipart.next_field().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("multipart", &format!("Stream error: {}", e))), messages: Some(vec!["Invalid multipart request".to_string()]) })))? {
@@ -59,12 +61,32 @@ pub async fn create(
                 let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
                 alts.insert(idx, text);
             }
+        } else if name.starts_with("category_") {
+            is_multiple = true;
+            if let Ok(idx) = name["category_".len()..].parse::<u32>() {
+                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+                categories.insert(idx, text);
+            }
+        } else if name.starts_with("tags_") {
+            is_multiple = true;
+            if let Ok(idx) = name["tags_".len()..].parse::<u32>() {
+                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+                let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                tags_map.insert(idx, tags);
+            }
         } else if name == "title" {
             let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
             titles.insert(0, text);
         } else if name == "alt" {
             let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
             alts.insert(0, text);
+        } else if name == "category" {
+            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+            categories.insert(0, text);
+        } else if name == "tags" {
+            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+            let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            tags_map.insert(0, tags);
         }
     }
 
@@ -110,9 +132,11 @@ pub async fn create(
                 let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
                 let title = titles.get(&(i as u32)).cloned();
                 let alt = alts.get(&(i as u32)).cloned();
+                let category = categories.get(&(i as u32)).cloned();
+                let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
 
                 let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at",
+                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags",
                 )
                 .bind(media_uuid)
                 .bind(media_type_str)
@@ -122,6 +146,8 @@ pub async fn create(
                 .bind(&title)
                 .bind(&alt)
                 .bind(file_size)
+                .bind(&category)
+                .bind(&tags)
                 .fetch_one(&state.pool)
                 .await;
 
@@ -133,6 +159,8 @@ pub async fn create(
                         extension: row.extension,
                         title: row.title,
                         alt: row.alt,
+                        category: row.category,
+                        tags: row.tags,
                         size_bytes: row.size_bytes,
                         created_at: row.created_at,
                         media_type: row.media_type,
@@ -172,20 +200,24 @@ pub async fn create(
 )]
 pub async fn get_all(
     State(state): State<Arc<AppState>>,
-    Query(pagination): Query<MediaFilterQuery>,
+    Query(filter): Query<MediaFilterQuery>,
 ) -> Result<Json<ApiResponseWithPagination<MediaItemDTO>>, (StatusCode, Json<ApiResponseWithPagination<MediaItemDTO>>)> {
-    let page = pagination.page.unwrap_or(1);
-    let limit = pagination.limit.unwrap_or(10);
+    let page = filter.page.unwrap_or(1);
+    let limit = filter.limit.unwrap_or(10);
     let offset = (page - 1) * limit;
 
-    let total_query = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM media")
-        .fetch_one(&state.pool)
-        .await;
+    // 1. Build COUNT query
+    let mut count_builder: QueryBuilder<Postgres> = QueryBuilder::new("SELECT COUNT(*) FROM media");
+    let mut where_clause = false;
+
+    apply_filters(&mut count_builder, &filter, &mut where_clause);
+
+    let total_query = count_builder.build_query_scalar::<i64>().fetch_one(&state.pool).await;
 
     let total = match total_query {
         Ok(count) => count,
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            eprintln!("DB count error: {:?}", e);
             return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -197,19 +229,23 @@ pub async fn get_all(
 
     let total_pages = (total as f64 / limit as f64).ceil() as i32;
 
+    // 2. Build SELECT query
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media"
     );
+    
+    let mut select_where_clause = false;
+    apply_filters(&mut query_builder, &filter, &mut select_where_clause);
 
     // Sorting logic
-    let sort_by = pagination.sort_by.unwrap_or_else(|| "created_at".to_string());
-    let sort_order = pagination.sort_order.unwrap_or_else(|| "DESC".to_string());
+    let sort_by = filter.sort_by.as_deref().unwrap_or("created_at");
+    let sort_order = filter.sort_order.as_deref().unwrap_or("DESC");
     
-    let allowed_sort_columns = ["name", "extension", "title", "alt", "size_bytes", "created_at"];
-    let final_sort_by = if allowed_sort_columns.contains(&sort_by.as_str()) {
+    let allowed_sort_columns = ["name", "extension", "title", "alt", "size_bytes", "created_at", "category"];
+    let final_sort_by = if allowed_sort_columns.contains(&sort_by) {
         sort_by
     } else {
-        "created_at".to_string()
+        "created_at"
     };
     
     let final_sort_order = if sort_order.to_uppercase() == "ASC" { "ASC" } else { "DESC" };
@@ -233,6 +269,8 @@ pub async fn get_all(
                     extension: row.extension,
                     title: row.title,
                     alt: row.alt,
+                    category: row.category,
+                    tags: row.tags,
                     size_bytes: row.size_bytes,
                     created_at: row.created_at,
                     media_type: row.media_type,
@@ -259,7 +297,7 @@ pub async fn get_all(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            eprintln!("DB fetch error: {:?}", e);
             into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -270,26 +308,71 @@ pub async fn get_all(
     }
 }
 
+fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a MediaFilterQuery, where_clause: &mut bool) {
+    if let Some(search) = &filter.search {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("(name ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR title ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR alt ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(")");
+    }
+
+    if let Some(categories) = &filter.category {
+        if !categories.is_empty() {
+            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+            builder.push("category IN (");
+            let mut separated = builder.separated(", ");
+            for cat in categories {
+                separated.push_bind(cat);
+            }
+            builder.push(")");
+        }
+    }
+
+    if let Some(types) = &filter.media_type {
+        if !types.is_empty() {
+            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+            builder.push("media_type IN (");
+            let mut separated = builder.separated(", ");
+            for t in types {
+                separated.push_bind(t);
+            }
+            builder.push(")");
+        }
+    }
+
+    if let Some(tags) = &filter.tags {
+        if !tags.is_empty() {
+            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+            builder.push("tags && ");
+            builder.push_bind(tags);
+        }
+    }
+}
+
 #[utoipa::path(
     get,
     path = "/api/v1/media/{uuid}",
     tag = "Media",
     params(
-        ("uuid" = String, Path, description = "Media UUID")
+        ("uuid" = Uuid, Path, description = "Media UUID")
     ),
     responses(
-        (status = 200, description = "Media item", body = ApiResponse<MediaItemDTO>),
-        (status = 404, description = "Media not found", body = ApiResponse<MediaItemDTO>),
-        (status = 500, description = "Internal server error", body = ApiResponse<MediaItemDTO>)
+        (status = 200, description = "Media item fetched successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Internal server error")
     ),
-    operation_id = "get_one_media"
+    operation_id = "get_media_by_uuid",
 )]
 pub async fn get_one(
     State(state): State<Arc<AppState>>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -297,13 +380,15 @@ pub async fn get_one(
 
     match result {
         Ok(Some(media)) => {
-            let media_response = MediaItemDTO {
+                let media_response = MediaItemDTO {
                 uuid: media.uuid.to_string(),
                 url: media.url,
                 name: media.name,
                 extension: media.extension,
                 title: media.title,
                 alt: media.alt,
+                category: media.category,
+                tags: media.tags,
                 size_bytes: media.size_bytes,
                 created_at: media.created_at,
                 media_type: media.media_type,
@@ -340,17 +425,16 @@ pub async fn get_one(
     put,
     path = "/api/v1/media/{uuid}",
     tag = "Media",
+    request_body = UpdateMediaDTO,
     params(
         ("uuid" = Uuid, Path, description = "Media UUID")
     ),
-    request_body(content = UpdateMediaDTO, content_type = "application/json"),
     responses(
         (status = 200, description = "Media updated successfully", body = ApiResponse<MediaItemDTO>),
-        (status = 400, description = "No fields to update", body = ApiResponse<MediaItemDTO>),
-        (status = 404, description = "Media not found", body = ApiResponse<MediaItemDTO>),
-        (status = 500, description = "Internal server error", body = ApiResponse<MediaItemDTO>)
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Internal server error")
     ),
-    operation_id = "update_media"
+    operation_id = "update_media",
 )]
 pub async fn update(
     State(state): State<Arc<AppState>>,
@@ -358,7 +442,7 @@ pub async fn update(
     Json(payload): Json<UpdateMediaDTO>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -394,6 +478,18 @@ pub async fn update(
                 has_updates = true;
             }
 
+            if let Some(_category) = &payload.category {
+                update_query.push_str(&format!("category = ${}, ", query_param_index));
+                query_param_index += 1;
+                has_updates = true;
+            }
+
+            if let Some(_tags) = &payload.tags {
+                update_query.push_str(&format!("tags = ${}, ", query_param_index));
+                query_param_index += 1;
+                has_updates = true;
+            }
+
             if !has_updates {
                 return into_api_response(
                     StatusCode::BAD_REQUEST,
@@ -403,7 +499,12 @@ pub async fn update(
                 );
             }
 
-            update_query.push_str(&format!("WHERE uuid = ${}", query_param_index));
+            // Remove trailing comma and space
+            if update_query.ends_with(", ") {
+                update_query.truncate(update_query.len() - 2);
+            }
+
+            update_query.push_str(&format!(" WHERE uuid = ${}", query_param_index));
 
             let mut query = sqlx::query(&update_query);
 
@@ -423,6 +524,14 @@ pub async fn update(
                 query = query.bind(alt.clone());
             }
 
+            if let Some(category) = &payload.category {
+                query = query.bind(category.clone());
+            }
+
+            if let Some(tags) = &payload.tags {
+                query = query.bind(tags);
+            }
+
             query = query.bind(uuid);
 
             let result = query.execute(&state.pool).await;
@@ -430,7 +539,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -445,6 +554,8 @@ pub async fn update(
                                 extension: media.extension,
                                 title: media.title,
                                 alt: media.alt,
+                                category: media.category,
+                                tags: media.tags,
                                 size_bytes: media.size_bytes,
                                 created_at: media.created_at,
                                 media_type: media.media_type,
@@ -500,6 +611,20 @@ pub async fn update(
 }
 
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/media/{uuid}",
+    tag = "Media",
+    params(
+        ("uuid" = Uuid, Path, description = "Media UUID")
+    ),
+    responses(
+        (status = 200, description = "Media deleted successfully", body = ApiResponse<serde_json::Value>),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Internal server error")
+    ),
+    operation_id = "delete_media_by_uuid",
+)]
 pub async fn delete_one(
     State(state): State<Arc<AppState>>,
     Path(uuid): Path<Uuid>,
@@ -556,6 +681,16 @@ pub async fn delete_one(
 }
 
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/media",
+    tag = "Media",
+    responses(
+        (status = 200, description = "All media deleted successfully", body = ApiResponse<serde_json::Value>),
+        (status = 500, description = "Internal server error")
+    ),
+    operation_id = "delete_all_media",
+)]
 pub async fn delete_all(
     State(state): State<Arc<AppState>>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {

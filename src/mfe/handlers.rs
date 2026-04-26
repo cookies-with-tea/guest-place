@@ -33,6 +33,7 @@ pub async fn get_manifest(
                 scope: m.scope,
                 module: m.module,
                 icon: m.icon,
+                version: m.version,
                 category: m.category,
                 order: m.order_index,
             }).collect();
@@ -107,8 +108,8 @@ pub async fn create(
 ) -> Result<Json<ApiResponse<Mfe>>, (StatusCode, Json<ApiResponse<Mfe>>)> {
     let result = sqlx::query_as::<_, Mfe>(
         r#"
-        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, category, order_index)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, version, category, order_index)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
         "#
     )
@@ -118,6 +119,7 @@ pub async fn create(
     .bind(&dto.scope)
     .bind(&dto.module)
     .bind(&dto.icon)
+    .bind(&dto.version)
     .bind(dto.category.unwrap_or_else(|| "system".to_string()))
     .bind(dto.order_index.unwrap_or(0))
     .fetch_one(&state.pool)
@@ -177,8 +179,8 @@ pub async fn update(
     let result = sqlx::query_as::<_, Mfe>(
         r#"
         UPDATE microfrontends
-        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, category = $6, order_index = $7, enabled = $8, updated_at = NOW()
-        WHERE id = $9
+        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, version = $6, category = $7, order_index = $8, enabled = $9, updated_at = NOW()
+        WHERE id = $10
         RETURNING *
         "#
     )
@@ -187,6 +189,7 @@ pub async fn update(
     .bind(dto.scope.unwrap_or(current.scope))
     .bind(dto.module.unwrap_or(current.module))
     .bind(dto.icon.or(current.icon))
+    .bind(dto.version.or(current.version))
     .bind(dto.category.unwrap_or(current.category))
     .bind(dto.order_index.unwrap_or(current.order_index))
     .bind(dto.enabled.unwrap_or(current.enabled))

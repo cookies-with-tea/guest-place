@@ -1,8 +1,9 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
+use sqlx::{Postgres, QueryBuilder};
 use serde_json::Value;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -12,7 +13,8 @@ use crate::AppState;
 
 use super::model::{
     ContentEntry, ContentEntryStatus, ContentEntryVersion, ContentSchema, CreateContentEntryDTO,
-    CreateSchemaDTO, FieldDefinition, FieldType, UpdateContentEntryDTO, UpdateSchemaDTO,
+    CreateSchemaDTO, EntryFilterQuery, FieldDefinition, FieldType, UpdateContentEntryDTO,
+    UpdateSchemaDTO,
 };
 
 #[utoipa::path(
@@ -308,7 +310,7 @@ pub async fn delete_schema(
 
 // --- Entry Handlers ---
 
-fn validate_entry_data(fields: &[FieldDefinition], data: &serde_json::Value) -> Result<(), String> {
+async fn validate_entry_data(pool: &sqlx::Pool<sqlx::Postgres>, fields: &[FieldDefinition], data: &serde_json::Value) -> Result<(), String> {
     let obj = data.as_object().ok_or("Data must be a JSON object")?;
 
     for field in fields {
@@ -338,6 +340,43 @@ fn validate_entry_data(fields: &[FieldDefinition], data: &serde_json::Value) -> 
                     FieldType::Boolean => {
                         if !val.is_boolean() {
                             return Err(format!("Field '{}' must be a boolean", field.label));
+                        }
+                    }
+                    FieldType::Relation => {
+                        // Validate relation existence
+                        if let Some(relation_to) = &field.relation_to {
+                            let uuids = if field.multiple {
+                                val.as_array()
+                                    .ok_or_else(|| format!("Field '{}' must be an array of UUIDs", field.label))?
+                                    .iter()
+                                    .map(|v| v.as_str().ok_or_else(|| format!("Invalid UUID in field '{}'", field.label)))
+                                    .collect::<Result<Vec<&str>, String>>()?
+                            } else {
+                                vec![val.as_str().ok_or_else(|| format!("Field '{}' must be a UUID string", field.label))?]
+                            };
+
+                            for uuid_str in uuids {
+                                let uuid = Uuid::parse_str(uuid_str)
+                                    .map_err(|_| format!("Invalid UUID format in field '{}'", field.label))?;
+                                
+                                // Check if entry exists in the target schema (using slug)
+                                let exists = sqlx::query_scalar::<_, bool>(
+                                    "SELECT EXISTS(
+                                        SELECT 1 FROM content_entries e 
+                                        JOIN content_schemas s ON e.schema_id = s.id 
+                                        WHERE e.id = $1 AND s.slug = $2
+                                    )"
+                                )
+                                .bind(uuid)
+                                .bind(relation_to)
+                                .fetch_one(pool)
+                                .await
+                                .map_err(|e| format!("Database error validating relation: {}", e))?;
+
+                                if !exists {
+                                    return Err(format!("Related entry {} not found in schema '{}'", uuid, relation_to));
+                                }
+                            }
                         }
                     }
                     _ => {
@@ -370,24 +409,37 @@ fn validate_entry_data(fields: &[FieldDefinition], data: &serde_json::Value) -> 
 pub async fn get_entries(
     State(state): State<Arc<AppState>>,
     Path(schema_id): Path<Uuid>,
+    Query(filter): Query<EntryFilterQuery>,
 ) -> Result<Json<ApiResponse<Vec<ContentEntry>>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let entries = sqlx::query_as::<_, ContentEntry>(
-        "SELECT * FROM content_entries WHERE schema_id = $1 ORDER BY created_at DESC",
-    )
-    .bind(schema_id)
-    .fetch_all(&state.pool)
-    .await
-    .map_err(|e| {
-        eprintln!("Database error: {}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ApiResponse::<()> {
-                data: None,
-                errors: None,
-                messages: Some(vec!["Database error".to_string()]),
-            }),
-        )
-    })?;
+    let mut query_builder: QueryBuilder<Postgres> =
+        QueryBuilder::new("SELECT * FROM content_entries WHERE schema_id = ");
+    query_builder.push_bind(schema_id);
+
+    if let Some(search) = &filter.search {
+        query_builder.push(" AND (slug ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR data::text ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(")");
+    }
+
+    query_builder.push(" ORDER BY created_at DESC");
+
+    let entries = query_builder
+        .build_query_as::<ContentEntry>()
+        .fetch_all(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
 
     Ok(Json(ApiResponse {
         data: Some(entries),
@@ -471,7 +523,7 @@ pub async fn create_entry(
     }
 
     // 2. Validate data
-    validate_entry_data(&schema.fields, &payload.data).map_err(|e| {
+    validate_entry_data(&state.pool, &schema.fields, &payload.data).await.map_err(|e| {
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -627,7 +679,7 @@ pub async fn update_entry(
                     )
                 })?;
 
-        validate_entry_data(&schema.fields, data).map_err(|e| {
+        validate_entry_data(&state.pool, &schema.fields, data).await.map_err(|e| {
             (
                 StatusCode::BAD_REQUEST,
                 Json(ApiResponse::<()> {

@@ -18,8 +18,11 @@ async fn setup_test_server() -> TestServer {
     let features = Arc::new(guest_platform::features::FeatureFlagService::new(redis.clone()));
     let media_quota = Arc::new(guest_platform::media::quota::QuotaService::new(pool.clone(), 1024 * 1024 * 1024));
     
+    sqlx::migrate!().run(&pool).await.expect("Failed to run migrations");
+
     let state = Arc::new(AppState {
         pool: pool.clone(),
+        config: config.clone(),
         i18n: guest_platform::i18n::I18nService::new(create_pool(&config).await),
         media_storage: Arc::new(guest_platform::media::storage::StorageService::new("tmp")),
         redis,
