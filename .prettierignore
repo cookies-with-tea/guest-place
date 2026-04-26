@@ -1,10 +1,10 @@
 # Ignore artifacts:
-dist
-dist-ssr
-build
-coverage
-storybook-static
-node_modules
+**/dist
+**/dist-ssr
+**/build
+**/coverage
+**/storybook-static
+**/node_modules
 stylelint_output.txt
 
 # Ignore all HTML files:

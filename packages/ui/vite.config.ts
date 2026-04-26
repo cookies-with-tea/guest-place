@@ -17,6 +17,33 @@ export default defineConfig({
 			'#': resolve(__dirname, 'src'),
 		},
 	},
+	build: {
+		lib: {
+			entry: resolve(__dirname, 'index.ts'),
+			name: 'GpUi',
+			fileName: (format) => `index.${format}.js`,
+		},
+		rollupOptions: {
+			external: [
+				'vue',
+				'pinia',
+				'element-plus',
+				'@admin-panel/lib',
+				'@admin-panel/i18n',
+				'@tanstack/vue-query',
+				'@element-plus/icons-vue',
+			],
+			output: {
+				globals: {
+					vue: 'Vue',
+					pinia: 'Pinia',
+					'element-plus': 'ElementPlus',
+					'@admin-panel/lib': 'GpLib',
+					'@admin-panel/i18n': 'GpI18n',
+				},
+			},
+		},
+	},
 	test: {
 		globals: true,
 		environment: 'jsdom',

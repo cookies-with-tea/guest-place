@@ -1,10 +1,5 @@
 <template>
-	<UiModal
-		v-model="isEditModalOpen"
-		title="Edit Media"
-		:width="600"
-		@close="closeEditModal"
-	>
+	<UiModal v-model="isEditModalOpen" title="Edit Media" :width="600" @close="closeEditModal">
 		<div v-if="currentMedia?.data" v-loading="isSubmitting" class="edit-container">
 			<div class="media-context">
 				<el-image
@@ -38,7 +33,6 @@
 import { ref, watch } from 'vue'
 
 import { UiModal } from '@admin-panel/ui'
-
 import { Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 

@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import type { ContentSchema } from '@admin-panel/lib'
@@ -42,7 +42,7 @@ const router = useRouter()
 const { isDark } = useTheme()
 
 const schema = ref<ContentSchema | null>(null)
-const formData = ref<Record<string, any>>({})
+const formData = reactive<Record<string, any>>({})
 const errors = ref<Record<string, string[]>>({})
 const isLoading = ref(true)
 const isSaving = ref(false)
@@ -62,7 +62,7 @@ const fetchData = async () => {
 				const entriesRes = await contentApi.getEntries(schema.value.id)
 
 				if (entriesRes.data && entriesRes.data.length > 0) {
-					formData.value = entriesRes.data[0].data
+					Object.assign(formData, entriesRes.data[0].data)
 				}
 			} catch (e: any) {
 				// 404 is fine here, it just means no entries created yet
@@ -89,14 +89,14 @@ const onSave = async () => {
 		const existingEntry = entriesRes.data?.[0]
 
 		if (existingEntry) {
-			await contentApi.updateEntry(existingEntry.id, formData.value)
+			await contentApi.updateEntry(existingEntry.id, formData)
 
 			ElMessage.success('Settings updated')
 		} else {
 			await contentApi.createEntry({
 				schema_id: schema.value.id,
 				slug: 'global-settings-entry',
-				data: formData.value,
+				data: formData,
 			})
 
 			ElMessage.success('Settings created')

@@ -31,6 +31,7 @@ export function createConfig(options: CreateConfigOptions) {
 			'element-plus': { singleton: true },
 			pinia: { singleton: true },
 			'@tanstack/vue-query': { singleton: true },
+			'@admin-panel/i18n': { singleton: true },
 		},
 		exposes,
 		remotes,

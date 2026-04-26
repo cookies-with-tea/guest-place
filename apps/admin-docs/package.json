@@ -22,6 +22,7 @@
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vue/tsconfig": "^0.8.1",
 		"eslint-plugin-storybook": "9.1.15",
+		"npm-run-all2": "^8.0.4",
 		"serve": "^14.2.5",
 		"storybook": "9.1.15",
 		"typescript": "~5.9.3",
@@ -32,9 +33,16 @@
 	"scripts": {
 		"build": "storybook build --docs",
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "eslint ./stories/*.stories.ts --max-warnings 0",
+		"eslint": "eslint . --cache",
+		"eslint:fix": "eslint . --fix --cache",
+		"lint": "run-p eslint stylelint prettier",
+		"lint:fix": "run-p eslint:fix stylelint:fix prettier:fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
 		"preview-storybook": "serve storybook-static",
-		"storybook": "storybook dev -p 6006"
+		"storybook": "storybook dev -p 6006",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache"
 	},
 	"type": "module"
 }

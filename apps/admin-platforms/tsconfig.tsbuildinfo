@@ -1,1 +1,1 @@
-{"root":["./src/main.ts","./src/app/router/index.ts","./src/pages/platformspage.vue","./vite.config.ts"],"version":"5.9.3"}
+{"root":["./src/main.ts","./src/app/router/index.ts","./src/app/app.vue","./src/pages/platformspage.vue","./vite.config.ts"],"version":"5.9.3"}

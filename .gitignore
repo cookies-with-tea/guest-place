@@ -13,3 +13,11 @@ public/dist
 .idea
 
 */**/coverage
+
+*/**/.stylelintcache
+*/**/.eslintcache
+*/**/.prettiercache
+
+.stylelintcache
+.eslintcache
+.prettiercache

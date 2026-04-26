@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 
 import { createTestingPinia } from '@pinia/testing'
 import ElementPlus from 'element-plus'
-import { describe, expect, it,vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 // No top-level variables used in vi.mock to avoid hoisting issues
 vi.mock('#entities/media', () => ({

@@ -48,13 +48,13 @@
 	},
 	"lint-staged": {
 		"*.{js,ts,vue}": [
-			"eslint --fix"
+			"eslint --fix --cache"
 		],
 		"*.{css,scss,postcss,vue}": [
-			"stylelint --fix"
+			"stylelint --fix --cache"
 		],
 		"*": [
-			"prettier --write --ignore-unknown"
+			"prettier --write --cache --ignore-unknown"
 		]
 	},
 	"private": true,
@@ -62,17 +62,17 @@
 		"build": "tsc && vite build",
 		"build-only": "vite build",
 		"dev": "vite",
-		"eslint": "eslint . --ext .ts,.js,.vue",
-		"eslint:fix": "eslint . --ext .ts,.js,.vue --fix",
+		"eslint": "eslint . --cache",
+		"eslint:fix": "eslint . --fix --cache",
 		"format": "prettier --write src/",
-		"lint": "pnpm eslint && pnpm stylelint && pnpm prettier",
-		"lint:fix": "pnpm eslint:fix && pnpm stylelint:fix && pnpm prettier:fix",
+		"lint": "run-p eslint stylelint prettier",
+		"lint:fix": "run-p eslint:fix stylelint:fix prettier:fix",
 		"prepare": "husky",
 		"prettier": "prettier --check .",
 		"prettier:fix": "prettier --write .",
 		"preview": "vite preview",
-		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\"",
-		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
 		"test:e2e": "start-server-and-test preview http://localhost:3000 'cypress run --e2e'",
 		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4173 'cypress open --e2e'",
 		"test:e2e:pw": "playwright test",

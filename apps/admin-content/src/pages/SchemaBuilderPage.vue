@@ -30,11 +30,7 @@
 			</UiTable>
 		</div>
 
-		<UiModal
-			v-model="dialogVisible"
-			:title="isEdit ? 'Edit Schema' : 'Create Schema'"
-			width="800px"
-		>
+		<UiModal v-model="dialogVisible" :title="isEdit ? 'Edit Schema' : 'Create Schema'" width="800px">
 			<el-form label-position="top" :model="form">
 				<div class="form-grid">
 					<el-form-item label="Schema Name">

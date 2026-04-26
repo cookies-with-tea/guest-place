@@ -1,3 +1,3 @@
-import { createConfig } from '@admin-panel/stylelint-config'
+import config from '@admin-panel/stylelint-config'
 
-export default createConfig()
+export default config

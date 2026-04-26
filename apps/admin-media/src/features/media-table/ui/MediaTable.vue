@@ -12,20 +12,19 @@
 			<el-table-column type="selection" width="55" />
 
 			<!-- Name Column -->
-			<el-table-column min-width="150" prop="name">
-				<template #header>
-					<UiSortableHeader
-						v-model:sortBy="filters.sortBy"
-						v-model:sortOrder="filters.sortOrder"
-						label="Name"
-						prop="name"
-						@sort="setSort"
-					/>
-				</template>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				label="Name"
+				min-width="150"
+				prop="name"
+				sortable
+				@sort="setSort"
+			>
 				<template #default="{ row }">
 					<span class="media-name">{{ row.name || 'unnamed' }}</span>
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Preview Column -->
 			<el-table-column label="Preview" width="120">
@@ -38,69 +37,56 @@
 			</el-table-column>
 
 			<!-- Title Column -->
-			<el-table-column min-width="200" prop="title">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
-					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								label="Title"
-								prop="title"
-								:show-filter-active="!!filters.search"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Search Media</span>
-							<el-input v-model="filters.search" clearable placeholder="Search by title or alt..." />
-						</div>
-					</el-popover>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Title"
+				min-width="200"
+				prop="title"
+				sortable
+				:show-filter-active="!!filters.search"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-input v-model="filters.search" clearable placeholder="Search by title or alt..." />
 				</template>
 				<template #default="{ row }">
 					<div class="media-title-cell">
 						{{ row.title || row.filename }}
 					</div>
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Size Column -->
-			<el-table-column width="140">
-				<template #header>
-					<UiSortableHeader
-						v-model:sortBy="filters.sortBy"
-						v-model:sortOrder="filters.sortOrder"
-						label="Size"
-						prop="size_bytes"
-						@sort="setSort"
-					/>
-				</template>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				label="Size"
+				prop="size_bytes"
+				sortable
+				width="140"
+				@sort="setSort"
+			>
 				<template #default="{ row }">
 					{{ formatFileSize(row.sizeBytes) }}
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Date Column -->
-			<el-table-column width="180">
-				<template #header>
-					<UiSortableHeader
-						v-model:sortBy="filters.sortBy"
-						v-model:sortOrder="filters.sortOrder"
-						label="Added"
-						prop="created_at"
-						@sort="setSort"
-					/>
-				</template>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				label="Added"
+				prop="created_at"
+				sortable
+				width="180"
+				@sort="setSort"
+			>
 				<template #default="{ row }">
 					{{ formatDate(row.createdAt) }}
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Actions Column -->
 			<el-table-column label="Actions" width="120">
@@ -134,10 +120,11 @@
 		<MediaUploadDialog />
 	</div>
 </template>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { UiSortableHeader, UiTable, useTheme } from '@admin-panel/ui'
+import { UiTable, UiTableColumn, useTheme } from '@admin-panel/ui'
 import { Delete, Document, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 

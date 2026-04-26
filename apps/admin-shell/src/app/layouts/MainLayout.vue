@@ -4,6 +4,7 @@
 			<div class="ambient-orb orb-1"></div>
 			<div class="ambient-orb orb-2"></div>
 		</div>
+
 		<TheSidebar />
 
 		<div class="main-layout__content">
@@ -12,6 +13,7 @@
 					<span class="page-title">{{ currentTitle }}</span>
 				</div>
 				<div class="header-right">
+					<UiLanguageSwitcher />
 					<UiThemeSwitcher />
 
 					<div v-if="isAuthenticated" class="user-info">
@@ -22,13 +24,15 @@
 							</div>
 							<template #dropdown>
 								<el-dropdown-menu>
-									<el-dropdown-item>Профиль</el-dropdown-item>
-									<el-dropdown-item divided @click="clearAuth">Выйти</el-dropdown-item>
+									<el-dropdown-item>{{ $T('shell.profile') }}</el-dropdown-item>
+									<el-dropdown-item divided @click="clearAuth">{{ $T('shell.logout') }}</el-dropdown-item>
 								</el-dropdown-menu>
 							</template>
 						</el-dropdown>
 					</div>
-					<el-button v-else plain size="small" type="primary" @click="loginDialogVisible = true"> Войти </el-button>
+					<el-button v-else plain size="small" type="primary" @click="loginDialogVisible = true">
+						{{ $T('shell.login') }}
+					</el-button>
 				</div>
 			</header>
 
@@ -38,8 +42,10 @@
 
 			<main class="page-content">
 				<RouterView v-slot="{ Component, route: currentRoute }">
-					<Transition :key="currentRoute.path" mode="out-in" name="fade-transform">
-						<component :is="Component" />
+					<Transition mode="out-in" name="fade-transform">
+						<div :key="currentRoute.path" class="page-wrapper">
+							<component :is="Component" />
+						</div>
 					</Transition>
 				</RouterView>
 			</main>
@@ -51,14 +57,21 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { useI18n } from '@admin-panel/i18n'
 import { useAuth } from '@admin-panel/lib'
-import { UiAuthWidget, UiThemeSwitcher } from '@admin-panel/ui'
+import { UiAuthWidget, UiLanguageSwitcher, UiThemeSwitcher } from '@admin-panel/ui'
 import { UserFilled } from '@element-plus/icons-vue'
 
 import { TheSidebar } from '#widgets/the-sidebar'
 
 const route = useRoute()
-const currentTitle = computed(() => (route.meta?.title as string) || 'Dashboard')
+const { t } = useI18n()
+
+const currentTitle = computed(() => {
+	const titleKey = route.meta?.title as string
+
+	return titleKey ? (titleKey.includes('.') ? t(titleKey) : titleKey) : 'Dashboard'
+})
 
 const { user, isAuthenticated, clearAuth } = useAuth()
 const loginDialogVisible = ref(false)

@@ -1,14 +1,16 @@
 <template>
-	<div class="content-editor-page" :class="{ 'is-dark': isDark }">
+	<div class="content-editor-page">
 		<div class="page-content">
 			<ContentEditor
 				v-if="schema"
 				v-model="formData"
+				:entry-id="entryId"
 				:errors="errors"
 				:is-edit="isEdit"
 				:is-saving="isSaving"
 				:schema="schema"
 				@cancel="goBack"
+				@rollback="fetchData"
 				@save="onSave"
 			/>
 		</div>
@@ -16,11 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type { ContentSchema } from '@admin-panel/lib'
-import { useTheme } from '@admin-panel/ui'
 import { ElMessage } from 'element-plus'
 
 import { ContentEditor } from '#features/content-editor'
@@ -32,11 +33,9 @@ const router = useRouter()
 const schemaIdentifier = route.params.schemaIdentifier as string
 const entryId = route.params.id as string | undefined
 
-const { isDark } = useTheme()
-
 const isEdit = computed(() => !!entryId)
 const schema = ref<ContentSchema | null>(null)
-const formData = ref<Record<string, any>>({})
+const formData = reactive<Record<string, any>>({})
 const errors = ref<Record<string, string[]>>({})
 const isSaving = ref(false)
 
@@ -51,7 +50,10 @@ const fetchData = async () => {
 				const entryRes = await contentApi.getEntry(entryId)
 
 				if (entryRes.data) {
-					formData.value = entryRes.data.data
+					// Clear and merge to keep reactivity
+					Object.keys(formData).forEach((key) => delete formData[key])
+
+					Object.assign(formData, entryRes.data.data)
 				}
 			}
 		}
@@ -60,15 +62,27 @@ const fetchData = async () => {
 	}
 }
 
-const onSave = async () => {
+const onSave = async (seoData?: any) => {
 	if (!schema.value) return
 	isSaving.value = true
 
 	errors.value = {}
 
+	// Merge SEO data into formData
+	const finalData = {
+		...formData,
+		_seo: seoData,
+	}
+
+	console.log('[Content Editor Page] Saving data:', {
+		isEdit: isEdit.value,
+		entryId,
+		finalData,
+	})
+
 	try {
 		if (isEdit.value && entryId) {
-			await contentApi.updateEntry(entryId, formData.value)
+			await contentApi.updateEntry(entryId, finalData)
 
 			ElMessage.success('Entry updated')
 		} else {
@@ -78,7 +92,7 @@ const onSave = async () => {
 			await contentApi.createEntry({
 				schema_id: schema.value.id,
 				slug: entrySlug,
-				data: formData.value,
+				data: finalData,
 			})
 
 			ElMessage.success('Entry created')
@@ -104,8 +118,8 @@ onMounted(fetchData)
 <style scoped>
 .content-editor-page {
 	min-height: 100vh;
-	color: var(--text-primary);
-	background-color: var(--bg-page);
+	color: var(--gp-text-main);
+	background-color: transparent;
 	transition: all 0.3s ease;
 	padding: 32px;
 }

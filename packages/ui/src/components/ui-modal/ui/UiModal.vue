@@ -1,10 +1,5 @@
 <template>
-	<el-dialog
-		v-bind="$attrs"
-		class="ui-modal"
-		:align-center="true"
-		:destroy-on-close="true"
-	>
+	<el-dialog v-bind="$attrs" class="ui-modal" :align-center="true" :destroy-on-close="true">
 		<!-- Проброс слотов (header, default, footer и т.д.) -->
 		<template v-for="(_, name) in $slots" #[name]="slotData">
 			<slot :name="name" v-bind="slotData || {}" />

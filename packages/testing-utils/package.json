@@ -6,6 +6,10 @@
 	},
 	"main": "./src/index.ts",
 	"private": true,
+	"scripts": {
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --fix --cache"
+	},
 	"type": "module",
 	"types": "./src/index.ts"
 }

@@ -2,6 +2,7 @@
 	"name": "@admin-panel/ui",
 	"version": "1.0.0",
 	"dependencies": {
+		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
 		"@element-plus/icons-vue": "^2.3.2",
 		"@tanstack/vue-query": "^5.92.1",
@@ -35,7 +36,8 @@
 	"scripts": {
 		"build": "vue-tsc -b && vite build",
 		"dev": "vite",
-		"lint": "eslint .",
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --fix --cache",
 		"preview": "vite preview",
 		"test:coverage": "vitest run --coverage --passWithNoTests",
 		"test:unit": "vitest --passWithNoTests"

@@ -257,9 +257,9 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
 
+import { UiModal, UiTable } from '@admin-panel/ui'
 import * as Icons from '@element-plus/icons-vue'
 import { CircleCheck, CircleClose, Delete, EditPen, Grid, Link, Monitor, Plus, Setting } from '@element-plus/icons-vue'
-import { UiModal, UiTable } from '@admin-panel/ui'
 
 import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
 
@@ -425,9 +425,7 @@ const getIcon = (name: string) => {
 
 /* Skeleton */
 .skeleton-card {
-	border: 1px solid var(--gp-glass-border);
-	border-radius: var(--gp-radius-md);
-	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background: var(--gp-bg-glass);
 	background-size: 800px 100%;
 	animation: shimmer 1.6s infinite linear;
 }

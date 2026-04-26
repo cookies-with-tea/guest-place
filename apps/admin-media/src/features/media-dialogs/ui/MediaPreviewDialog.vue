@@ -1,10 +1,5 @@
 <template>
-	<UiModal
-		v-model="isPreviewDialogOpen"
-		title="Media Preview"
-		:width="800"
-		@close="closePreviewDialog"
-	>
+	<UiModal v-model="isPreviewDialogOpen" title="Media Preview" :width="800" @close="closePreviewDialog">
 		<div v-if="currentMedia?.data && currentMedia.data.uuid === currentMediaUuid" class="preview-container">
 			<div class="media-display">
 				<el-image
@@ -61,8 +56,8 @@
 </template>
 
 <script setup lang="ts">
-import { Document } from '@element-plus/icons-vue'
 import { UiModal } from '@admin-panel/ui'
+import { Document } from '@element-plus/icons-vue'
 
 import { useMedia } from '#entities/media'
 import { mediaUtils } from '#entities/media/utils/media.utils'

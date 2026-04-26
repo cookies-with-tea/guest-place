@@ -8,207 +8,141 @@
 			element-loading-text="Loading data..."
 		>
 			<!-- Email Column -->
-			<el-table-column min-width="200" prop="email">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
-					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								label="Email"
-								prop="email"
-								:show-filter-active="!!filters.email"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by Email</span>
-							<el-input v-model="filters.email" clearable placeholder="Enter email..." />
-						</div>
-					</el-popover>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Email"
+				min-width="200"
+				prop="email"
+				sortable
+				:show-filter-active="!!filters.email"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-input v-model="filters.email" clearable placeholder="Enter email..." />
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Name Column -->
-			<el-table-column min-width="220" prop="first_name">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
-					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								label="Full Name"
-								prop="first_name"
-								:show-filter-active="!!filters.name"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by Name</span>
-							<el-input v-model="filters.name" clearable placeholder="Enter name..." />
-						</div>
-					</el-popover>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Full Name"
+				min-width="220"
+				prop="first_name"
+				sortable
+				:show-filter-active="!!filters.name"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-input v-model="filters.name" clearable placeholder="Enter name..." />
 				</template>
 				<template #default="{ row }">
 					<div class="user-name-cell">
 						{{ row.name }}
 					</div>
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Role Column -->
-			<el-table-column prop="role" width="160">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				prop="role"
+				sortable
+				width="160"
+				:label="getRoleLabels()"
+				:show-filter-active="filters.role && filters.role.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.role"
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						filterable
+						multiple
+						placeholder="Select roles"
+						popper-class="premium-dark-select"
 					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								:label="getRoleLabels()"
-								prop="role"
-								:show-filter-active="filters.role && filters.role.length > 0"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by Role</span>
-							<el-select
-								v-model="filters.role"
-								clearable
-								collapse-tags
-								collapse-tags-tooltip
-								filterable
-								multiple
-								placeholder="Select roles"
-								popper-class="premium-dark-select"
-							>
-								<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-							</el-select>
-						</div>
-					</el-popover>
+						<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+					</el-select>
 				</template>
 				<template #default="{ row }">
 					<el-tag effect="plain" size="small" :type="row.role === 'admin' ? 'danger' : 'info'">{{ row.role }}</el-tag>
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Status Column -->
-			<el-table-column prop="status" width="160">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				prop="status"
+				sortable
+				width="160"
+				:label="getStatusLabels()"
+				:show-filter-active="filters.status && filters.status.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.status"
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						filterable
+						multiple
+						placeholder="Select statuses"
+						popper-class="premium-dark-select"
 					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								:label="getStatusLabels()"
-								prop="status"
-								:show-filter-active="filters.status && filters.status.length > 0"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by Status</span>
-							<el-select
-								v-model="filters.status"
-								clearable
-								collapse-tags
-								collapse-tags-tooltip
-								filterable
-								multiple
-								placeholder="Select statuses"
-								popper-class="premium-dark-select"
-							>
-								<el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-							</el-select>
-						</div>
-					</el-popover>
+						<el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+					</el-select>
 				</template>
 				<template #default="{ row }">
 					<el-tag effect="plain" size="small" :type="row.status === 'active' ? 'success' : 'warning'">{{
 						row.status
 					}}</el-tag>
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- Phone Column -->
-			<el-table-column prop="phone" width="160">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
-					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								label="Phone"
-								prop="phone"
-								:show-filter-active="!!filters.phone"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by Phone</span>
-							<el-input v-model="filters.phone" clearable placeholder="Enter phone..." />
-						</div>
-					</el-popover>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Phone"
+				prop="phone"
+				sortable
+				width="160"
+				:show-filter-active="!!filters.phone"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-input v-model="filters.phone" clearable placeholder="Enter phone..." />
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<!-- City Column -->
-			<el-table-column prop="city" width="140">
-				<template #header>
-					<el-popover
-						placement="bottom-start"
-						popper-class="gp-popover"
-						:show-arrow="true"
-						trigger="click"
-						:width="240"
-					>
-						<template #reference>
-							<UiSortableHeader
-								v-model:sortBy="filters.sortBy"
-								v-model:sortOrder="filters.sortOrder"
-								label="City"
-								prop="city"
-								:show-filter-active="!!filters.city"
-								@sort="setSort"
-							/>
-						</template>
-						<div class="filter-popover-content">
-							<span class="popover-label">Filter by City</span>
-							<el-input v-model="filters.city" clearable placeholder="Enter city..." />
-						</div>
-					</el-popover>
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="City"
+				prop="city"
+				sortable
+				width="140"
+				:show-filter-active="!!filters.city"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-input v-model="filters.city" clearable placeholder="Enter city..." />
 				</template>
-			</el-table-column>
+			</UiTableColumn>
 
 			<el-table-column label="Actions" width="120">
 				<template #default="scope">
@@ -262,7 +196,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { UiSortableHeader, UiTable, useTheme } from '@admin-panel/ui'
+import { UiTable, UiTableColumn, useTheme } from '@admin-panel/ui'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 

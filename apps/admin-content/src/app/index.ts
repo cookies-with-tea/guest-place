@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 
-import { initUiStyles } from '@admin-panel/ui'
+import { i18nPlugin, initUiStyles } from '@admin-panel/ui'
 import ElementPlus from 'element-plus'
 
 import App from './App.vue'
@@ -10,6 +10,6 @@ initUiStyles()
 
 const app = createApp(App)
 
-app.use(router).use(ElementPlus)
+app.use(router).use(ElementPlus).use(i18nPlugin)
 
 export { app }

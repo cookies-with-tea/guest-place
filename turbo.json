@@ -22,6 +22,10 @@
 			"dependsOn": ["^lint"],
 			"outputs": []
 		},
+		"lint:fix": {
+			"dependsOn": ["^lint:fix"],
+			"outputs": []
+		},
 		"type-check": {
 			"outputs": []
 		},

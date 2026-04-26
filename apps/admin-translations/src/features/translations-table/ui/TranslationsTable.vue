@@ -2,6 +2,14 @@
 	<div class="translations-table">
 		<UiTable v-loading="isLoading" border :data="translations">
 			<el-table-column label="ID" prop="id" width="120" />
+			<el-table-column label="Namespace" prop="key" width="150">
+				<template #default="{ row }">
+					<el-tag v-if="row.key.includes('.')" size="small" type="info">
+						{{ row.key.split('.')[0] }}
+					</el-tag>
+					<el-tag v-else size="small" type="warning"> none </el-tag>
+				</template>
+			</el-table-column>
 			<el-table-column label="Key" min-width="200" prop="key" />
 			<el-table-column label="Translation" min-width="200" prop="value" />
 			<el-table-column label="Actions" width="160">

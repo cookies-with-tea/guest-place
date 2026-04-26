@@ -1,3 +1,3 @@
-import { createConfig } from '@admin-panel/eslint-config'
+import config from '@admin-panel/eslint-config'
 
-export default createConfig()
+export default config

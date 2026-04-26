@@ -35,7 +35,7 @@ export const ROUTES = {
 	},
 	content: {
 		name: 'SchemaBuilder',
-		title: 'Схемы',
+		title: 'menu.schemas',
 		icon: 'Document',
 	},
 	about: {
@@ -45,7 +45,7 @@ export const ROUTES = {
 	},
 	platforms: {
 		name: 'PlatformsPage',
-		title: 'Площадкам',
+		title: 'menu.platforms',
 		icon: 'Place',
 	},
 	guests: {

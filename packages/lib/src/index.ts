@@ -1,5 +1,5 @@
 export * from './api'
-export * from './composables/index'
+export * from './composables'
 export * from './constants'
 export * from './model'
 export * from './utils'

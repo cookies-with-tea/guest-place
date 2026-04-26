@@ -21,5 +21,9 @@
 		"stylelint": "^16.0.0"
 	},
 	"private": true,
+	"scripts": {
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --fix --cache"
+	},
 	"type": "module"
 }

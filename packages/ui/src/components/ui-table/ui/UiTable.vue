@@ -1,6 +1,11 @@
 <template>
 	<div class="ui-table">
 		<el-table v-bind="$attrs">
+			<!-- Декларативные колонки -->
+			<template v-if="columns && columns.length">
+				<UiTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />
+			</template>
+
 			<!-- Прямой проброс всех слотов -->
 			<template v-for="(_, name) in $slots" #[name]="slotData">
 				<slot :name="name" v-bind="slotData || {}" />
@@ -10,10 +15,24 @@
 </template>
 
 <script setup lang="ts">
-/**
- * UiTable — универсальная обертка над el-table с едиными стилями проекта.
- * Все пропсы и события el-table доступны через v-bind="$attrs".
- */
+import UiTableColumn from '../../ui-table-column'
+
+interface ColumnConfig {
+	label?: string
+	prop?: string
+	width?: string | number
+	minWidth?: string | number
+	sortable?: boolean
+	filterable?: boolean
+	[key: string]: any
+}
+
+interface Props {
+	columns?: ColumnConfig[]
+}
+
+defineProps<Props>()
+
 defineOptions({
 	inheritAttrs: false,
 })

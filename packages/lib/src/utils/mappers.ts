@@ -1,5 +1,8 @@
 import type { CamelCasedProperties, SnakeCasedProperties } from '../model'
 
+const toCamel = (s: string) => s.replace(/([a-z0-9])_([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase())
+const toSnake = (s: string) => s.replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase()
+
 export const snakeToCamel = <T extends Record<string, any>>(data: T): CamelCasedProperties<T> => {
 	if (data === null || typeof data !== 'object') {
 		return data as CamelCasedProperties<T>
@@ -13,9 +16,18 @@ export const snakeToCamel = <T extends Record<string, any>>(data: T): CamelCased
 
 	for (const key in data) {
 		if (Object.prototype.hasOwnProperty.call(data, key)) {
-			const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+			// Only convert underscores that are preceded by a character (ignore leading underscores)
+			const camelKey = toCamel(key)
+			let value = data[key]
 
-			result[camelKey] = snakeToCamel(data[key])
+			// Special case: convert values of 'name' and 'slug' to camelCase for frontend consistency
+			if (typeof value === 'string' && (camelKey === 'name' || camelKey === 'slug')) {
+				value = toCamel(value)
+			} else {
+				value = snakeToCamel(value)
+			}
+
+			;(result as any)[camelKey] = value
 		}
 	}
 
@@ -35,9 +47,20 @@ export const camelToSnake = <T extends Record<string, any>>(data: T): SnakeCased
 
 	for (const key in data) {
 		if (Object.prototype.hasOwnProperty.call(data, key)) {
-			const snakeKey = key.replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase()
+			// Convert camelCase to snake_case, but keep leading underscore if present
+			const baseKey = key.startsWith('_') ? key.slice(1) : key
+			const snakeKey = toSnake(baseKey)
+			const finalKey = key.startsWith('_') ? `_${snakeKey}` : snakeKey
+			let value = data[key]
 
-			result[snakeKey] = camelToSnake(data[key])
+			// Special case: convert values of 'name' and 'slug' back to snake_case for backend
+			if (typeof value === 'string' && (key === 'name' || key === 'slug')) {
+				value = toSnake(value)
+			} else {
+				value = camelToSnake(value)
+			}
+
+			;(result as any)[finalKey] = value
 		}
 	}
 

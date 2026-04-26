@@ -91,7 +91,6 @@
 import { ref } from 'vue'
 
 import { UiModal } from '@admin-panel/ui'
-
 import { Edit, UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 

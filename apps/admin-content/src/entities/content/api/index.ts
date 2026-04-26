@@ -45,6 +45,13 @@ export const deleteEntry = (id: string) =>
 		method: 'DELETE',
 	})
 
+export const getEntryVersions = (id: string) => fetchData<any[]>(`/entries/${id}/versions`)
+
+export const rollbackEntryVersion = (id: string, versionId: string) =>
+	fetchData<ContentEntry>(`/entries/${id}/versions/${versionId}/rollback`, {
+		method: 'POST',
+	})
+
 export const contentApi = {
 	getSchemas,
 	getSchemaByIdentifier,
@@ -56,4 +63,6 @@ export const contentApi = {
 	createEntry,
 	updateEntry,
 	deleteEntry,
+	getEntryVersions,
+	rollbackEntryVersion,
 }

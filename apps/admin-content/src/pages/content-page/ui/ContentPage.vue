@@ -2,7 +2,12 @@
 	<div class="content-page" :class="{ 'is-dark': isDark }">
 		<div class="page-header">
 			<h1>{{ schema?.name || 'Content' }}</h1>
-			<el-button :icon="Plus" type="primary" @click="goToCreate"> Add Entry </el-button>
+			<div class="header-right">
+				<el-button @click="onExport"> Export JSON </el-button>
+				<el-button @click="triggerImport"> Import JSON </el-button>
+				<el-button :icon="Plus" type="primary" @click="goToCreate"> Add Entry </el-button>
+				<input ref="fileInput" accept=".json" style="display: none" type="file" @change="onImport" />
+			</div>
 		</div>
 
 		<div class="page-content">
@@ -47,6 +52,19 @@ const fetchData = async () => {
 
 			if (entriesRes.data) {
 				entries.value = entriesRes.data
+
+				// Singleton logic: auto-redirect to editor
+				if (schema.value.isSingleton) {
+					if (entries.value.length === 1) {
+						goToEdit(entries.value[0].id)
+
+						return
+					} else if (entries.value.length === 0) {
+						goToCreate()
+
+						return
+					}
+				}
 			}
 		}
 	} catch (error: any) {
@@ -76,6 +94,73 @@ const onDelete = async (id: string) => {
 	}
 }
 
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const onExport = () => {
+	const data = JSON.stringify(entries.value, null, 2)
+	const blob = new Blob([data], { type: 'application/json' })
+	const url = URL.createObjectURL(blob)
+	const a = document.createElement('a')
+
+	a.href = url
+
+	a.download = `${schemaIdentifier}-export-${new Date().toISOString().split('T')[0]}.json`
+
+	a.click()
+
+	URL.revokeObjectURL(url)
+
+	ElMessage.success('Export started')
+}
+
+const triggerImport = () => {
+	fileInput.value?.click()
+}
+
+const onImport = async (event: any) => {
+	const file = event.target.files?.[0]
+
+	if (!file || !schema.value) return
+
+	const reader = new FileReader()
+
+	reader.onload = async (e) => {
+		try {
+			const importedData = JSON.parse(e.target?.result as string)
+
+			if (!Array.isArray(importedData)) {
+				throw new Error('Imported data must be an array of entries')
+			}
+
+			let successCount = 0
+
+			for (const item of importedData) {
+				try {
+					await contentApi.createEntry({
+						schema_id: schema.value!.id,
+						slug: item.slug || `imported-${Date.now()}-${successCount}`,
+						data: item.data,
+					})
+
+					successCount++
+				} catch {
+					// Error handled per item if needed
+				}
+			}
+
+			ElMessage.success(`Successfully imported ${successCount} entries`)
+
+			fetchData()
+		} catch (err: any) {
+			ElMessage.error(`Import failed: ${err.message}`)
+		} finally {
+			if (fileInput.value) fileInput.value.value = ''
+		}
+	}
+
+	reader.readAsText(file)
+}
+
 onMounted(fetchData)
 </script>
 
@@ -101,5 +186,11 @@ onMounted(fetchData)
 	letter-spacing: -0.02em;
 	color: var(--text-primary);
 	margin: 0;
+}
+
+.header-right {
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
 </style>

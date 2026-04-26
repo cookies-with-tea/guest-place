@@ -1,4 +1,4 @@
-import { initUiStyles } from '@admin-panel/ui'
+import { i18nPlugin, initUiStyles } from '@admin-panel/ui'
 
 initUiStyles()
 
@@ -61,11 +61,15 @@ import { initRouter } from './router'
 const app = createApp(App)
 const pinia = createPinia()
 
-app.use(pinia).use(ElementPlus).use(VueQueryPlugin)
+app.use(pinia).use(ElementPlus).use(VueQueryPlugin).use(i18nPlugin)
 
 const { loadDict } = useI18n()
 
 await loadDict('general')
+
+await loadDict('shell')
+
+await loadDict('platforms')
 
 const router = await initRouter(app)
 

@@ -1,35 +1,7 @@
 @use 'variables' as *;
 
 :root {
-	/* Design Tokens */
-	--gp-bg-main: #{$gp-bg};
-	--gp-bg-surface: #{$gp-surface};
-	--gp-bg-element: #{$gp-bg-2};
-	--gp-primary: #{$gp-primary};
-	--gp-primary-hover: #3fb27d;
-	--gp-primary-light: rgb(66, 184, 131, 0.2);
-	--gp-text-main: #{$gp-text};
-	--gp-text-secondary: #{$gp-text-secondary};
-	--gp-text-disabled: #{$gp-text-disabled};
-	--gp-border-color: #{$gp-border};
-	--gp-border-color-hover: rgb(255, 255, 255, 0.2);
-
-	/* Glassmorphism */
-	--gp-bg-glass: rgb(255, 255, 255, 0.03);
-	--gp-bg-glass-hover: rgb(255, 255, 255, 0.06);
-	--gp-glass-blur: 16px;
-	--gp-glass-border: rgb(255, 255, 255, 0.08);
-	--gp-glass-shadow: 0 8px 32px 0 rgb(0, 0, 0, 0.37);
-
-	/* Spacing & Radii */
-	--gp-radius-sm: 16px;
-	--gp-radius-md: 24px;
-	--gp-radius-lg: 32px;
-	--gp-sidebar-width: 260px;
-	--gp-header-height: 64px;
-}
-
-html.light {
+	/* Light Theme Colors */
 	--gp-bg-main: #{$gp-bg-light};
 	--gp-bg-surface: #{$gp-surface-light};
 	--gp-bg-element: #{$gp-bg-2-light};
@@ -42,6 +14,61 @@ html.light {
 	/* Light Glassmorphism */
 	--gp-bg-glass: rgb(255, 255, 255, 0.6);
 	--gp-bg-glass-hover: rgb(255, 255, 255, 0.8);
+	--gp-glass-blur: 16px;
 	--gp-glass-border: rgb(0, 0, 0, 0.05);
 	--gp-glass-shadow: 0 4px 12px rgb(0, 0, 0, 0.05);
+
+	/* Component Specific (from old theme.scss) */
+	--bg-page: var(--gp-bg-main);
+	--bg-card: var(--gp-bg-surface);
+	--bg-header: var(--gp-bg-main);
+	--bg-surface: var(--gp-bg-element);
+	--text-primary: var(--gp-text-main);
+	--text-muted: var(--gp-text-secondary);
+	--text-inverse: #f8fafc;
+	--border-color: var(--gp-border-color);
+	--accent-primary: #0284c7;
+	--accent-hover: #0ea5e9;
+	--shadow-sm: 0 4px 20px rgb(0, 0, 0, 0.05);
+
+	/* Branding & Spacing */
+	--gp-primary: #{$gp-primary};
+	--gp-primary-hover: #3fb27d;
+	--gp-primary-light: rgb(66, 184, 131, 0.2);
+	--gp-radius-sm: 16px;
+	--gp-radius-md: 24px;
+	--gp-radius-lg: 32px;
+	--gp-sidebar-width: 260px;
+	--gp-header-height: 64px;
+}
+
+:root.dark {
+	/* Dark Theme Colors - More Transparent & Premium */
+	--gp-bg-main: rgb(15, 23, 42, 0.95);
+	--gp-bg-surface: rgb(30, 41, 59, 0.5);
+	--gp-bg-element: rgb(30, 41, 59, 0.3);
+	--gp-text-main: #f8fafc;
+	--gp-text-secondary: #94a3b8;
+	--gp-text-disabled: #475569;
+	--gp-border-color: rgb(255, 255, 255, 0.1);
+	--gp-border-color-hover: rgb(255, 255, 255, 0.2);
+
+	/* Dark Glassmorphism - Lighter & Cleaner */
+	--gp-bg-glass: rgb(255, 255, 255, 0.03);
+	--gp-bg-glass-hover: rgb(255, 255, 255, 0.06);
+	--gp-glass-border: rgb(255, 255, 255, 0.08);
+	--gp-glass-shadow: 0 8px 32px 0 rgb(0, 0, 0, 0.37);
+
+	/* Component Specific Overrides */
+	--bg-page: transparent;
+	--bg-card: var(--gp-bg-surface);
+	--bg-header: transparent;
+	--bg-surface: var(--gp-bg-element);
+	--text-primary: var(--gp-text-main);
+	--text-muted: var(--gp-text-secondary);
+	--text-inverse: #1e293b;
+	--border-color: var(--gp-border-color);
+	--accent-primary: #06b6d4;
+	--accent-hover: #22d3ee;
+	--shadow-sm: 0 10px 25px -5px rgb(0, 0, 0, 0.3);
 }

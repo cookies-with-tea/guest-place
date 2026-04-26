@@ -1,22 +1,49 @@
 import { ref } from 'vue'
 
-const isDark = ref(localStorage.getItem('theme') === 'dark')
+const THEME_KEY = 'gp-theme-mode'
+
+const isDark = ref(localStorage.getItem(THEME_KEY) === 'dark')
+
+const updateDOM = (dark: boolean) => {
+	if (typeof document === 'undefined') return
+
+	if (dark) {
+		document.documentElement.classList.add('dark')
+
+		document.documentElement.classList.remove('light')
+	} else {
+		document.documentElement.classList.remove('dark')
+
+		document.documentElement.classList.add('light')
+	}
+}
 
 const toggleTheme = () => {
 	isDark.value = !isDark.value
 
-	localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+	const mode = isDark.value ? 'dark' : 'light'
 
-	if (isDark.value) {
-		document.documentElement.classList.add('dark')
-	} else {
-		document.documentElement.classList.remove('dark')
-	}
+	localStorage.setItem(THEME_KEY, mode)
+
+	updateDOM(isDark.value)
 }
 
-// Initial check
-if (isDark.value) {
-	document.documentElement.classList.add('dark')
+// Initial sync
+if (typeof window !== 'undefined') {
+	updateDOM(isDark.value)
+
+	// Listen for changes from other TABS
+	window.addEventListener('storage', (event) => {
+		if (event.key === THEME_KEY) {
+			const dark = event.newValue === 'dark'
+
+			if (isDark.value !== dark) {
+				isDark.value = dark
+
+				updateDOM(dark)
+			}
+		}
+	})
 }
 
 export const useTheme = () => {

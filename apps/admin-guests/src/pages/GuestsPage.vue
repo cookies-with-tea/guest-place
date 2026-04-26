@@ -24,8 +24,8 @@
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="Page Title">
-									<el-input v-model="form.title" placeholder="e.g., Гостям" />
+								<el-form-item label="Page Title (Translation Key)">
+									<el-input v-model="form.title" placeholder="e.g. guests.hero.title" />
 								</el-form-item>
 								<div class="section-guide-embed">
 									<UiMediaPicker v-model="form.heroGuideUuid" />
@@ -57,15 +57,15 @@
 												</el-form-item>
 											</el-col>
 											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="opp.title" placeholder="e.g., Возможности GP Platform" />
+												<el-form-item label="Title (Translation Key)">
+													<el-input v-model="opp.title" placeholder="e.g. guests.opp.title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
 										<el-row :gutter="20">
 											<el-col :span="12">
-												<el-form-item label="Button Text">
-													<el-input v-model="opp.buttonText" placeholder="e.g., Узнать больше" />
+												<el-form-item label="Button Text (Translation Key)">
+													<el-input v-model="opp.buttonText" placeholder="e.g. guests.opp.btn" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
@@ -77,7 +77,7 @@
 										<el-form-item label="Features List">
 											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
-													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
+													<el-input v-model="opp.items[iIdx]" placeholder="Translation key">
 														<template #append>
 															<el-button :icon="Delete" @click="removeItem(opp.items, iIdx as number)" />
 														</template>
@@ -90,7 +90,7 @@
 													type="primary"
 													@click="addItem(opp.items, '')"
 												>
-													Add Feature
+													Add Feature (Key)
 												</el-button>
 											</div>
 										</el-form-item>
@@ -114,11 +114,16 @@
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="Promo Title">
-									<el-input v-model="form.searchPromoTitle" placeholder="Main promo title" />
+								<el-form-item label="Promo Title (Translation Key)">
+									<el-input v-model="form.searchPromoTitle" placeholder="e.g. guests.promo.title" />
 								</el-form-item>
-								<el-form-item label="Promo Description">
-									<el-input v-model="form.searchPromoDescription" :rows="3" type="textarea" />
+								<el-form-item label="Promo Description (Translation Key)">
+									<el-input
+										v-model="form.searchPromoDescription"
+										:rows="2"
+										type="textarea"
+										placeholder="e.g. guests.promo.desc"
+									/>
 								</el-form-item>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.searchPromoGuideUuid" />
@@ -155,18 +160,18 @@
 												</el-form-item>
 											</el-col>
 											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="card.title" />
+												<el-form-item label="Title (Translation Key)">
+													<el-input v-model="card.title" placeholder="e.g. guests.card.title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
-										<el-form-item label="Description">
-											<el-input v-model="card.text" :rows="2" type="textarea" />
+										<el-form-item label="Interaction Card Description (Translation Key)">
+											<el-input v-model="card.text" :rows="2" type="textarea" placeholder="e.g. guests.card.desc" />
 										</el-form-item>
 										<el-row :gutter="20">
 											<el-col :span="12">
-												<el-form-item label="Button Text">
-													<el-input v-model="card.buttonText" />
+												<el-form-item label="Button Text (Translation Key)">
+													<el-input v-model="card.buttonText" placeholder="e.g. guests.card.btn" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
@@ -198,7 +203,7 @@
 								<div v-for="(item, index) in form.additionalServices" :key="index" class="sub-item-complex">
 									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
-											<el-input v-model="item.text" placeholder="Service text" />
+											<el-input v-model="item.text" placeholder="Key (e.g. guests.svc.item)" />
 										</el-col>
 										<el-col :span="6">
 											<UiMediaPicker v-model="item.iconUuid" />
@@ -220,7 +225,7 @@
 									type="primary"
 									@click="addAdditionalService"
 								>
-									Add Service Item
+									Add Service Item (Key)
 								</el-button>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.additionalServicesGuideUuid" />
@@ -477,10 +482,7 @@ onMounted(fetchData)
 	h1 {
 		font-weight: 800;
 		font-size: 1.75rem;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(to right, var(--gp-primary), var(--gp-text-primary));
-		-webkit-background-clip: text;
-		background-clip: text;
+		color: var(--gp-primary);
 		margin: 0;
 	}
 

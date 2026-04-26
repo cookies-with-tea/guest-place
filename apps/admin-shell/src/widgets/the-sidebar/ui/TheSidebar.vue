@@ -10,16 +10,16 @@
 		</div>
 
 		<div class="context-switcher" :class="{ 'is-collapsed': isCollapsed }">
-			<el-tooltip :content="t('general.system_admin')" :disabled="!isCollapsed" placement="right">
+			<el-tooltip :content="t('shell.admin')" :disabled="!isCollapsed" placement="right">
 				<div class="context-item" :class="{ active: activeContext === 'system' }" @click="setContext('system')">
 					<el-icon><Setting /></el-icon>
-					<span v-show="!isCollapsed">Admin</span>
+					<span v-show="!isCollapsed">{{ t('shell.admin') }}</span>
 				</div>
 			</el-tooltip>
-			<el-tooltip :content="t('general.website_content')" :disabled="!isCollapsed" placement="right">
+			<el-tooltip :content="t('shell.website')" :disabled="!isCollapsed" placement="right">
 				<div class="context-item" :class="{ active: activeContext === 'website' }" @click="setContext('website')">
 					<el-icon><EditPen /></el-icon>
-					<span v-show="!isCollapsed">Website</span>
+					<span v-show="!isCollapsed">{{ t('shell.website') }}</span>
 				</div>
 			</el-tooltip>
 		</div>
@@ -129,10 +129,7 @@ const getIcon = (name: string) => {
 	font-size: 1.1rem;
 	letter-spacing: 1px;
 	white-space: nowrap;
-	-webkit-text-fill-color: transparent;
-	background: linear-gradient(120deg, var(--gp-primary), #fff);
-	-webkit-background-clip: text;
-	background-clip: text;
+	color: var(--gp-primary);
 	margin: 0;
 }
 

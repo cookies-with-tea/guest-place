@@ -7,7 +7,7 @@
 			filterable
 			placeholder="Namespace"
 		>
-			<el-option v-for="ns in namespaces" :key="ns" :label="ns" :value="ns" />
+			<el-option v-for="ns in allNamespaces" :key="ns" :label="ns" :value="ns" />
 		</el-select>
 
 		<el-select
@@ -17,7 +17,7 @@
 			filterable
 			placeholder="Language"
 		>
-			<el-option v-for="lang in languages" :key="lang" :label="lang" :value="lang" />
+			<el-option v-for="lang in allLanguages" :key="lang" :label="lang" :value="lang" />
 		</el-select>
 
 		<el-input v-model="filters.search" class="translations-filters__search" clearable placeholder="Search by key" />
@@ -29,10 +29,7 @@
 <script setup lang="ts">
 import { useTranslations } from '#entities/translation/lib/composables'
 
-const { filters, openAddModal } = useTranslations()
-
-const namespaces = ['common', 'auth', 'profile', 'admin']
-const languages = ['ru', 'en', 'es', 'fr']
+const { filters, openAddModal, allNamespaces, allLanguages } = useTranslations()
 </script>
 
 <style scoped>

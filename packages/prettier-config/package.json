@@ -12,6 +12,10 @@
 	"peerDependencies": {
 		"prettier": "^3.0.0"
 	},
+	"scripts": {
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --fix --cache"
+	},
 	"private": true,
 	"type": "module"
 }

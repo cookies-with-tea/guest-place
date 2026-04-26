@@ -2,12 +2,20 @@
 	<div v-if="!loading" class="platforms-page-editor">
 		<header class="editor-header">
 			<div>
-				<h1>Platforms Platform</h1>
-				<p class="subtitle">Design-first content management</p>
+				<h1>
+					<T path="platforms.page_title" :params="{ brand: 'GP' }">
+						<template #brand="{ value }">
+							<span style="color: var(--gp-primary)">{{ value }}</span>
+						</template>
+					</T>
+				</h1>
+				<p class="subtitle">{{ t('platforms.subtitle') }}</p>
 			</div>
 			<div class="header-actions">
 				<el-button circle :icon="Refresh" @click="fetchData" />
-				<el-button :icon="Check" :loading="saving" type="primary" @click="handleSave"> Save Changes </el-button>
+				<el-button :icon="Check" :loading="saving" type="primary" @click="handleSave">
+					{{ t('platforms.save_btn') }}
+				</el-button>
 			</div>
 		</header>
 
@@ -20,18 +28,18 @@
 						<el-card class="section-card mb-24">
 							<template #header>
 								<div class="card-header">
-									<span>General Settings</span>
+									<span>{{ t('platforms.general_settings') }}</span>
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="Main Hero Title">
-									<el-input v-model="form.title" placeholder="Platform main title" />
+								<el-form-item label="Main Hero Title (Translation Key)">
+									<el-input v-model="form.title" placeholder="e.g. platforms.hero.title" />
 								</el-form-item>
-								<el-form-item label="Main Hero Description">
+								<el-form-item label="Main Hero Description (Translation Key)">
 									<el-input
 										v-model="form.description"
-										placeholder="Platform main vision and mission"
-										:rows="4"
+										placeholder="e.g. platforms.hero.desc"
+										:rows="2"
 										type="textarea"
 									/>
 								</el-form-item>
@@ -65,15 +73,15 @@
 												</el-form-item>
 											</el-col>
 											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="opp.title" placeholder="e.g., Sustainability" />
+												<el-form-item label="Title (Translation Key)">
+													<el-input v-model="opp.title" placeholder="e.g. platforms.opp.title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
 										<el-row :gutter="20">
 											<el-col :span="12">
-												<el-form-item label="Button Text">
-													<el-input v-model="opp.buttonText" placeholder="e.g., More Details" />
+												<el-form-item label="Button Text (Translation Key)">
+													<el-input v-model="opp.buttonText" placeholder="e.g. platforms.opp.btn" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
@@ -85,7 +93,7 @@
 										<el-form-item label="Features List">
 											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
-													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
+													<el-input v-model="opp.items[iIdx]" placeholder="Translation key">
 														<template #append>
 															<el-button :icon="Delete" @click="removeItem(opp.items, iIdx as number)" />
 														</template>
@@ -98,7 +106,7 @@
 													type="primary"
 													@click="addItem(opp.items, '')"
 												>
-													Add Feature
+													Add Feature (Key)
 												</el-button>
 											</div>
 										</el-form-item>
@@ -129,15 +137,15 @@
 							<el-form label-position="top">
 								<el-row :gutter="20">
 									<el-col :span="24">
-										<el-form-item label="Section SVG Logo">
+										<el-form-item label="Tools Logo">
 											<div style="max-width: 250px">
 												<UiMediaPicker v-model="form.toolsLogoUuid" />
 											</div>
 										</el-form-item>
 									</el-col>
 									<el-col :span="24">
-										<el-form-item label="Header Title">
-											<el-input v-model="form.toolsTitle" placeholder="e.g., Инструменты и сервисы от GP Platform" />
+										<el-form-item label="Section Title (Translation Key)">
+											<el-input v-model="form.toolsTitle" placeholder="e.g. platforms.tools.title" />
 										</el-form-item>
 									</el-col>
 								</el-row>
@@ -145,11 +153,16 @@
 								<div v-for="(item, index) in form.toolsItems" :key="index" class="sub-item-complex">
 									<el-row align="middle" :gutter="12">
 										<el-col :span="22">
-											<el-form-item class="mb-8" label="Card Title">
-												<el-input v-model="item.title" placeholder="Card title" />
+											<el-form-item class="mb-8" label="Card Title (Translation Key)">
+												<el-input v-model="item.title" placeholder="e.g. platforms.tools.item_title" />
 											</el-form-item>
-											<el-form-item class="mb-8" label="Card Text">
-												<el-input v-model="item.text" placeholder="Description/Card text" :rows="2" type="textarea" />
+											<el-form-item class="mb-8" label="Card Description (Translation Key)">
+												<el-input
+													v-model="item.text"
+													:rows="2"
+													type="textarea"
+													placeholder="e.g. platforms.tools.item_desc"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="2">
@@ -164,11 +177,11 @@
 									type="primary"
 									@click="addToolItem"
 								>
-									Add Service Card
+									Add Service Card (Key)
 								</el-button>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.toolsGuideUuid" />
-									<p class="guide-hint">Tools Section Preview</p>
+									<p class="guide-hint">Tools Preview</p>
 								</div>
 							</el-form>
 						</el-card>
@@ -182,6 +195,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
 
+import { useI18n } from '@admin-panel/i18n'
 import { createApi } from '@admin-panel/lib'
 import { UiMediaPicker } from '@admin-panel/ui'
 import { Check, Delete, Plus, Refresh } from '@element-plus/icons-vue'
@@ -213,6 +227,8 @@ interface IPlatformsData {
 }
 
 const { fetchData: apiFetch } = createApi('platforms')
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -356,10 +372,7 @@ onMounted(fetchData)
 	h1 {
 		font-weight: 800;
 		font-size: 1.75rem;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(to right, var(--gp-primary), var(--gp-text-primary));
-		-webkit-background-clip: text;
-		background-clip: text;
+		color: var(--gp-primary);
 		margin: 0;
 	}
 
@@ -463,7 +476,7 @@ onMounted(fetchData)
 		content: '';
 		height: 1px;
 		flex: 1;
-		background: linear-gradient(to right, var(--gp-primary), transparent);
+		background: var(--gp-glass-border);
 		margin-left: 16px;
 	}
 }

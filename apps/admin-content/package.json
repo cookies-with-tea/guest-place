@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@admin-panel/typescript-config": "workspace:*",
 		"@vitejs/plugin-vue": "^6.0.1",
+		"npm-run-all2": "^8.0.4",
 		"typescript": "^5.9.3",
 		"vite": "^7.1.7"
 	},
@@ -19,7 +20,15 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite",
-		"preview": "vite preview"
+		"eslint": "eslint . --cache",
+		"eslint:fix": "eslint . --fix --cache",
+		"lint": "run-p eslint stylelint prettier",
+		"lint:fix": "run-p eslint:fix stylelint:fix prettier:fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"preview": "vite preview",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache"
 	},
 	"type": "module"
 }

@@ -1,10 +1,5 @@
 <template>
-	<UiModal
-		v-model="isModalOpen"
-		:title="isEditing ? 'Edit user' : 'Add user'"
-		width="600px"
-		@close="handleModalClose"
-	>
+	<UiModal v-model="isModalOpen" :title="isEditing ? 'Edit user' : 'Add user'" width="600px" @close="handleModalClose">
 		<el-form ref="formRef" v-loading="isSubmitting" label-width="120px" :model="form" :rules="rules" @submit.prevent>
 			<el-form-item label="Email" prop="email">
 				<el-input v-model="form.email" />
@@ -189,24 +184,18 @@ const resetForm = () => {
 const submit = async () => {
 	await formRef.value?.validate()
 
-	if (!isEditing.value) {
-		handleSubmit({
-			...form.value,
-			avatar: avatarUrl.value,
-			birthDate: form.value.birthDate || undefined,
-			lastName: form.value.lastName || undefined,
-			phone: form.value.phone || undefined,
-		})
-	} else {
-		handleSubmit({
-			...form.value,
-			uuid: editingUserUuid.value,
-			avatar: avatarUrl.value,
-			birthDate: form.value.birthDate || undefined,
-			lastName: form.value.lastName || undefined,
-			phone: form.value.phone || undefined,
-		})
+	const data = {
+		...form.value,
+		avatar: avatarUrl.value,
+		birthDate: form.value.birthDate || undefined,
+		lastName: form.value.lastName || undefined,
+		phone: form.value.phone || undefined,
 	}
+
+	handleSubmit({
+		...data,
+		...(isEditing.value ? { uuid: editingUserUuid.value } : {}),
+	})
 }
 </script>
 

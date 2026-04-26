@@ -24,16 +24,11 @@
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="Main Hero Title">
-									<el-input v-model="form.title" placeholder="Platform main title" />
+								<el-form-item label="Main Hero Title (Translation Key)">
+									<el-input v-model="form.title" placeholder="e.g. about.hero.title" />
 								</el-form-item>
-								<el-form-item label="Main Hero Description">
-									<el-input
-										v-model="form.description"
-										placeholder="Platform main vision and mission"
-										:rows="4"
-										type="textarea"
-									/>
+								<el-form-item label="Main Hero Description (Translation Key)">
+									<el-input v-model="form.description" placeholder="e.g. about.hero.desc" :rows="2" type="textarea" />
 								</el-form-item>
 								<div class="section-guide-embed">
 									<UiMediaPicker v-model="form.heroGuideUuid" />
@@ -65,15 +60,15 @@
 												</el-form-item>
 											</el-col>
 											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="opp.title" placeholder="e.g., Sustainability" />
+												<el-form-item label="Title (Translation Key)">
+													<el-input v-model="opp.title" placeholder="e.g. about.opp.title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
 										<el-row :gutter="20">
 											<el-col :span="12">
-												<el-form-item label="Button Text">
-													<el-input v-model="opp.buttonText" placeholder="e.g., More Details" />
+												<el-form-item label="Button Text (Translation Key)">
+													<el-input v-model="opp.buttonText" placeholder="e.g. about.opp.btn" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
@@ -85,7 +80,7 @@
 										<el-form-item label="Features List">
 											<div style="width: 100%; display: flex; flex-direction: column; gap: 12px">
 												<div v-for="(item, iIdx) in opp.items" :key="iIdx" class="sub-item">
-													<el-input v-model="opp.items[iIdx]" placeholder="Feature text">
+													<el-input v-model="opp.items[iIdx]" placeholder="Translation key">
 														<template #append>
 															<el-button :icon="Delete" @click="removeItem(opp.items, iIdx as number)" />
 														</template>
@@ -98,7 +93,7 @@
 													type="primary"
 													@click="addItem(opp.items, '')"
 												>
-													Add Feature
+													Add Feature (Key)
 												</el-button>
 											</div>
 										</el-form-item>
@@ -131,19 +126,24 @@
 										</el-form-item>
 									</el-col>
 									<el-col :span="24">
-										<el-form-item label="Header Title">
-											<el-input v-model="form.leadershipTitle" />
+										<el-form-item label="Header Title (Translation Key)">
+											<el-input v-model="form.leadershipTitle" placeholder="e.g. about.lead.title" />
 										</el-form-item>
 									</el-col>
 								</el-row>
-								<el-form-item label="Section Introduction">
-									<el-input v-model="form.leadershipDescription" :rows="3" type="textarea" />
+								<el-form-item label="Section Introduction (Translation Key)">
+									<el-input
+										v-model="form.leadershipDescription"
+										:rows="2"
+										type="textarea"
+										placeholder="e.g. about.lead.desc"
+									/>
 								</el-form-item>
 								<div class="divider">Team Members & Key Points</div>
 								<div v-for="(item, index) in form.leadershipItems" :key="index" class="sub-item-complex">
 									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
-											<el-input v-model="item.text" placeholder="Leader name or description" />
+											<el-input v-model="item.text" placeholder="Key (e.g. about.lead.item)" />
 										</el-col>
 										<el-col :span="6">
 											<UiMediaPicker v-model="item.iconUuid" />
@@ -160,7 +160,7 @@
 									type="primary"
 									@click="addLeadershipItem"
 								>
-									Add Leadership Item
+									Add Leadership Item (Key)
 								</el-button>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.leadershipGuideUuid" />
@@ -197,13 +197,18 @@
 												</el-form-item>
 											</el-col>
 											<el-col :span="24">
-												<el-form-item label="Title">
-													<el-input v-model="item.title" />
+												<el-form-item label="Title (Translation Key)">
+													<el-input v-model="item.title" placeholder="e.g. about.who.item_title" />
 												</el-form-item>
 											</el-col>
 										</el-row>
-										<el-form-item label="Description">
-											<el-input v-model="item.description" :rows="2" type="textarea" />
+										<el-form-item label="Description (Translation Key)">
+											<el-input
+												v-model="item.description"
+												:rows="2"
+												type="textarea"
+												placeholder="e.g. about.who.item_desc"
+											/>
 										</el-form-item>
 									</el-form>
 								</el-card>
@@ -225,14 +230,14 @@
 								</div>
 							</template>
 							<el-form label-position="top">
-								<el-form-item label="News Section Title">
-									<el-input v-model="form.newsTitle" />
+								<el-form-item label="News Section Title (Translation Key)">
+									<el-input v-model="form.newsTitle" placeholder="e.g. about.news.title" />
 								</el-form-item>
 								<div class="divider">News Items</div>
 								<div v-for="(item, index) in form.newsItems" :key="index" class="sub-item-complex">
 									<el-row align="middle" :gutter="12">
 										<el-col :span="14">
-											<el-input v-model="item.text" placeholder="News text" />
+											<el-input v-model="item.text" placeholder="Translation key" />
 										</el-col>
 										<el-col :span="6">
 											<UiMediaPicker v-model="item.iconUuid" />
@@ -249,7 +254,7 @@
 									type="primary"
 									@click="addNewsItem"
 								>
-									Add News Item
+									Add News Item (Key)
 								</el-button>
 								<div class="mt-16">
 									<UiMediaPicker v-model="form.newsGuideUuid" />
