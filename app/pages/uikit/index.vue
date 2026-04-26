@@ -85,11 +85,17 @@
         <UiTabs id="tabs-2" with-query variant="secondary" :tabs />
       </div>
     </div>
+
+    <div class="box">
+      <div class="column">
+        <UiUpload/>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiAccordion, UiAccordionItem, UiButton, UiForm, UiFormItem, UiIcon, UiInput, UiTabs } from '#shared/ui'
+import { UiUpload, UiAccordion, UiAccordionItem, UiButton, UiForm, UiFormItem, UiIcon, UiInput, UiTabs } from '#shared/ui'
 import { ref, defineAsyncComponent } from 'vue'
 import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import { FORM_RULES } from '#shared/constants'
@@ -183,8 +189,8 @@ const tabs = [
 }
 
 .box {
-  width: fit-content;
-  display: flex;
+  //width: fit-content;
+  //display: flex;
   border: 1px dashed rgb(89 0 131);
   padding: 20px;
   margin: 8px;
@@ -192,8 +198,8 @@ const tabs = [
 }
 
 .column {
-  display: flex;
-  flex-direction: column;
+  //display: flex;
+  //flex-direction: column;
   gap: 20px;
 }
 </style>

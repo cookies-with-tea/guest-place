@@ -13,3 +13,5 @@ export { default as UiFormItem } from './ui-form/components/ui-form-item'
 export { default as UiInput } from './ui-input'
 
 export { default as UiTabs } from './ui-tabs'
+
+export { default as UiUpload } from './ui-upload'
