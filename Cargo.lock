@@ -1076,7 +1076,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "guest-platform"
+name = "guest-place"
 version = "0.1.0"
 dependencies = [
  "anyhow",

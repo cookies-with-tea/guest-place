@@ -1,9 +1,9 @@
 use axum_test::TestServer;
-use guest_platform::{create_router, AppState, core::app::AppConfig};
-use guest_platform::i18n::I18nService;
-use guest_platform::core::redis::RedisService;
-use guest_platform::features::FeatureFlagService;
-use guest_platform::media::storage::StorageService;
+use guest_place::{create_router, AppState, core::app::AppConfig};
+use guest_place::i18n::I18nService;
+use guest_place::core::redis::RedisService;
+use guest_place::features::FeatureFlagService;
+use guest_place::media::storage::StorageService;
 use axum::http::StatusCode;
 use serde_json::json;
 use dotenv::dotenv;
@@ -37,7 +37,7 @@ async fn setup_test_app() -> axum::Router {
         media_storage: Arc::new(StorageService::new("uploads")),
         redis: redis_service.clone(),
         features: Arc::new(FeatureFlagService::new(redis_service.clone())),
-        media_quota: Arc::new(guest_platform::media::quota::QuotaService::new(pool.clone(), 1024 * 1024 * 1024)),
+        media_quota: Arc::new(guest_place::media::quota::QuotaService::new(pool.clone(), 1024 * 1024 * 1024)),
         frontend_url: "http://localhost:3000".to_string(),
         smtp_host: "localhost".to_string(),
         smtp_port: 587,

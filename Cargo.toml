@@ -1,8 +1,8 @@
 [package]
-name = "guest-platform"
+name = "guest-place"
 version = "0.1.0"
 edition = "2021"
-default-run = "guest-platform"
+default-run = "guest-place"
 
 [dependencies]
 axum = { version = "0.8.1", features = ["multipart", "macros"] }

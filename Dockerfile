@@ -1,6 +1,6 @@
-ARG RUST_VERSION=1.85.0
+ARG RUST_VERSION=1.88.0
 ARG APP_NAME=guest-place
-FROM rust:${RUST_VERSION}-slim-bullseye AS build
+FROM rust:${RUST_VERSION}-slim-bookworm AS build
 ARG APP_NAME
 WORKDIR /app
 
@@ -21,7 +21,7 @@ cp ./target/release/$APP_NAME /bin/server
 EOF
 
 ################################################################################
-FROM debian:bullseye-slim AS final
+FROM debian:bookworm-slim AS final
 
 ARG UID=10001
 
