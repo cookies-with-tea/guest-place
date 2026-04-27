@@ -62,6 +62,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .with_state(state.clone());
 
     let protected_router = Router::new()
+        .nest("/api/v1/auth", auth::handlers::protected_router())
         .nest("/api/v1/user", user::handlers::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())

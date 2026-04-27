@@ -1,6 +1,6 @@
 use crate::{
     core::{dto::ApiResponse, response::into_api_response},
-    i18n::dto::{CreateTranslationDTO, LanguageDTO, TranslationDTO, TranslationInput},
+    i18n::dto::{LanguageDTO, TranslationDTO, TranslationInput},
     AppState,
 };
 use axum::{

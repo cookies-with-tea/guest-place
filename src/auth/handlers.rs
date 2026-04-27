@@ -21,7 +21,7 @@ use std::sync::Arc;
 use tokio::task;
 use uuid::Uuid;
 
-fn verify_password(password: &str, hash: &str) -> bool {
+pub fn verify_password(password: &str, hash: &str) -> bool {
     let parsed_hash = PasswordHash::new(hash).unwrap();
     Argon2::default()
         .verify_password(password.as_bytes(), &parsed_hash)
@@ -505,6 +505,49 @@ async fn logout(
 }
 
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/logout/other",
+    request_body = AuthRefreshTokenDTO,
+    responses(
+        (status = 200, description = "Другие сессии завершены"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Ошибка базы данных")
+    ),
+    tag = "Auth",
+    operation_id = "logout_other_devices",
+    security(("bearer_auth" = []))
+)]
+async fn logout_other_devices(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
+    Json(payload): Json<AuthRefreshTokenDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM refresh_token WHERE user_id = $1 AND token != $2")
+        .bind(claims.sub)
+        .bind(&payload.refresh_token)
+        .execute(&state.pool)
+        .await;
+
+    match result {
+        Ok(_) => {
+            let msg = state.i18n.t("auth.logout_other_success", &locale).await;
+            into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+        }
+        Err(_) => {
+            let msg = state.i18n.t("auth.logout_db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/register", post(register))
@@ -512,4 +555,9 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/login", post(login))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
+}
+
+pub fn protected_router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/logout/other", post(logout_other_devices))
 }

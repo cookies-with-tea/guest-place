@@ -52,6 +52,7 @@ pub struct UpdateUserDTO {
     pub(crate) role: Option<UserRole>,
     pub(crate) status: Option<UserStatus>,
     pub(crate) avatar: Option<String>,
+    pub(crate) avatar_uuid: Option<Uuid>,
     pub(crate) street: Option<String>,
     pub(crate) city: Option<String>,
     pub(crate) gender: Option<String>,
@@ -123,4 +124,10 @@ pub struct RolePermissionsDTO {
 #[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
 pub struct PermissionDTO {
     pub id: String,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+pub struct ChangePasswordDTO {
+    pub(crate) old_password: String,
+    pub(crate) new_password: String,
 }

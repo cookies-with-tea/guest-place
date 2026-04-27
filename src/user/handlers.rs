@@ -1,7 +1,7 @@
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
 use crate::user::dto::{
-    CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
+    ChangePasswordDTO, CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
     UserResponseDTO, UserRole, UserStatus,
 };
 use crate::user::utils::{validate_email, validate_phone};
@@ -13,9 +13,11 @@ use argon2::{
 use axum::{
     extract::{Extension, Path, Query, State},
     http::StatusCode,
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
+use crate::auth::dto::Claims;
+use crate::auth::handlers::verify_password;
 use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -699,6 +701,11 @@ async fn update(
                 query_param_index += 1;
             }
 
+            if payload.avatar_uuid.is_some() {
+                update_query.push_str(&format!("avatar_uuid = ${}, ", query_param_index));
+                query_param_index += 1;
+            }
+
             if payload.street.is_some() {
                 update_query.push_str(&format!("street = ${}, ", query_param_index));
                 query_param_index += 1;
@@ -771,6 +778,11 @@ async fn update(
 
             if let Some(avatar) = &payload.avatar {
                 query = query.bind(avatar.clone());
+                _bind_param_index += 1;
+            }
+
+            if let Some(avatar_uuid) = &payload.avatar_uuid {
+                query = query.bind(avatar_uuid);
                 _bind_param_index += 1;
             }
 
@@ -974,6 +986,109 @@ pub async fn update_role_permissions(
     into_api_response(StatusCode::OK, None, None, None)
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/user/me",
+    responses(
+        (status = 200, body = ApiResponse<UserResponseDTO>),
+        (status = 401, description = "Unauthorized"),
+        (status = 404, body = ApiResponse<UserResponseDTO>),
+        (status = 500, body = ApiResponse<UserResponseDTO>)
+    ),
+    tag = "User",
+    operation_id = "get_me",
+    security(("bearer_auth" = []))
+)]
+async fn get_me(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
+) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
+    get_one(State(state), Extension(locale), Path(claims.sub)).await
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/user/me",
+    request_body = UpdateUserDTO,
+    responses(
+        (status = 200, body = ApiResponse<UserResponseDTO>),
+        (status = 401, description = "Unauthorized"),
+        (status = 404, body = ApiResponse<UserResponseDTO>),
+        (status = 500, body = ApiResponse<UserResponseDTO>)
+    ),
+    tag = "User",
+    operation_id = "update_me",
+    security(("bearer_auth" = []))
+)]
+async fn update_me(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
+    Json(payload): Json<UpdateUserDTO>,
+) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
+    update(State(state), Extension(locale), Path(claims.sub), Json(payload)).await
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/user/me/password",
+    request_body = ChangePasswordDTO,
+    responses(
+        (status = 200, description = "Пароль изменен"),
+        (status = 400, description = "Неверный старый пароль"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Ошибка")
+    ),
+    tag = "User",
+    operation_id = "change_password",
+    security(("bearer_auth" = []))
+)]
+async fn change_password(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
+    Json(payload): Json<ChangePasswordDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let user = sqlx::query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
+        .bind(claims.sub)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|_| {
+            let msg = state.i18n.t("general.db_error", &locale);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec![futures::executor::block_on(msg)]) }))
+        })?
+        .ok_or_else(|| {
+            (StatusCode::UNAUTHORIZED, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["User not found".to_string()]) }))
+        })?;
+
+    if !verify_password(&payload.old_password, &user.password_hash) {
+        let msg = state.i18n.t("auth.invalid_credentials", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map("password", &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let new_password_hash = hash_password(&payload.new_password).map_err(|_| {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Hash error".to_string()]) }))
+    })?;
+
+    sqlx::query("UPDATE guest_user SET password_hash = $1, updated_at = NOW() WHERE uuid = $2")
+        .bind(new_password_hash)
+        .bind(claims.sub)
+        .execute(&state.pool)
+        .await
+        .map_err(|_| {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Update error".into()]) }))
+        })?;
+
+    let msg = state.i18n.t("user.password_changed", &locale).await;
+    into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+}
+
 pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_all).post(create))
@@ -982,6 +1097,8 @@ pub fn public_router() -> Router<Arc<AppState>> {
 
 pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/me", get(get_me).patch(update_me))
+        .route("/me/password", post(change_password))
         .route("/roles", get(list_roles))
         .route("/permissions", get(list_permissions))
         .route("/roles/{role}/permissions", get(get_role_permissions).post(update_role_permissions))

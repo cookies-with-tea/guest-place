@@ -10,6 +10,7 @@ pub struct DatabaseConfig {
     pub db_password: String,
     pub db_host: String,
     pub db_port: String,
+    pub ssl_mode: String,
 }
 
 impl DatabaseConfig {
@@ -20,7 +21,8 @@ impl DatabaseConfig {
         let db_password = env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD must be set");
         let db_host = env::var("POSTGRES_HOST").expect("POSTGRES_HOST must be set");
         let db_port = env::var("POSTGRES_PORT").unwrap_or_else(|_| "5432".to_string());
-
+        let ssl_mode = env::var("POSTGRES_SSLMODE").unwrap_or_else(|_| "prefer".to_string());
+        
         DatabaseConfig {
             db_engine,
             db_name,
@@ -28,14 +30,15 @@ impl DatabaseConfig {
             db_password,
             db_host,
             db_port,
+            ssl_mode,
         }
     }
 
     pub fn connect_url(&self) -> String {
         let engine = if self.db_engine == "pg" { "postgres" } else { &self.db_engine };
         format!(
-            "{}://{}:{}@{}:{}/{}?sslmode=prefer",
-            engine, self.db_user, self.db_password, self.db_host, self.db_port, self.db_name
+            "{}://{}:{}@{}:{}/{}?sslmode={}",
+            engine, self.db_user, self.db_password, self.db_host, self.db_port, self.db_name, self.ssl_mode
         )
     }
 }

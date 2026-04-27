@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use axum_test::TestServer;
 use std::sync::Arc;
-use guest_platform::{create_app, AppState, i18n::I18nService, core::db::create_pool, core::app::AppConfig};
+use guest_platform::{create_router, AppState, i18n::I18nService, core::db::create_pool, core::app::AppConfig};
 use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use serde_json::json;
@@ -20,6 +20,7 @@ async fn setup_test_server() -> TestServer {
     
     let state = Arc::new(AppState {
         pool: pool.clone(),
+        config: config.clone(),
         i18n,
         media_storage: Arc::new(guest_platform::media::storage::StorageService::new("tmp")),
         redis,
@@ -35,7 +36,7 @@ async fn setup_test_server() -> TestServer {
 
     let openapi = ApiDoc::openapi();
     let cors = CorsLayer::permissive();
-    let app = create_app(state, openapi, cors);
+    let app = create_router(state, openapi, cors);
     
     TestServer::new(app)
 }

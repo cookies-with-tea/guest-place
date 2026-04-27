@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use axum_test::TestServer;
 use std::sync::Arc;
-use guest_platform::{create_app, AppState, core::db::create_pool, core::app::AppConfig};
+use guest_platform::{create_router, AppState, core::db::create_pool, core::app::AppConfig};
 use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 
@@ -38,7 +38,7 @@ async fn setup_test_server() -> TestServer {
 
     let openapi = ApiDoc::openapi();
     let cors = CorsLayer::permissive();
-    let app = create_app(state, openapi, cors);
+    let app = create_router(state, openapi, cors);
     
     TestServer::new(app)
 }

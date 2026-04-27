@@ -1,5 +1,5 @@
 use axum_test::TestServer;
-use guest_platform::{create_app, AppState};
+use guest_platform::{create_router, AppState, core::app::AppConfig};
 use guest_platform::i18n::I18nService;
 use guest_platform::core::redis::RedisService;
 use guest_platform::features::FeatureFlagService;
@@ -29,8 +29,10 @@ async fn setup_test_app() -> axum::Router {
     let redis_pool = redis_cfg.create_pool(Some(deadpool_redis::Runtime::Tokio1)).unwrap();
     let redis_service = Arc::new(RedisService::new(redis_pool));
         
+    let config = AppConfig::new();
     let state = Arc::new(AppState {
         pool: pool.clone(),
+        config: config.clone(),
         i18n: I18nService::new(pool.clone()),
         media_storage: Arc::new(StorageService::new("uploads")),
         redis: redis_service.clone(),
@@ -44,7 +46,7 @@ async fn setup_test_app() -> axum::Router {
         smtp_from: "test@example.com".to_string(),
     });
 
-    create_app(state, ApiDoc::openapi(), CorsLayer::permissive())
+    create_router(state, ApiDoc::openapi(), CorsLayer::permissive())
 }
 
 #[tokio::test]
