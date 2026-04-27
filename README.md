@@ -5,7 +5,7 @@
 - Клонировать репозиторий
 
 ```bash
-git clone https://github.com/cookies-with-tea/education-platform -b server
+git clone https://github.com/cookies-with-tea/guest-place -b server
 ```
 
 - Скопировать `.env`
