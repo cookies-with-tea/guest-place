@@ -20,9 +20,11 @@
         hidden
         name="avatar"
         accept="image/png, image/jpeg"
+        ref="input-ref"
+        @change="handleFileUpload"
       />
 
-      <button class="ui-upload__btn" type="button">
+      <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
         <UiIcon
           name="attach"
           width="16px"
@@ -37,11 +39,57 @@
       </span>
   </div>
 
+  <template v-if="!!modelValue">
+    <i>Icon</i>
+
+    <p class="ui-uploader__preview-name">{{ modelValue.name }}</p>
+    <p class="ui-uploader__preview-success">Файл загружен</p>
+
+    <button class="ui-uploader__preview-delete" @click="modelValue = null">
+      <i>Delete</i>
+    </button>
+  </template>
+
 </template>
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui';
 
+import { ref, useTemplateRef } from 'vue'
+
+interface IProps {
+  maxSize?: number | string
+}
+
+interface IEmits {
+  upload: [file: File]
+}
+
+const props = withDefaults(defineProps<IProps>(), {
+  maxSize: 30
+})
+
+const emit = defineEmits<IEmits>()
+
+const modelValue = defineModel<File | null>()
+
+const inputRef = useTemplateRef<HTMLInputElement>('input-ref')
+
+const handleFileUploadOpen = () => {
+  inputRef.value?.click()
+}
+
+const handleFileUpload = () => {
+  modelValue.value = null
+
+  const file = inputRef.value?.files?.[0]
+
+  if (file) {
+    modelValue.value = file
+
+    emit('upload', file)
+  }
+}
 </script>
 
 <style scoped lang="scss">
