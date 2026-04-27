@@ -1,4 +1,4 @@
-ARG RUST_VERSION=1.83.0
+ARG RUST_VERSION=1.85.0
 ARG APP_NAME=guest-place
 FROM rust:${RUST_VERSION}-slim-bullseye AS build
 ARG APP_NAME

@@ -17,6 +17,8 @@ cp .env.example .env
 - Заполнить `.env`
 - Запустить контейнеры
 
+### Для работы
+
 ```bash
 docker-compose up -d --build
 ```
