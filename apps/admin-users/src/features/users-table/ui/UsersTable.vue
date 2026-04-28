@@ -67,7 +67,7 @@
 						filterable
 						multiple
 						placeholder="Select roles"
-						popper-class="premium-dark-select"
+						popper-class="dark-select"
 					>
 						<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
 					</el-select>
@@ -98,7 +98,7 @@
 						filterable
 						multiple
 						placeholder="Select statuses"
-						popper-class="premium-dark-select"
+						popper-class="dark-select"
 					>
 						<el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
 					</el-select>
@@ -189,12 +189,6 @@
 	</div>
 </template>
 
-<script lang="ts">
-export default {
-	components: {},
-}
-</script>
-
 <script setup lang="ts">
 import { UiTable, UiTableColumn, useTheme } from '@admin-panel/ui'
 import { Delete, Edit } from '@element-plus/icons-vue'
@@ -282,8 +276,8 @@ const confirmDelete = (uuid: string) => {
 	margin-top: 40px;
 }
 
-/* Premium Dark Popover Styles */
-:deep(.premium-dark-popover) {
+/* Dark Popover Styles */
+:deep(.dark-popover) {
 	border: 1px solid var(--border-color) !important;
 	border-radius: 12px !important;
 	box-shadow: var(--shadow-sm) !important;

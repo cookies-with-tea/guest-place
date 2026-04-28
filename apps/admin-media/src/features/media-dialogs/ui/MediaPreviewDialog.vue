@@ -9,6 +9,13 @@
 					lazy
 					:src="currentMedia.data.url"
 				/>
+				<video
+					v-else-if="currentMedia.data.mediaType === 'video'"
+					class="preview-img"
+					controls
+					playsinline
+					:src="currentMedia.data.url"
+				/>
 				<div v-else class="file-placeholder">
 					<el-icon :size="64"><Document /></el-icon>
 					<span class="name">{{ currentMedia.data.name }}</span>
