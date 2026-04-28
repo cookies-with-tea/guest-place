@@ -41,6 +41,7 @@ pub async fn create(
     let mut alts = BTreeMap::new();
     let mut categories = BTreeMap::new();
     let mut tags_map = BTreeMap::new();
+    let mut upload_source = "site".to_string();
     let mut is_multiple = false;
 
     while let Some(field) = multipart.next_field().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("multipart", &format!("Stream error: {}", e))), messages: Some(vec!["Invalid multipart request".to_string()]) })))? {
@@ -87,6 +88,9 @@ pub async fn create(
             let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
             let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
             tags_map.insert(0, tags);
+        } else if name == "source" {
+            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
+            upload_source = text;
         }
     }
 
@@ -136,7 +140,7 @@ pub async fn create(
                 let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
 
                 let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags",
+                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
                 )
                 .bind(media_uuid)
                 .bind(media_type_str)
@@ -148,6 +152,7 @@ pub async fn create(
                 .bind(file_size)
                 .bind(&category)
                 .bind(&tags)
+                .bind(&upload_source)
                 .fetch_one(&state.pool)
                 .await;
 
@@ -163,6 +168,7 @@ pub async fn create(
                         tags: row.tags,
                         size_bytes: row.size_bytes,
                         created_at: row.created_at,
+                        source: row.source,
                         media_type: row.media_type,
                     });
                 }
@@ -231,7 +237,7 @@ pub async fn get_all(
 
     // 2. Build SELECT query
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media"
     );
     
     let mut select_where_clause = false;
@@ -273,6 +279,7 @@ pub async fn get_all(
                     tags: row.tags,
                     size_bytes: row.size_bytes,
                     created_at: row.created_at,
+                    source: row.source,
                     media_type: row.media_type,
                 })
                 .collect();
@@ -320,36 +327,55 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
         builder.push(")");
     }
 
-    if let Some(categories) = &filter.category {
-        if !categories.is_empty() {
-            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
-            builder.push("category IN (");
-            let mut separated = builder.separated(", ");
-            for cat in categories {
-                separated.push_bind(cat);
+    if let Some(categories_str) = &filter.category {
+        if !categories_str.is_empty() {
+            let split_categories: Vec<&str> = categories_str.split(',').collect();
+            if !split_categories.is_empty() {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("category IN (");
+                let mut separated = builder.separated(", ");
+                for cat in split_categories {
+                    separated.push_bind(cat.trim());
+                }
+                builder.push(")");
             }
-            builder.push(")");
         }
     }
 
-    if let Some(types) = &filter.media_type {
-        if !types.is_empty() {
-            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
-            builder.push("media_type IN (");
-            let mut separated = builder.separated(", ");
-            for t in types {
-                separated.push_bind(t);
+    if let Some(types_str) = &filter.media_type {
+        if !types_str.is_empty() {
+            let split_types: Vec<&str> = types_str.split(',').collect();
+            if !split_types.is_empty() {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("media_type::text IN (");
+                let mut separated = builder.separated(", ");
+                for t in split_types {
+                    separated.push_bind(t.trim());
+                }
+                builder.push(")");
             }
-            builder.push(")");
         }
     }
 
-    if let Some(tags) = &filter.tags {
-        if !tags.is_empty() {
-            if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
-            builder.push("tags && ");
-            builder.push_bind(tags);
+    if let Some(tags_str) = &filter.tags {
+        if !tags_str.is_empty() {
+            let split_tags: Vec<&str> = tags_str.split(',').collect();
+            if !split_tags.is_empty() {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("tags && ARRAY[");
+                let mut separated = builder.separated(", ");
+                for t in split_tags {
+                    separated.push_bind(t.trim());
+                }
+                builder.push("]::text[]");
+            }
         }
+    }
+
+    if let Some(source) = &filter.source {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("source = ");
+        builder.push_bind(source);
     }
 }
 
@@ -372,7 +398,7 @@ pub async fn get_one(
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -391,6 +417,7 @@ pub async fn get_one(
                 tags: media.tags,
                 size_bytes: media.size_bytes,
                 created_at: media.created_at,
+                source: media.source,
                 media_type: media.media_type,
             };
 
@@ -442,7 +469,7 @@ pub async fn update(
     Json(payload): Json<UpdateMediaDTO>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -539,7 +566,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -558,6 +585,7 @@ pub async fn update(
                                 tags: media.tags,
                                 size_bytes: media.size_bytes,
                                 created_at: media.created_at,
+                                source: media.source,
                                 media_type: media.media_type,
                             };
 
