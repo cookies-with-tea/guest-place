@@ -7,6 +7,7 @@ pub struct CreateMediaDTO {
     pub title: Option<String>,
     pub alt: Option<String>,
     pub category: Option<String>,
+    pub source: Option<String>,
     pub tags: Option<Vec<String>>,
     #[schema(format = Binary, content_media_type = "application/octet-stream")]
     pub file: String,
@@ -23,6 +24,7 @@ pub struct MediaItemDTO {
     pub alt: Option<String>,
     pub category: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub source: String,
     pub size_bytes: i64,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub media_type: MediaType,
@@ -46,9 +48,10 @@ pub struct MediaFilterQuery {
     pub sort_by: Option<String>,
     pub sort_order: Option<String>,
     pub search: Option<String>,
-    pub category: Option<Vec<String>>,
-    pub media_type: Option<Vec<MediaType>>,
-    pub tags: Option<Vec<String>>,
+    pub category: Option<String>,
+    pub source: Option<String>,
+    pub media_type: Option<String>,
+    pub tags: Option<String>,
 }
 
 #[derive(sqlx::FromRow, Debug)]
@@ -61,6 +64,7 @@ pub struct MediaItemFromDb {
     pub alt: Option<String>,
     pub category: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub source: String,
     pub size_bytes: i64,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub media_type: MediaType,
