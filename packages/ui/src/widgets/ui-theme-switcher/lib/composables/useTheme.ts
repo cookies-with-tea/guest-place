@@ -26,6 +26,10 @@ const toggleTheme = () => {
 	localStorage.setItem(THEME_KEY, mode)
 
 	updateDOM(isDark.value)
+
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(new CustomEvent('gp-theme-changed', { detail: { isDark: isDark.value } }))
+	}
 }
 
 // Initial sync
@@ -44,6 +48,15 @@ if (typeof window !== 'undefined') {
 			}
 		}
 	})
+
+	// Listen for changes from the same window (MFE synchronization)
+	window.addEventListener('gp-theme-changed', ((event: CustomEvent) => {
+		if (isDark.value !== event.detail.isDark) {
+			isDark.value = event.detail.isDark
+
+			updateDOM(isDark.value)
+		}
+	}) as EventListener)
 }
 
 export const useTheme = () => {

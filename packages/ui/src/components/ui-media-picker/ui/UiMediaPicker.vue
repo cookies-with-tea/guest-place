@@ -13,29 +13,35 @@
 			<div class="media-actions">
 				<el-button circle :icon="Delete" type="danger" @click="handleRemove" />
 				<el-upload
+					:accept="accept"
 					action="#"
 					:auto-upload="false"
 					class="upload-trigger"
 					:on-change="handleUpload"
 					:show-file-list="false"
+					:disabled="disabled"
 				>
-					<el-button circle :icon="Refresh" type="primary" />
+					<el-button circle :icon="Refresh" type="primary" :disabled="disabled" />
 				</el-upload>
 			</div>
 		</div>
 
 		<div v-else class="media-empty">
 			<el-upload
+				:accept="accept"
 				action="#"
 				:auto-upload="false"
 				class="empty-upload"
 				drag
 				:on-change="handleUpload"
 				:show-file-list="false"
+				:disabled="disabled"
 			>
 				<el-icon class="el-icon--upload"><UploadFilled /></el-icon>
 				<div class="el-upload__text">
 					Drop file here, <em>click to upload</em> or <strong>paste from clipboard</strong>
+					<div v-if="hint" class="upload-hint">{{ hint }}</div>
+					<div v-else class="upload-hint">Supported formats: Images (JPG, PNG, WEBP, SVG)</div>
 				</div>
 			</el-upload>
 		</div>
@@ -55,9 +61,17 @@ import { ElMessage } from 'element-plus'
 
 interface Props {
 	modelValue?: string | null
+	accept?: string
+	hint?: string
+	disabled?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: null,
+	accept: 'image/*',
+	hint: '',
+	disabled: false,
+})
 const emit = defineEmits(['update:modelValue'])
 
 const { fetchData: apiFetch } = createApi('media')
@@ -104,6 +118,23 @@ const processFile = async (rawFile: File) => {
 
 const handleUpload = async (file: any) => {
 	if (file.raw) {
+		// Basic format validation if accept is strictly set and not wildcards (naive check)
+		if (props.accept && props.accept !== '*/*') {
+			const acceptedTypes = props.accept.split(',').map((t) => t.trim().toLowerCase())
+			// if it's image/* we can just check if file type starts with image/
+			const isAccepted = acceptedTypes.some((t) => {
+				if (t.endsWith('/*')) return file.raw.type.startsWith(t.replace('/*', '/'))
+
+				return file.raw.type === t || file.name.toLowerCase().endsWith(t)
+			})
+
+			if (!isAccepted) {
+				ElMessage.error(`Invalid file format. Accepted: ${props.accept}`)
+
+				return
+			}
+		}
+
 		await processFile(file.raw)
 	}
 }
@@ -201,6 +232,13 @@ onMounted(() => {
 		transform: translateY(0);
 		opacity: 1;
 	}
+}
+
+.upload-hint {
+	font-size: 11px;
+	color: var(--gp-text-secondary);
+	margin-top: 8px;
+	opacity: 0.8;
 }
 
 .media-empty {

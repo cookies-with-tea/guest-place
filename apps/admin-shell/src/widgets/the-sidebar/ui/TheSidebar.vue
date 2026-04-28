@@ -111,6 +111,11 @@ const getIcon = (name: string) => {
 	width: 64px;
 }
 
+.the-sidebar.is-collapsed .sidebar-header {
+	justify-content: center;
+	padding: 0;
+}
+
 .sidebar-header {
 	height: 64px;
 	display: flex;
@@ -161,6 +166,7 @@ const getIcon = (name: string) => {
 .context-switcher.is-collapsed {
 	flex-direction: column;
 	align-items: center;
+	padding: 8px 0;
 }
 
 .context-item {
@@ -212,6 +218,18 @@ const getIcon = (name: string) => {
 	line-height: 48px;
 	padding: 0 12px !important;
 	margin: 4px 8px;
+}
+
+:deep(.el-menu--collapse .el-menu-item),
+:deep(.el-menu--collapse .el-sub-menu__title) {
+	display: flex;
+	justify-content: center;
+	margin: 4px 0;
+}
+
+:deep(.el-menu--collapse .el-menu-item span),
+:deep(.el-menu--collapse .el-sub-menu__title span) {
+	display: none !important;
 }
 
 :deep(.el-sub-menu .el-menu-item) {

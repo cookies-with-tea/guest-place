@@ -11,6 +11,7 @@ export interface MediaItem {
 	tags?: string[]
 	sizeBytes: number
 	createdAt: Date | string
+	source: string
 	mediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
 }
 
@@ -21,6 +22,7 @@ export interface MediaFilters {
 	mediaTypes?: string[]
 	category?: string[]
 	tags?: string[]
+	source?: string[]
 	page?: number
 	limit?: number
 }

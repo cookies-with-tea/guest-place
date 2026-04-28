@@ -191,6 +191,8 @@ const handleUpload = async () => {
 	try {
 		const formData = new FormData()
 
+		formData.append('source', 'cms')
+
 		filesToUpload.value.forEach((item, index) => {
 			formData.append('file', item.file)
 

@@ -13,6 +13,8 @@ export const uploadMedia = async (rawFile: File) => {
 
 	formData.append('alt', removeFileExtension(rawFile.name))
 
+	formData.append('source', 'cms')
+
 	const { data, errors } = await fetchData<{ uuid: string; url: string }>('', {
 		method: 'POST',
 		body: formData,

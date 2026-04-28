@@ -46,7 +46,7 @@
 						collapse-tags-tooltip
 						multiple
 						placeholder="Select types"
-						popper-class="premium-dark-select"
+						popper-class="dark-select"
 					>
 						<el-option label="Image" value="image" />
 						<el-option label="Video" value="video" />
@@ -81,7 +81,7 @@
 						filterable
 						multiple
 						placeholder="Select categories"
-						popper-class="premium-dark-select"
+						popper-class="dark-select"
 					>
 						<!-- These would ideally come from a separate API -->
 						<el-option label="Marketing" value="Marketing" />
@@ -116,7 +116,7 @@
 						filterable
 						multiple
 						placeholder="Filter by tags"
-						popper-class="premium-dark-select"
+						popper-class="dark-select"
 					>
 						<!-- Tags would also ideally be fetched -->
 					</el-select>
@@ -135,6 +135,15 @@
 				<template #default="{ row }">
 					<div class="media-preview-cell">
 						<el-image v-if="row.mediaType === 'image'" class="preview-img" fit="cover" lazy :src="row.url" />
+						<video
+							v-else-if="row.mediaType === 'video'"
+							class="preview-img"
+							muted
+							loop
+							autoplay
+							playsinline
+							:src="row.url"
+						/>
 						<el-icon v-else :size="24"><Document /></el-icon>
 					</div>
 				</template>
@@ -152,6 +161,40 @@
 			>
 				<template #default="{ row }">
 					{{ formatFileSize(row.sizeBytes) }}
+				</template>
+			</UiTableColumn>
+
+			<!-- Source Column -->
+			<UiTableColumn
+				v-model:sortBy="filters.sortBy"
+				v-model:sortOrder="filters.sortOrder"
+				filterable
+				label="Source"
+				prop="source"
+				sortable
+				width="140"
+				:show-filter-active="filters.source && filters.source.length > 0"
+				@sort="setSort"
+			>
+				<template #filter>
+					<el-select
+						v-model="filters.source"
+						clearable
+						collapse-tags
+						collapse-tags-tooltip
+						filterable
+						multiple
+						placeholder="Select sources"
+						popper-class="dark-select"
+					>
+						<el-option label="CMS" value="cms" />
+						<el-option label="Site" value="site" />
+					</el-select>
+				</template>
+				<template #default="{ row }">
+					<el-tag effect="plain" :type="(row.source || 'cms') === 'site' ? 'warning' : 'primary'" size="small">{{
+						row.source || 'cms'
+					}}</el-tag>
 				</template>
 			</UiTableColumn>
 
@@ -250,10 +293,6 @@ const confirmDelete = (uuid: string) => {
 		handleDelete(uuid)
 	})
 }
-
-defineExpose({
-	selectedItems,
-})
 </script>
 
 <style scoped>

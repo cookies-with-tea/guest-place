@@ -25,7 +25,6 @@
 					:key="tag.key"
 					class="gp-tag"
 					closable
-					effect="dark"
 					round
 					@close="removeFilter(tag.key as any)"
 				>
@@ -158,13 +157,12 @@ const activeFilterTags = computed(() => {
 
 .tag-key {
 	font-weight: 500;
-	color: var(--text-muted);
 	margin-right: 6px;
+	opacity: 0.85;
 }
 
 .tag-value {
 	font-weight: 600;
-	color: var(--text-primary);
 }
 
 :deep(.el-input__wrapper) {
