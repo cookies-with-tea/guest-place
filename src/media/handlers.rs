@@ -11,7 +11,7 @@ use crate::core::response::{error_map, into_api_response, into_api_response_with
 use serde_json::json;
 use crate::AppState;
 use axum::{
-    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
+    extract::{multipart::MultipartRejection, DefaultBodyLimit, Multipart, Path, Query, State},
     http::StatusCode,
     routing::{delete, get, post, put},
     Extension, Json, Router,
@@ -36,14 +36,26 @@ use uuid::Uuid;
 pub async fn create(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
-    mut multipart: Multipart,
+    multipart: Result<Multipart, MultipartRejection>,
 ) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<serde_json::Value>>)> {
+    let mut multipart = match multipart {
+        Ok(m) => m,
+        Err(e) => {
+            let msg = state.i18n.t("media.invalid_request", &locale).await;
+            return into_api_response(
+                StatusCode::BAD_REQUEST,
+                None,
+                Some(error_map("file", &format!("Invalid multipart request: {}", e))),
+                Some(vec![msg]),
+            );
+        }
+    };
     let mut uploaded_items = Vec::new();
-    let mut files = Vec::new();
-    let mut titles = BTreeMap::new();
-    let mut alts = BTreeMap::new();
-    let mut categories = BTreeMap::new();
-    let mut tags_map = BTreeMap::new();
+    let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+    let mut titles: BTreeMap<u32, String> = BTreeMap::new();
+    let mut alts: BTreeMap<u32, String> = BTreeMap::new();
+    let mut categories: BTreeMap<u32, String> = BTreeMap::new();
+    let mut tags_map: BTreeMap<u32, Vec<String>> = BTreeMap::new();
     let mut upload_source = "site".to_string();
     let mut is_multiple = false;
     let mut field_errors: HashMap<String, Vec<String>> = HashMap::new();
