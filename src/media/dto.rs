@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{ToSchema, IntoParams};
 
 #[derive(Debug, serde::Deserialize, ToSchema)]
 pub struct CreateMediaDTO {
@@ -41,7 +41,7 @@ pub struct UpdateMediaDTO {
     pub tags: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Debug, ToSchema, Clone)]
+#[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
 pub struct MediaFilterQuery {
     pub page: Option<i32>,
     pub limit: Option<i32>,

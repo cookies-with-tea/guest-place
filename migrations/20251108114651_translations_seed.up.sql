@@ -198,5 +198,4 @@ INSERT INTO i18n_translations (key, locale, value) VALUES
 ('general.email_failed', 'ru', 'Не удалось отправить письмо'),
 ('general.db_error', 'en', 'Internal error'),
 ('general.db_error', 'ru', 'Внутренняя ошибка')
-
 ON CONFLICT (key, locale) DO UPDATE SET value = EXCLUDED.value;

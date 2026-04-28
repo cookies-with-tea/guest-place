@@ -14,10 +14,10 @@ use axum::{
     extract::{DefaultBodyLimit, Multipart, Path, Query, State},
     http::StatusCode,
     routing::{delete, get, post, put},
-    Json, Router,
+    Extension, Json, Router,
 };
 use std::sync::Arc;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use uuid::Uuid;
 
 #[utoipa::path(
@@ -27,12 +27,15 @@ use uuid::Uuid;
     request_body(content = Vec<CreateMediaDTO>, content_type = "multipart/form-data"),
     responses(
         (status = 201, description = "Media uploaded successfully", body = ApiResponse<serde_json::Value>),
+        (status = 400, description = "Invalid request"),
+        (status = 413, description = "Quota exceeded"),
         (status = 500, description = "Internal server error")
     ),
     operation_id = "upload_media",
 )]
 pub async fn create(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     mut multipart: Multipart,
 ) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<serde_json::Value>>)> {
     let mut uploaded_items = Vec::new();
@@ -43,55 +46,129 @@ pub async fn create(
     let mut tags_map = BTreeMap::new();
     let mut upload_source = "site".to_string();
     let mut is_multiple = false;
+    let mut field_errors: HashMap<String, Vec<String>> = HashMap::new();
 
-    while let Some(field) = multipart.next_field().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("multipart", &format!("Stream error: {}", e))), messages: Some(vec!["Invalid multipart request".to_string()]) })))? {
+    loop {
+        let field_result = multipart.next_field().await;
+        let field = match field_result {
+            Ok(Some(f)) => f,
+            Ok(None) => break,
+            Err(e) => {
+                let msg = state.i18n.t("media.invalid_request", &locale).await;
+                return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+                    data: None, 
+                    errors: Some(error_map("multipart", &format!("Stream error: {}", e))), 
+                    messages: Some(vec![msg]) 
+                })));
+            }
+        };
+
         let name = field.name().map(|n| n.to_string()).unwrap_or_default();
         if name == "file" {
             let file_name = field.file_name().map(|f| f.to_string()).unwrap_or_else(|| "file.bin".to_string());
-            let data = field.bytes().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Read error: {}", e))), messages: Some(vec!["Could not read file data".to_string()]) })))?.to_vec();
+            let data_result = field.bytes().await;
+            let data = match data_result {
+                Ok(b) => b.to_vec(),
+                Err(e) => {
+                    let msg = state.i18n.t("media.read_error", &locale).await;
+                    return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+                        data: None, 
+                        errors: Some(error_map("field", &format!("Read error: {}", e))), 
+                        messages: Some(vec![msg]) 
+                    })));
+                }
+            };
             files.push((file_name, data));
         } else if name.starts_with("title_") {
             is_multiple = true;
             if let Ok(idx) = name["title_".len()..].parse::<u32>() {
-                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-                titles.insert(idx, text);
+                if let Ok(text) = field.text().await {
+                    titles.insert(idx, text);
+                }
             }
         } else if name.starts_with("alt_") {
             is_multiple = true;
             if let Ok(idx) = name["alt_".len()..].parse::<u32>() {
-                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-                alts.insert(idx, text);
+                if let Ok(text) = field.text().await {
+                    alts.insert(idx, text);
+                }
             }
         } else if name.starts_with("category_") {
             is_multiple = true;
             if let Ok(idx) = name["category_".len()..].parse::<u32>() {
-                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-                categories.insert(idx, text);
+                if let Ok(text) = field.text().await {
+                    categories.insert(idx, text);
+                }
             }
         } else if name.starts_with("tags_") {
             is_multiple = true;
             if let Ok(idx) = name["tags_".len()..].parse::<u32>() {
-                let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-                let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-                tags_map.insert(idx, tags);
+                if let Ok(text) = field.text().await {
+                    let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                    tags_map.insert(idx, tags);
+                }
             }
         } else if name == "title" {
-            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-            titles.insert(0, text);
+            if let Ok(text) = field.text().await {
+                titles.insert(0, text);
+            }
         } else if name == "alt" {
-            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-            alts.insert(0, text);
+            if let Ok(text) = field.text().await {
+                alts.insert(0, text);
+            }
         } else if name == "category" {
-            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-            categories.insert(0, text);
+            if let Ok(text) = field.text().await {
+                categories.insert(0, text);
+            }
         } else if name == "tags" {
-            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-            let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-            tags_map.insert(0, tags);
+            if let Ok(text) = field.text().await {
+                let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                tags_map.insert(0, tags);
+            }
         } else if name == "source" {
-            let text = field.text().await.map_err(|e| (StatusCode::BAD_REQUEST, Json(ApiResponse { data: None, errors: Some(error_map("field", &format!("Text error: {}", e))), messages: Some(vec!["Could not read field text".to_string()]) })))?;
-            upload_source = text;
+            if let Ok(text) = field.text().await {
+                upload_source = text;
+            }
         }
+    }
+
+    // Validation
+    if files.is_empty() {
+        let msg = state.i18n.t("media.field.file_required", &locale).await;
+        field_errors.entry("file".to_string()).or_default().push(msg);
+    }
+
+    for (idx, text) in &titles {
+        if text.len() > 255 {
+            let msg = state.i18n.t("media.field.title_too_long", &locale).await;
+            let field_key = if *idx == 0 { "title".to_string() } else { format!("title_{}", idx) };
+            field_errors.entry(field_key).or_default().push(msg);
+        }
+    }
+
+    for (idx, text) in &alts {
+        if text.len() > 255 {
+            let msg = state.i18n.t("media.field.alt_too_long", &locale).await;
+            let field_key = if *idx == 0 { "alt".to_string() } else { format!("alt_{}", idx) };
+            field_errors.entry(field_key).or_default().push(msg);
+        }
+    }
+
+    for (idx, text) in &categories {
+        if text.len() > 64 {
+            let msg = state.i18n.t("media.field.category_too_long", &locale).await;
+            let field_key = if *idx == 0 { "category".to_string() } else { format!("category_{}", idx) };
+            field_errors.entry(field_key).or_default().push(msg);
+        }
+    }
+
+    if !field_errors.is_empty() {
+        let msg = state.i18n.t("media.validation_error", &locale).await;
+        return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+            data: None, 
+            errors: Some(field_errors), 
+            messages: Some(vec![msg]) 
+        })));
     }
 
     if files.len() > 1 {
@@ -116,77 +193,88 @@ pub async fn create(
         let file_size = data.len() as i64;
         
         // Quota check
-        if let Ok(true) = state.media_quota.check_quota(file_size).await {
-            let media_uuid = Uuid::new_v4();
-            let extension = std::path::Path::new(&file_name).extension().and_then(|ext| ext.to_str()).unwrap_or("bin");
-            let final_name = std::path::Path::new(&file_name).file_stem().and_then(|s| s.to_str()).unwrap_or(&file_name).to_string();
+        match state.media_quota.check_quota(file_size).await {
+            Ok(true) => {
+                let media_uuid = Uuid::new_v4();
+                let extension = std::path::Path::new(&file_name).extension().and_then(|ext| ext.to_str()).unwrap_or("bin");
+                let final_name = std::path::Path::new(&file_name).file_stem().and_then(|s| s.to_str()).unwrap_or(&file_name).to_string();
 
-            let save_result = if media_type_str == "image" {
-                let processed_data = state.media_storage.process_image(&data).await;
-                if let Ok(p_data) = processed_data {
-                    state.media_storage.save_cas(&p_data, "webp").await
+                let save_result = if media_type_str == "image" {
+                    let processed_data = state.media_storage.process_image(&data).await;
+                    if let Ok(p_data) = processed_data {
+                        state.media_storage.save_cas(&p_data, "webp").await
+                    } else {
+                        state.media_storage.save_cas(&data, extension).await
+                    }
                 } else {
                     state.media_storage.save_cas(&data, extension).await
+                };
+
+                if let Ok((_hash, relative_path)) = save_result {
+                    let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
+                    let title = titles.get(&(i as u32)).cloned();
+                    let alt = alts.get(&(i as u32)).cloned();
+                    let category = categories.get(&(i as u32)).cloned();
+                    let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
+
+                    let db_result = sqlx::query_as::<_, MediaItemFromDb>(
+                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
+                    )
+                    .bind(media_uuid)
+                    .bind(media_type_str)
+                    .bind(&full_url)
+                    .bind(&final_name)
+                    .bind(extension)
+                    .bind(&title)
+                    .bind(&alt)
+                    .bind(file_size)
+                    .bind(&category)
+                    .bind(&tags)
+                    .bind(&upload_source)
+                    .fetch_one(&state.pool)
+                    .await;
+
+                    if let Ok(row) = db_result {
+                        uploaded_items.push(MediaItemDTO {
+                            uuid: row.uuid.to_string(),
+                            url: row.url,
+                            name: row.name,
+                            extension: row.extension,
+                            title: row.title,
+                            alt: row.alt,
+                            category: row.category,
+                            tags: row.tags,
+                            size_bytes: row.size_bytes,
+                            created_at: row.created_at,
+                            source: row.source,
+                            media_type: row.media_type,
+                        });
+                    }
                 }
-            } else {
-                state.media_storage.save_cas(&data, extension).await
-            };
-
-            if let Ok((_hash, relative_path)) = save_result {
-                let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
-                let title = titles.get(&(i as u32)).cloned();
-                let alt = alts.get(&(i as u32)).cloned();
-                let category = categories.get(&(i as u32)).cloned();
-                let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
-
-                let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                    "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
-                )
-                .bind(media_uuid)
-                .bind(media_type_str)
-                .bind(&full_url)
-                .bind(&final_name)
-                .bind(extension)
-                .bind(&title)
-                .bind(&alt)
-                .bind(file_size)
-                .bind(&category)
-                .bind(&tags)
-                .bind(&upload_source)
-                .fetch_one(&state.pool)
-                .await;
-
-                if let Ok(row) = db_result {
-                    uploaded_items.push(MediaItemDTO {
-                        uuid: row.uuid.to_string(),
-                        url: row.url,
-                        name: row.name,
-                        extension: row.extension,
-                        title: row.title,
-                        alt: row.alt,
-                        category: row.category,
-                        tags: row.tags,
-                        size_bytes: row.size_bytes,
-                        created_at: row.created_at,
-                        source: row.source,
-                        media_type: row.media_type,
-                    });
-                }
+            },
+            Ok(false) => {
+                let msg = state.i18n.t("media.quota_exceeded", &locale).await;
+                return Err((StatusCode::PAYLOAD_TOO_LARGE, Json(ApiResponse { data: None, errors: Some(error_map("quota", "exceeded")), messages: Some(vec![msg]) })));
+            },
+            Err(e) => {
+                eprintln!("Quota check error: {:?}", e);
+                let msg = state.i18n.t("media.db_error", &locale).await;
+                return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: Some(error_map("database", "quota_check")), messages: Some(vec![msg]) })));
             }
         }
     }
 
-    let count = uploaded_items.len();
     let response_data = if is_multiple {
         json!(uploaded_items)
     } else {
         json!(uploaded_items.first())
     };
 
+    let msg = state.i18n.t("media.upload_success", &locale).await;
     Ok(Json(ApiResponse {
         data: Some(response_data),
         errors: None,
-        messages: Some(vec![format!("{} files processed successfully", count)]),
+        messages: Some(vec![msg]),
     }))
 }
 
@@ -206,6 +294,7 @@ pub async fn create(
 )]
 pub async fn get_all(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     Query(filter): Query<MediaFilterQuery>,
 ) -> Result<Json<ApiResponseWithPagination<MediaItemDTO>>, (StatusCode, Json<ApiResponseWithPagination<MediaItemDTO>>)> {
     let page = filter.page.unwrap_or(1);
@@ -224,11 +313,12 @@ pub async fn get_all(
         Ok(count) => count,
         Err(e) => {
             eprintln!("DB count error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to fetch media count")),
-                Some(vec!["Could not retrieve media count".to_string()]),
+                Some(vec![msg]),
             );
         }
     };
@@ -296,20 +386,22 @@ pub async fn get_all(
                 pagination: pagination,
             };
 
+            let msg = state.i18n.t("media.fetch_success", &locale).await;
             into_api_response_with_pagination(
                 StatusCode::OK,
                 Some(api_pagination),
                 None,
-                Some(vec!["Media fetched successfully".to_string()]),
+                Some(vec![msg]),
             )
         }
         Err(e) => {
             eprintln!("DB fetch error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to fetch media list")),
-                Some(vec!["Could not retrieve media records".to_string()]),
+                Some(vec![msg]),
             )
         }
     }
@@ -395,6 +487,7 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
 )]
 pub async fn get_one(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
@@ -421,28 +514,31 @@ pub async fn get_one(
                 media_type: media.media_type,
             };
 
+            let msg = state.i18n.t("media.fetch_success", &locale).await;
             into_api_response(
                 StatusCode::OK,
                 Some(media_response),
                 None,
-                Some(vec!["Media fetched successfully".to_string()]),
+                Some(vec![msg]),
             )
         }
         Ok(None) => {
+            let msg = state.i18n.t("media.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
                 None,
                 Some(error_map("media", "Media not found")),
-                Some(vec!["Media not found".to_string()]),
+                Some(vec![msg]),
             )
         }
         Err(e) => {
             eprintln!("DB error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to fetch media")),
-                Some(vec!["Could not retrieve media".to_string()]),
+                Some(vec![msg]),
             )
         }
     }
@@ -465,9 +561,61 @@ pub async fn get_one(
 )]
 pub async fn update(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
     Json(payload): Json<UpdateMediaDTO>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
+    let mut field_errors: HashMap<String, Vec<String>> = HashMap::new();
+
+    if let Some(name) = &payload.name {
+        if name.len() > 255 {
+            let msg = state.i18n.t("media.field.name_too_long", &locale).await;
+            field_errors.entry("name".to_string()).or_default().push(msg);
+        }
+    }
+    if let Some(title) = &payload.title {
+        if title.len() > 255 {
+            let msg = state.i18n.t("media.field.title_too_long", &locale).await;
+            field_errors.entry("title".to_string()).or_default().push(msg);
+        }
+    }
+    if let Some(alt) = &payload.alt {
+        if alt.len() > 255 {
+            let msg = state.i18n.t("media.field.alt_too_long", &locale).await;
+            field_errors.entry("alt".to_string()).or_default().push(msg);
+        }
+    }
+    if let Some(category) = &payload.category {
+        if category.len() > 64 {
+            let msg = state.i18n.t("media.field.category_too_long", &locale).await;
+            field_errors.entry("category".to_string()).or_default().push(msg);
+        }
+    }
+
+    if !field_errors.is_empty() {
+        let msg = state.i18n.t("media.validation_error", &locale).await;
+        return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+            data: None, 
+            errors: Some(field_errors), 
+            messages: Some(vec![msg]) 
+        })));
+    }
+
+    let mut has_updates = false;
+    if payload.name.is_some() || payload.extension.is_some() || payload.title.is_some() || 
+       payload.alt.is_some() || payload.category.is_some() || payload.tags.is_some() {
+        has_updates = true;
+    }
+
+    if !has_updates {
+        let msg = state.i18n.t("media.no_update_fields", &locale).await;
+        return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+            data: None, 
+            errors: Some(error_map("update", "No fields to update")), 
+            messages: Some(vec![msg]) 
+        })));
+    }
+
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
         "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
     )
@@ -479,51 +627,35 @@ pub async fn update(
         Ok(Some(_)) => {
             let mut update_query = "UPDATE media SET ".to_string();
             let mut query_param_index = 1;
-            let mut has_updates = false;
 
             if let Some(_name) = &payload.name {
                 update_query.push_str(&format!("name = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
             }
 
             if let Some(_extension) = &payload.extension {
                 update_query.push_str(&format!("extension = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
             }
 
             if let Some(_title) = &payload.title {
                 update_query.push_str(&format!("title = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
             }
 
             if let Some(_alt) = &payload.alt {
                 update_query.push_str(&format!("alt = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
             }
 
             if let Some(_category) = &payload.category {
                 update_query.push_str(&format!("category = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
             }
 
             if let Some(_tags) = &payload.tags {
                 update_query.push_str(&format!("tags = ${}, ", query_param_index));
                 query_param_index += 1;
-                has_updates = true;
-            }
-
-            if !has_updates {
-                return into_api_response(
-                    StatusCode::BAD_REQUEST,
-                    None,
-                    Some(error_map("update", "No fields to update")),
-                    Some(vec!["No fields provided for update".to_string()]),
-                );
             }
 
             // Remove trailing comma and space
@@ -589,50 +721,55 @@ pub async fn update(
                                 media_type: media.media_type,
                             };
 
+                            let msg = state.i18n.t("media.update_success", &locale).await;
                             into_api_response(
                                 StatusCode::OK,
                                 Some(media_response),
                                 None,
-                                Some(vec!["Media updated successfully".to_string()]),
+                                Some(vec![msg]),
                             )
                         }
                         Err(e) => {
                             eprintln!("DB error: {:?}", e);
+                            let msg = state.i18n.t("media.db_error", &locale).await;
                             into_api_response(
                                 StatusCode::INTERNAL_SERVER_ERROR,
                                 None,
                                 Some(error_map("database", "Failed to fetch updated media")),
-                                Some(vec!["Could not retrieve updated media".to_string()]),
+                                Some(vec![msg]),
                             )
                         }
                     }
                 }
                 Err(e) => {
                     eprintln!("DB error: {:?}", e);
+                    let msg = state.i18n.t("media.db_error", &locale).await;
                     into_api_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         None,
                         Some(error_map("database", "Failed to update media")),
-                        Some(vec!["Could not update media".to_string()]),
+                        Some(vec![msg]),
                     )
                 }
             }
         }
         Ok(None) => {
+            let msg = state.i18n.t("media.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
                 None,
                 Some(error_map("media", "Media not found")),
-                Some(vec!["Media not found".to_string()]),
+                Some(vec![msg]),
             )
         }
         Err(e) => {
             eprintln!("DB error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to check media existence")),
-                Some(vec!["Could not check if media exists".to_string()]),
+                Some(vec![msg]),
             )
         }
     }
@@ -655,6 +792,7 @@ pub async fn update(
 )]
 pub async fn delete_one(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let exists = sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM media WHERE uuid = $1)")
@@ -670,39 +808,43 @@ pub async fn delete_one(
                 .await;
             match result {
                 Ok(_) => {
+                    let msg = state.i18n.t("media.delete_success", &locale).await;
                     into_api_response(
                         StatusCode::OK,
                         None,
                         None,
-                        Some(vec!["Media deleted successfully".to_string()]),
+                        Some(vec![msg]),
                     )
                 }
                 Err(e) => {
                     eprintln!("DB error: {:?}", e);
+                    let msg = state.i18n.t("media.db_error", &locale).await;
                     into_api_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         None,
                         Some(error_map("database", "Failed to delete media")),
-                        Some(vec!["Could not delete media".to_string()]),
+                        Some(vec![msg]),
                     )
                 }
             }
         }
         Ok(false) => {
+            let msg = state.i18n.t("media.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
                 None,
                 Some(error_map("media", "Media not found")),
-                Some(vec!["Media not found".to_string()]),
+                Some(vec![msg]),
             )
         }
         Err(e) => {
             eprintln!("DB error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to check media existence")),
-                Some(vec!["Could not check if media exists".to_string()]),
+                Some(vec![msg]),
             )
         }
     }
@@ -721,6 +863,7 @@ pub async fn delete_one(
 )]
 pub async fn delete_all(
     State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let result = sqlx::query("DELETE FROM media")
         .execute(&state.pool)
@@ -728,20 +871,22 @@ pub async fn delete_all(
 
     match result {
         Ok(_) => {
+            let msg = state.i18n.t("media.delete_success", &locale).await;
             into_api_response(
                 StatusCode::OK,
                 None,
                 None,
-                Some(vec!["All media deleted successfully".to_string()]),
+                Some(vec![msg]),
             )
         }
         Err(e) => {
             eprintln!("DB error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
                 Some(error_map("database", "Failed to delete all media")),
-                Some(vec!["Could not delete all media".to_string()]),
+                Some(vec![msg]),
             )
         }
     }

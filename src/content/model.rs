@@ -1,6 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 use sqlx::FromRow;
-use utoipa::ToSchema;
+use utoipa::{ToSchema, IntoParams};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
@@ -111,7 +111,7 @@ pub struct ContentEntryVersion {
     pub created_by: Option<Uuid>,
     pub comment: Option<String>,
 }
-#[derive(Deserialize, Debug, ToSchema, Clone)]
+#[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
 pub struct EntryFilterQuery {
     pub search: Option<String>,
 }
