@@ -111,7 +111,8 @@ const formRules: Rules = {
 async function uploadMedia(file) {
   const formData = new FormData()
 
-  formData.append('file', file)
+  // formData.append('file', file)
+  formData.append('alt', 'someText')
 
   const data = await mediaApi.upload(formData)
 
@@ -185,7 +186,8 @@ const tabs = [
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
-  background-color: #f7faff;
+  background-color: #ECF4FD;
+  //вернуть #f7faff
   padding: 20px;
   gap: 20px;
 

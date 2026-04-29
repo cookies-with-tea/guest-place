@@ -1,61 +1,68 @@
 <template>
-  <div class="ui-upload">
-      <UiIcon
-        name="download"
-        width="40px"
-        height="36px"
-      />
+  <div
+    class="ui-upload"
+    :class="classes"
+    @drop.prevent="console.log('элемент был использован')"
+    @dragenter="console.log('я в зоне дропа'); isAnimating = true; isDragover=true"
+    @dragover.prevent="console.log('работаю всегда в зоне дропа')"
+    @dragleave.prevent="console.log('я покинул зону для дропа'); isAnimating = false; isDragover=false"
+  >
+    <UiIcon
+      name="download"
+      width="40px"
+      height="36px"
+      :style="{ color: isAnimating ? 'var(--color-accent)' : '#A8ABB2' }"
+    />
 
-      <span class="ui-upload__on-drag">
+    <span class="ui-upload__on-drag">
        Перетащите файл сюда
-      </span>
+    </span>
 
-      <span class="ui-upload__or">
-        или
-      </span>
+    <input
+      id="avatar"
+      type="file"
+      hidden
+      name="avatar"
+      accept="image/png, image/jpeg"
+      ref="input-ref"
+      @change="handleFileUpload"
+    />
 
-      <input
-        id="avatar"
-        type="file"
-        hidden
-        name="avatar"
-        accept="image/png, image/jpeg"
-        ref="input-ref"
-        @change="handleFileUpload"
-      />
+    <!-- Группа элементов, которые исчезают вместе -->
+    <Transition name="smooth" mode="out-in">
+      <div v-if="!isAnimating" key="controls" class="ui-upload__controls">
+        <span class="ui-upload__or">или</span>
 
-      <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
-        <UiIcon
-          name="attach"
-          width="16px"
-          height="16px"
-        />
+        <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
+          <UiIcon name="attach" width="16px" height="16px" />
+          Выберите файл
+        </button>
 
-        Выберите файл
-      </button>
-
-      <span class="ui-upload__max-weight">
-         Максимальный размер файла 30 MB
-      </span>
+        <span class="ui-upload__max-weight">
+      Максимальный размер файла 30 MB
+    </span>
+      </div>
+    </Transition>
   </div>
 
+  <!-- Плавное появление/исчезновение превью файла -->
+
   <template v-if="!!modelValue">
-    <i>Icon</i>
-
-    <p class="ui-uploader__preview-name">{{ modelValue.name }}</p>
-    <p class="ui-uploader__preview-success">Файл загружен</p>
-
-    <button class="ui-uploader__preview-delete" @click="resetFiles">
-      <i>Delete</i>
-    </button>
+    <div class="ui-uploader__preview">
+      <i>Icon</i>
+      <p class="ui-uploader__preview-name">{{ modelValue.name }}</p>
+      <p class="ui-uploader__preview-success">Файл загружен</p>
+      <button class="ui-uploader__preview-delete" @click="resetFiles">
+        <i>Delete</i>
+      </button>
+    </div>
   </template>
-
 </template>
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui';
 
-import { ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 interface IProps {
   maxSize?: number | string
@@ -67,6 +74,16 @@ interface IEmits {
 
 const props = withDefaults(defineProps<IProps>(), {
   maxSize: 30
+})
+
+const isAnimating = ref(false)
+const isDragover = ref(false)
+
+const classes = computed(() => {
+  return {
+    'is-animating': isAnimating.value,
+    'is-dragover': isDragover.value
+  }
 })
 
 const emit = defineEmits<IEmits>()
@@ -104,9 +121,12 @@ const handleFileUpload = () => {
 @use 'public/styles/helpers/functions' as *;
 
 .ui-upload {
-  --ui-upload-border-color: #c6c6cc;
+  --ui-upload-border-color: #A8ABB2;
   --ui-upload-button-bg-color: var(--color-accent);
   --ui-upload-button-color: #fff;
+
+  --ui-upload-bg-color: transparent;
+    //#{darken(var(--color-accent), 2)};
 
   width: 100%;
   height: 204px;
@@ -120,8 +140,27 @@ const handleFileUpload = () => {
   background-size: 2px calc(100% + 17px), calc(100% + 17px) 2px, 2px calc(100% + 17px) , calc(100% + 17px) 2px;
   background-repeat: no-repeat;
   animation: borderAnimation 0.9s infinite linear reverse;
+  animation-play-state: paused;
+  background-color: var(--ui-upload-bg-color);
   gap: 8px;
 
+  &.is-dragover {
+    --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
+    --ui-upload-bg-color: #{darken(#ECF4FD, 5)};
+  }
+
+  &.is-animating {
+    animation-play-state: running;
+  }
+
+  @keyframes borderAnimation {
+    from {
+      background-position: 0 0, -17px 0, 100% -17px, 0 100%;
+    }
+    to {
+      background-position: 0 -17px, 0 0, 100% 0, -17px 100%;
+    }
+  }
 
   &__on-drag {
     @include typography(h5);
@@ -160,12 +199,12 @@ const handleFileUpload = () => {
   }
 }
 
-//@keyframes borderAnimation {
-//  from {
-//    background-position: 0 0, -17px 0, 100% -17px, 0 100%;
-//  }
-//  to {
-//    background-position: 0 -17px, 0 0, 100% 0, -17px 100%;
-//  }
-//}
+
+.ui-upload__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
 </style>
