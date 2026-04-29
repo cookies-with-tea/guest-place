@@ -1,5 +1,5 @@
 <template>
-	<aside class="the-sidebar glass-sidebar" :class="{ 'is-collapsed': isCollapsed }">
+	<aside class="ui-sidebar glass-sidebar" :class="{ 'is-collapsed': isCollapsed }">
 		<div class="sidebar-header">
 			<div v-show="!isCollapsed" class="sidebar-logo">
 				<h2>GUEST PLACE</h2>
@@ -66,31 +66,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
 import * as Icons from '@element-plus/icons-vue'
-import { Expand, Fold } from '@element-plus/icons-vue'
+import { EditPen, Expand, Fold, Setting } from '@element-plus/icons-vue'
 
-import { useSidebar } from '../composables'
+import { useSidebar } from '../lib/useSidebar'
 
 const route = useRoute()
-
-const { sidebarData, activeContext, setContext } = useSidebar()
+const { sidebarData, activeContext, isCollapsed, setContext, toggleCollapse } = useSidebar()
 const { t } = useI18n()
 
-import { EditPen, Setting } from '@element-plus/icons-vue'
-
-const isCollapsed = ref(localStorage.getItem('gp-sidebar-collapsed') === 'true')
-
 const activePath = computed(() => route.path)
-
-const toggleCollapse = () => {
-	isCollapsed.value = !isCollapsed.value
-
-	localStorage.setItem('gp-sidebar-collapsed', String(isCollapsed.value))
-}
 
 const getIcon = (name: string) => {
 	return (Icons as any)[name] || Icons.Menu
@@ -98,20 +87,22 @@ const getIcon = (name: string) => {
 </script>
 
 <style scoped>
-.the-sidebar {
+.ui-sidebar {
 	width: var(--gp-sidebar-width);
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
+	border-right: 1px solid var(--gp-glass-border);
+	background: var(--gp-bg-sidebar);
 	transition: width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 	overflow: hidden;
 }
 
-.the-sidebar.is-collapsed {
+.ui-sidebar.is-collapsed {
 	width: 64px;
 }
 
-.the-sidebar.is-collapsed .sidebar-header {
+.ui-sidebar.is-collapsed .sidebar-header {
 	justify-content: center;
 	padding: 0;
 }

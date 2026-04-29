@@ -2,8 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { ROUTES } from '@admin-panel/lib'
 import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
-
-import { useSidebar } from '#widgets/the-sidebar'
+import { useSidebar } from '@admin-panel/ui'
 
 import MainLayout from '#app/layouts/MainLayout.vue'
 

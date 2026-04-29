@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import type { IPagination } from '@admin-panel/lib'
+import { ElMessage } from 'element-plus'
 
 import { userApi } from '../../api'
 import type { IUserCreateUpdate, UserFilters } from '../../model'
@@ -149,6 +150,17 @@ export const useUsers = () => {
 		},
 	})
 
+	const patchMutation = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: Partial<IUserCreateUpdate> }) => update(id, data as any),
+		onSuccess: (response) => {
+			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+
+			if (response.messages?.[0]) {
+				ElMessage.success(response.messages[0])
+			}
+		},
+	})
+
 	const deleteMutation = useMutation({
 		mutationFn: deleteById,
 		onSuccess: () => {
@@ -164,6 +176,10 @@ export const useUsers = () => {
 		} else {
 			createMutation.mutate(data)
 		}
+	}
+
+	const handlePatch = (uuid: string, data: Partial<IUserCreateUpdate>) => {
+		patchMutation.mutate({ id: uuid, data })
 	}
 
 	const handleDelete = (uuid: string) => {
@@ -234,6 +250,7 @@ export const useUsers = () => {
 		openDetailDrawer,
 		closeDetailDrawer,
 		handleSubmit,
+		handlePatch,
 		handleDelete,
 		setPage,
 		setLimit,

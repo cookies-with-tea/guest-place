@@ -49,11 +49,20 @@ export function useAuth() {
 
 		// Redirect to login if in a browser
 		if (typeof window !== 'undefined') {
-			const event = new CustomEvent('auth:unauthorized', { cancelable: true })
+			const event = new CustomEvent('auth:unauthorized', {
+				cancelable: true,
+				detail: {
+					pathname: window.location.pathname,
+					port: window.location.port,
+				},
+			})
 			const notCanceled = window.dispatchEvent(event)
 
 			if (notCanceled && !window.location.pathname.startsWith('/login')) {
-				window.location.href = '/login'
+				// TODO: Позже убрать хардкод портов. Надо иной способ для детекта Shell-приложения
+				if (window.location.port === '4173' || window.location.port === '5173') {
+					window.location.href = '/login'
+				}
 			}
 		}
 	}

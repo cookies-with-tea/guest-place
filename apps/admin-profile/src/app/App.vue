@@ -20,12 +20,9 @@ const { setData } = useSidebar()
 onMounted(() => {
 	setData('system', [
 		{
-			title: 'menu.users',
+			title: 'menu.profile',
 			icon: 'User',
-			children: [
-				{ title: 'Пользователи', path: '/' },
-				{ title: 'Права доступа', path: '/rights' },
-			],
+			path: '/',
 		},
 	])
 })

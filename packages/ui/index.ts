@@ -1,6 +1,7 @@
 import { i18nPlugin, UiTranslation } from '@admin-panel/i18n'
 
 import ContentFormGenerator from './src/components/content'
+import UiAuthGuard from './src/components/ui-auth-guard'
 import UiButton from './src/components/ui-button'
 import UiIcon from './src/components/ui-icon'
 import UiInput from './src/components/ui-input'
@@ -14,12 +15,16 @@ import { initUiStyles } from './src/styles-loader'
 import UiAuthWidget from './src/widgets/ui-auth-widget'
 import UiFloatingSettings from './src/widgets/ui-floating-settings/ui/UiFloatingSettings.vue'
 import UiLanguageSwitcher from './src/widgets/ui-language-switcher/UiLanguageSwitcher.vue'
-import UiThemeSwitcher, { useTheme } from './src/widgets/ui-theme-switcher'
+import UiSidebar from './src/widgets/ui-sidebar'
+import { useSidebar } from './src/widgets/ui-sidebar'
+import UiThemeSwitcher from './src/widgets/ui-theme-switcher'
+import { useTheme } from './src/widgets/ui-theme-switcher'
 
 export {
 	ContentFormGenerator,
 	i18nPlugin,
 	initUiStyles,
+	UiAuthGuard,
 	UiAuthWidget,
 	UiButton,
 	UiFloatingSettings,
@@ -29,10 +34,12 @@ export {
 	UiMediaPicker,
 	UiModal,
 	UiSeoEditor,
+	UiSidebar,
 	UiSortableHeader,
 	UiTable,
 	UiTableColumn,
 	UiThemeSwitcher,
 	UiTranslation,
+	useSidebar,
 	useTheme,
 }

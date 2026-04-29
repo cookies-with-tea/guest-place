@@ -53,4 +53,9 @@ export const ROUTES = {
 		title: 'general.guests',
 		icon: 'UserFilled',
 	},
+	profile: {
+		name: 'ProfilePage',
+		title: 'general.profile',
+		icon: 'User',
+	},
 } as const

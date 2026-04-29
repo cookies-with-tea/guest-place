@@ -1,8 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 
-import type { ISidebarItem } from '../model'
-
-export type SidebarContext = 'system' | 'website'
+import type { ISidebarItem, SidebarContext } from '../model'
 
 const sidebarData = ref<Record<SidebarContext, ISidebarItem[]>>({
 	system: [],
@@ -10,6 +8,7 @@ const sidebarData = ref<Record<SidebarContext, ISidebarItem[]>>({
 })
 
 const activeContext = ref<SidebarContext>((localStorage.getItem('gp-sidebar-context') as SidebarContext) || 'system')
+const isCollapsed = ref(localStorage.getItem('gp-sidebar-collapsed') === 'true')
 
 export const useSidebar = () => {
 	const setData = (context: SidebarContext, data: ISidebarItem[]) => {
@@ -22,12 +21,20 @@ export const useSidebar = () => {
 		localStorage.setItem('gp-sidebar-context', context)
 	}
 
+	const toggleCollapse = () => {
+		isCollapsed.value = !isCollapsed.value
+
+		localStorage.setItem('gp-sidebar-collapsed', String(isCollapsed.value))
+	}
+
 	const currentSidebarData = computed(() => sidebarData.value[activeContext.value])
 
 	return {
 		sidebarData: currentSidebarData,
 		activeContext: readonly(activeContext),
+		isCollapsed: readonly(isCollapsed),
 		setContext,
 		setData,
+		toggleCollapse,
 	}
 }

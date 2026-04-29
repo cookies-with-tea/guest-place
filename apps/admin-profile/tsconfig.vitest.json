@@ -1,0 +1,23 @@
+{
+	"extends": "../../packages/typescript-config/vitest.json",
+	"include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+	"exclude": [],
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
+		"lib": [],
+		"types": ["node", "jsdom"],
+		"baseUrl": "./",
+		"paths": {
+			"@/*": ["./src/*"],
+			"~/*": ["./src/*"],
+			"@core/*": ["./core/*"],
+			"@root/*": ["./*"],
+			"#app/*": ["./src/app/*"],
+			"#pages/*": ["./src/pages/*"],
+			"#widgets/*": ["./src/widgets/*"],
+			"#features/*": ["./src/features/*"],
+			"#entities/*": ["./src/entities/*"],
+			"#shared/*": ["./src/shared/*"]
+		}
+	}
+}

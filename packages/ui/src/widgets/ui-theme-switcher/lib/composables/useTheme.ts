@@ -2,7 +2,15 @@ import { ref } from 'vue'
 
 const THEME_KEY = 'gp-theme-mode'
 
-const isDark = ref(localStorage.getItem(THEME_KEY) === 'dark')
+const getInitialTheme = () => {
+	const saved = localStorage.getItem(THEME_KEY)
+
+	if (saved) return saved === 'dark'
+
+	return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+const isDark = ref(getInitialTheme())
 
 const updateDOM = (dark: boolean) => {
 	if (typeof document === 'undefined') return

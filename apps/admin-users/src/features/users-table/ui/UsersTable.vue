@@ -73,7 +73,15 @@
 					</el-select>
 				</template>
 				<template #default="{ row }">
-					<el-tag effect="plain" size="small" :type="row.role === 'admin' ? 'danger' : 'info'">{{ row.role }}</el-tag>
+					<el-select
+						v-model="row.role"
+						class="inline-edit-select"
+						placeholder="Role"
+						size="small"
+						@change="(val: any) => handlePatch(row.uuid, { role: val })"
+					>
+						<el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+					</el-select>
 				</template>
 			</UiTableColumn>
 
@@ -104,9 +112,18 @@
 					</el-select>
 				</template>
 				<template #default="{ row }">
-					<el-tag effect="plain" size="small" :type="row.status === 'active' ? 'success' : 'warning'">{{
-						row.status
-					}}</el-tag>
+					<div class="status-cell">
+						<el-switch
+							v-model="row.status"
+							active-value="active"
+							inactive-value="inactive"
+							size="small"
+							@change="(val: any) => handlePatch(row.uuid, { status: val })"
+						/>
+						<el-tag v-if="row.status === 'in_moderation'" class="status-tag" effect="plain" size="small" type="warning">
+							Moderation
+						</el-tag>
+					</div>
 				</template>
 			</UiTableColumn>
 
@@ -197,8 +214,19 @@ import { ElMessageBox } from 'element-plus'
 import { useUsers } from '#entities/user'
 import { UserRole, UserStatus } from '#entities/user/model'
 
-const { users, filters, isLoading, isFetching, pagination, openEditModal, handleDelete, setPage, setLimit, setSort } =
-	useUsers()
+const {
+	users,
+	filters,
+	isLoading,
+	isFetching,
+	pagination,
+	openEditModal,
+	handleDelete,
+	handlePatch,
+	setPage,
+	setLimit,
+	setSort,
+} = useUsers()
 
 const { isDark } = useTheme()
 
@@ -303,5 +331,19 @@ const confirmDelete = (uuid: string) => {
 	display: flex;
 	justify-content: center;
 	gap: 8px;
+}
+
+.inline-edit-select {
+	width: 100%;
+}
+
+.status-cell {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.status-tag {
+	margin-left: 4px;
 }
 </style>

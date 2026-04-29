@@ -5,7 +5,7 @@
 			<div class="ambient-orb orb-2"></div>
 		</div>
 
-		<TheSidebar />
+		<UiSidebar />
 
 		<div class="main-layout__content">
 			<header class="main-header glass-panel">
@@ -59,10 +59,8 @@ import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
 import { useAuth } from '@admin-panel/lib'
-import { UiAuthWidget, UiLanguageSwitcher, UiThemeSwitcher } from '@admin-panel/ui'
+import { UiAuthWidget, UiLanguageSwitcher, UiSidebar, UiThemeSwitcher } from '@admin-panel/ui'
 import { UserFilled } from '@element-plus/icons-vue'
-
-import { TheSidebar } from '#widgets/the-sidebar'
 
 const route = useRoute()
 const { t } = useI18n()

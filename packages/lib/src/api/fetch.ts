@@ -59,11 +59,25 @@ export const createApi = (entityName: string) => {
 
 					localStorage.removeItem('gp_refresh_token')
 
-					const event = new CustomEvent('auth:unauthorized', { cancelable: true })
+					// eslint-disable-next-line no-console
+					console.warn(`[fetchData] Unauthorized (401/403) for ${baseUrl}${url}. Clearing auth and potential redirect.`)
+
+					const event = new CustomEvent('auth:unauthorized', {
+						cancelable: true,
+						detail: {
+							pathname: window.location.pathname,
+							port: window.location.port,
+						},
+					})
 					const notCanceled = window.dispatchEvent(event)
 
+					// Only redirect if not canceled and we are likely in the Shell (port 4173) or on a path that expects /login
 					if (notCanceled && !window.location.pathname.startsWith('/login')) {
-						window.location.href = '/login'
+						// In standalone MFEs (like port 4183), we don't want to redirect to a non-existent /login
+						// Instead, we let the UI (UiAuthGuard) handle the state change
+						if (window.location.port === '4173' || window.location.port === '5173') {
+							window.location.href = '/login'
+						}
 					}
 				}
 			}
