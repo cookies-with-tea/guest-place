@@ -8,29 +8,44 @@ use tokio_stream::StreamExt;
 use crate::{AppState, ApiResponse};
 use super::service::{get_system_stats, SystemStats};
 
+use tokio::sync::mpsc;
+use tokio_stream::wrappers::ReceiverStream;
+
 #[utoipa::path(
     get,
-    path = "/api/v1/system/stats",
+    path = "/api/v1/system/stats/stream",
     responses(
-        (status = 200, description = "Get system statistics", body = SystemStats)
+        (status = 200, description = "Stream system statistics via SSE")
     ),
     tag = "System"
 )]
-pub async fn get_stats(
+pub async fn get_stats_stream(
     State(state): State<Arc<AppState>>,
-) -> axum::Json<ApiResponse<SystemStats>> {
-    let mfes = sqlx::query_as::<_, (String, String)>(
-        "SELECT name, display_name FROM microfrontends"
-    )
-    .fetch_all(&state.pool)
-    .await
-    .unwrap_or_default();
+) -> Sse<impl tokio_stream::Stream<Item = Result<Event, std::convert::Infallible>>> {
+    let (tx, rx) = mpsc::channel(1);
 
-    axum::Json(ApiResponse {
-        data: Some(get_system_stats(mfes)),
-        errors: None,
-        messages: None,
-    })
+    tokio::spawn(async move {
+        loop {
+            let mfes = sqlx::query_as::<_, (String, String)>(
+                "SELECT name, display_name FROM microfrontends"
+            )
+            .fetch_all(&state.pool)
+            .await
+            .unwrap_or_default();
+
+            let stats = get_system_stats(mfes);
+            let json = serde_json::to_string(&stats).unwrap_or_default();
+
+            if tx.send(Ok(Event::default().data(json))).await.is_err() {
+                break;
+            }
+
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+        }
+    });
+
+    let stream = ReceiverStream::new(rx);
+    Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::default())
 }
 
 pub async fn get_logs(

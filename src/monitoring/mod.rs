@@ -7,6 +7,6 @@ use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/stats", axum::routing::get(handlers::get_stats))
+        .route("/stats/stream", axum::routing::get(handlers::get_stats_stream))
         .route("/logs", axum::routing::get(handlers::get_logs))
 }
