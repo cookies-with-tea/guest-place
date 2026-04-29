@@ -251,10 +251,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
+import { snakeToCamel } from '@admin-panel/lib'
 import { EditPen, Setting, Timer } from '@element-plus/icons-vue'
 
 import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
-import { systemApi } from '../../../entities/system/api'
 import type { SystemStats } from '../../../entities/system/model'
 
 const activeTab = ref('mfe')
@@ -337,31 +337,44 @@ const formatUptime = (seconds: number) => {
 	return `${days}d ${hours}h ${minutes}m ${secs}s`
 }
 
-let timer: any = null
+let eventSource: EventSource | null = null
 
-const fetchStats = async () => {
-	const response = await systemApi.getStats()
+const connectStats = () => {
+	eventSource = new EventSource('/api/v1/system/stats/stream')
 
-	const data = response.data
+	eventSource.onmessage = (event) => {
+		try {
+			const rawData = JSON.parse(event.data)
+			const data = snakeToCamel(rawData) as SystemStats
 
-	if (data) {
-		stats.value = data
+			if (data) {
+				stats.value = data
 
-		// Update history
-		data.processes.forEach((p) => {
-			if (!history.value[p.name]) {
-				history.value[p.name] = { cpu: [], mem: [] }
+				// Update history
+				data.processes.forEach((p: any) => {
+					if (!history.value[p.name]) {
+						history.value[p.name] = { cpu: [], mem: [] }
+					}
+
+					const h = history.value[p.name]
+
+					h.cpu.push(p.cpuUsage)
+
+					h.mem.push(p.memoryUsed)
+
+					if (h.cpu.length > MAX_HISTORY) h.cpu.shift()
+					if (h.mem.length > MAX_HISTORY) h.mem.shift()
+				})
 			}
+		} catch (e) {
+			console.error('Failed to parse stats stream', e)
+		}
+	}
 
-			const h = history.value[p.name]
+	eventSource.onerror = () => {
+		eventSource?.close()
 
-			h.cpu.push(p.cpuUsage)
-
-			h.mem.push(p.memoryUsed)
-
-			if (h.cpu.length > MAX_HISTORY) h.cpu.shift()
-			if (h.mem.length > MAX_HISTORY) h.mem.shift()
-		})
+		setTimeout(connectStats, 5000)
 	}
 }
 
@@ -382,13 +395,11 @@ const getSparklineData = (values: number[], width: number, height: number, max: 
 }
 
 onMounted(() => {
-	fetchStats()
-
-	timer = setInterval(fetchStats, 2000)
+	connectStats()
 })
 
 onUnmounted(() => {
-	if (timer) clearInterval(timer)
+	eventSource?.close()
 })
 </script>
 

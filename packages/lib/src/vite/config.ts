@@ -106,7 +106,7 @@ export function createConfig(options: CreateConfigOptions) {
 								configure: (proxy) => {
 									proxy.on('proxyRes', (proxyRes, req) => {
 										// For SSE, we want to ensure no buffering
-										if (req.url?.includes('/logs')) {
+										if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
 											proxyRes.headers['cache-control'] = 'no-cache'
 
 											proxyRes.headers['connection'] = 'keep-alive'
@@ -127,7 +127,7 @@ export function createConfig(options: CreateConfigOptions) {
 								secure: false,
 								configure: (proxy) => {
 									proxy.on('proxyRes', (proxyRes, req) => {
-										if (req.url?.includes('/logs')) {
+										if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
 											proxyRes.headers['cache-control'] = 'no-cache'
 
 											proxyRes.headers['connection'] = 'keep-alive'
