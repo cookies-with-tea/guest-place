@@ -13,6 +13,7 @@ interface Node extends d3.SimulationNodeDatum {
 	id: string
 	group: number
 	status: 'online' | 'offline'
+	type: 'shell' | 'mfe' | 'route' | 'package'
 	x?: number
 	y?: number
 }
@@ -37,7 +38,7 @@ const initChart = () => {
 	if (!svgRef.value || !chartContainer.value) return
 
 	const width = chartContainer.value.clientWidth
-	const height = 400
+	const height = 500 // Increased height for more nodes
 
 	// Deep copy for D3 mutations
 	const nodes = props.data.nodes.map((d) => ({ ...d }))
@@ -48,17 +49,42 @@ const initChart = () => {
 
 	const svg = d3.select(svgRef.value).attr('width', width).attr('height', height).attr('viewBox', [0, 0, width, height])
 
+	// Zoom and Pan
+	const g = svg.append('g')
+
+	const zoom = d3
+		.zoom()
+		.scaleExtent([0.1, 8])
+		.on('zoom', (event) => {
+			g.attr('transform', event.transform)
+		})
+
+	svg.call(zoom as any)
+
 	// Add glow filter
 	const defs = svg.append('defs')
-	const filter = defs.append('filter').attr('id', 'glow')
 
-	filter.append('feGaussianBlur').attr('stdDeviation', '3.5').attr('result', 'coloredBlur')
+	// Shell/MFE glow
+	const glow = defs.append('filter').attr('id', 'glow')
 
-	const feMerge = filter.append('feMerge')
+	glow.append('feGaussianBlur').attr('stdDeviation', '3.5').attr('result', 'coloredBlur')
 
-	feMerge.append('feMergeNode').attr('in', 'coloredBlur')
+	const feMergeGlow = glow.append('feMerge')
 
-	feMerge.append('feMergeNode').attr('in', 'SourceGraphic')
+	feMergeGlow.append('feMergeNode').attr('in', 'coloredBlur')
+
+	feMergeGlow.append('feMergeNode').attr('in', 'SourceGraphic')
+
+	// Route glow (purple)
+	const routeGlow = defs.append('filter').attr('id', 'routeGlow')
+
+	routeGlow.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur')
+
+	const feMergeRoute = routeGlow.append('feMerge')
+
+	feMergeRoute.append('feMergeNode').attr('in', 'coloredBlur')
+
+	feMergeRoute.append('feMergeNode').attr('in', 'SourceGraphic')
 
 	const simulation = d3
 		.forceSimulation(nodes as any)
@@ -67,49 +93,106 @@ const initChart = () => {
 			d3
 				.forceLink(links)
 				.id((d: any) => d.id)
-				.distance(150)
-		)
-		.force('charge', d3.forceManyBody().strength(-500))
-		.force('center', d3.forceCenter(width / 2, height / 2))
-		.force('collision', d3.forceCollide().radius(50))
+				.distance((d: any) => {
+					if (d.target.type === 'route') return 60
+					if (d.target.type === 'package') return 100
 
-	const link = svg
+					return 180
+				})
+		)
+		.force(
+			'charge',
+			d3.forceManyBody().strength((d: any) => {
+				if (d.type === 'shell') return -1000
+				if (d.type === 'package') return -200
+
+				return -500
+			})
+		)
+		.force('center', d3.forceCenter(width / 2, height / 2))
+		.force(
+			'collision',
+			d3.forceCollide().radius((d: any) => {
+				if (d.type === 'shell') return 60
+				if (d.type === 'route') return 30
+
+				return 40
+			})
+		)
+
+	const link = g
 		.append('g')
 		.selectAll('path')
 		.data(links)
 		.join('path')
 		.attr('fill', 'none')
-		.attr('stroke', 'rgba(66, 184, 131, 0.2)')
-		.attr('stroke-width', 2)
+		.attr('stroke', (d: any) => {
+			if (d.target.type === 'route') return 'rgba(100, 108, 255, 0.15)'
+			if (d.target.type === 'package') return 'rgba(144, 147, 153, 0.1)'
+
+			return 'rgba(66, 184, 131, 0.2)'
+		})
+		.attr('stroke-width', (d: any) => (d.target.type === 'package' ? 1 : 2))
+		.attr('stroke-dasharray', (d: any) => (d.target.type === 'package' ? '4,4' : 'none'))
 		.attr('class', 'link-path')
 
-	const nodeGroup = svg
+	const nodeGroup = g
 		.append('g')
 		.selectAll('g')
 		.data(nodes)
 		.join('g')
+		.attr('class', (d) => `node-group type-${d.type}`)
 		.call(drag(simulation as any) as any)
 
 	// Node circles
 	nodeGroup
 		.append('circle')
-		.attr('r', (d) => (d.id === 'Shell' ? 18 : 12))
-		.attr('fill', (d) => (d.id === 'Shell' ? '#35495e' : d.status === 'online' ? '#42b883' : '#ff5f5f'))
-		.attr('stroke', (d) => (d.id === 'Shell' ? '#42b883' : 'transparent'))
+		.attr('r', (d) => {
+			if (d.type === 'shell') return 20
+			if (d.type === 'mfe') return 14
+			if (d.type === 'route') return 8
+
+			return 6
+		})
+		.attr('fill', (d) => {
+			if (d.type === 'shell') return '#35495e'
+			if (d.type === 'route') return '#646cff'
+			if (d.type === 'package') return '#909399'
+
+			return d.status === 'online' ? '#42b883' : '#ff5f5f'
+		})
+		.attr('stroke', (d) => (d.type === 'shell' ? '#42b883' : 'transparent'))
 		.attr('stroke-width', 2)
-		.style('filter', (d) => (d.status === 'online' ? 'url(#glow)' : 'none'))
+		.style('filter', (d) => {
+			if (d.type === 'shell' || (d.type === 'mfe' && d.status === 'online')) return 'url(#glow)'
+			if (d.type === 'route') return 'url(#routeGlow)'
+
+			return 'none'
+		})
 		.attr('class', 'node-circle')
+		.style('opacity', (d) => (d.type === 'package' ? 0.6 : 1))
 
 	// Labels
 	nodeGroup
 		.append('text')
 		.text((d) => d.id)
-		.attr('dx', (d) => (d.id === 'Shell' ? 25 : 18))
+		.attr('dx', (d) => {
+			if (d.type === 'shell') return 28
+			if (d.type === 'mfe') return 20
+
+			return 14
+		})
 		.attr('dy', 5)
 		.attr('class', 'node-text')
-		.style('font-size', (d) => (d.id === 'Shell' ? '14px' : '12px'))
-		.style('font-weight', '600')
+		.style('font-size', (d) => {
+			if (d.type === 'shell') return '14px'
+			if (d.type === 'mfe') return '12px'
+
+			return '10px'
+		})
+		.style('font-weight', (d) => (d.type === 'shell' || d.type === 'mfe' ? '700' : '500'))
 		.style('pointer-events', 'none')
+		.style('opacity', (d) => (d.type === 'package' ? 0.5 : 1))
 
 	simulation.on('tick', () => {
 		link.attr('d', (d: any) => {
@@ -168,7 +251,12 @@ watch(
 	position: relative;
 	border-radius: 12px;
 	background: transparent;
+	cursor: grab;
 	overflow: hidden;
+}
+
+.mfe-stats-chart:active {
+	cursor: grabbing;
 }
 
 .chart-overlay {

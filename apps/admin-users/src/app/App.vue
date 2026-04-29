@@ -1,7 +1,7 @@
 <template>
 	<UiAuthGuard>
 		<div class="app-layout">
-			<UiSidebar />
+			<UiSidebar simple />
 			<main class="app-main">
 				<UiFloatingSettings />
 				<router-view />

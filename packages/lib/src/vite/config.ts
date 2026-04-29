@@ -4,7 +4,7 @@ import { defu } from 'defu'
 import { builtinModules } from 'node:module'
 import { resolve } from 'node:path'
 import { loadEnv } from 'vite'
-import { defineConfig, type UserConfig } from 'vitest/config'
+import { defineConfig, type ViteUserConfig } from 'vitest/config'
 
 import { APPS_PORTS } from '../constants/ports'
 
@@ -14,7 +14,7 @@ export interface CreateConfigOptions {
 	shared?: string[] | Record<string, any>
 	exposes?: Record<string, string>
 	remotes?: Record<string, string>
-	overrides?: UserConfig
+	overrides?: ViteUserConfig
 	plugins?: any[]
 	serverPort?: number
 	previewPort?: number
@@ -50,7 +50,7 @@ export function createConfig(options: CreateConfigOptions) {
 		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
 		const isProduction = mode === 'production' || command === 'build'
 
-		const baseConfig: UserConfig = {
+		const baseConfig: ViteUserConfig = {
 			root: appDir,
 			base: '/', // Keep base as / but override URLs for built assets
 			plugins: [
@@ -102,6 +102,17 @@ export function createConfig(options: CreateConfigOptions) {
 								target: env.VITE_API_BASE,
 								changeOrigin: true,
 								secure: false,
+								// Ensure SSE works by disabling buffering
+								configure: (proxy) => {
+									proxy.on('proxyRes', (proxyRes, req) => {
+										// For SSE, we want to ensure no buffering
+										if (req.url?.includes('/logs')) {
+											proxyRes.headers['cache-control'] = 'no-cache'
+
+											proxyRes.headers['connection'] = 'keep-alive'
+										}
+									})
+								},
 							},
 						}
 					: {},
@@ -114,6 +125,15 @@ export function createConfig(options: CreateConfigOptions) {
 								target: env.VITE_API_BASE,
 								changeOrigin: true,
 								secure: false,
+								configure: (proxy) => {
+									proxy.on('proxyRes', (proxyRes, req) => {
+										if (req.url?.includes('/logs')) {
+											proxyRes.headers['cache-control'] = 'no-cache'
+
+											proxyRes.headers['connection'] = 'keep-alive'
+										}
+									})
+								},
 							},
 						}
 					: {},

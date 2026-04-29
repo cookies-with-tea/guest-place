@@ -59,7 +59,7 @@ onMounted(() => {
 	position: fixed;
 	border-color: var(--gp-primary-hover);
 	box-shadow: 0 8px 16px rgb(0, 0, 0, 0.2);
-	color: #fff;
+	color: var(--gp-white);
 	background: var(--gp-primary);
 	z-index: 9999;
 }
@@ -83,15 +83,15 @@ onMounted(() => {
 }
 
 .is-dark .switcher-icon {
-	color: #fbbf24;
+	color: var(--gp-warning-light);
 	transform: rotate(360deg);
 }
 
 .ui-theme-switcher:not(.is-dark) .switcher-icon {
-	color: #f59e0b;
+	color: var(--gp-warning);
 }
 
 .ui-theme-switcher.is-floating:not(.is-dark) .switcher-icon {
-	color: #fff;
+	color: var(--gp-white);
 }
 </style>

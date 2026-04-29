@@ -68,24 +68,44 @@ const loadRemoteRoutes = async (app: any) => {
 }
 
 const routesToSidebar = (groups: any[]) => {
+	const processRoute = (route: any): any => {
+		const item: any = {
+			title: route.meta?.title || route.name,
+			path: route.path,
+		}
+
+		if (Array.isArray(route.children)) {
+			const visibleChildren = route.children
+				.filter((child: any) => !child.meta?.hideInSidebar && !child.path.includes(':'))
+				.map(processRoute)
+
+			if (visibleChildren.length > 0) {
+				item.children = visibleChildren
+			}
+		}
+
+		return item
+	}
+
 	return groups.map((group: any) => {
-		if (group.routes.length === 1 && group.routes[0].path === `/${group.name}`) {
+		const visibleRoutes = group.routes.filter((route: any) => !route.meta?.hideInSidebar && !route.path.includes(':'))
+
+		// If there is only one route and it's the root of the MFE
+		if (visibleRoutes.length === 1 && visibleRoutes[0].path === `/${group.name}`) {
+			const processed = processRoute(visibleRoutes[0])
+
 			return {
-				title: group.routes[0].meta?.title || group.routes[0].name,
-				path: group.routes[0].path,
+				title: processed.title || group.title,
+				path: processed.path,
 				icon: group.icon,
+				children: processed.children,
 			}
 		}
 
 		return {
 			title: group.title,
 			icon: group.icon,
-			children: group.routes
-				.filter((route: any) => !route.meta?.hideInSidebar && !route.path.includes(':'))
-				.map((route: any) => ({
-					title: route.meta?.title || route.name,
-					path: route.path,
-				})),
+			children: visibleRoutes.map(processRoute),
 		}
 	})
 }

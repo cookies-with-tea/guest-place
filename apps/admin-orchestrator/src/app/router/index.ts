@@ -1,39 +1,44 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-import { type MFLifecycleHooks, ROUTES } from '@admin-panel/lib'
+import { ROUTES } from '@admin-panel/lib'
 
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorPage',
-		component: () => import('#pages/orchestrator-page'),
+		name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorTopology',
+		component: () => import('#pages/orchestrator-page/ui/TopologyPage.vue'),
 		meta: {
-			title: (ROUTES as any).orchestrator?.list?.title || 'Оркестратор',
+			title: 'Топология',
+			icon: 'Coordinate', // This icon will be used for the whole group in Shell
 		},
 	},
 	{
-		path: '/features',
-		name: (ROUTES as any).orchestrator?.features?.name || 'FeaturesPage',
-		component: () => import('#pages/features-page'),
+		path: '/modules',
+		name: 'OrchestratorModules',
+		component: () => import('#pages/orchestrator-page/ui/ModulesPage.vue'),
 		meta: {
-			title: (ROUTES as any).orchestrator?.features?.title || 'Флаги фич',
+			title: 'Модули',
+		},
+	},
+	{
+		path: '/monitoring',
+		name: 'OrchestratorMonitoring',
+		component: () => import('#pages/orchestrator-page/ui/MonitoringPage.vue'),
+		meta: {
+			title: 'Мониторинг',
+		},
+	},
+	{
+		path: '/logs',
+		name: 'OrchestratorLogs',
+		component: () => import('#pages/orchestrator-page/ui/LogsPage.vue'),
+		meta: {
+			title: 'Логи системы',
 		},
 	},
 ]
 
 export const router = createRouter({
-	history: createWebHistory(),
+	history: createWebHistory(import.meta.env.BASE_URL),
 	routes,
 })
-
-export const hooks: MFLifecycleHooks = {
-	onMount: async (app: any, context: any) => {
-		// eslint-disable-next-line no-console
-		console.log('[MF orchestrator] Mounted', context)
-	},
-}
-
-export default {
-	routes,
-	hooks,
-}

@@ -84,7 +84,7 @@ p {
 .el-button--primary {
 	border: none !important;
 	box-shadow: 0 4px 16px var(--gp-primary-light);
-	color: #fff !important;
+	color: var(--gp-white) !important;
 	background: var(--gp-primary) !important;
 }
 
@@ -96,7 +96,7 @@ p {
 .el-button--danger {
 	border: none !important;
 	box-shadow: 0 4px 16px rgb(255, 95, 95, 0.3);
-	color: #fff !important;
+	color: var(--gp-white) !important;
 	background: #ff5f5f !important;
 }
 

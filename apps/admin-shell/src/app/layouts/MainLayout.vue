@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
@@ -73,6 +73,23 @@ const currentTitle = computed(() => {
 
 const { user, isAuthenticated, clearAuth } = useAuth()
 const loginDialogVisible = ref(false)
+
+const handleUnauthorized = (event: any) => {
+	// Prevent default redirect to /login if we want to show a dialog instead
+	if (event.preventDefault) {
+		event.preventDefault()
+	}
+
+	loginDialogVisible.value = true
+}
+
+onMounted(() => {
+	window.addEventListener('auth:unauthorized', handleUnauthorized)
+})
+
+onUnmounted(() => {
+	window.removeEventListener('auth:unauthorized', handleUnauthorized)
+})
 </script>
 
 <style lang="scss" scoped>

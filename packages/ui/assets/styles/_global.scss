@@ -2,6 +2,10 @@
 
 :root {
 	/* Light Theme Colors */
+	--gp-white: #fff;
+	--gp-black: #000;
+	--gp-warning: #f59e0b;
+	--gp-warning-light: #fbbf24;
 	--gp-bg-main: #{$gp-bg-light};
 	--gp-bg-surface: #{$gp-surface-light};
 	--gp-bg-element: #{$gp-bg-2-light};

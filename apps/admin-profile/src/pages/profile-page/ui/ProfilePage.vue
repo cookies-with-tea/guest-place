@@ -337,7 +337,7 @@ const changePassword = async () => {
 
 	&__edit-icon {
 		font-size: 24px !important;
-		color: #fff !important;
+		color: var(--gp-white) !important;
 	}
 
 	&__actions {

@@ -1,13 +1,36 @@
 <template>
-	<UiThemeSwitcher floating />
-	<router-view />
+	<UiAuthGuard>
+		<div class="app-layout">
+			<UiSidebar :data="sidebarData" :show-context-switcher="false" simple />
+			<main class="app-main">
+				<UiFloatingSettings />
+				<router-view />
+			</main>
+		</div>
+	</UiAuthGuard>
 </template>
 
 <script setup lang="ts">
-import { UiThemeSwitcher } from '@admin-panel/ui'
-// Global app logic
+import { UiAuthGuard, UiFloatingSettings, UiSidebar } from '@admin-panel/ui'
+
+const sidebarData = [
+	{ title: 'Топология', path: '/', icon: 'Share' },
+	{ title: 'Модули (MFE)', path: '/modules', icon: 'Monitor' },
+	{ title: 'Мониторинг', path: '/monitoring', icon: 'DataAnalysis' },
+	{ title: 'Логи системы', path: '/logs', icon: 'Memo' },
+]
 </script>
 
 <style>
-/* Global styles for this MF */
+.app-layout {
+	min-height: 100vh;
+	display: flex;
+	background: var(--gp-bg-main);
+}
+
+.app-main {
+	flex: 1;
+	padding: 32px;
+	overflow-y: auto;
+}
 </style>

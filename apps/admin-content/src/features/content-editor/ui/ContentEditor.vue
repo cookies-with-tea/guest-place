@@ -357,7 +357,7 @@ watch(activeTab, (tab) => {
 	width: 100%;
 	height: 600px;
 	border: none;
-	background: #fff;
+	background: var(--gp-white);
 	transition: all 0.3s ease;
 }
 

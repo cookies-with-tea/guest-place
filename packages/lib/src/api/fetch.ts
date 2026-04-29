@@ -59,9 +59,6 @@ export const createApi = (entityName: string) => {
 
 					localStorage.removeItem('gp_refresh_token')
 
-					// eslint-disable-next-line no-console
-					console.warn(`[fetchData] Unauthorized (401/403) for ${baseUrl}${url}. Clearing auth and potential redirect.`)
-
 					const event = new CustomEvent('auth:unauthorized', {
 						cancelable: true,
 						detail: {

@@ -156,7 +156,7 @@ const emitField = (field: keyof SeoData, value: string | undefined) => {
 	flex-direction: column;
 	border: 1px solid #dfe1e5;
 	border-radius: 8px;
-	background: #fff;
+	background: var(--gp-white);
 	padding: 20px;
 	gap: 4px;
 }
