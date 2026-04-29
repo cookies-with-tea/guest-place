@@ -13,7 +13,15 @@ export const fetchData = async <T>(
   options?: JsonFetchOptions
 ): Promise<IResponse<CamelCasedProperties<T>>> => {
   try {
-    const body = options?.body ? camelToSnake(options.body) : undefined
+    let body = undefined
+
+    if (options?.body) {
+      if (options.body instanceof FormData) {
+        body = options.body
+      } else {
+        body = camelToSnake(options.body as Record<string, any>)
+      }
+    }
 
     const response = await $fetch<IResponse<SnakeCasedProperties<T>>>(url, {
       ...options,

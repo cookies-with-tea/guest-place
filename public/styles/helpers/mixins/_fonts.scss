@@ -20,7 +20,7 @@
         url($fonts-path + '/' + $font-name + '/' + $font-name + '-' + $font-type + '.ttf') format('truetype');
       font-family: $font-name;
       font-weight: $font-weight;
-      font-style: $font-style;
+      font-style: #{$font-style};
       font-display: swap;
     }
     /* stylelint-enable */

@@ -45,7 +45,7 @@
     <p class="ui-uploader__preview-name">{{ modelValue.name }}</p>
     <p class="ui-uploader__preview-success">Файл загружен</p>
 
-    <button class="ui-uploader__preview-delete" @click="modelValue = null">
+    <button class="ui-uploader__preview-delete" @click="resetFiles">
       <i>Delete</i>
     </button>
   </template>
@@ -79,9 +79,15 @@ const handleFileUploadOpen = () => {
   inputRef.value?.click()
 }
 
-const handleFileUpload = () => {
+const resetFiles = () => {
   modelValue.value = null
 
+  if(inputRef.value) {
+    inputRef.value.value = ''
+  }
+}
+
+const handleFileUpload = () => {
   const file = inputRef.value?.files?.[0]
 
   if (file) {
@@ -89,6 +95,8 @@ const handleFileUpload = () => {
 
     emit('upload', file)
   }
+
+  resetFiles()
 }
 </script>
 
