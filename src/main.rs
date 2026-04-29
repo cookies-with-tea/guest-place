@@ -146,8 +146,16 @@ impl Modify for SecurityAddon {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().init();
     dotenv::dotenv().ok();
+
+    let (log_tx, _) = tokio::sync::broadcast::channel(100);
+    let log_layer = guest_place::monitoring::service::LogBroadcastLayer { tx: log_tx.clone() };
+
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(log_layer)
+        .init();
 
     let config = AppConfig::new();
     let pool = create_pool(&config).await;
@@ -185,6 +193,7 @@ async fn main() {
         smtp_username,
         smtp_password,
         smtp_from,
+        log_tx,
     });
 
     let cors = {

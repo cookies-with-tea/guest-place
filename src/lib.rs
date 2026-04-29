@@ -10,6 +10,7 @@ pub mod media;
 pub mod mfe;
 pub mod user;
 pub mod platforms;
+pub mod monitoring;
 
 pub use crate::core::dto::ApiResponse;
 
@@ -45,6 +46,7 @@ pub struct AppState {
     pub smtp_username: String,
     pub smtp_password: String,
     pub smtp_from: String,
+    pub log_tx: tokio::sync::broadcast::Sender<String>,
 }
 
 pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, cors: CorsLayer) -> Router {
@@ -58,8 +60,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/guests", guests::router())
         .nest("/api/v1/platforms", platforms::handlers::router())
         .nest("/api/v1/features", features::router())
-        .nest_service("/uploads", ServeDir::new("uploads"))
-        .with_state(state.clone());
+        .nest_service("/uploads", ServeDir::new("uploads"));
 
     let protected_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::protected_router())
@@ -67,7 +68,6 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
         .nest("/api/v1/content", content::router())
-        .with_state(state.clone())
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -75,6 +75,8 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
 
     let app_router = public_router
         .merge(protected_router)
+        .nest("/api/v1/system", monitoring::router())
+        .with_state(state.clone())
         .layer(middleware::from_fn(locale_middleware));
 
     app_router
