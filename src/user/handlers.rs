@@ -832,7 +832,15 @@ async fn update(
                                 gender: user.gender,
                             };
 
-                            let msg = state.i18n.t("user.updated", &locale).await;
+                            let msg_key = if payload.role.is_some() && payload.status.is_none() && payload.first_name.is_none() {
+                                "user.role_updated"
+                            } else if payload.status.is_some() && payload.role.is_none() && payload.first_name.is_none() {
+                                "user.status_updated"
+                            } else {
+                                "user.updated"
+                            };
+
+                            let msg = state.i18n.t(msg_key, &locale).await;
                             into_api_response(StatusCode::OK, Some(user_response), None, Some(vec![msg]))
                         }
                         Err(_) => {
