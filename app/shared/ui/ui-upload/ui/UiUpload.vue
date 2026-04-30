@@ -1,17 +1,16 @@
 <template>
   <div
-    class="ui-upload"
+    class="ui-upload a"
     :class="classes"
-    @drop.prevent="console.log('элемент был использован')"
-    @dragenter="console.log('я в зоне дропа'); isAnimating = true; isDragover=true"
+    @drop.prevent="drop"
+    @dragenter="dragenter"
     @dragover.prevent="console.log('работаю всегда в зоне дропа')"
-    @dragleave.prevent="console.log('я покинул зону для дропа'); isAnimating = false; isDragover=false"
+    @dragleave.prevent="dragleave"
   >
     <UiIcon
       name="download"
       width="40px"
       height="36px"
-      :style="{ color: isAnimating ? 'var(--color-accent)' : '#A8ABB2' }"
     />
 
     <span class="ui-upload__on-drag">
@@ -28,25 +27,21 @@
       @change="handleFileUpload"
     />
 
-    <!-- Группа элементов, которые исчезают вместе -->
-    <Transition name="smooth" mode="out-in">
-      <div v-if="!isAnimating" key="controls" class="ui-upload__controls">
-        <span class="ui-upload__or">или</span>
+    <template v-if="!isDragover">
+      <span class="ui-upload__or">или</span>
 
-        <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
-          <UiIcon name="attach" width="16px" height="16px" />
-          Выберите файл
-        </button>
+      <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
+        <UiIcon name="attach" width="16px" height="16px" />
+        Выберите файл
+      </button>
 
-        <span class="ui-upload__max-weight">
-      Максимальный размер файла 30 MB
-    </span>
-      </div>
-    </Transition>
+      <span class="ui-upload__max-weight">
+        Максимальный размер файла 30 MB
+       </span>
+    </template>
   </div>
 
   <!-- Плавное появление/исчезновение превью файла -->
-
   <template v-if="!!modelValue">
     <div class="ui-uploader__preview">
       <i>Icon</i>
@@ -81,10 +76,46 @@ const isDragover = ref(false)
 
 const classes = computed(() => {
   return {
-    'is-animating': isAnimating.value,
     'is-dragover': isDragover.value
   }
 })
+
+
+let dragCounter = 0
+
+const dragenter = () => {
+  console.log('я в зоне дропа', event);
+
+  dragCounter++
+
+  isDragover.value = true
+}
+
+const dragleave = () => {
+  console.log('я покинул зону для дропа');
+
+  dragCounter--
+
+  // Сбрасываем флаг только когда счётчик <= 0 (полный выход из зоны)
+  if (dragCounter <= 0) {
+    isDragover.value = false
+    dragCounter = 0 // защита от отрицательных значений
+  }
+}
+
+const drop = (event: DragEvent) => {
+  console.log('элемент сброшен', event.dataTransfer.files);
+  // Сбрасываем состояние сразу
+  dragCounter = 0
+  isDragover.value = false
+
+  // const files = event.dataTransfer?.files
+  // if (files?.length) {
+  //   const file = files[0]
+  //   // Ваша логика валидации/отправки...
+  //   // emit('upload', file)
+  // }
+}
 
 const emit = defineEmits<IEmits>()
 
@@ -122,11 +153,13 @@ const handleFileUpload = () => {
 
 .ui-upload {
   --ui-upload-border-color: #A8ABB2;
+  --ui-upload-bg-color: transparent;
+  --ui-upload-error: #D51A52;
+
   --ui-upload-button-bg-color: var(--color-accent);
   --ui-upload-button-color: #fff;
 
-  --ui-upload-bg-color: transparent;
-    //#{darken(var(--color-accent), 2)};
+  --ui-upload-icon-color: #A8ABB2;
 
   width: 100%;
   height: 204px;
@@ -144,12 +177,20 @@ const handleFileUpload = () => {
   background-color: var(--ui-upload-bg-color);
   gap: 8px;
 
+  & > :deep(.ui-icon) {
+    color: var(--ui-upload-icon-color);
+  }
+
+  &--error {
+    --ui-upload-border-color: var(--ui-upload-error);
+    --ui-upload-icon-color: var(--ui-upload-error);
+  }
+
   &.is-dragover {
     --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
     --ui-upload-bg-color: #{darken(#ECF4FD, 5)};
-  }
+    --ui-upload-icon-color: var(--color-accent);
 
-  &.is-animating {
     animation-play-state: running;
   }
 
@@ -197,14 +238,5 @@ const handleFileUpload = () => {
     vertical-align: middle;
     color: var(--color-text-regular);
   }
-}
-
-
-.ui-upload__controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
 }
 </style>
