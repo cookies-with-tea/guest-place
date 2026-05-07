@@ -1,10 +1,11 @@
 <template>
   <div
-    class="ui-upload a"
+    class="ui-upload"
     :class="classes"
+    @click="handleFileUploadOpen"
     @drop.prevent="drop"
     @dragenter="dragenter"
-    @dragover.prevent="console.log('работаю всегда в зоне дропа')"
+    @dragover.prevent="onDragOver"
     @dragleave.prevent="dragleave"
   >
     <UiIcon
@@ -30,7 +31,7 @@
     <template v-if="!isDragover">
       <span class="ui-upload__or">или</span>
 
-      <button class="ui-upload__btn" type="button" @click="handleFileUploadOpen">
+      <button class="ui-upload__btn" type="button">
         <UiIcon name="attach" width="16px" height="16px" />
         Выберите файл
       </button>
@@ -56,7 +57,7 @@
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui';
-
+import { mediaApi } from '#entities/media'
 import { computed, ref, useTemplateRef } from 'vue'
 
 interface IProps {
@@ -71,7 +72,6 @@ const props = withDefaults(defineProps<IProps>(), {
   maxSize: 30
 })
 
-const isAnimating = ref(false)
 const isDragover = ref(false)
 
 const classes = computed(() => {
@@ -83,8 +83,10 @@ const classes = computed(() => {
 
 let dragCounter = 0
 
-const dragenter = () => {
-  console.log('я в зоне дропа', event);
+const dragenter = (e) => {
+  // e.dataTransfer.dropEffect = 'copy'
+  console.log('я в зоне дропа', e);
+
 
   dragCounter++
 
@@ -103,12 +105,19 @@ const dragleave = () => {
   }
 }
 
+function onDragOver(e: DragEvent) {
+  console.log('работаю всегда в зоне дропа')
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'copy';
+}
+
 const drop = (event: DragEvent) => {
-  console.log('элемент сброшен', event.dataTransfer.files);
+  console.log('элемент сброшен', event.dataTransfer.files[0], event);
   // Сбрасываем состояние сразу
   dragCounter = 0
   isDragover.value = false
 
+  // emit('upload', event.dataTransfer.files)
   // const files = event.dataTransfer?.files
   // if (files?.length) {
   //   const file = files[0]
@@ -116,6 +125,9 @@ const drop = (event: DragEvent) => {
   //   // emit('upload', file)
   // }
 }
+
+// 1. типизировать: все
+// 2.
 
 const emit = defineEmits<IEmits>()
 
@@ -127,21 +139,35 @@ const handleFileUploadOpen = () => {
   inputRef.value?.click()
 }
 
+async function uploadMedia(file) {
+  const formData = new FormData()
+
+  formData.append('file', file)
+  // formData.append('alt', 'someText')
+
+  const { data } = await mediaApi.upload(formData)
+
+  if (data) {
+    modelValue.value = data.uuid
+  }
+
+  console.log(file)
+}
+
 const resetFiles = () => {
   modelValue.value = null
 
-  if(inputRef.value) {
+  if (inputRef.value) {
     inputRef.value.value = ''
   }
 }
 
 const handleFileUpload = () => {
   const file = inputRef.value?.files?.[0]
+  // console.log(inputRef.value?.files)
 
   if (file) {
-    modelValue.value = file
-
-    emit('upload', file)
+    uploadMedia(file)
   }
 
   resetFiles()
@@ -175,23 +201,33 @@ const handleFileUpload = () => {
   animation: borderAnimation 0.9s infinite linear reverse;
   animation-play-state: paused;
   background-color: var(--ui-upload-bg-color);
+  cursor: pointer;
   gap: 8px;
+  transition:
+    border var(--transition-duration-primary),
+    background-color var(--transition-duration-primary),
+  ;
+
+  &:hover,
+  &.is-dragover {
+    --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
+    --ui-upload-bg-color: #{darken(#ECF4FD, 5)};
+    --ui-upload-icon-color: var(--color-accent);
+    animation-play-state: running;
+  }
+
+  &:active {
+    --ui-upload-bg-color: #{darken(#ECF4FD, 3)};
+  }
 
   & > :deep(.ui-icon) {
     color: var(--ui-upload-icon-color);
+    transition: color var(--transition-duration-primary);
   }
 
   &--error {
     --ui-upload-border-color: var(--ui-upload-error);
     --ui-upload-icon-color: var(--ui-upload-error);
-  }
-
-  &.is-dragover {
-    --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
-    --ui-upload-bg-color: #{darken(#ECF4FD, 5)};
-    --ui-upload-icon-color: var(--color-accent);
-
-    animation-play-state: running;
   }
 
   @keyframes borderAnimation {

@@ -88,7 +88,7 @@
 
     <div class="box">
       <div class="column">
-        <UiUpload @upload="uploadMedia"/>
+        <UiUpload v-model="form.mainImg"/>
       </div>
     </div>
   </div>
@@ -101,23 +101,15 @@ import type { TUiAccordionModelValue } from '#shared/ui/ui-accordion/types'
 import { FORM_RULES } from '#shared/constants'
 import { authApi, type IAuthRefreshResponse, type IAuthRefreshUpdateRequest } from '#entities/auth'
 import { useForm } from '#shared/ui/ui-form'
-import { mediaApi } from '#entities/media'
 import type { Rules } from 'async-validator'
 
 const formRules: Rules = {
   refreshToken: FORM_RULES.name,
 }
 
-async function uploadMedia(file) {
-  const formData = new FormData()
-
-  // formData.append('file', file)
-  formData.append('alt', 'someText')
-
-  const data = await mediaApi.upload(formData)
-
-  console.log(data)
-}
+const form = ref({
+  mainImg: null
+})
 
 const activeListAccordion = ref<TUiAccordionModelValue>('1')
 const inputValue = ref('')
