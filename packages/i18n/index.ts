@@ -14,14 +14,26 @@ export interface Language {
 }
 
 // Global reactive state
-const currentLocale = ref<Locale>(localStorage.getItem('gp-locale') || 'en')
+const getInitialLocale = (): Locale => {
+	if (typeof window !== 'undefined' && window.localStorage) {
+		return localStorage.getItem('gp-locale') || 'en'
+	}
+
+	return 'en'
+}
+
+const currentLocale = ref<Locale>(getInitialLocale())
 const availableLanguages = ref<Language[]>([])
 const globalTranslations = ref<TranslationDict>({})
 
 export function setLocale(locale: Locale) {
 	currentLocale.value = locale
 
-	localStorage.setItem('gp-locale', locale)
+	updateGlobalTranslations()
+
+	if (typeof window !== 'undefined' && window.localStorage) {
+		localStorage.setItem('gp-locale', locale)
+	}
 }
 
 export function getLocale() {
@@ -40,6 +52,7 @@ export function initI18n(config: I18nConfig) {
 
 const cache = new Map<Locale, TranslationDict>()
 const loading = new Map<string, Promise<void>>()
+const loadedNamespaces = new Set<string>() // e.g., "en:common"
 
 function updateGlobalTranslations() {
 	const dict = cache.get(currentLocale.value) || {}
@@ -57,13 +70,20 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 		return cache.get(locale) || {}
 	}
 
-	if (cache.has(locale)) {
-		const dict = cache.get(locale)!
-		const hasDict = Object.keys(dict).some((key) => key.startsWith(`${dictKey}.`))
-
-		if (hasDict) {
-			return dict
+	// If we already have any keys for this locale, we assume it's hydrated or loaded
+	if (loadedNamespaces.has(cacheKey)) {
+		if (typeof window !== 'undefined') {
+			console.log(`[i18n] Skipping fetch for ${dictKey}, namespace "${cacheKey}" is already marked as loaded.`)
 		}
+
+		return cache.get(locale) || {}
+	}
+
+	if (typeof window !== 'undefined') {
+		console.log(
+			`[i18n] Fetching ${dictKey} for locale "${locale}". Cache exists: ${cache.has(locale)}, keys:`,
+			Object.keys(cache.get(locale) || {}).length
+		)
 	}
 
 	const loadPromise = (async () => {
@@ -74,10 +94,16 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 				credentials: 'include',
 			})
 
+			if (typeof window === 'undefined') {
+				console.log(`[i18n Server] Loaded "${dictKey}" for "${locale}". Keys found:`, Object.keys(data || {}).length)
+			}
+
 			const current = cache.get(locale) || {}
 			const merged = { ...current, ...data }
 
 			cache.set(locale, merged)
+
+			loadedNamespaces.add(cacheKey)
 
 			if (locale === currentLocale.value) {
 				updateGlobalTranslations()
@@ -98,6 +124,10 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 }
 
 export async function loadLanguages(): Promise<Language[]> {
+	if (availableLanguages.value.length > 0) {
+		return availableLanguages.value
+	}
+
 	try {
 		const baseUrl = i18nConfig.apiBase || ''
 		const response = await ofetch(`${baseUrl}/api/v1/i18n/languages`)
@@ -160,6 +190,37 @@ export function clearI18nCache() {
 	globalTranslations.value = {}
 }
 
+export function getState() {
+	return {
+		locale: currentLocale.value,
+		languages: availableLanguages.value,
+		cache: Array.from(cache.entries()),
+		loadedNamespaces: Array.from(loadedNamespaces),
+	}
+}
+
+export function hydrateState(state: any) {
+	if (!state) return
+
+	if (state.locale) currentLocale.value = state.locale
+
+	if (state.languages) availableLanguages.value = state.languages
+
+	if (state.cache) {
+		state.cache.forEach(([locale, dict]: [Locale, TranslationDict]) => {
+			cache.set(locale, dict)
+		})
+	}
+
+	if (state.loadedNamespaces) {
+		state.loadedNamespaces.forEach((ns: string) => {
+			loadedNamespaces.add(ns)
+		})
+	}
+
+	updateGlobalTranslations()
+}
+
 // Initial update
 updateGlobalTranslations()
 
@@ -202,6 +263,8 @@ export const useI18n = () => {
 		setLocale,
 		loadLanguages,
 		loadNamespaces,
+		getState,
+		hydrateState,
 	}
 }
 

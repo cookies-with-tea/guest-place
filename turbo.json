@@ -1,5 +1,6 @@
 {
 	"$schema": "https://turborepo.com/schema.json",
+	"extends": ["//"],
 	"tasks": {
 		"build": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*", "vite.config.ts"],
@@ -50,6 +51,5 @@
 			"outputs": ["coverage/**"],
 			"cache": true
 		}
-	},
-	"globalDependencies": ["**/package.json"]
+	}
 }

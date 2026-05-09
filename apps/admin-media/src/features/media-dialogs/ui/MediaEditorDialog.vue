@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VueCropper } from 'vue-cropper'
+import { VueCropper } from 'vue-cropper/dist/vue-cropper.es.js'
 
 import { UiModal } from '@admin-panel/ui'
 import { RefreshLeft, RefreshRight, Sort } from '@element-plus/icons-vue'
