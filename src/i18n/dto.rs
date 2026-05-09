@@ -28,6 +28,17 @@ pub struct TranslationDTO {
     updated_at: NaiveDateTime,
 }
 
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct TranslationVersionDTO {
+    pub id: uuid::Uuid,
+    pub key: String,
+    pub locale: String,
+    pub value: String,
+    pub version_number: i32,
+    pub created_at: NaiveDateTime,
+    pub comment: Option<String>,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct LanguageDTO {
     pub code: String,

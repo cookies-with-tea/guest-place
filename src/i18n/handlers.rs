@@ -1,6 +1,6 @@
 use crate::{
     core::{dto::ApiResponse, response::into_api_response},
-    i18n::dto::{LanguageDTO, TranslationDTO, TranslationInput},
+    i18n::dto::{LanguageDTO, TranslationDTO, TranslationInput, TranslationVersionDTO},
     AppState,
 };
 use axum::{
@@ -48,6 +48,51 @@ pub async fn create_or_update(
     })?;
 
     for dto in dtos {
+        // 1. Get current value to save as version if it exists
+        let current: Option<(String,)> =
+            sqlx::query_as("SELECT value FROM i18n_translations WHERE key = $1 AND locale = $2")
+                .bind(&dto.key)
+                .bind(&dto.locale)
+                .fetch_optional(&mut *tx)
+                .await
+                .map_err(|e| {
+                    eprintln!("DB error fetching current translation: {}", e);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        into_api_response_internal("Failed to save versions".to_string()),
+                    )
+                })?;
+
+        if let Some((old_value,)) = current {
+            if old_value != dto.value {
+                let next_version: i32 = sqlx::query_scalar(
+                    "SELECT COALESCE(MAX(version_number), 0) + 1 FROM i18n_translation_versions WHERE key = $1 AND locale = $2"
+                )
+                .bind(&dto.key)
+                .bind(&dto.locale)
+                .fetch_one(&mut *tx)
+                .await
+                .map_err(|e| {
+                    eprintln!("DB error calculating version: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("Failed to calculate version".to_string()))
+                })?;
+
+                sqlx::query(
+                    "INSERT INTO i18n_translation_versions (key, locale, value, version_number) VALUES ($1, $2, $3, $4)"
+                )
+                .bind(&dto.key)
+                .bind(&dto.locale)
+                .bind(&old_value)
+                .bind(next_version)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| {
+                    eprintln!("DB error saving translation version: {}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("Failed to save translation version".to_string()))
+                })?;
+            }
+        }
+
         if let Err(e) = sqlx::query(
             r#"
             INSERT INTO i18n_translations (key, locale, value)
@@ -112,13 +157,28 @@ pub async fn get_all(
     Json<ApiResponseWithPagination<TranslationDTO>>,
     (StatusCode, Json<ApiResponseWithPagination<TranslationDTO>>),
 > {
-    let locale = params.get("locale").cloned().unwrap_or_else(|| "en".to_string());
-    let page = params.get("page").and_then(|p| p.parse::<i32>().ok()).unwrap_or(1);
-    let limit = params.get("limit").and_then(|l| l.parse::<i32>().ok()).unwrap_or(10);
+    let locale = params
+        .get("locale")
+        .cloned()
+        .unwrap_or_else(|| "en".to_string());
+    let page = params
+        .get("page")
+        .and_then(|p| p.parse::<i32>().ok())
+        .unwrap_or(1);
+    let limit = params
+        .get("limit")
+        .and_then(|l| l.parse::<i32>().ok())
+        .unwrap_or(10);
     let offset = ((page - 1) * limit) as i64;
-    
-    let search = params.get("search").map(|s| format!("%{}%", s.to_lowercase())).unwrap_or_else(|| "%".to_string());
-    let namespace = params.get("namespace").map(|ns| format!("{}.%", ns)).unwrap_or_else(|| "%".to_string());
+
+    let search = params
+        .get("search")
+        .map(|s| format!("%{}%", s.to_lowercase()))
+        .unwrap_or_else(|| "%".to_string());
+    let namespace = params
+        .get("namespace")
+        .map(|ns| format!("{}.%", ns))
+        .unwrap_or_else(|| "%".to_string());
 
     let total = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM i18n_translations WHERE locale = $1 AND key LIKE $2 AND LOWER(key) LIKE $3"
@@ -136,7 +196,7 @@ pub async fn get_all(
         "SELECT id, key, locale, value, created_at, updated_at FROM i18n_translations 
          WHERE locale = $1 AND key LIKE $2 AND LOWER(key) LIKE $3
          ORDER BY key ASC 
-         LIMIT $4 OFFSET $5"
+         LIMIT $4 OFFSET $5",
     )
     .bind(&locale)
     .bind(&namespace)
@@ -370,6 +430,145 @@ fn into_api_response_internal(message: String) -> Json<ApiResponse<()>> {
     })
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/i18n/versions/{key}/{locale}",
+    params(
+        ("key" = String, Path, description = "Translation key"),
+        ("locale" = String, Path, description = "Locale code")
+    ),
+    responses(
+        (status = 200, description = "List of translation versions", body = ApiResponse<Vec<TranslationVersionDTO>>),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn get_versions(
+    State(state): State<Arc<AppState>>,
+    Path((key, locale)): Path<(String, String)>,
+) -> Result<
+    Json<ApiResponse<Vec<TranslationVersionDTO>>>,
+    (StatusCode, Json<ApiResponse<Vec<TranslationVersionDTO>>>),
+> {
+    match sqlx::query_as::<_, TranslationVersionDTO>(
+        "SELECT * FROM i18n_translation_versions WHERE key = $1 AND locale = $2 ORDER BY version_number DESC"
+    )
+    .bind(&key)
+    .bind(&locale)
+    .fetch_all(&state.pool)
+    .await
+    {
+        Ok(versions) => Ok(Json(ApiResponse {
+            data: Some(versions),
+            errors: None,
+            messages: None,
+        })),
+        Err(e) => {
+            eprintln!("DB error: {}", e);
+            into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Failed to load versions".to_string()]))
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/i18n/versions/{version_id}/rollback",
+    responses(
+        (status = 200, description = "Rollback successful"),
+        (status = 404, description = "Version not found"),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn rollback(
+    State(state): State<Arc<AppState>>,
+    Path(version_id): Path<uuid::Uuid>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut tx = state.pool.begin().await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            into_api_response_internal("DB error".to_string()),
+        )
+    })?;
+
+    // 1. Get the version
+    let version: Option<TranslationVersionDTO> =
+        sqlx::query_as("SELECT * FROM i18n_translation_versions WHERE id = $1")
+            .bind(version_id)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    into_api_response_internal("DB error".to_string()),
+                )
+            })?;
+
+    let version = match version {
+        Some(v) => v,
+        None => {
+            return into_api_response(
+                StatusCode::NOT_FOUND,
+                None,
+                None,
+                Some(vec!["Version not found".to_string()]),
+            )
+        }
+    };
+
+    // 2. Save current as new version
+    let current_value: String =
+        sqlx::query_scalar("SELECT value FROM i18n_translations WHERE key = $1 AND locale = $2")
+            .bind(&version.key)
+            .bind(&version.locale)
+            .fetch_one(&mut *tx)
+            .await
+            .unwrap_or_default();
+
+    let next_version: i32 = sqlx::query_scalar(
+        "SELECT COALESCE(MAX(version_number), 0) + 1 FROM i18n_translation_versions WHERE key = $1 AND locale = $2"
+    )
+    .bind(&version.key)
+    .bind(&version.locale)
+    .fetch_one(&mut *tx)
+    .await
+    .unwrap_or(1);
+
+    sqlx::query("INSERT INTO i18n_translation_versions (key, locale, value, version_number, comment) VALUES ($1, $2, $3, $4, $5)")
+        .bind(&version.key)
+        .bind(&version.locale)
+        .bind(&current_value)
+        .bind(next_version)
+        .bind(format!("Rollback to version {}", version.version_number))
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("DB error".to_string())))?;
+
+    // 3. Update main table
+    sqlx::query("UPDATE i18n_translations SET value = $1, updated_at = NOW() WHERE key = $2 AND locale = $3")
+        .bind(&version.value)
+        .bind(&version.key)
+        .bind(&version.locale)
+        .execute(&mut *tx)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("DB error".to_string())))?;
+
+    tx.commit().await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            into_api_response_internal("DB error".to_string()),
+        )
+    })?;
+
+    state.i18n.clear_cache();
+    into_api_response(
+        StatusCode::OK,
+        None,
+        None,
+        Some(vec!["Rollback successful".to_string()]),
+    )
+}
+
 pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/languages", get(get_languages))
@@ -382,4 +581,6 @@ pub fn protected_router() -> Router<Arc<AppState>> {
         .route("/", post(create_or_update))
         .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))
+        .route("/versions/{key}/{locale}", get(get_versions))
+        .route("/versions/{version_id}/rollback", post(rollback))
 }

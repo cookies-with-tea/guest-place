@@ -5,6 +5,7 @@ use crate::media::dto::{
   MediaItemDTO,
   MediaItemFromDb,
   UpdateMediaDTO,
+  BulkUpdateMediaDTO,
 };
 use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
@@ -13,7 +14,7 @@ use crate::AppState;
 use axum::{
     extract::{multipart::MultipartRejection, DefaultBodyLimit, Multipart, Path, Query, State},
     http::StatusCode,
-    routing::{delete, get, post, put},
+    routing::{delete, get, post, put, patch},
     Extension, Json, Router,
 };
 use std::sync::Arc;
@@ -58,6 +59,7 @@ pub async fn create(
     let mut tags_map: BTreeMap<u32, Vec<String>> = BTreeMap::new();
     let mut upload_source = "site".to_string();
     let mut is_multiple = false;
+    let mut convert_to_webp_global = true;
     let mut field_errors: HashMap<String, Vec<String>> = HashMap::new();
 
     loop {
@@ -141,6 +143,10 @@ pub async fn create(
             if let Ok(text) = field.text().await {
                 upload_source = text;
             }
+        } else if name == "convert_to_webp" {
+            if let Ok(text) = field.text().await {
+                convert_to_webp_global = text == "true";
+            }
         }
     }
 
@@ -211,7 +217,7 @@ pub async fn create(
                 let extension = std::path::Path::new(&file_name).extension().and_then(|ext| ext.to_str()).unwrap_or("bin");
                 let final_name = std::path::Path::new(&file_name).file_stem().and_then(|s| s.to_str()).unwrap_or(&file_name).to_string();
 
-                let save_result = if media_type_str == "image" {
+                let save_result = if media_type_str == "image" && convert_to_webp_global {
                     let processed_data = state.media_storage.process_image(&data).await;
                     if let Ok(p_data) = processed_data {
                         state.media_storage.save_cas(&p_data, "webp").await
@@ -904,6 +910,111 @@ pub async fn delete_all(
     }
 }
 
+#[utoipa::path(
+    patch,
+    path = "/api/v1/media/bulk",
+    tag = "Media",
+    request_body = BulkUpdateMediaDTO,
+    responses(
+        (status = 200, description = "Bulk media update successful", body = ApiResponse<serde_json::Value>),
+        (status = 400, description = "Invalid request"),
+        (status = 500, description = "Internal server error")
+    ),
+    operation_id = "update_bulk_media",
+)]
+pub async fn update_bulk(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<BulkUpdateMediaDTO>,
+) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<serde_json::Value>>)> {
+    let uuids: Vec<Uuid> = payload.uuids.iter()
+        .filter_map(|s| Uuid::parse_str(s).ok())
+        .collect();
+
+    if uuids.is_empty() {
+        let msg = state.i18n.t("media.invalid_request", &locale).await;
+        return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+            data: None, 
+            errors: Some(error_map("uuids", "No valid UUIDs provided")), 
+            messages: Some(vec![msg]) 
+        })));
+    }
+
+    let mut update_query = "UPDATE media SET ".to_string();
+    let mut query_param_index = 1;
+    let mut has_updates = false;
+
+    if let Some(_name) = &payload.data.name {
+        update_query.push_str(&format!("name = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+    if let Some(_extension) = &payload.data.extension {
+        update_query.push_str(&format!("extension = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+    if let Some(_title) = &payload.data.title {
+        update_query.push_str(&format!("title = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+    if let Some(_alt) = &payload.data.alt {
+        update_query.push_str(&format!("alt = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+    if let Some(_category) = &payload.data.category {
+        update_query.push_str(&format!("category = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+    if let Some(_tags) = &payload.data.tags {
+        update_query.push_str(&format!("tags = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
+
+    if !has_updates {
+        let msg = state.i18n.t("media.no_update_fields", &locale).await;
+        return Err((StatusCode::BAD_REQUEST, Json(ApiResponse { 
+            data: None, 
+            errors: Some(error_map("update", "No fields to update")), 
+            messages: Some(vec![msg]) 
+        })));
+    }
+
+    // Remove trailing comma and space
+    update_query.truncate(update_query.len() - 2);
+
+    update_query.push_str(&format!(" WHERE uuid = ANY(${})", query_param_index));
+
+    let mut query = sqlx::query(&update_query);
+
+    if let Some(name) = &payload.data.name { query = query.bind(name); }
+    if let Some(extension) = &payload.data.extension { query = query.bind(extension); }
+    if let Some(title) = &payload.data.title { query = query.bind(title); }
+    if let Some(alt) = &payload.data.alt { query = query.bind(alt); }
+    if let Some(category) = &payload.data.category { query = query.bind(category); }
+    if let Some(tags) = &payload.data.tags { query = query.bind(tags); }
+
+    query = query.bind(uuids);
+
+    let result = query.execute(&state.pool).await;
+
+    match result {
+        Ok(_) => {
+            let msg = state.i18n.t("media.update_success", &locale).await;
+            into_api_response(StatusCode::OK, Some(json!({"updated": true})), None, Some(vec![msg]))
+        }
+        Err(e) => {
+            eprintln!("DB bulk update error: {:?}", e);
+            let msg = state.i18n.t("media.db_error", &locale).await;
+            into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, Some(error_map("database", "Bulk update failed")), Some(vec![msg]))
+        }
+    }
+}
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
@@ -911,6 +1022,7 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/{uuid}", get(get_one))
         .route("/{uuid}", put(update))
         .route("/{uuid}", delete(delete_one))
+        .route("/bulk", patch(update_bulk))
         .route("/", delete(delete_all))
 }
 

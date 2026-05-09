@@ -41,6 +41,13 @@ pub struct UpdateMediaDTO {
     pub tags: Option<Vec<String>>,
 }
 
+#[derive(Deserialize, Debug, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkUpdateMediaDTO {
+    pub uuids: Vec<String>,
+    pub data: UpdateMediaDTO,
+}
+
 #[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
 pub struct MediaFilterQuery {
     pub page: Option<i32>,

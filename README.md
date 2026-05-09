@@ -36,6 +36,12 @@ docker-compose up db redis -d --build
 
 ### Подсказки, чтобы не забыть
 
+**run new migration**
+
+```bash
+sqlx migrate run --database-url postgresql://admin:admin@localhost:5432/admin
+```
+
 **fix postgres with sqlx** - add postgres to features
 
 ```bash

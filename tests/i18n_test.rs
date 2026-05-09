@@ -24,6 +24,7 @@ async fn setup_test_server() -> TestServer {
         redis.clone(),
     ));
 
+    let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let state = Arc::new(AppState {
         pool: pool.clone(),
         config: config.clone(),
@@ -41,6 +42,7 @@ async fn setup_test_server() -> TestServer {
         smtp_username: "test".to_string(),
         smtp_password: "test".to_string(),
         smtp_from: "test@example.com".to_string(),
+        log_tx,
     });
 
     let openapi = ApiDoc::openapi();

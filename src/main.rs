@@ -69,6 +69,8 @@ use utoipa::{
     guest_place::guests::handlers::update_guests,
     guest_place::platforms::handlers::get_platforms,
     guest_place::platforms::handlers::update_platforms,
+    guest_place::monitoring::handlers::get_health,
+    guest_place::monitoring::handlers::get_stats_stream,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -81,6 +83,7 @@ use utoipa::{
         (name = "Features", description = "Feature Flags management"),
         (name = "Content", description = "Dynamic Content Management"),
         (name = "Platforms", description = "Platforms information"),
+        (name = "System", description = "System monitoring and orchestration"),
   ),
   components(
     schemas(
@@ -118,6 +121,7 @@ use utoipa::{
         guest_place::platforms::dto::PlatformsResponseDTO,
         guest_place::user::dto::ChangePasswordDTO,
         guest_place::core::dto::PaginationDTO,
+        guest_place::monitoring::handlers::HealthStatus,
     )
   )
 )]

@@ -58,7 +58,7 @@ pub fn get_system_stats(mfes: Vec<(String, String)>) -> SystemStats {
     if let Some(process) = sys.process(sysinfo::get_current_pid().unwrap()) {
         let cpu = process.cpu_usage();
         processes.push(ProcessStats {
-            name: "Main Backend".to_string(),
+            name: "orchestrator".to_string(),
             memory_used: process.memory(),
             cpu_usage: if cpu.is_nan() || cpu.is_infinite() { 0.0 } else { cpu },
             is_system: true,
@@ -70,14 +70,20 @@ pub fn get_system_stats(mfes: Vec<(String, String)>) -> SystemStats {
     for process in sys.processes().values() {
         let cmd = process.cmd().iter().map(|s| s.to_string_lossy()).collect::<Vec<_>>().join(" ");
         let cwd = process.cwd().map(|p| p.to_string_lossy().to_string()).unwrap_or_default();
-        let search_text = format!("{} {}", cmd, cwd).to_lowercase();
+        let process_name = process.name().to_string_lossy().to_lowercase();
+        let search_text = format!("{} {} {}", process_name, cmd, cwd).to_lowercase();
 
         let mut matched_name = None;
 
         // Dynamic discovery from DB
         for (mfe_name, display_name) in &mfes {
+            if mfe_name == "orchestrator" { continue; }
+
             let keyword = format!("admin-{}", mfe_name);
-            if search_text.contains(&keyword) || search_text.contains(mfe_name) {
+            
+            // Be more strict: check if it's likely a dev server for this MFE
+            if (search_text.contains(&keyword) && search_text.contains("node")) || 
+               (process_name.contains(&keyword)) {
                 matched_name = Some(display_name.clone());
                 break;
             }

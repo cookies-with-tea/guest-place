@@ -30,6 +30,7 @@ async fn setup_test_app() -> axum::Router {
     let redis_service = Arc::new(RedisService::new(redis_pool));
         
     let config = AppConfig::new();
+    let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let state = Arc::new(AppState {
         pool: pool.clone(),
         config: config.clone(),
@@ -44,6 +45,7 @@ async fn setup_test_app() -> axum::Router {
         smtp_username: "test".to_string(),
         smtp_password: "test".to_string(),
         smtp_from: "test@example.com".to_string(),
+        log_tx,
     });
 
     create_router(state, ApiDoc::openapi(), CorsLayer::permissive())

@@ -40,4 +40,19 @@ impl RedisService {
         conn.del::<&str, ()>(key).await?;
         Ok(())
     }
+
+    pub async fn ping(&self) -> anyhow::Result<()> {
+        let mut conn = self.pool.get().await?;
+        let _ : String = redis::cmd("PING").query_async(&mut conn).await?;
+        Ok(())
+    }
+
+    pub async fn delete_by_pattern(&self, pattern: &str) -> anyhow::Result<()> {
+        let mut conn = self.pool.get().await?;
+        let keys: Vec<String> = conn.keys(pattern).await?;
+        if !keys.is_empty() {
+            conn.del::<_, ()>(keys).await?;
+        }
+        Ok(())
+    }
 }
