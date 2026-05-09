@@ -60,17 +60,46 @@
 					</template>
 				</el-table-column>
 
-				<el-table-column align="center" label="Статус" width="100">
+				<el-table-column label="Статус" width="220">
 					<template #default="scope">
 						<div class="status-indicator-wrapper">
 							<div
 								class="status-dot"
 								:class="{
-									'status-dot--online': healthMap[scope.row.url]?.status === 'online',
-									'status-dot--offline': healthMap[scope.row.url]?.status === 'offline',
-									'status-dot--loading': healthMap[scope.row.url]?.status === 'checking',
+									'status-dot--online':
+										healthMap[scope.row.name]?.status === 'online' || healthMap[scope.row.url]?.status === 'online',
+									'status-dot--offline':
+										healthMap[scope.row.name]?.status === 'offline' || healthMap[scope.row.url]?.status === 'offline',
+									'status-dot--loading':
+										healthMap[scope.row.name]?.status === 'checking' || healthMap[scope.row.url]?.status === 'checking',
 								}"
 							/>
+							<div v-if="scope.row.name === 'orchestrator' && backendHealth" class="health-badges">
+								<el-tooltip :content="`Database connection: ${backendHealth.db}`" placement="top">
+									<el-tag :type="backendHealth.db === 'ok' ? 'success' : 'danger'" size="small">DB</el-tag>
+								</el-tooltip>
+								<el-tooltip :content="`Redis connection: ${backendHealth.redis}`" placement="top">
+									<el-tag :type="backendHealth.redis === 'ok' ? 'success' : 'danger'" size="small">RD</el-tag>
+								</el-tooltip>
+							</div>
+							<div v-else class="health-simple-status">
+								<span
+									v-if="healthMap[scope.row.url]?.status === 'online' || healthMap[scope.row.name]?.status === 'online'"
+									class="status-text online"
+								>
+									Online
+								</span>
+								<span
+									v-else-if="
+										healthMap[scope.row.url]?.status === 'offline' || healthMap[scope.row.name]?.status === 'offline'
+									"
+									class="status-text offline"
+								>
+									Offline
+								</span>
+								<span v-else class="status-text checking">Checking...</span>
+							</div>
+
 							<el-tooltip
 								:content="scope.row.enabled ? 'Нажмите чтобы отключить' : 'Нажмите чтобы включить'"
 								placement="top"
@@ -78,7 +107,7 @@
 								<el-switch
 									:disabled="scope.row.name === 'orchestrator' || healthMap[scope.row.url]?.status === 'checking'"
 									:model-value="scope.row.enabled"
-									:active-color="'var(--gp-primary)'"
+									active-color="var(--gp-primary)"
 									@change="toggleEnabled(scope.row)"
 								/>
 							</el-tooltip>
@@ -110,6 +139,11 @@
 									@click="handleEdit(scope.row)"
 								>
 									<el-icon><EditPen /></el-icon>
+								</el-button>
+							</el-tooltip>
+							<el-tooltip content="Сбросить кэш и перезагрузить" placement="top">
+								<el-button circle size="small" type="warning" @click="handleHotReload(scope.row)">
+									<el-icon><RefreshRight /></el-icon>
 								</el-button>
 							</el-tooltip>
 							<el-tooltip content="Удалить" placement="top">
@@ -214,11 +248,15 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
+import { GP_EVENTS, useEvents } from '@admin-panel/lib'
 import { UiModal, UiTable } from '@admin-panel/ui'
 import * as Icons from '@element-plus/icons-vue'
-import { Delete, EditPen, Link, Plus, Timer } from '@element-plus/icons-vue'
+import { Delete, EditPen, Link, Plus, RefreshRight, Timer } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
-import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
+import { mfeApi, systemApi, useMfe } from '#entities/mfe'
+
+const { dispatch, on } = useEvents()
 
 const {
 	microfrontends,
@@ -263,28 +301,81 @@ const checkHealth = async (url: string) => {
 
 	healthMap.value[url] = { status: 'checking', lastChecked: Date.now() }
 
-	try {
-		const controller = new AbortController()
-		const id = setTimeout(() => controller.abort(), 5000)
+	const controller = new AbortController()
+	const id = setTimeout(() => controller.abort(), 5000)
 
-		await fetch(url, {
-			method: 'HEAD',
-			mode: 'no-cors',
-			signal: controller.signal,
+	mfeApi
+		.checkHealth(url, controller.signal)
+		.then(() => {
+			clearTimeout(id)
+
+			healthMap.value[url] = { status: 'online', lastChecked: Date.now() }
 		})
+		.catch(() => {
+			clearTimeout(id)
 
-		clearTimeout(id)
+			healthMap.value[url] = { status: 'offline', lastChecked: Date.now() }
+		})
+}
 
-		healthMap.value[url] = { status: 'online', lastChecked: Date.now() }
+const backendHealth = ref<any>(null)
+
+const checkBackendHealth = async () => {
+	try {
+		const res = await systemApi.getHealth()
+
+		if (res.data) {
+			backendHealth.value = res.data
+
+			// Even if status is 'error' (e.g. redis down), the backend is ALIVE
+			healthMap.value['orchestrator'] = {
+				status: 'online',
+				lastChecked: Date.now(),
+			}
+		} else {
+			healthMap.value['orchestrator'] = { status: 'offline', lastChecked: Date.now() }
+		}
 	} catch {
-		healthMap.value[url] = { status: 'offline', lastChecked: Date.now() }
+		healthMap.value['orchestrator'] = { status: 'offline', lastChecked: Date.now() }
 	}
 }
 
 const checkAllHealth = () => {
 	microfrontends.value.forEach((m: any) => {
 		if (m.url) checkHealth(m.url)
+		if (m.name === 'orchestrator') checkBackendHealth()
 	})
+}
+
+const handleHotReload = async (mfe: any) => {
+	ElMessage.info(`Инициирован сброс кэша для ${mfe.displayName}...`)
+
+	// 1. Backend reload (clear Redis etc)
+	const res = await systemApi.reloadModule(mfe.name)
+
+	if (res) {
+		ElMessage.success(`Backend кэш для ${mfe.name} успешно очищен`)
+	}
+
+	// 2. Local Storage / Session Storage cleanup
+	Object.keys(localStorage).forEach((key) => {
+		if (key.includes(mfe.name) || key.includes(mfe.scope)) {
+			localStorage.removeItem(key)
+		}
+	})
+
+	Object.keys(sessionStorage).forEach((key) => {
+		if (key.includes(mfe.name) || key.includes(mfe.scope)) {
+			sessionStorage.removeItem(key)
+		}
+	})
+
+	// 3. Notify shell and reload
+	dispatch(GP_EVENTS.FORCE_RELOAD, { name: mfe.name })
+
+	setTimeout(() => {
+		window.location.reload()
+	}, 800)
 }
 
 const loadingStats = ref<Record<string, { loadTime: number }>>({})
@@ -306,11 +397,12 @@ onMounted(() => {
 		loadingStats.value[name] = globalStats[name]
 	})
 
-	window.addEventListener('mfe:load-stat', handleLoadStat)
+	on(GP_EVENTS.LOAD_STAT, handleLoadStat)
 })
 
 onUnmounted(() => {
-	window.removeEventListener('mfe:load-stat', handleLoadStat)
+	// on() from useEvents handles cleanup if using useEventListener, but handleLoadStat is passed here.
+	// Actually, useEvents.on returns a cleanup function and handles it via Vue lifecycle if it's called in setup.
 })
 
 watch(
@@ -319,6 +411,10 @@ watch(
 		newMfes.forEach((m: any) => {
 			if (m.url && !healthMap.value[m.url]) {
 				checkHealth(m.url)
+			}
+
+			if (m.name === 'orchestrator' && !healthMap.value['orchestrator']) {
+				checkBackendHealth()
 			}
 		})
 	},
@@ -398,8 +494,31 @@ const getIcon = (name: string) => {
 .status-indicator-wrapper {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	gap: 8px;
+	justify-content: flex-start;
+	gap: 12px;
+}
+
+.health-badges {
+	display: flex;
+	gap: 4px;
+}
+
+.health-simple-status {
+	min-width: 60px;
+	font-weight: 500;
+	font-size: 0.75rem;
+}
+
+.status-text.online {
+	color: var(--gp-primary);
+}
+
+.status-text.offline {
+	color: #ff5f5f;
+}
+
+.status-text.checking {
+	color: #f59e0b;
 }
 
 .status-dot {

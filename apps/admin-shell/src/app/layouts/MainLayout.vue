@@ -16,6 +16,12 @@
 					<UiLanguageSwitcher />
 					<UiThemeSwitcher />
 
+					<el-tooltip content="Search (Cmd+K)" placement="bottom">
+						<el-button circle class="header-search-btn" @click="openSearch">
+							<el-icon><Search /></el-icon>
+						</el-button>
+					</el-tooltip>
+
 					<div v-if="isAuthenticated" class="user-info">
 						<el-dropdown trigger="click">
 							<div class="user-profile">
@@ -50,17 +56,21 @@
 				</RouterView>
 			</main>
 		</div>
+
+		<GlobalSearch ref="searchRef" />
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
-import { useAuth } from '@admin-panel/lib'
+import { GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
 import { UiAuthWidget, UiLanguageSwitcher, UiSidebar, UiThemeSwitcher } from '@admin-panel/ui'
-import { UserFilled } from '@element-plus/icons-vue'
+import { Search, UserFilled } from '@element-plus/icons-vue'
+
+import GlobalSearch from '#features/global-search/ui/GlobalSearch.vue'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -73,6 +83,11 @@ const currentTitle = computed(() => {
 
 const { user, isAuthenticated, clearAuth } = useAuth()
 const loginDialogVisible = ref(false)
+const searchRef = ref<any>(null)
+
+const openSearch = () => {
+	searchRef.value?.open()
+}
 
 const handleUnauthorized = (event: any) => {
 	// Prevent default redirect to /login if we want to show a dialog instead
@@ -83,13 +98,9 @@ const handleUnauthorized = (event: any) => {
 	loginDialogVisible.value = true
 }
 
-onMounted(() => {
-	window.addEventListener('auth:unauthorized', handleUnauthorized)
-})
+const { on } = useEvents()
 
-onUnmounted(() => {
-	window.removeEventListener('auth:unauthorized', handleUnauthorized)
-})
+on(GP_EVENTS.UNAUTHORIZED, handleUnauthorized)
 </script>
 
 <style lang="scss" scoped>
@@ -169,6 +180,17 @@ onUnmounted(() => {
 	display: flex;
 	align-items: center;
 	gap: 16px;
+}
+
+.header-search-btn {
+	border-color: var(--gp-border-color);
+	color: var(--gp-text-secondary);
+	background: transparent;
+
+	&:hover {
+		color: var(--gp-primary);
+		background: var(--gp-bg-glass-hover);
+	}
 }
 
 .page-title {

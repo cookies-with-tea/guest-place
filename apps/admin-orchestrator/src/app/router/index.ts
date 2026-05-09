@@ -5,36 +5,39 @@ import { ROUTES } from '@admin-panel/lib'
 export const routes: RouteRecordRaw[] = [
 	{
 		path: '/',
-		name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorTopology',
-		component: () => import('#pages/orchestrator-page/ui/TopologyPage.vue'),
-		meta: {
-			title: 'Топология',
-			icon: 'Coordinate', // This icon will be used for the whole group in Shell
-		},
-	},
-	{
-		path: '/modules',
-		name: 'OrchestratorModules',
-		component: () => import('#pages/orchestrator-page/ui/ModulesPage.vue'),
-		meta: {
-			title: 'Модули',
-		},
-	},
-	{
-		path: '/monitoring',
-		name: 'OrchestratorMonitoring',
-		component: () => import('#pages/orchestrator-page/ui/MonitoringPage.vue'),
-		meta: {
-			title: 'Мониторинг',
-		},
-	},
-	{
-		path: '/logs',
-		name: 'OrchestratorLogs',
-		component: () => import('#pages/orchestrator-page/ui/LogsPage.vue'),
-		meta: {
-			title: 'Логи системы',
-		},
+		component: () => import('#app/layouts/OrchestratorLayout.vue'),
+		children: [
+			{
+				path: '',
+				name: (ROUTES as any).orchestrator?.list?.name || 'OrchestratorTopology',
+				component: () => import('#pages/topology-page/TopologyPage.vue'),
+				meta: { title: 'Топология' },
+			},
+			{
+				path: 'modules',
+				name: 'OrchestratorModules',
+				component: () => import('#pages/modules-page/ModulesPage.vue'),
+				meta: { title: 'Модули' },
+			},
+			{
+				path: 'monitoring',
+				name: 'OrchestratorMonitoring',
+				component: () => import('#pages/monitoring-page/MonitoringPage.vue'),
+				meta: { title: 'Мониторинг' },
+			},
+			{
+				path: 'logs',
+				name: 'OrchestratorLogs',
+				component: () => import('#pages/logs-page/LogsPage.vue'),
+				meta: { title: 'Логи системы' },
+			},
+			{
+				path: 'features',
+				name: 'OrchestratorFeatures',
+				component: () => import('#pages/features-page/FeaturesPage.vue'),
+				meta: { title: 'Возможности' },
+			},
+		],
 	},
 ]
 

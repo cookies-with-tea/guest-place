@@ -2,15 +2,23 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { useI18n } from '@admin-panel/i18n'
+import { ElMessage } from 'element-plus'
 
-import { createTranslation, deleteTranslation, fetchTranslations, updateTranslation } from '../../api'
+import {
+	createTranslation,
+	deleteTranslation,
+	fetchTranslations,
+	fetchTranslationVersions,
+	rollbackTranslation,
+	updateTranslation,
+} from '../../api'
 import type { Translation, TranslationFilters } from '../../model'
 import { TRANSLATIONS_QUERY_KEY } from '../../model'
 
 // === PERSISTENT STATE (SHARED) ===
 const filters = ref<TranslationFilters>({
 	namespace: undefined,
-	language: undefined,
+	locale: undefined,
 	search: undefined,
 })
 
@@ -21,7 +29,10 @@ const pagination = ref({
 })
 
 const isModalOpen = ref(false)
+const isHistoryOpen = ref(false)
 const editingTranslation = ref<Translation | null>(null)
+const translationHistory = ref<any[]>([])
+const isHistoryLoading = ref(false)
 
 export const useTranslations = () => {
 	const { loadLanguages, loadNamespaces } = useI18n()
@@ -105,11 +116,49 @@ export const useTranslations = () => {
 	})
 
 	const deleteMutation = useMutation({
-		mutationFn: (id: string) => deleteTranslation(id, filters.value.language),
+		mutationFn: (id: string) => deleteTranslation(id, filters.value.locale),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [TRANSLATIONS_QUERY_KEY] })
 		},
 	})
+
+	const fetchHistory = async (key: string, locale: string) => {
+		isHistoryLoading.value = true
+
+		const res = await fetchTranslationVersions(key, locale)
+
+		translationHistory.value = res.data || []
+
+		isHistoryLoading.value = false
+	}
+
+	const openHistory = async (t: Translation) => {
+		editingTranslation.value = t
+
+		isHistoryOpen.value = true
+
+		await fetchHistory(t.key, t.locale)
+	}
+
+	const closeHistory = () => {
+		isHistoryOpen.value = false
+
+		editingTranslation.value = null
+
+		translationHistory.value = []
+	}
+
+	const handleRollback = async (versionId: string) => {
+		await rollbackTranslation(versionId)
+
+		ElMessage.success('Rollback successful')
+
+		queryClient.invalidateQueries({ queryKey: [TRANSLATIONS_QUERY_KEY] })
+
+		if (editingTranslation.value) {
+			await fetchHistory(editingTranslation.value.key, editingTranslation.value.locale)
+		}
+	}
 
 	const handleSubmit = (data: Translation | Omit<Translation, 'id'> | Array<Omit<Translation, 'id'>>) => {
 		if (Array.isArray(data)) {
@@ -130,7 +179,7 @@ export const useTranslations = () => {
 		pagination.value.page = page
 	}
 
-	const setlimit = (size: number) => {
+	const setLimit = (size: number) => {
 		pagination.value.limit = size
 
 		pagination.value.page = 1
@@ -164,7 +213,7 @@ export const useTranslations = () => {
 			if (t.locale) langs.add(t.locale)
 		})
 
-		if (filters.value.language) langs.add(filters.value.language)
+		if (filters.value.locale) langs.add(filters.value.locale)
 
 		return Array.from(langs).sort()
 	})
@@ -174,7 +223,10 @@ export const useTranslations = () => {
 		filters,
 		pagination,
 		isModalOpen,
+		isHistoryOpen,
 		editingTranslation,
+		translationHistory,
+		isHistoryLoading,
 		isSubmitting: computed(() => createMutation.isPending.value || updateMutation.isPending.value),
 
 		// data
@@ -189,7 +241,10 @@ export const useTranslations = () => {
 		closeModal,
 		handleSubmit,
 		handleDelete,
+		openHistory,
+		closeHistory,
+		handleRollback,
 		setPage,
-		setlimit,
+		setLimit,
 	}
 }

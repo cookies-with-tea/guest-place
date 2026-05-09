@@ -1,7 +1,12 @@
+import { ElMessage } from 'element-plus'
 import { $fetch, type FetchOptions } from 'ofetch'
 
+import { useEvents } from '../composables/useEvents'
+import { GP_EVENTS } from '../constants'
 import type { CamelCasedProperties, IResponse, SnakeCasedProperties } from '../model'
 import { camelToSnake, snakeToCamel } from '../utils'
+
+const { dispatch } = useEvents()
 
 type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -59,14 +64,10 @@ export const createApi = (entityName: string) => {
 
 					localStorage.removeItem('gp_refresh_token')
 
-					const event = new CustomEvent('auth:unauthorized', {
-						cancelable: true,
-						detail: {
-							pathname: window.location.pathname,
-							port: window.location.port,
-						},
+					const notCanceled = dispatch(GP_EVENTS.UNAUTHORIZED, {
+						pathname: window.location.pathname,
+						port: window.location.port,
 					})
-					const notCanceled = window.dispatchEvent(event)
 
 					// Only redirect if not canceled and we are likely in the Shell (port 4173) or on a path that expects /login
 					if (notCanceled && !window.location.pathname.startsWith('/login')) {
@@ -79,9 +80,10 @@ export const createApi = (entityName: string) => {
 				}
 			}
 
-			if (error.statusCode === 500) {
-				// eslint-disable-next-line no-console
-				console.error('[fetchData] Server error: ', error)
+			if (error.statusCode !== 401 && error.statusCode !== 403) {
+				const message = messages[0] || error.message || 'Network error'
+
+				ElMessage.error(message)
 			}
 
 			throw {

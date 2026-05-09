@@ -13,9 +13,7 @@ export const fetchTranslations = async (
 
 	Object.entries(params).forEach(([key, value]) => {
 		if (value === undefined || value === null || value === '') return
-
-		if (key === 'language') processedParams.locale = value
-		else processedParams[key] = value
+		processedParams[key] = value
 	})
 
 	return fetchData<IWithPagination<Translation>>('', {
@@ -43,5 +41,17 @@ export const updateTranslation = async (data: Translation): Promise<IResponse<Tr
 export const deleteTranslation = async (id: string, locale?: string): Promise<IResponse<void>> => {
 	return fetchData<void>(`/${id}/${locale || 'en'}`, {
 		method: 'DELETE',
+	})
+}
+
+export const fetchTranslationVersions = async (key: string, locale: string): Promise<IResponse<any[]>> => {
+	return fetchData<any[]>(`/versions/${key}/${locale}`, {
+		method: 'GET',
+	})
+}
+
+export const rollbackTranslation = async (versionId: string): Promise<IResponse<void>> => {
+	return fetchData<void>(`/versions/${versionId}/rollback`, {
+		method: 'POST',
 	})
 }

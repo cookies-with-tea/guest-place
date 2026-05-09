@@ -254,8 +254,8 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { snakeToCamel } from '@admin-panel/lib'
 import { EditPen, Setting, Timer } from '@element-plus/icons-vue'
 
-import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
-import type { SystemStats } from '../../../entities/system/model'
+import { useMfe } from '#entities/mfe'
+import type { SystemStats } from '#entities/system/model'
 
 const activeTab = ref('mfe')
 
@@ -366,8 +366,9 @@ const connectStats = () => {
 					if (h.mem.length > MAX_HISTORY) h.mem.shift()
 				})
 			}
-		} catch (e) {
-			console.error('Failed to parse stats stream', e)
+		} catch {
+			// eslint-disable-next-line no-console
+			console.error('Failed to parse stats stream')
 		}
 	}
 

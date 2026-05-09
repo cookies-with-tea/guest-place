@@ -17,6 +17,9 @@
 					<el-button v-if="scope && scope.row" plain size="small" type="primary" @click="openEditModal(scope.row)">
 						Edit
 					</el-button>
+					<el-button v-if="scope && scope.row" plain size="small" type="warning" @click="openHistory(scope.row)">
+						History
+					</el-button>
 					<el-button v-if="scope && scope.row" plain size="small" type="danger" @click="confirmDelete(scope.row.id)">
 						Delete
 					</el-button>
@@ -24,14 +27,16 @@
 			</el-table-column>
 		</UiTable>
 
+		<TranslationsHistoryDialog />
+
 		<div class="translations-table__pagination">
 			<el-pagination
 				v-model:current-page="currentPage"
-				v-model:page-size="currentlimit"
+				v-model:page-size="currentLimit"
 				layout="prev, pager, next, total"
 				:total="pagination.total"
 				@current-change="setPage"
-				@size-change="setlimit"
+				@size-change="setLimit"
 			/>
 		</div>
 	</div>
@@ -45,16 +50,19 @@ import { ElMessageBox } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'
 
-const { translations, isLoading, pagination, openEditModal, handleDelete, setPage, setlimit } = useTranslations()
+import { TranslationsHistoryDialog } from '../../translations-history'
+
+const { translations, isLoading, pagination, openEditModal, openHistory, handleDelete, setPage, setLimit } =
+	useTranslations()
 
 const currentPage = computed({
 	get: () => pagination.value.page,
 	set: (val) => setPage(val),
 })
 
-const currentlimit = computed({
+const currentLimit = computed({
 	get: () => pagination.value.limit,
-	set: (val) => setlimit(val),
+	set: (val) => setLimit(val),
 })
 
 const confirmDelete = (id: string) => {

@@ -3,12 +3,12 @@ export interface Translation {
 	key: string
 	value: string
 	namespace: string
-	language: string
+	locale: string
 }
 
 export interface TranslationFilters {
 	namespace?: string
-	language?: string
+	locale?: string
 	search?: string
 }
 

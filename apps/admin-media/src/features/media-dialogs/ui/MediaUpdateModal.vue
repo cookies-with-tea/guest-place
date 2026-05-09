@@ -9,8 +9,21 @@
 					:src="currentMedia.data.url"
 				/>
 				<el-icon v-else :size="48"><Document /></el-icon>
-				<span class="filename">{{ currentMedia.data.name }}</span>
+				<div class="context-info">
+					<span class="filename">{{ currentMedia.data.name }}</span>
+					<el-button
+						v-if="currentMedia.data.mediaType === 'image'"
+						class="edit-img-btn"
+						size="small"
+						type="primary"
+						@click="openImageEditor"
+					>
+						Edit Image (Crop/Resize)
+					</el-button>
+				</div>
 			</div>
+
+			<MediaEditorDialog ref="editorRef" />
 
 			<el-form label-position="top">
 				<el-form-item label="Title">
@@ -62,7 +75,15 @@ import { ElMessage } from 'element-plus'
 
 import { useMedia } from '#entities/media'
 
+import MediaEditorDialog from './MediaEditorDialog.vue'
+
 const { currentMedia, isEditModalOpen, closeEditModal, updateMedia, isSubmitting } = useMedia()
+
+const editorRef = ref<any>(null)
+
+const openImageEditor = () => {
+	editorRef.value?.openEditor()
+}
 
 const form = ref({
 	title: '',
@@ -128,10 +149,20 @@ const handleSave = () => {
 	object-fit: cover;
 }
 
+.context-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
 .filename {
 	font-weight: 500;
 	word-break: break-all;
 	color: var(--text-primary);
+}
+
+.edit-img-btn {
+	align-self: flex-start;
 }
 
 .dialog-footer {

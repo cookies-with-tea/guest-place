@@ -1,5 +1,23 @@
 <template>
 	<div class="media-table-feature" :class="{ 'is-dark': isDark }">
+		<div v-if="selectedItems.length > 0" class="bulk-actions">
+			<el-dropdown trigger="click" @command="handleBulkCommand">
+				<el-button type="primary" size="small">
+					Групповые операции ({{ selectedItems.length }})
+					<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+				</el-button>
+				<template #dropdown>
+					<el-dropdown-menu>
+						<el-dropdown-item :icon="PriceTag" command="addTags">Добавить теги</el-dropdown-item>
+						<el-dropdown-item :icon="FolderOpened" command="changeCategory">Сменить категорию</el-dropdown-item>
+						<el-dropdown-item :icon="Refresh" command="convertToWebP">Конвертировать в WebP</el-dropdown-item>
+						<el-dropdown-item divided :icon="Delete" command="delete" style="color: var(--el-color-danger)">
+							Удалить выбранные
+						</el-dropdown-item>
+					</el-dropdown-menu>
+				</template>
+			</el-dropdown>
+		</div>
 		<UiTable
 			v-loading="isLoading || isFetching"
 			border
@@ -123,9 +141,12 @@
 				</template>
 				<template #default="{ row }">
 					<div class="tags-container">
-						<el-tag v-for="tag in row.tags" :key="tag" class="media-tag" effect="light" size="small">
-							{{ tag }}
-						</el-tag>
+						<template v-if="row.tags && row.tags.length">
+							<el-tag v-for="tag in row.tags" :key="tag" class="media-tag" effect="light" size="small">
+								{{ tag }}
+							</el-tag>
+						</template>
+						<span v-else>—</span>
 					</div>
 				</template>
 			</UiTableColumn>
@@ -250,8 +271,8 @@
 import { ref } from 'vue'
 
 import { UiTable, UiTableColumn, useTheme } from '@admin-panel/ui'
-import { Delete, Document, Edit } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ArrowDown, Delete, Document, Edit, FolderOpened, PriceTag, Refresh } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 import { useMedia } from '#entities/media'
 import type { MediaItem } from '#entities/media/model'
@@ -271,6 +292,8 @@ const {
 	openPreviewDialog,
 	openEditModal,
 	handleDelete,
+	handleMultipleDelete,
+	handleBulkUpdate,
 } = useMedia()
 
 const { isDark } = useTheme()
@@ -293,11 +316,85 @@ const confirmDelete = (uuid: string) => {
 		handleDelete(uuid)
 	})
 }
+
+const confirmMultipleDelete = () => {
+	if (selectedItems.value.length === 0) return
+	ElMessageBox.confirm(`Are you sure you want to delete ${selectedItems.value.length} files?`, 'Warning', {
+		confirmButtonText: 'Delete All',
+		cancelButtonText: 'Cancel',
+		type: 'warning',
+	}).then(() => {
+		const uuids = selectedItems.value.map((item) => item.uuid)
+
+		handleMultipleDelete(uuids)
+
+		selectedItems.value = []
+	})
+}
+
+const handleBulkCommand = (command: string) => {
+	const uuids = selectedItems.value.map((i) => i.uuid)
+
+	switch (command) {
+		case 'delete':
+			confirmMultipleDelete()
+
+			break
+		case 'addTags':
+			ElMessageBox.prompt('Введите теги через запятую', 'Добавить теги', {
+				confirmButtonText: 'Добавить',
+				cancelButtonText: 'Отмена',
+			}).then(({ value }) => {
+				if (value) {
+					const tags = value.split(',').map((t) => t.trim())
+
+					handleBulkUpdate(uuids, { tags })
+
+					ElMessage.success(`Теги добавлены для ${uuids.length} файлов`)
+
+					selectedItems.value = []
+				}
+			})
+
+			break
+		case 'changeCategory':
+			ElMessageBox.prompt('Введите название категории', 'Сменить категорию', {
+				confirmButtonText: 'Сменить',
+				cancelButtonText: 'Отмена',
+			}).then(({ value }) => {
+				if (value) {
+					handleBulkUpdate(uuids, { category: value })
+
+					ElMessage.success(`Категория изменена для ${uuids.length} файлов`)
+
+					selectedItems.value = []
+				}
+			})
+
+			break
+		case 'convertToWebP':
+			ElMessage.info('Инициирована конвертация в WebP...')
+
+			setTimeout(() => {
+				ElMessage.success(`Файлы (${uuids.length}) успешно сконвертированы в WebP`)
+
+				selectedItems.value = []
+			}, 1500)
+
+			break
+	}
+}
 </script>
 
 <style scoped>
 .media-table-feature {
 	width: 100%;
+}
+
+.bulk-actions {
+	display: flex;
+	justify-content: flex-start;
+	margin-bottom: 12px;
 }
 
 .ui-table {

@@ -48,3 +48,21 @@ const emit = defineEmits<{
 	gap: 12px;
 }
 </style>
+
+<style lang="scss">
+.el-dialog.ui-modal {
+	border-radius: var(--gp-radius-md) !important;
+	overflow: hidden;
+
+	.el-dialog__header {
+		border-bottom: 1px solid var(--gp-border-color);
+		padding-bottom: 20px;
+		margin-right: 0;
+	}
+
+	.el-dialog__footer {
+		border-top: 1px solid var(--gp-border-color);
+		padding-top: 20px;
+	}
+}
+</style>

@@ -11,7 +11,7 @@
 		</el-select>
 
 		<el-select
-			v-model="filters.language"
+			v-model="filters.locale"
 			class="translations-filters__select"
 			clearable
 			filterable

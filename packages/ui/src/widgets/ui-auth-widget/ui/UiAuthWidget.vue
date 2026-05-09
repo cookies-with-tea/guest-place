@@ -4,7 +4,7 @@
 			<h2 class="ui-auth-widget__title">{{ title }}</h2>
 			<p class="ui-auth-widget__subtitle">{{ subtitle }}</p>
 
-			<el-form class="ui-auth-widget__form" label-position="top" :model="authForm">
+			<el-form class="ui-auth-widget__form" label-position="top" :model="authForm" @submit.prevent="handleSubmit">
 				<el-form-item v-if="mode === 'register'" label="Имя">
 					<el-input v-model="authForm.name" placeholder="Введите ваше имя" />
 				</el-form-item>
@@ -19,7 +19,7 @@
 
 				<el-alert v-if="error" class="ui-auth-widget__error" :closable="false" show-icon :title="error" type="error" />
 
-				<el-button class="ui-auth-widget__submit" :loading="loading" type="primary" @click="handleSubmit">
+				<el-button class="ui-auth-widget__submit" :loading="loading" native-type="submit" type="primary">
 					{{ submitButtonText }}
 				</el-button>
 			</el-form>

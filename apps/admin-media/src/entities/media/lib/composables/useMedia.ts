@@ -145,6 +145,12 @@ export const useMedia = () => {
 		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
 	}
 
+	const handleBulkUpdate = async (uuids: string[], data: Partial<MediaItem>) => {
+		await mediaApi.updateBulk(uuids, data)
+
+		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+	}
+
 	// === Pagination & Filters ===
 	const setPage = (page: number) => {
 		pagination.value.page = page
@@ -211,6 +217,7 @@ export const useMedia = () => {
 		closeEditModal,
 		handleDelete,
 		handleMultipleDelete,
+		handleBulkUpdate,
 		createMedia: createMutation.mutateAsync,
 		updateMedia: updateMutation.mutate,
 		setPage,

@@ -10,6 +10,9 @@
 		"vue-router": "^4.5.1"
 	},
 	"devDependencies": {
+		"@admin-panel/eslint-config": "workspace:*",
+		"@admin-panel/prettier-config": "workspace:*",
+		"@admin-panel/stylelint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"npm-run-all2": "^8.0.4",

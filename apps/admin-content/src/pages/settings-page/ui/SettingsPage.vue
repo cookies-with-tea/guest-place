@@ -52,30 +52,19 @@ const SETTINGS_IDENTIFIER = 'global-settings'
 const fetchData = async () => {
 	isLoading.value = true
 
-	try {
-		const schemaRes = await contentApi.getSchemaByIdentifier(SETTINGS_IDENTIFIER)
+	const schemaRes = await contentApi.getSchemaByIdentifier(SETTINGS_IDENTIFIER)
 
-		if (schemaRes.data) {
-			schema.value = schemaRes.data
+	if (schemaRes.data) {
+		schema.value = schemaRes.data
 
-			try {
-				const entriesRes = await contentApi.getEntries(schema.value.id)
+		const entriesRes = await contentApi.getEntries(schema.value.id)
 
-				if (entriesRes.data && entriesRes.data.length > 0) {
-					Object.assign(formData, entriesRes.data[0].data)
-				}
-			} catch (e: any) {
-				// 404 is fine here, it just means no entries created yet
-				if (e.status !== 404) throw e
-			}
+		if (entriesRes.data && entriesRes.data.length > 0) {
+			Object.assign(formData, entriesRes.data[0].data)
 		}
-	} catch (error: any) {
-		if (error.status !== 404) {
-			ElMessage.error(error.messages?.[0] || 'Failed to fetch settings')
-		}
-	} finally {
-		isLoading.value = false
 	}
+
+	isLoading.value = false
 }
 
 const onSave = async () => {
@@ -84,56 +73,44 @@ const onSave = async () => {
 
 	errors.value = {}
 
-	try {
-		const entriesRes = await contentApi.getEntries(schema.value.id)
-		const existingEntry = entriesRes.data?.[0]
+	const entriesRes = await contentApi.getEntries(schema.value.id)
+	const existingEntry = entriesRes.data?.[0]
 
-		if (existingEntry) {
-			await contentApi.updateEntry(existingEntry.id, formData)
+	if (existingEntry) {
+		await contentApi.updateEntry(existingEntry.id, formData)
 
-			ElMessage.success('Settings updated')
-		} else {
-			await contentApi.createEntry({
-				schema_id: schema.value.id,
-				slug: 'global-settings-entry',
-				data: formData,
-			})
+		ElMessage.success('Settings updated')
+	} else {
+		await contentApi.createEntry({
+			schema_id: schema.value.id,
+			slug: 'global-settings-entry',
+			data: formData,
+		})
 
-			ElMessage.success('Settings created')
-		}
-	} catch (error: any) {
-		errors.value = error.errors || {}
-
-		ElMessage.error(error.messages?.[0] || 'Failed to save settings')
-	} finally {
-		isSaving.value = false
+		ElMessage.success('Settings created')
 	}
+
+	isSaving.value = false
 }
 
 const createDefaultSchema = async () => {
 	isLoading.value = true
 
-	try {
-		// First we need to expose createSchema in contentApi or use fetching directly
-		// For now, I'll use a direct fetch or ensure contentApi has it
-		await contentApi.createSchema({
-			name: 'Global Settings',
-			slug: SETTINGS_IDENTIFIER,
-			fields: [
-				{ label: 'Site Name', name: 'siteName', fieldType: FieldType.Text, required: true },
-				{ label: 'Description', name: 'description', fieldType: FieldType.RichText, required: false },
-				{ label: 'Maintenance Mode', name: 'maintenanceMode', fieldType: FieldType.Boolean, required: false },
-			],
-		})
+	await contentApi.createSchema({
+		name: 'Global Settings',
+		slug: SETTINGS_IDENTIFIER,
+		fields: [
+			{ label: 'Site Name', name: 'siteName', fieldType: FieldType.Text, required: true },
+			{ label: 'Description', name: 'description', fieldType: FieldType.RichText, required: false },
+			{ label: 'Maintenance Mode', name: 'maintenanceMode', fieldType: FieldType.Boolean, required: false },
+		],
+	})
 
-		ElMessage.success('Settings schema initialized')
+	ElMessage.success('Settings schema initialized')
 
-		fetchData()
-	} catch (error: any) {
-		ElMessage.error(error.messages?.[0] || 'Failed to initialize schema')
-	} finally {
-		isLoading.value = false
-	}
+	fetchData()
+
+	isLoading.value = false
 }
 
 const goBack = () => {

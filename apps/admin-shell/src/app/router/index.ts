@@ -1,10 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { ROUTES } from '@admin-panel/lib'
+import { GP_EVENTS, ROUTES, useEvents } from '@admin-panel/lib'
+
+const { on } = useEvents()
+
 import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
 import { useSidebar } from '@admin-panel/ui'
 
 import MainLayout from '#app/layouts/MainLayout.vue'
+
+import { mfeApi } from '../../entities/mfe/api'
 
 // Загружаем роуты асинхронно
 const loadRemoteRoutes = async (app: any) => {
@@ -28,13 +33,10 @@ const loadRemoteRoutes = async (app: any) => {
 		return modifiedRoute
 	}
 
-	try {
-		const response = await fetch('/api/v1/mfe/manifest')
+	const res = await mfeApi.getManifest()
 
-		if (!response.ok) throw new Error('Failed to fetch manifest from API')
-
-		const json = await response.json()
-		const manifest: RemoteManifest = json.data
+	if (res.data) {
+		const manifest: RemoteManifest = res.data
 		const remotes = (manifest.remotes || []).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
 		for (const remote of remotes) {
@@ -60,8 +62,6 @@ const loadRemoteRoutes = async (app: any) => {
 				// Silent fail for individual remotes
 			}
 		}
-	} catch {
-		// Silent fail for manifest
 	}
 
 	return { routes, sidebarGroups }
@@ -122,7 +122,7 @@ export const initRouter = async (app: any) => {
 
 	setData('website', routesToSidebar(websiteGroups))
 
-	window.addEventListener('mfe:updated', async () => {
+	on(GP_EVENTS.UPDATED, async () => {
 		const { sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
 
 		const newSystemGroups = updatedGroups.filter(

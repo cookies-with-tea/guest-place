@@ -5,7 +5,7 @@ import type { MediaFilters, MediaItem } from '../model'
 const { fetchData } = createApi('media')
 
 const create = (data: FormData) => {
-	return fetchData('', {
+	return fetchData<MediaItem>('', {
 		method: 'POST',
 		body: data,
 	})
@@ -51,10 +51,18 @@ export const deleteById = (uuid: string) => {
 	})
 }
 
+export const updateBulk = (uuids: string[], data: Partial<MediaItem>) => {
+	return fetchData('/bulk', {
+		method: 'PATCH',
+		body: { uuids, data },
+	})
+}
+
 export const mediaApi = {
 	create,
 	getAll,
 	update,
 	getById,
 	deleteById,
+	updateBulk,
 }

@@ -1,7 +1,7 @@
 <template>
 	<UiModal v-model="isPreviewDialogOpen" title="Media Preview" :width="800" @close="closePreviewDialog">
 		<div v-if="currentMedia?.data && currentMedia.data.uuid === currentMediaUuid" class="preview-container">
-			<div class="media-display">
+			<div class="media-display" :class="previewBg">
 				<el-image
 					v-if="currentMedia.data.mediaType === 'image'"
 					class="preview-img"
@@ -19,6 +19,14 @@
 				<div v-else class="file-placeholder">
 					<el-icon :size="64"><Document /></el-icon>
 					<span class="name">{{ currentMedia.data.name }}</span>
+				</div>
+
+				<div class="bg-toggle">
+					<el-radio-group v-model="previewBg" size="small">
+						<el-radio-button label="Transparent" value="checkered" />
+						<el-radio-button label="White" value="white" />
+						<el-radio-button label="Black" value="black" />
+					</el-radio-group>
 				</div>
 			</div>
 
@@ -80,6 +88,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import { UiModal } from '@admin-panel/ui'
 import { Document } from '@element-plus/icons-vue'
 
@@ -87,6 +97,8 @@ import { useMedia } from '#entities/media'
 import { mediaUtils } from '#entities/media/utils/media.utils'
 
 const { currentMedia, isPreviewDialogOpen, closePreviewDialog, currentMediaUuid } = useMedia()
+
+const previewBg = ref('checkered')
 
 const formatFileSize = (bytes: number) => mediaUtils.formatFileSize(bytes)
 const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
@@ -102,6 +114,7 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 .media-display {
 	width: 100%;
 	height: 400px;
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -110,6 +123,34 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 	border-radius: 12px;
 	background: var(--bg-surface);
 	overflow: hidden;
+}
+
+.media-display.checkered {
+	background-image:
+		linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%);
+	background-position:
+		0 0,
+		0 10px,
+		10px -10px,
+		-10px 0;
+	background-size: 20px 20px;
+	background-color: #1a1a1a;
+}
+
+.media-display.white {
+	background: #fff !important;
+}
+
+.media-display.black {
+	background: #000 !important;
+}
+
+.bg-toggle {
+	top: 12px;
+	right: 12px;
+	position: absolute;
+	z-index: 10;
 }
 
 .preview-img {

@@ -1,5 +1,9 @@
 import { ref } from 'vue'
 
+import { GP_EVENTS, useEvents } from '@admin-panel/lib'
+
+const { dispatch, on } = useEvents()
+
 const THEME_KEY = 'gp-theme-mode'
 
 const getInitialTheme = () => {
@@ -36,7 +40,7 @@ const toggleTheme = () => {
 	updateDOM(isDark.value)
 
 	if (typeof window !== 'undefined') {
-		window.dispatchEvent(new CustomEvent('gp-theme-changed', { detail: { isDark: isDark.value } }))
+		dispatch(GP_EVENTS.THEME_CHANGED, { isDark: isDark.value })
 	}
 }
 
@@ -58,13 +62,13 @@ if (typeof window !== 'undefined') {
 	})
 
 	// Listen for changes from the same window (MFE synchronization)
-	window.addEventListener('gp-theme-changed', ((event: CustomEvent) => {
+	on(GP_EVENTS.THEME_CHANGED, (event: any) => {
 		if (isDark.value !== event.detail.isDark) {
 			isDark.value = event.detail.isDark
 
 			updateDOM(isDark.value)
 		}
-	}) as EventListener)
+	})
 }
 
 export const useTheme = () => {

@@ -4,6 +4,7 @@
 	"version": "1.0.0",
 	"author": "miirsery",
 	"dependencies": {
+		"@vueuse/core": "^14.2.1",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"
 	},
@@ -80,6 +81,7 @@
 		"prettier": "prettier --check .",
 		"prettier:fix": "prettier --write .",
 		"preview": "turbo run preview --parallel && turbo run dev --filter=./apps/admin-shell",
+		"preview:project": "pnpm build:packages && node scripts/choose-project.js preview",
 		"preview-storybook": "turbo run preview-storybook",
 		"preview:mf": "pnpm prebuild && turbo run preview --parallel --filter=./apps/* --filter=!./apps/admin-shell --filter=!./apps/admin-docs",
 		"storybook": "turbo run storybook --filter=docs",

@@ -1,9 +1,12 @@
 import { computed, reactive, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
+import { GP_EVENTS, useEvents } from '@admin-panel/lib'
+
 import { mfeApi } from '../../api'
 
 export const useMfe = () => {
+	const { dispatch } = useEvents()
 	const queryClient = useQueryClient()
 	const dialogVisible = ref(false)
 	const isEdit = ref(false)
@@ -62,7 +65,7 @@ export const useMfe = () => {
 
 			closeDialog()
 
-			window.dispatchEvent(new CustomEvent('mfe:updated'))
+			dispatch(GP_EVENTS.UPDATED)
 		},
 		onError: (err) => {
 			// eslint-disable-next-line no-console
@@ -75,7 +78,7 @@ export const useMfe = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['mfes'] })
 
-			window.dispatchEvent(new CustomEvent('mfe:updated'))
+			dispatch(GP_EVENTS.UPDATED)
 
 			closeDialog()
 		},
@@ -90,7 +93,7 @@ export const useMfe = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['mfes'] })
 
-			window.dispatchEvent(new CustomEvent('mfe:updated'))
+			dispatch(GP_EVENTS.UPDATED)
 		},
 	})
 

@@ -1,3 +1,8 @@
+import { useEvents } from '../composables/useEvents'
+import { GP_EVENTS } from '../constants'
+
+const { dispatch } = useEvents()
+
 export interface RemoteManifestItem {
 	name: string
 	displayName: string
@@ -63,14 +68,10 @@ export async function loadRemoteModule(remote: RemoteManifestItem, context?: any
 		window.__gp_mfe_stats[remote.name] = { loadTime }
 
 		// Dispatch event for real-time updates
-		window.dispatchEvent(
-			new CustomEvent('mfe:load-stat', {
-				detail: {
-					name: remote.name,
-					loadTime,
-				},
-			})
-		)
+		dispatch(GP_EVENTS.LOAD_STAT, {
+			name: remote.name,
+			loadTime,
+		})
 
 		return {
 			...module,

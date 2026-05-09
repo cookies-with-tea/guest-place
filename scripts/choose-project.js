@@ -7,7 +7,7 @@ const { Select } = pkg
 
 const command = process.argv[2]
 
-const TURBO_TASKS = ['build', 'dev', 'lint', 'clean', 'typecheck', 'storybook', 'preview-storybook']
+const TURBO_TASKS = ['build', 'dev', 'lint', 'clean', 'typecheck', 'storybook', 'preview-storybook', 'preview']
 
 if (!command) {
 	console.error('❌ Specify a command.')

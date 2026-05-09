@@ -12,8 +12,8 @@
 				</el-select>
 			</el-form-item>
 
-			<el-form-item label="Language" prop="language">
-				<el-select v-model="form.language" clearable filterable placeholder="Select language" style="width: 100%">
+			<el-form-item label="Locale" prop="locale">
+				<el-select v-model="form.locale" clearable filterable placeholder="Select locale" style="width: 100%">
 					<el-option v-for="lang in allLanguages" :key="lang" :label="lang" :value="lang" />
 				</el-select>
 			</el-form-item>
@@ -80,7 +80,7 @@ const isBulkMode = ref(false)
 
 const form = ref({
 	namespace: '',
-	language: '',
+	locale: '',
 	key: '',
 	value: '',
 	bulkValue: '',
@@ -96,7 +96,7 @@ watch(
 		if (isOpen && editingTranslation.value) {
 			form.value = {
 				namespace: editingTranslation.value.namespace || '',
-				language: editingTranslation.value.language || '',
+				locale: (editingTranslation.value as any).locale || '',
 				key: editingTranslation.value.key,
 				value: editingTranslation.value.value,
 				bulkValue: '',
@@ -104,7 +104,7 @@ watch(
 		} else {
 			form.value = {
 				namespace: filters.value.namespace || '',
-				language: filters.value.language || '',
+				locale: filters.value.locale || '',
 				key: '',
 				value: '',
 				bulkValue: '',
@@ -115,7 +115,7 @@ watch(
 
 const rules = computed<FormRules>(() => ({
 	namespace: [{ required: true, message: 'Required', trigger: 'blur' }],
-	language: [{ required: true, message: 'Required', trigger: 'blur' }],
+	locale: [{ required: true, message: 'Required', trigger: 'blur' }],
 	key: [{ required: !isBulkMode.value, message: 'Required', trigger: 'blur' }],
 	value: [{ required: !isBulkMode.value, message: 'Required', trigger: 'blur' }],
 	bulkValue: [{ required: isBulkMode.value, message: 'Required', trigger: 'blur' }],
@@ -153,7 +153,7 @@ const submitForm = async () => {
 
 				return {
 					namespace: ns,
-					locale: form.value.language,
+					locale: form.value.locale,
 					key: rawKey,
 					value,
 				}
@@ -171,7 +171,7 @@ const submitForm = async () => {
 		handleSubmit({
 			...(editingTranslation.value || {}),
 			namespace: form.value.namespace,
-			locale: form.value.language,
+			locale: form.value.locale,
 			key: form.value.key,
 			value: form.value.value,
 		} as any)

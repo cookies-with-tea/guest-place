@@ -1,5 +1,10 @@
 <template>
 	<div class="topology-page">
+		<div class="page-header">
+			<h1>Оркестрация</h1>
+			<p class="page-subtitle">Системная топология и статистика</p>
+		</div>
+
 		<!-- Summary Cards -->
 		<div class="summary-grid">
 			<div v-for="stat in stats" :key="stat.title" class="stat-card glass-card">
@@ -52,7 +57,7 @@ import { computed, defineAsyncComponent } from 'vue'
 
 import * as Icons from '@element-plus/icons-vue'
 
-import { useMfe } from '../../../entities/mfe/lib/composables/useMfe'
+import { useMfe } from '#entities/mfe'
 
 const MfeStatsChart = defineAsyncComponent(() => import('./MfeStatsChart.vue'))
 
@@ -145,6 +150,20 @@ const chartData = computed(() => {
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
+}
+
+.page-header h1 {
+	font-weight: 800;
+	font-size: 2rem;
+	letter-spacing: -0.02em;
+	color: var(--gp-text-main);
+	margin: 0;
+}
+
+.page-subtitle {
+	font-size: 0.9rem;
+	color: var(--gp-text-secondary);
+	margin-top: 4px;
 }
 
 .summary-grid {

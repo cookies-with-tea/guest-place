@@ -46,39 +46,33 @@ const loadingPermissions = ref(false)
 const saving = ref(false)
 
 const loadData = async () => {
-	try {
-		const [rolesRes, permsRes] = await Promise.all([rightsApi.getRoles(), rightsApi.getPermissions()])
+	loading.value = true
 
-		roles.value = rolesRes.data || []
+	const [rolesRes, permsRes] = await Promise.all([rightsApi.getRoles(), rightsApi.getPermissions()])
 
-		allPermissions.value = permsRes.data || []
+	roles.value = rolesRes.data || []
 
-		if (roles.value.length > 0) {
-			activeRole.value = roles.value[0]
+	allPermissions.value = permsRes.data || []
 
-			await loadRolePermissions(activeRole.value)
-		}
-	} catch {
-		ElMessage.error('Failed to load rights data')
-	} finally {
-		loading.value = false
+	if (roles.value.length > 0) {
+		activeRole.value = roles.value[0]
+
+		await loadRolePermissions(activeRole.value)
 	}
+
+	loading.value = false
 }
 
 const loadRolePermissions = async (role: string) => {
 	loadingPermissions.value = true
 
-	try {
-		const res = await rightsApi.getRolePermissions(role)
+	const res = await rightsApi.getRolePermissions(role)
 
-		selectedPermissions.value = res.data || []
+	selectedPermissions.value = res.data || []
 
-		initialPermissions.value = [...selectedPermissions.value]
-	} catch {
-		ElMessage.error(`Failed to load permissions for ${role}`)
-	} finally {
-		loadingPermissions.value = false
-	}
+	initialPermissions.value = [...selectedPermissions.value]
+
+	loadingPermissions.value = false
 }
 
 const handleTabChange = (role: string) => {
@@ -88,17 +82,13 @@ const handleTabChange = (role: string) => {
 const savePermissions = async () => {
 	saving.value = true
 
-	try {
-		await rightsApi.updateRolePermissions(activeRole.value, selectedPermissions.value)
+	await rightsApi.updateRolePermissions(activeRole.value, selectedPermissions.value)
 
-		ElMessage.success('Permissions updated successfully')
+	ElMessage.success('Permissions updated successfully')
 
-		initialPermissions.value = [...selectedPermissions.value]
-	} catch {
-		ElMessage.error('Failed to update permissions')
-	} finally {
-		saving.value = false
-	}
+	initialPermissions.value = [...selectedPermissions.value]
+
+	saving.value = false
 }
 
 const resetPermissions = () => {

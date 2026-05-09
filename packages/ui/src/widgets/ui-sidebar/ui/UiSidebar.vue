@@ -49,8 +49,13 @@
 					</template>
 
 					<!-- Single Item (No children) -->
-					<router-link v-else-if="!item.children" v-slot="{ isActive, navigate }" :to="item.path || '/'" custom>
-						<div class="menu-item" :class="{ active: isActive }" @click="navigate">
+					<router-link
+						v-else-if="!item.children"
+						v-slot="{ isExactActive, isActive, navigate }"
+						:to="item.path || '/'"
+						custom
+					>
+						<div class="menu-item" :class="{ active: item.path === '/' ? isExactActive : isActive }" @click="navigate">
 							<el-icon v-if="item.icon"><component :is="getIcon(item.icon)" /></el-icon>
 							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
 						</div>
@@ -78,13 +83,19 @@
 					<router-link
 						v-for="child in activeSubMenu.children"
 						:key="child.path"
-						v-slot="{ isActive, navigate }"
+						v-slot="{ isExactActive, isActive, navigate }"
 						:to="child.path || ''"
 						custom
 					>
-						<div class="secondary-item" :class="{ active: isActive }" @click="navigate">
+						<div
+							class="secondary-item"
+							:class="{ active: child.path === '/' ? isExactActive : isActive }"
+							@click="navigate"
+						>
 							<span>{{ t(child.title) }}</span>
-							<el-icon v-if="isActive" class="active-dot"><CircleCheckFilled /></el-icon>
+							<el-icon v-if="child.path === '/' ? isExactActive : isActive" class="active-dot">
+								<CircleCheckFilled />
+							</el-icon>
 						</div>
 					</router-link>
 				</div>
@@ -132,8 +143,24 @@ const activeSubMenu = computed(() => {
 })
 
 const isItemActive = (item: ISidebarItem) => {
-	if (item.path === route.path) return true
-	if (item.children?.some((child) => child.path && route.path.startsWith(child.path))) return true
+	// 1. Exact path match
+	if (item.path && item.path !== '/') {
+		if (route.path === item.path || route.path.startsWith(item.path + '/')) return true
+	} else if (item.path === '/') {
+		if (route.path === '/') return true
+	}
+
+	// 2. Child match
+	if (
+		item.children?.some((child) => {
+			if (!child.path) return false
+			if (child.path === '/') return route.path === '/'
+
+			return route.path === child.path || route.path.startsWith(child.path + '/')
+		})
+	) {
+		return true
+	}
 
 	return selectedPrimaryTitle.value === item.title
 }
@@ -157,11 +184,21 @@ watch(
 	(path) => {
 		const found = sidebarData.value.find((item) => {
 			if (item.path === path) return true
+			if (item.path && item.path !== '/' && path.startsWith(item.path + '/')) return true
 
-			return item.children?.some((child) => child.path && path.startsWith(child.path))
+			if (!item.children) return false
+
+			return item.children.some((child) => {
+				if (!child.path) return false
+				if (child.path === '/') return path === '/'
+
+				return path === child.path || path.startsWith(child.path + '/')
+			})
 		})
 
-		if (found) selectedPrimaryTitle.value = found.title || null
+		if (found) {
+			selectedPrimaryTitle.value = found.title || null
+		}
 	},
 	{ immediate: true }
 )

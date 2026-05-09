@@ -17,6 +17,7 @@ const sidebarData = [
 	{ title: 'Топология', path: '/', icon: 'Share' },
 	{ title: 'Модули (MFE)', path: '/modules', icon: 'Monitor' },
 	{ title: 'Мониторинг', path: '/monitoring', icon: 'DataAnalysis' },
+	{ title: 'Возможности', path: '/features', icon: 'MagicStick' },
 	{ title: 'Логи системы', path: '/logs', icon: 'Memo' },
 ]
 </script>

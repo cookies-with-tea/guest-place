@@ -18,7 +18,10 @@ import * as piniaPkg from 'pinia'
 import * as vueQueryPkg from '@tanstack/vue-query'
 
 import { useI18n } from '@admin-panel/i18n'
+import { GP_EVENTS, useEvents } from '@admin-panel/lib'
 import * as elementPlus from 'element-plus'
+
+const { on } = useEvents()
 
 // Manually populate federation shared scope for dynamic remotes
 // @ts-ignore
@@ -73,7 +76,7 @@ await loadDict('platforms')
 
 const router = await initRouter(app)
 
-window.addEventListener('auth:unauthorized', (e) => {
+on(GP_EVENTS.UNAUTHORIZED, (e: any) => {
 	e.preventDefault()
 
 	if (router.currentRoute.value.path !== '/login') {

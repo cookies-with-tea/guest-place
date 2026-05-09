@@ -17,7 +17,10 @@
 				<template #header>
 					<div class="card-header">
 						<span class="header-title">Global Metadata</span>
-						<el-checkbox v-model="isApplyToAll">Apply to all files</el-checkbox>
+						<div class="header-actions">
+							<el-checkbox v-model="convertToWebP">Auto-convert to WebP</el-checkbox>
+							<el-checkbox v-model="isApplyToAll">Apply to all files</el-checkbox>
+						</div>
 					</div>
 				</template>
 				<div class="global-inputs">
@@ -78,6 +81,9 @@
 			<div v-if="filesToUpload.length > 0" class="files-grid">
 				<div v-for="(file, index) in filesToUpload" :key="index" class="compact-file-item">
 					<div class="item-main">
+						<div v-if="file.preview" class="file-thumb" @click="openFilePreview(file)">
+							<img :src="file.preview" />
+						</div>
 						<span class="file-name">{{ file.file.name.substring(0, 20) }}...</span>
 						<el-tag size="small" type="info">{{ (file.file.size / 1024 / 1024).toFixed(2) }}MB</el-tag>
 						<el-button
@@ -134,6 +140,26 @@
 			</div>
 		</template>
 	</UiModal>
+
+	<!-- Inner Preview for Uploading Files -->
+	<el-dialog v-model="isPreviewOpen" append-to-body title="File Preview" width="600px">
+		<div v-if="activePreviewFile" class="upload-preview-container" :class="previewBg">
+			<img :src="activePreviewFile.preview" class="upload-preview-img" />
+			<div class="bg-toggle">
+				<el-radio-group v-model="previewBg" size="small">
+					<el-radio-button label="Transparent" value="checkered" />
+					<el-radio-button label="White" value="white" />
+					<el-radio-button label="Black" value="black" />
+				</el-radio-group>
+			</div>
+		</div>
+		<template #footer>
+			<div class="preview-info">
+				<span>{{ activePreviewFile?.file.name }}</span>
+				<span>{{ (activePreviewFile?.file.size || 0 / 1024 / 1024).toFixed(2) }} MB</span>
+			</div>
+		</template>
+	</el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -152,6 +178,7 @@ const globalAlt = ref('')
 const globalCategory = ref('')
 const globalTags = ref<string[]>([])
 const isApplyToAll = ref(true)
+const convertToWebP = ref(true)
 
 interface FileWithMeta {
 	file: File
@@ -160,11 +187,24 @@ interface FileWithMeta {
 	category: string
 	tags: string[]
 	isCustom: boolean
+	preview?: string
 }
 
 const filesToUpload = ref<FileWithMeta[]>([])
 
+const isPreviewOpen = ref(false)
+const activePreviewFile = ref<FileWithMeta | null>(null)
+const previewBg = ref('checkered')
+
+const openFilePreview = (file: FileWithMeta) => {
+	activePreviewFile.value = file
+
+	isPreviewOpen.value = true
+}
+
 const handleFileChange = (file: any) => {
+	const preview = file.raw.type.startsWith('image/') ? URL.createObjectURL(file.raw) : undefined
+
 	filesToUpload.value.push({
 		file: file.raw,
 		title: '',
@@ -172,13 +212,20 @@ const handleFileChange = (file: any) => {
 		category: '',
 		tags: [],
 		isCustom: false,
+		preview,
 	})
 }
 
 const handleFileRemove = (file: any) => {
 	const index = filesToUpload.value.findIndex((f) => f.file === file.raw)
 
-	if (index !== -1) filesToUpload.value.splice(index, 1)
+	if (index !== -1) {
+		const removed = filesToUpload.value.splice(index, 1)[0]
+
+		if (removed.preview) {
+			URL.revokeObjectURL(removed.preview)
+		}
+	}
 }
 
 const toggleCustom = (index: number) => {
@@ -192,6 +239,8 @@ const handleUpload = async () => {
 		const formData = new FormData()
 
 		formData.append('source', 'cms')
+
+		formData.append('convert_to_webp', String(convertToWebP.value))
 
 		filesToUpload.value.forEach((item, index) => {
 			formData.append('file', item.file)
@@ -225,6 +274,10 @@ const handleUpload = async () => {
 }
 
 const closeAndReset = () => {
+	filesToUpload.value.forEach((f) => {
+		if (f.preview) URL.revokeObjectURL(f.preview)
+	})
+
 	filesToUpload.value = []
 
 	globalTitle.value = ''
@@ -236,6 +289,8 @@ const closeAndReset = () => {
 	globalTags.value = []
 
 	isApplyToAll.value = true
+
+	convertToWebP.value = true
 
 	closeUploadModal()
 }
@@ -258,6 +313,11 @@ const closeAndReset = () => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+}
+
+.header-actions {
+	display: flex;
+	gap: 16px;
 }
 
 .header-title {
@@ -321,7 +381,29 @@ const closeAndReset = () => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 8px;
+	gap: 12px;
+}
+
+.file-thumb {
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	transition: transform 0.2s;
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.file-thumb:hover {
+	border-color: var(--color-primary);
+	transform: scale(1.1);
+}
+
+.file-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 .file-name {
@@ -347,5 +429,60 @@ const closeAndReset = () => {
 	align-items: center;
 	justify-content: flex-end;
 	gap: 16px;
+}
+
+.upload-preview-container {
+	width: 100%;
+	height: 400px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-surface);
+	overflow: hidden;
+}
+
+.upload-preview-container.checkered {
+	background-image:
+		linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%);
+	background-position:
+		0 0,
+		0 10px,
+		10px -10px,
+		-10px 0;
+	background-size: 20px 20px;
+	background-color: #1a1a1a;
+}
+
+.upload-preview-container.white {
+	background: #fff !important;
+}
+
+.upload-preview-container.black {
+	background: #000 !important;
+}
+
+.upload-preview-img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.bg-toggle {
+	top: 12px;
+	right: 12px;
+	position: absolute;
+	z-index: 10;
+}
+
+.preview-info {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	font-size: 12px;
+	color: var(--text-muted);
 }
 </style>
