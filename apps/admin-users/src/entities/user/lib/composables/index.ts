@@ -179,6 +179,8 @@ export const useUsers = () => {
 	}
 
 	const handlePatch = (uuid: string, data: Partial<IUserCreateUpdate>) => {
+		if (!uuid) return
+
 		patchMutation.mutate({ id: uuid, data })
 	}
 

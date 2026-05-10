@@ -10,6 +10,8 @@ export const AUTH_EVENTS = {
 
 export const SYSTEM_EVENTS = {
 	THEME_CHANGED: 'gp:theme-changed',
+	THEME_SETTINGS_CHANGED: 'gp:theme-settings-changed',
+	STORAGE: 'storage',
 } as const
 
 export const GP_EVENTS = {

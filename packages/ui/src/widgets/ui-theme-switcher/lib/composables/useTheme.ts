@@ -1,12 +1,14 @@
 import { ref } from 'vue'
 
-import { GP_EVENTS, useEvents } from '@admin-panel/lib'
+import { GP_EVENTS, isBrowser, useEvents } from '@admin-panel/lib'
 
 const { dispatch, on } = useEvents()
 
 const THEME_KEY = 'gp-theme-mode'
 
 const getInitialTheme = () => {
+	if (!isBrowser) return true
+
 	const saved = localStorage.getItem(THEME_KEY)
 
 	if (saved) return saved === 'dark'
@@ -17,7 +19,7 @@ const getInitialTheme = () => {
 const isDark = ref(getInitialTheme())
 
 const updateDOM = (dark: boolean) => {
-	if (typeof document === 'undefined') return
+	if (!isBrowser) return
 
 	if (dark) {
 		document.documentElement.classList.add('dark')
@@ -35,23 +37,25 @@ const toggleTheme = () => {
 
 	const mode = isDark.value ? 'dark' : 'light'
 
-	localStorage.setItem(THEME_KEY, mode)
+	if (isBrowser) {
+		localStorage.setItem(THEME_KEY, mode)
+	}
 
 	updateDOM(isDark.value)
 
-	if (typeof window !== 'undefined') {
-		dispatch(GP_EVENTS.THEME_CHANGED, { isDark: isDark.value })
-	}
+	dispatch(GP_EVENTS.THEME_CHANGED, { isDark: isDark.value })
 }
 
 // Initial sync
-if (typeof window !== 'undefined') {
+if (isBrowser) {
 	updateDOM(isDark.value)
 
 	// Listen for changes from other TABS
-	window.addEventListener('storage', (event) => {
-		if (event.key === THEME_KEY) {
-			const dark = event.newValue === 'dark'
+	on(GP_EVENTS.STORAGE, (event: any) => {
+		const storageEvent = event as StorageEvent
+
+		if (storageEvent.key === THEME_KEY) {
+			const dark = storageEvent.newValue === 'dark'
 
 			if (isDark.value !== dark) {
 				isDark.value = dark

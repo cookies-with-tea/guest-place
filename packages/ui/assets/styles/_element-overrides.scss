@@ -6,8 +6,8 @@ html.light {
 	/* Element Plus Root Color Hacks (Replacing Blue with VP Green) */
 	--el-color-primary: var(--gp-primary) !important;
 	--el-color-primary-light-3: var(--gp-primary-light) !important;
-	--el-color-primary-light-5: rgb(66, 184, 131, 0.5) !important;
-	--el-color-primary-light-7: rgb(66, 184, 131, 0.3) !important;
+	--el-color-primary-light-5: var(--gp-primary-light-5) !important;
+	--el-color-primary-light-7: var(--gp-primary-light-7) !important;
 	--el-color-primary-light-8: var(--gp-bg-glass) !important;
 	--el-color-primary-light-9: var(--gp-bg-glass) !important;
 	--el-color-primary-dark-2: var(--gp-primary-hover) !important;

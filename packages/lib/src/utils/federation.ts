@@ -1,6 +1,8 @@
 import { useEvents } from '../composables/useEvents'
 import { GP_EVENTS } from '../constants'
 
+import { isBrowser } from './browser'
+
 const { dispatch } = useEvents()
 
 export interface RemoteManifestItem {
@@ -35,7 +37,7 @@ export async function loadRemoteModule(remote: RemoteManifestItem, context?: any
 
 		// 2. Initialize the container (Module Federation init)
 		// @ts-ignore
-		const sharedScope = window.__federation_shared__ || {}
+		const sharedScope = (isBrowser && (window as any).__federation_shared__) || {}
 		// console.log(`[Federation] Initializing ${remote.name} with shared scope keys:`, Object.keys(sharedScope))
 
 		if (container && !initializedRemotes.has(remote.url)) {
@@ -61,11 +63,13 @@ export async function loadRemoteModule(remote: RemoteManifestItem, context?: any
 		const loadTime = Math.round(endTime - startTime)
 
 		// Cache stats in window for later retrieval
-		// @ts-ignore
-		window.__gp_mfe_stats = window.__gp_mfe_stats || {}
+		if (isBrowser) {
+			// @ts-ignore
+			window.__gp_mfe_stats = window.__gp_mfe_stats || {}
 
-		// @ts-ignore
-		window.__gp_mfe_stats[remote.name] = { loadTime }
+			// @ts-ignore
+			window.__gp_mfe_stats[remote.name] = { loadTime }
+		}
 
 		// Dispatch event for real-time updates
 		dispatch(GP_EVENTS.LOAD_STAT, {

@@ -16,6 +16,12 @@
 					<UiLanguageSwitcher />
 					<UiThemeSwitcher />
 
+					<el-tooltip content="Theme Settings" placement="bottom">
+						<el-button circle class="header-theme-btn" @click="themeBuilderVisible = true">
+							<el-icon><Brush /></el-icon>
+						</el-button>
+					</el-tooltip>
+
 					<el-tooltip content="Search (Cmd+K)" placement="bottom">
 						<el-button circle class="header-search-btn" @click="openSearch">
 							<el-icon><Search /></el-icon>
@@ -42,6 +48,12 @@
 				</div>
 			</header>
 
+			<el-dialog v-model="themeBuilderVisible" title="Theme Settings" width="400px">
+				<div class="theme-builder-dialog-content">
+					<UiThemeBuilder />
+				</div>
+			</el-dialog>
+
 			<el-dialog v-model="loginDialogVisible" custom-class="auth-dialog" :show-close="false" title="" width="400px">
 				<UiAuthWidget />
 			</el-dialog>
@@ -67,8 +79,8 @@ import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
 import { GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
-import { UiAuthWidget, UiLanguageSwitcher, UiSidebar, UiThemeSwitcher } from '@admin-panel/ui'
-import { Search, UserFilled } from '@element-plus/icons-vue'
+import { UiAuthWidget, UiLanguageSwitcher, UiSidebar, UiThemeBuilder, UiThemeSwitcher } from '@admin-panel/ui'
+import { Brush, Search, UserFilled } from '@element-plus/icons-vue'
 
 import GlobalSearch from '#features/global-search/ui/GlobalSearch.vue'
 
@@ -83,6 +95,7 @@ const currentTitle = computed(() => {
 
 const { user, isAuthenticated, clearAuth } = useAuth()
 const loginDialogVisible = ref(false)
+const themeBuilderVisible = ref(false)
 const searchRef = ref<any>(null)
 
 const openSearch = () => {

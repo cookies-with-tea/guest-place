@@ -1,3 +1,4 @@
+export * from './browser'
 export * from './federation'
 export * from './formatNumbers'
 export * from './lifecycle'

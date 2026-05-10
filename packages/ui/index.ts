@@ -17,6 +17,7 @@ import UiFloatingSettings from './src/widgets/ui-floating-settings/ui/UiFloating
 import UiLanguageSwitcher from './src/widgets/ui-language-switcher/UiLanguageSwitcher.vue'
 import UiSidebar from './src/widgets/ui-sidebar'
 import { useSidebar } from './src/widgets/ui-sidebar'
+import { UiThemeBuilder, useThemeBuilder } from './src/widgets/ui-theme-builder'
 import UiThemeSwitcher from './src/widgets/ui-theme-switcher'
 import { useTheme } from './src/widgets/ui-theme-switcher'
 
@@ -38,8 +39,10 @@ export {
 	UiSortableHeader,
 	UiTable,
 	UiTableColumn,
+	UiThemeBuilder,
 	UiThemeSwitcher,
 	UiTranslation,
 	useSidebar,
 	useTheme,
+	useThemeBuilder,
 }

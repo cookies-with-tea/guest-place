@@ -20,6 +20,16 @@
 
 					<el-divider class="section-divider" />
 
+					<!-- Theme Builder Section -->
+					<div class="dropdown-section theme-builder-dropdown-section">
+						<div class="section-title">Theme Builder</div>
+						<div class="theme-builder-container" @click.stop>
+							<UiThemeBuilder />
+						</div>
+					</div>
+
+					<el-divider class="section-divider" />
+
 					<!-- Language Section -->
 					<div class="dropdown-section">
 						<div class="section-title">Language</div>
@@ -48,6 +58,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from '@admin-panel/i18n'
 import { Check, Moon, Setting, Sunny } from '@element-plus/icons-vue'
 
+import { UiThemeBuilder } from '../../ui-theme-builder'
 import { useTheme } from '../../ui-theme-switcher/lib/composables/useTheme'
 
 const { isDark, toggleTheme } = useTheme()
@@ -108,11 +119,15 @@ onMounted(async () => {
 }
 
 .settings-dropdown {
-	width: 200px;
+	width: 280px;
 	border: 1px solid var(--gp-glass-border);
 	background: var(--gp-bg-glass);
 	padding: 8px 0;
 	backdrop-filter: blur(12px);
+}
+
+.theme-builder-container {
+	padding: 0 12px 8px;
 }
 
 .dropdown-section {

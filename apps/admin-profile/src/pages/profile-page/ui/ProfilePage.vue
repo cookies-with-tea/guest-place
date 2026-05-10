@@ -9,9 +9,9 @@
 			<el-skeleton animated :rows="10" />
 		</div>
 
-		<div v-else class="profile-page__content">
+		<div v-else class="profile-page__content stagger-list">
 			<!-- Personal Info Section -->
-			<section class="profile-section">
+			<section class="profile-section hover-lift">
 				<div class="profile-section__header">
 					<h2 class="profile-section__title">Личная информация</h2>
 				</div>
@@ -59,7 +59,7 @@
 			</section>
 
 			<!-- Security Section -->
-			<section class="profile-section">
+			<section class="profile-section hover-lift">
 				<div class="profile-section__header">
 					<h2 class="profile-section__title">Безопасность</h2>
 				</div>
@@ -86,7 +86,7 @@
 			</section>
 
 			<!-- Notifications Section -->
-			<section class="profile-section">
+			<section class="profile-section hover-lift">
 				<div class="profile-section__header">
 					<h2 class="profile-section__title">Уведомления</h2>
 				</div>

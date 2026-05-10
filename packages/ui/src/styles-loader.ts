@@ -14,7 +14,9 @@ const CRITICAL_CSS = `
     --gp-bg-element: #1f242c;
     --gp-primary: #42b883;
     --gp-primary-hover: #3fb27d;
-    --gp-primary-light: rgba(66,184,131,0.2);
+    --gp-primary-light: rgba(66, 184, 131, 0.2);
+    --gp-primary-light-5: rgba(66, 184, 131, 0.5);
+    --gp-primary-light-7: rgba(66, 184, 131, 0.7);
     --gp-text-main: #f0f6fc;
     --gp-text-secondary: #8b949e;
     --gp-text-disabled: #484f58;
@@ -50,8 +52,10 @@ const CRITICAL_CSS = `
   body.gp-ready { opacity: 1; }
 `
 
+import { isBrowser } from '@admin-panel/lib'
+
 export function initUiStyles() {
-	if (typeof window === 'undefined') return
+	if (!isBrowser) return
 
 	// Check if core styles are already loaded by the Shell or another MF
 	if (window.document.documentElement.dataset.gpUiStylesLoaded) {
@@ -67,7 +71,17 @@ export function initUiStyles() {
 
 	criticalStyle.id = 'gp-critical'
 
-	criticalStyle.textContent = CRITICAL_CSS
+	// Load persisted theme settings
+	const savedAccent = localStorage.getItem('gp-theme-accent-color') || '#42b883'
+	const savedBlur = localStorage.getItem('gp-theme-glass-blur') || '16'
+
+	const themedCss = CRITICAL_CSS.replace(/--gp-primary:\s*[^;]+;/, `--gp-primary: ${savedAccent};`)
+		.replace(/--gp-primary-light:\s*[^;]+;/, `--gp-primary-light: ${savedAccent}33;`)
+		.replace(/--gp-primary-light-5:\s*[^;]+;/, `--gp-primary-light-5: ${savedAccent}80;`)
+		.replace(/--gp-primary-light-7:\s*[^;]+;/, `--gp-primary-light-7: ${savedAccent}b3;`)
+		.replace(/--gp-glass-blur:\s*[^;]+;/, `--gp-glass-blur: ${savedBlur}px;`)
+
+	criticalStyle.textContent = themedCss
 
 	document.head.insertBefore(criticalStyle, document.head.firstChild)
 

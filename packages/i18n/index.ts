@@ -1,5 +1,6 @@
 import { type App, ref, watch } from 'vue'
 
+import { isBrowser } from '@admin-panel/lib'
 import { ofetch } from 'ofetch'
 
 import UiTranslation from './src/UiTranslation.vue'
@@ -15,7 +16,7 @@ export interface Language {
 
 // Global reactive state
 const getInitialLocale = (): Locale => {
-	if (typeof window !== 'undefined' && window.localStorage) {
+	if (isBrowser && window.localStorage) {
 		return localStorage.getItem('gp-locale') || 'en'
 	}
 
@@ -31,7 +32,7 @@ export function setLocale(locale: Locale) {
 
 	updateGlobalTranslations()
 
-	if (typeof window !== 'undefined' && window.localStorage) {
+	if (isBrowser && window.localStorage) {
 		localStorage.setItem('gp-locale', locale)
 	}
 }
@@ -72,14 +73,14 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 
 	// If we already have any keys for this locale, we assume it's hydrated or loaded
 	if (loadedNamespaces.has(cacheKey)) {
-		if (typeof window !== 'undefined') {
+		if (isBrowser) {
 			console.log(`[i18n] Skipping fetch for ${dictKey}, namespace "${cacheKey}" is already marked as loaded.`)
 		}
 
 		return cache.get(locale) || {}
 	}
 
-	if (typeof window !== 'undefined') {
+	if (isBrowser) {
 		console.log(
 			`[i18n] Fetching ${dictKey} for locale "${locale}". Cache exists: ${cache.has(locale)}, keys:`,
 			Object.keys(cache.get(locale) || {}).length
@@ -94,7 +95,7 @@ export async function loadTranslations(dictKey: string): Promise<TranslationDict
 				credentials: 'include',
 			})
 
-			if (typeof window === 'undefined') {
+			if (!isBrowser) {
 				console.log(`[i18n Server] Loaded "${dictKey}" for "${locale}". Keys found:`, Object.keys(data || {}).length)
 			}
 
@@ -173,7 +174,7 @@ export function t(key: string, locale: Locale = getLocale()): string {
 }
 
 export function getBrowserLocale(): string {
-	if (typeof navigator !== 'undefined') {
+	if (isBrowser && typeof navigator !== 'undefined') {
 		const lang = navigator.language.split('-')[0]
 
 		return lang === 'ru' ? 'ru' : 'en'

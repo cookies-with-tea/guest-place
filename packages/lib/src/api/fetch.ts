@@ -4,7 +4,7 @@ import { $fetch, type FetchOptions } from 'ofetch'
 import { useEvents } from '../composables/useEvents'
 import { GP_EVENTS } from '../constants'
 import type { CamelCasedProperties, IResponse, SnakeCasedProperties } from '../model'
-import { camelToSnake, snakeToCamel } from '../utils'
+import { camelToSnake, isBrowser, snakeToCamel } from '../utils'
 
 const { dispatch } = useEvents()
 
@@ -23,7 +23,7 @@ export const createApi = (entityName: string) => {
 			let body = undefined
 			let token = ''
 
-			if (typeof localStorage !== 'undefined') {
+			if (isBrowser) {
 				token = localStorage.getItem('gp_access_token') ?? ''
 			}
 
@@ -59,7 +59,7 @@ export const createApi = (entityName: string) => {
 			const messages = error.data?.messages ? snakeToCamel(error.data.messages) : []
 
 			if (error.statusCode === 401 || error.statusCode === 403) {
-				if (typeof window !== 'undefined') {
+				if (isBrowser) {
 					localStorage.removeItem('gp_access_token')
 
 					localStorage.removeItem('gp_refresh_token')
