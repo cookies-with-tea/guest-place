@@ -21,7 +21,14 @@
 		</template>
 
 		<template #default="scope">
-			<slot v-bind="scope">{{ scope.row[prop || ''] }}</slot>
+			<template v-if="scope.row.__isSkeleton">
+				<el-skeleton animated>
+					<template #template>
+						<el-skeleton-item variant="text" style="width: 80%" />
+					</template>
+				</el-skeleton>
+			</template>
+			<slot v-else v-bind="scope">{{ scope.row[prop || ''] }}</slot>
 		</template>
 	</el-table-column>
 </template>

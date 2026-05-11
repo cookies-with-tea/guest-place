@@ -1,6 +1,6 @@
 <template>
 	<div class="ui-table">
-		<el-table v-bind="$attrs">
+		<el-table v-loading="loading" v-bind="$attrs" :data="computedData">
 			<!-- Декларативные колонки -->
 			<template v-if="columns && columns.length">
 				<UiTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />
@@ -21,6 +21,7 @@
 				layout="total, sizes, prev, pager, next, jumper"
 				:page-sizes="[10, 20, 50, 100]"
 				background
+				:disabled="loading"
 				@update:current-page="$emit('update:page', $event)"
 				@update:page-size="$emit('update:limit', $event)"
 			/>
@@ -29,6 +30,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import UiTableColumn from '../../ui-table-column'
 
 interface ColumnConfig {
@@ -42,18 +45,36 @@ interface ColumnConfig {
 }
 
 interface Props {
+	data?: any[]
 	columns?: ColumnConfig[]
 	total?: number
 	page?: number
 	limit?: number
+	loading?: boolean
+	skeletonRows?: number
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+	data: () => [],
+	columns: () => [],
+	skeletonRows: 10,
+})
 
 defineEmits<{
 	(e: 'update:page', val: number): void
 	(e: 'update:limit', val: number): void
 }>()
+
+const computedData = computed(() => {
+	if (props.loading && props.data.length === 0) {
+		return Array.from({ length: props.skeletonRows }).map((_, i) => ({
+			__isSkeleton: true,
+			id: `skeleton-${i}`,
+		}))
+	}
+
+	return props.data
+})
 
 defineOptions({
 	inheritAttrs: false,

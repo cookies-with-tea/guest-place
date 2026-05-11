@@ -3,7 +3,7 @@
 		<UiTable
 			v-model:page="pagination.page"
 			v-model:limit="pagination.limit"
-			v-loading="isLoading || isFetching"
+			:loading="isLoading || isFetching"
 			border
 			class="ui-table"
 			:data="users"

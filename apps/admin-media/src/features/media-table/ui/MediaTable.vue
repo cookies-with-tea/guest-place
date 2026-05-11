@@ -19,13 +19,18 @@
 			</el-dropdown>
 		</div>
 		<UiTable
-			v-loading="isLoading || isFetching"
+			v-model:page="pagination.page"
+			v-model:limit="pagination.limit"
+			:loading="isLoading || isFetching"
 			border
 			class="ui-table"
 			:data="mediaItems"
 			element-loading-text="Loading data..."
+			:total="pagination.total"
 			@selection-change="handleSelectionChange"
 			@row-click="(row: MediaItem) => openPreviewDialog(row.uuid)"
+			@update:page="setPage"
+			@update:limit="setLimit"
 		>
 			<el-table-column type="selection" width="55" />
 
@@ -249,18 +254,6 @@
 			</el-table-column>
 		</UiTable>
 
-		<div class="pagination-container">
-			<el-pagination
-				v-model:current-page="pagination.page"
-				v-model:page-size="pagination.limit"
-				background
-				layout="total, sizes, prev, pager, next, jumper"
-				:page-sizes="[10, 20, 50, 100]"
-				:total="pagination.total"
-				@current-change="setPage"
-				@size-change="setLimit"
-			/>
-		</div>
 		<MediaPreviewDialog />
 		<MediaUpdateModal />
 		<MediaUploadDialog />

@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import type { IPagination } from '@admin-panel/lib'
@@ -34,11 +35,21 @@ export const useMedia = () => {
 
 	const { create, update, getAll, deleteById, getById } = mediaApi
 
+	const debouncedFilters = ref({ ...filters.value })
+
+	watchDebounced(
+		filters,
+		(val) => {
+			debouncedFilters.value = { ...val }
+		},
+		{ debounce: 500, deep: true }
+	)
+
 	// === Query ===
 	const queryKey = computed(() => [
 		MEDIA_QUERY_KEY,
 		{
-			...filters.value,
+			...debouncedFilters.value,
 			page: pagination.value.page,
 			limit: pagination.value.limit,
 		},
@@ -48,7 +59,7 @@ export const useMedia = () => {
 		queryKey,
 		queryFn: () =>
 			getAll({
-				...filters.value,
+				...debouncedFilters.value,
 				page: pagination.value.page,
 				limit: pagination.value.limit,
 			}),

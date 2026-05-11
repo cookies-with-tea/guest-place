@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import type { IPagination } from '@admin-panel/lib'
@@ -38,11 +39,21 @@ const editingUserUuid = ref<string>('')
 export const useUsers = () => {
 	const queryClient = useQueryClient()
 
+	const debouncedFilters = ref({ ...filters.value })
+
+	watchDebounced(
+		filters,
+		(val) => {
+			debouncedFilters.value = { ...val }
+		},
+		{ debounce: 500, deep: true }
+	)
+
 	// === Query ===
 	const queryKey = computed(() => [
 		USERS_QUERY_KEY,
 		{
-			...filters.value,
+			...debouncedFilters.value,
 			page: pagination.value.page,
 			limit: pagination.value.limit,
 		},
@@ -62,7 +73,7 @@ export const useUsers = () => {
 		queryKey,
 		queryFn: () =>
 			getAll({
-				...filters.value,
+				...debouncedFilters.value,
 				page: pagination.value.page,
 				limit: pagination.value.limit,
 			}),

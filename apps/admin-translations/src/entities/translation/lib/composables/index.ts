@@ -1,4 +1,5 @@
 import { computed, onMounted, ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { useI18n } from '@admin-panel/i18n'
@@ -48,10 +49,20 @@ export const useTranslations = () => {
 		fetchedLanguages.value = langs.map((l) => l.code)
 	})
 
+	const debouncedFilters = ref({ ...filters.value })
+
+	watchDebounced(
+		filters,
+		(val) => {
+			debouncedFilters.value = { ...val }
+		},
+		{ debounce: 500, deep: true }
+	)
+
 	// === Query ===
 	const queryKey = computed(() => [
 		TRANSLATIONS_QUERY_KEY,
-		{ ...filters.value, page: pagination.value.page, limit: pagination.value.limit },
+		{ ...debouncedFilters.value, page: pagination.value.page, limit: pagination.value.limit },
 	])
 
 	const queryClient = useQueryClient()
@@ -60,7 +71,7 @@ export const useTranslations = () => {
 		queryKey,
 		queryFn: () =>
 			fetchTranslations({
-				...filters.value,
+				...debouncedFilters.value,
 				page: pagination.value.page,
 				limit: pagination.value.limit,
 			}),

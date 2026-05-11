@@ -3,22 +3,22 @@
 		<UiTable
 			v-model:limit="currentLimit"
 			v-model:page="currentPage"
-			v-loading="isLoading"
+			:loading="isLoading"
 			style="width: 100%"
 			:data="translations"
 			:total="pagination.total"
 		>
-			<el-table-column label="ID" prop="id" width="120" />
-			<el-table-column label="Namespace" prop="key" width="150">
+			<UiTableColumn label="ID" prop="id" width="120" />
+			<UiTableColumn label="Namespace" prop="key" width="150">
 				<template #default="{ row }">
 					<el-tag v-if="row.key.includes('.')" size="small" type="info">
 						{{ row.key.split('.')[0] }}
 					</el-tag>
 					<el-tag v-else size="small" type="warning"> none </el-tag>
 				</template>
-			</el-table-column>
-			<el-table-column label="Key" min-width="200" prop="key" />
-			<el-table-column label="Translation" min-width="200" prop="value" />
+			</UiTableColumn>
+			<UiTableColumn label="Key" min-width="200" prop="key" />
+			<UiTableColumn label="Translation" min-width="200" prop="value" />
 			<el-table-column label="Actions" width="160" align="center">
 				<template #default="scope">
 					<div class="action-buttons">
@@ -67,8 +67,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { UiTable } from '@admin-panel/ui'
-import { Clock,Delete, Edit } from '@element-plus/icons-vue'
+import { UiTable, UiTableColumn } from '@admin-panel/ui'
+import { Clock, Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'
