@@ -1,4 +1,5 @@
 pub mod handlers;
+pub mod hello_plugin;
 
 use crate::core::redis::RedisService;
 use serde::{Deserialize, Serialize};

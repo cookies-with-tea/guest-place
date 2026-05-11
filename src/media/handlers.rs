@@ -253,6 +253,10 @@ pub async fn create(
                     .await;
 
                     if let Ok(row) = db_result {
+                        if media_type_str == "image" {
+                            state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
+                        }
+
                         uploaded_items.push(MediaItemDTO {
                             uuid: row.uuid.to_string(),
                             url: row.url,

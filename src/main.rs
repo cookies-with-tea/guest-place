@@ -150,6 +150,15 @@ impl Modify for SecurityAddon {
 
 #[tokio::main]
 async fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.contains(&"--export-openapi".to_string()) {
+        let openapi = ApiDoc::openapi();
+        let json = openapi.to_pretty_json().unwrap();
+        std::fs::write("openapi.json", json).expect("Unable to write openapi.json");
+        println!("OpenAPI spec exported to openapi.json");
+        return;
+    }
+
     dotenv::dotenv().ok();
 
     let (log_tx, _) = tokio::sync::broadcast::channel(100);
@@ -182,6 +191,15 @@ async fn main() {
     let redis = Arc::new(RedisService::new(redis_pool));
     let features = Arc::new(FeatureFlagService::new(redis.clone()));
     let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
+    let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(1024));
+    let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
+        pool.clone(),
+        bus.clone(),
+        "uploads".to_string(),
+    ));
+
+    let mut plugin_manager = guest_place::core::plugin::PluginManager::new();
+    plugin_manager.register(guest_place::features::hello_plugin::HelloPlugin);
 
     let shared_state = Arc::new(AppState {
         pool: pool.clone(),
@@ -191,6 +209,7 @@ async fn main() {
         redis,
         features,
         media_quota,
+        media_optimizer,
         frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
         smtp_host,
         smtp_port,
@@ -198,6 +217,7 @@ async fn main() {
         smtp_password,
         smtp_from,
         log_tx,
+        bus,
     });
 
     let cors = {
@@ -236,6 +256,7 @@ async fn main() {
     };
 
     let router = create_router(shared_state.clone(), ApiDoc::openapi(), cors);
+    let router = plugin_manager.setup_plugins(shared_state.clone(), router);
 
     sqlx::migrate!()
         .run(&pool.clone())

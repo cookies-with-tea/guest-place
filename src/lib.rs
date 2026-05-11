@@ -40,6 +40,7 @@ pub struct AppState {
     pub redis: Arc<RedisService>,
     pub features: Arc<FeatureFlagService>,
     pub media_quota: Arc<QuotaService>,
+    pub media_optimizer: Arc<crate::media::optimizer::MediaOptimizer>,
     pub frontend_url: String,
     pub smtp_host: String,
     pub smtp_port: u16,
@@ -47,6 +48,7 @@ pub struct AppState {
     pub smtp_password: String,
     pub smtp_from: String,
     pub log_tx: tokio::sync::broadcast::Sender<String>,
+    pub bus: Arc<crate::core::bus::RealtimeBus>,
 }
 
 pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, cors: CorsLayer) -> Router {
@@ -76,6 +78,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
     let app_router = public_router
         .merge(protected_router)
         .nest("/api/v1/system", monitoring::router())
+        .route("/api/v1/events", axum::routing::get(monitoring::handlers::get_events))
         .with_state(state.clone())
         .layer(middleware::from_fn(locale_middleware));
 

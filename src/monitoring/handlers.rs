@@ -110,6 +110,37 @@ pub async fn get_logs(
 }
 
 #[utoipa::path(
+    get,
+    path = "/api/v1/events",
+    responses(
+        (status = 200, description = "Real-time system events via SSE")
+    ),
+    tag = "System"
+)]
+pub async fn get_events(
+    State(state): State<Arc<AppState>>,
+) -> Sse<impl tokio_stream::Stream<Item = Result<Event, std::convert::Infallible>>> {
+    let rx = state.bus.subscribe();
+    let stream = BroadcastStream::new(rx).filter_map(|msg| {
+        match msg {
+            Ok(event) => {
+                let json = serde_json::to_string(&event).unwrap_or_default();
+                let event_name = match &event {
+                    crate::core::bus::SystemEvent::FileProcessed { .. } => "file_processed",
+                    crate::core::bus::SystemEvent::ContentUpdated { .. } => "content_updated",
+                    crate::core::bus::SystemEvent::ContentLocked { .. } => "content_locked",
+                    crate::core::bus::SystemEvent::ConfigChanged { .. } => "config_changed",
+                };
+                Some(Ok(Event::default().event(event_name).data(json)))
+            },
+            Err(_) => None,
+        }
+    });
+
+    Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::default())
+}
+
+#[utoipa::path(
     post,
     path = "/api/v1/system/modules/{name}/reload",
     responses(

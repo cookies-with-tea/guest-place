@@ -44,6 +44,7 @@ sha2 = "0.10.8"
 image = { version = "0.25.1", features = ["webp"] }
 redis = { version = "0.25.3", features = ["tokio-comp", "aio"] }
 deadpool-redis = "0.15.0"
+blurhash = "0.2.3"
 
 [dev-dependencies]
 axum-test = "20.0.0"
