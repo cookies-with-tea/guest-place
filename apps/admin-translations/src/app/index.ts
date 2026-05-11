@@ -12,18 +12,20 @@ initUiStyles()
 
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
-import { initI18n } from '@admin-panel/i18n'
+import { i18nPlugin, initI18n, useI18n } from '@admin-panel/i18n'
 
-initI18n({
-	apiBase: import.meta.env.VITE_API_BASE,
-})
+initI18n({ apiBase: '' })
+
+const { loadDict } = useI18n()
 
 const app = createApp(App)
 
-app.use(VueQueryPlugin)
+app.use(i18nPlugin)
 
-app.use(router)
+loadDict('general')
 
-app.use(ElementPlus)
+loadDict('platforms')
+
+app.use(VueQueryPlugin).use(router).use(ElementPlus)
 
 export { app }

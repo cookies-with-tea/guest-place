@@ -40,7 +40,7 @@ const loadRemoteRoutes = async (app: any) => {
 		const manifest: RemoteManifest = res.data
 		const remotes = (manifest.remotes || []).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
-		for (const remote of remotes) {
+		const loadPromises = remotes.map(async (remote) => {
 			try {
 				const remoteModule = await loadRemoteModule(remote, { app })
 
@@ -49,22 +49,33 @@ const loadRemoteRoutes = async (app: any) => {
 				const routesFromModule = remoteModule.routes || remoteModule.default?.routes || remoteModule.default || []
 				const modifiedRoutes = routesFromModule.map((route: any) => addPrefixToRoute(route, `/${remote.name}`))
 
-				console.log(`[Shell] Modified routes for ${remote.name}:`, modifiedRoutes)
-
-				routes.push(...modifiedRoutes)
-
 				// Finding icon and title from ROUTES if it matches remote name
 				const routeConfig = (ROUTES as any)[remote.name]
 
-				sidebarGroups.push({
-					name: remote.name,
-					title: routeConfig?.title || `general.${remote.name}`,
-					icon: routeConfig?.icon || 'Menu',
-					category: remote.category,
+				return {
 					routes: modifiedRoutes,
-				})
-			} catch {
-				// Silent fail for individual remotes
+					sidebarGroup: {
+						name: remote.name,
+						title: routeConfig?.title || `general.${remote.name}`,
+						icon: routeConfig?.icon || 'Menu',
+						category: remote.category,
+						routes: modifiedRoutes,
+					},
+				}
+			} catch (err) {
+				console.error(`[Shell] Failed to load remote ${remote.name}:`, err)
+
+				return null
+			}
+		})
+
+		const loadedModules = await Promise.all(loadPromises)
+
+		for (const mod of loadedModules) {
+			if (mod) {
+				routes.push(...mod.routes)
+
+				sidebarGroups.push(mod.sidebarGroup)
 			}
 		}
 	}

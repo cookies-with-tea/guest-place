@@ -22,6 +22,11 @@ export default defineBuildConfig({
 		'vue-router',
 		'element-plus',
 		'@tanstack/vue-query',
+		'rollup-plugin-visualizer',
+		'unplugin-vue-components',
+		'unplugin-element-plus',
+		'unplugin-auto-import',
+		'vite-plugin-compression',
 	],
 	failOnWarn: false,
 })

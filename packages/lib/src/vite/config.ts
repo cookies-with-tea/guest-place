@@ -3,7 +3,9 @@ import vue from '@vitejs/plugin-vue'
 import { defu } from 'defu'
 import { builtinModules } from 'node:module'
 import { resolve } from 'node:path'
+import { visualizer } from 'rollup-plugin-visualizer'
 import { loadEnv } from 'vite'
+import viteCompression from 'vite-plugin-compression'
 import { defineConfig, type ViteUserConfig } from 'vitest/config'
 
 import { APPS_PORTS } from '../constants/ports'
@@ -61,7 +63,9 @@ export function createConfig(options: CreateConfigOptions) {
 					resolveId(id) {
 						// If we are NOT the shell, we skip bundling heavy global styles
 						// because they are already provided by the host (Shell).
-						const isHeavyStyle = (id.includes('element-plus') && id.endsWith('.css')) || id.endsWith('bundle.scss')
+						const isHeavyStyle =
+							(id.includes('element-plus') && (id.endsWith('.css') || id.includes('/style/'))) ||
+							id.endsWith('bundle.scss')
 
 						const isShellLike = name === 'shell' || name === 'orchestrator'
 						const isStandalone = !!process.env.VITE_STANDALONE || command === 'serve'
@@ -83,13 +87,24 @@ export function createConfig(options: CreateConfigOptions) {
 						[`./${displayName.replace(/\s+/g, '')}Routes`]: './src/app/router/index.ts',
 					},
 					remotes,
-					shared: isProduction
-						? shared
-						: {
-								...shared,
-								'@admin-panel/ui': { singleton: true },
-								'@admin-panel/lib': { singleton: true },
-							},
+					shared: {
+						...shared,
+						'@admin-panel/ui': { singleton: true },
+						'@admin-panel/lib': { singleton: true },
+					},
+				}),
+				viteCompression({
+					verbose: true,
+					disable: false,
+					threshold: 1024,
+					algorithm: 'gzip',
+					ext: '.gz',
+				}),
+				visualizer({
+					open: false,
+					filename: 'stats.html',
+					gzipSize: true,
+					brotliSize: true,
 				}),
 				...plugins,
 			],
@@ -111,13 +126,31 @@ export function createConfig(options: CreateConfigOptions) {
 					'#shared': resolve(appDir, 'src/shared'),
 					styles: resolve(appDir, 'src/app/assets/styles'),
 				},
+				dedupe: ['vue', 'element-plus', 'pinia', 'vue-router', '@tanstack/vue-query'],
 			},
 			build: {
 				target: 'esnext',
 				minify: false,
 				cssCodeSplit: true, // Enable code splitting for better performance
 				rollupOptions: {
-					external: ['fsevents', ...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
+					external: [
+						'vue',
+						'vue-router',
+						'element-plus',
+						'pinia',
+						'@admin-panel/ui',
+						'@admin-panel/lib',
+						'@tanstack/vue-query',
+						'@admin-panel/i18n',
+						'fsevents',
+						...builtinModules,
+						...builtinModules.map((m) => `node:${m}`),
+					],
+					output: {
+						// Ensure clean chunk names for federation
+						chunkFileNames: 'assets/[name]-[hash].js',
+						entryFileNames: 'assets/[name].js',
+					},
 				},
 			},
 			server: {

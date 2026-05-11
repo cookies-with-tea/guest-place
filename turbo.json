@@ -4,8 +4,12 @@
 	"tasks": {
 		"build": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*", "vite.config.ts"],
-			"outputs": ["dist/**", "storybook-static/**"],
+			"outputs": ["dist/**", "storybook-static/**", "stats.html"],
 			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"check-size": {
+			"dependsOn": ["build"],
 			"cache": true
 		},
 		"dev": {

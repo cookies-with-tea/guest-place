@@ -1,5 +1,6 @@
 if (typeof window !== 'undefined') {
 	;(window as any).__gp_is_shell = true
+
 	;(window as any).__gp_shell_active = true
 }
 
