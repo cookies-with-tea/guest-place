@@ -69,3 +69,10 @@ rustup toolchain install stable-x86_64-pc-windows-gnu
 rustup default stable-x86_64-pc-windows-gnu
 # download visual studio
 ```
+
+** kill specific port **
+
+```bash
+netstat -ano | findstr :<PORT_NUMBER>
+taskkill /F /PID <PID>
+```

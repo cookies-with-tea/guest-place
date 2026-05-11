@@ -39,6 +39,23 @@ pub struct TranslationVersionDTO {
     pub comment: Option<String>,
 }
 
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct NamespaceDTO {
+    pub id: uuid::Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub is_dynamic: bool,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct CreateNamespaceDTO {
+    pub name: String,
+    pub description: Option<String>,
+    pub is_dynamic: Option<bool>,
+}
+
 #[derive(Serialize, ToSchema)]
 pub struct LanguageDTO {
     pub code: String,

@@ -1,12 +1,15 @@
 use crate::{
     core::{dto::ApiResponse, response::into_api_response},
-    i18n::dto::{LanguageDTO, TranslationDTO, TranslationInput, TranslationVersionDTO},
+    i18n::dto::{
+        CreateNamespaceDTO, LanguageDTO, NamespaceDTO, TranslationDTO, TranslationInput,
+        TranslationVersionDTO,
+    },
     AppState,
 };
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
     Extension, Json, Router,
 };
 use std::{collections::HashMap, sync::Arc};
@@ -385,31 +388,20 @@ pub async fn get_languages(
     get,
     path = "/api/v1/i18n/namespaces",
     responses(
-        (status = 200, description = "List of available namespaces", body = ApiResponse<Vec<String>>),
+        (status = 200, description = "List of available namespaces", body = ApiResponse<Vec<NamespaceDTO>>),
         (status = 500, description = "Database error")
     ),
     tag = "I18n"
 )]
 pub async fn get_namespaces(
     State(state): State<Arc<AppState>>,
-) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
-    let rows: Result<Vec<(String,)>, _> = sqlx::query_as(
-        r#"
-        SELECT DISTINCT split_part(key, '.', 1) as namespace 
-        FROM i18n_translations 
-        WHERE key LIKE '%.%'
-        ORDER BY namespace
-        "#,
-    )
-    .fetch_all(&state.pool)
-    .await;
-
-    match rows {
-        Ok(namespaces) => {
-            let list: Vec<String> = namespaces.into_iter().map(|(ns,)| ns).collect();
-
-            into_api_response(StatusCode::OK, Some(list), None, None)
-        }
+) -> Result<Json<ApiResponse<Vec<NamespaceDTO>>>, (StatusCode, Json<ApiResponse<Vec<NamespaceDTO>>>)>
+{
+    match sqlx::query_as::<_, NamespaceDTO>("SELECT * FROM i18n_namespaces ORDER BY name ASC")
+        .fetch_all(&state.pool)
+        .await
+    {
+        Ok(namespaces) => into_api_response(StatusCode::OK, Some(namespaces), None, None),
         Err(e) => {
             eprintln!("DB error in get_namespaces: {}", e);
             into_api_response(
@@ -419,6 +411,122 @@ pub async fn get_namespaces(
                 Some(vec!["Failed to load namespaces".to_string()]),
             )
         }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/i18n/namespaces",
+    request_body = CreateNamespaceDTO,
+    responses(
+        (status = 201, description = "Namespace created"),
+        (status = 409, description = "Namespace already exists"),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn create_namespace(
+    State(state): State<Arc<AppState>>,
+    Json(input): Json<CreateNamespaceDTO>,
+) -> Result<Json<ApiResponse<NamespaceDTO>>, (StatusCode, Json<ApiResponse<NamespaceDTO>>)> {
+    let result = sqlx::query_as::<_, NamespaceDTO>(
+        "INSERT INTO i18n_namespaces (name, description, is_dynamic) VALUES ($1, $2, $3) RETURNING *"
+    )
+    .bind(&input.name)
+    .bind(&input.description)
+    .bind(input.is_dynamic.unwrap_or(false))
+    .fetch_one(&state.pool)
+    .await;
+
+    match result {
+        Ok(ns) => into_api_response(StatusCode::CREATED, Some(ns), None, None),
+        Err(e) => {
+            eprintln!("DB error creating namespace: {}", e);
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                None,
+                Some(vec!["Failed to create namespace".to_string()]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/i18n/namespaces/{id}",
+    request_body = CreateNamespaceDTO,
+    params(
+        ("id" = uuid::Uuid, Path, description = "Namespace ID")
+    ),
+    responses(
+        (status = 200, description = "Namespace updated"),
+        (status = 404, description = "Namespace not found"),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn update_namespace(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<uuid::Uuid>,
+    Json(input): Json<CreateNamespaceDTO>,
+) -> Result<Json<ApiResponse<NamespaceDTO>>, (StatusCode, Json<ApiResponse<NamespaceDTO>>)> {
+    let result = sqlx::query_as::<_, NamespaceDTO>(
+        "UPDATE i18n_namespaces SET name = $1, description = $2, is_dynamic = $3, updated_at = NOW() WHERE id = $4 RETURNING *"
+    )
+    .bind(&input.name)
+    .bind(&input.description)
+    .bind(input.is_dynamic.unwrap_or(false))
+    .bind(id)
+    .fetch_one(&state.pool)
+    .await;
+
+    match result {
+        Ok(ns) => into_api_response(StatusCode::OK, Some(ns), None, None),
+        Err(e) => {
+            eprintln!("DB error updating namespace: {}", e);
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                None,
+                Some(vec!["Failed to update namespace".to_string()]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/i18n/namespaces/{id}",
+    params(
+        ("id" = uuid::Uuid, Path, description = "Namespace ID")
+    ),
+    responses(
+        (status = 200, description = "Namespace deleted"),
+        (status = 404, description = "Namespace not found"),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn delete_namespace(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<uuid::Uuid>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM i18n_namespaces WHERE id = $1")
+        .bind(id)
+        .execute(&state.pool)
+        .await;
+
+    match result {
+        Ok(res) if res.rows_affected() > 0 => {
+            into_api_response(StatusCode::OK, None, None, Some(vec!["Namespace deleted".to_string()]))
+        }
+        _ => into_api_response(
+            StatusCode::NOT_FOUND,
+            None,
+            None,
+            Some(vec!["Namespace not found".to_string()]),
+        ),
     }
 }
 
@@ -574,13 +682,16 @@ pub fn public_router() -> Router<Arc<AppState>> {
         .route("/languages", get(get_languages))
         .route("/namespaces", get(get_namespaces))
         .route("/{dict_key}", get(get_by_dict_key))
+        .route("/", get(get_all))
 }
 
 pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create_or_update))
-        .route("/", get(get_all))
         .route("/{key}/{locale}", delete(delete_one))
         .route("/versions/{key}/{locale}", get(get_versions))
         .route("/versions/{version_id}/rollback", post(rollback))
+        .route("/namespaces", post(create_namespace))
+        .route("/namespaces/{id}", patch(update_namespace))
+        .route("/namespaces/{id}", delete(delete_namespace))
 }
