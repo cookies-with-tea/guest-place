@@ -3,6 +3,7 @@ import { i18nPlugin, UiTranslation } from '@admin-panel/i18n'
 import ContentFormGenerator from './src/components/content'
 import UiAuthGuard from './src/components/ui-auth-guard'
 import UiButton from './src/components/ui-button'
+import UiErrorBoundary from './src/components/ui-error-boundary/ui/UiErrorBoundary.vue'
 import UiIcon from './src/components/ui-icon'
 import UiInput from './src/components/ui-input'
 import UiMediaPicker from './src/components/ui-media-picker'
@@ -29,6 +30,7 @@ export {
 	UiAuthGuard,
 	UiAuthWidget,
 	UiButton,
+	UiErrorBoundary,
 	UiFloatingSettings,
 	UiIcon,
 	UiInput,

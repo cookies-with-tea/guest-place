@@ -59,13 +59,15 @@
 			</el-dialog>
 
 			<main class="page-content">
-				<RouterView v-slot="{ Component, route: currentRoute }">
-					<Transition mode="out-in" :name="(currentRoute.meta.transition as string) || 'fade-transform'">
-						<div :key="currentRoute.path" class="page-wrapper">
-							<component :is="Component" />
-						</div>
-					</Transition>
-				</RouterView>
+				<UiErrorBoundary>
+					<RouterView v-slot="{ Component, route: currentRoute }">
+						<Transition mode="out-in" :name="(currentRoute.meta.transition as string) || 'fade-transform'">
+							<div :key="currentRoute.path" class="page-wrapper">
+								<component :is="Component" />
+							</div>
+						</Transition>
+					</RouterView>
+				</UiErrorBoundary>
 			</main>
 		</div>
 
@@ -79,7 +81,14 @@ import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
 import { GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
-import { UiAuthWidget, UiLanguageSwitcher, UiSidebar, UiThemeBuilder, UiThemeSwitcher } from '@admin-panel/ui'
+import {
+	UiAuthWidget,
+	UiErrorBoundary,
+	UiLanguageSwitcher,
+	UiSidebar,
+	UiThemeBuilder,
+	UiThemeSwitcher,
+} from '@admin-panel/ui'
 import { Brush, Search, UserFilled } from '@element-plus/icons-vue'
 
 import GlobalSearch from '#features/global-search/ui/GlobalSearch.vue'
