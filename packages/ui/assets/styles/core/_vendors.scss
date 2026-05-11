@@ -114,14 +114,17 @@ p {
 
 .el-input__wrapper,
 .el-select__wrapper {
+	border: 1px solid var(--gp-glass-border-inner) !important;
 	box-shadow: 0 0 0 1px var(--gp-glass-border) inset !important;
+	background: var(--gp-glass-gradient) !important;
 	background-color: var(--gp-bg-glass) !important;
-	transition: all 0.3s ease;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 	backdrop-filter: blur(var(--gp-glass-blur));
 
 	.el-select__caret,
 	.el-input__icon {
 		color: var(--gp-text-secondary) !important;
+		transition: transform 0.3s ease;
 	}
 
 	.el-select__placeholder {
@@ -133,8 +136,14 @@ p {
 .el-select__wrapper.is-focused {
 	box-shadow:
 		0 0 0 1px var(--gp-primary) inset,
-		0 0 8px var(--gp-primary-light) !important;
-	background-color: transparent !important;
+		0 8px 16px -4px var(--gp-primary-light) !important;
+	background: var(--gp-bg-glass-hover) !important;
+	transform: translateY(-1px);
+
+	.el-select__caret,
+	.el-input__icon {
+		color: var(--gp-primary) !important;
+	}
 }
 
 /* Modals (Glassmorphism) */

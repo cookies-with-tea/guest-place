@@ -7,6 +7,7 @@ import UiIcon from './src/components/ui-icon'
 import UiInput from './src/components/ui-input'
 import UiMediaPicker from './src/components/ui-media-picker'
 import UiModal from './src/components/ui-modal'
+import UiSelect from './src/components/ui-select'
 import UiSeoEditor from './src/components/ui-seo-editor'
 import UiSortableHeader from './src/components/ui-sortable-header'
 import UiTable from './src/components/ui-table'
@@ -34,6 +35,7 @@ export {
 	UiLanguageSwitcher,
 	UiMediaPicker,
 	UiModal,
+	UiSelect,
 	UiSeoEditor,
 	UiSidebar,
 	UiSortableHeader,

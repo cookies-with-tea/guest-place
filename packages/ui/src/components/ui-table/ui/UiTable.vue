@@ -1,6 +1,16 @@
 <template>
 	<div class="ui-table">
-		<el-table v-loading="loading" v-bind="$attrs" :data="computedData">
+		<el-table
+			v-loading="loading"
+			v-bind="$attrs"
+			:data="computedData"
+			border
+			stripe
+			row-key="id"
+			fit
+			highlight-current-row
+			style="width: 100%"
+		>
 			<!-- Декларативные колонки -->
 			<template v-if="columns && columns.length">
 				<UiTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />

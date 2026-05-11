@@ -32,17 +32,21 @@
 							@mouseenter="activeIndex = flatResults.indexOf(item)"
 						>
 							<div class="item-icon">
-								<component :is="getIcon(category)" />
+								<component :is="getIcon(item)" />
 							</div>
 							<div class="item-content">
-								<div class="item-title">{{ item.title }}</div>
-								<div class="item-desc">{{ item.description }}</div>
+								<div class="item-title-wrapper">
+									<span v-if="item.parent" class="item-parent">{{ item.parent }}</span>
+									<span v-if="item.parent" class="item-separator">/</span>
+									<span class="item-title">{{ item.title }}</span>
+								</div>
+								<div class="item-desc">{{ item.description || item.path }}</div>
 							</div>
 						</div>
 					</div>
 				</template>
-				<div v-else-if="query.length > 2" class="no-results"> No results found for "{{ query }}" </div>
-				<div v-else class="search-placeholder"> Type at least 3 characters to search... </div>
+				<div v-else-if="query.length > 1" class="no-results"> No results found for "{{ query }}" </div>
+				<div v-else class="search-placeholder"> Type to find pages and sections... </div>
 			</div>
 
 			<div class="search-footer">
@@ -62,18 +66,24 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDebounceFn, useMagicKeys } from '@vueuse/core'
+import { onKeyStroke, useDebounceFn, useMagicKeys } from '@vueuse/core'
 
-import { ChatDotRound, Document, Picture, Search, User } from '@element-plus/icons-vue'
+import { useI18n } from '@admin-panel/i18n'
+import { useSidebar } from '@admin-panel/ui'
+import * as Icons from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 import { systemApi } from '../../../entities/system/api'
+import type { SearchResult } from '../../../entities/system/model'
 
 const router = useRouter()
-const { meta_k, ctrl_k, escape } = useMagicKeys()
+const { t } = useI18n()
+const { sidebarData } = useSidebar()
+const { escape } = useMagicKeys()
 
 const isOpen = ref(false)
 const query = ref('')
-const results = ref<any[]>([])
+const results = ref<SearchResult[]>([])
 const isLoading = ref(false)
 const activeIndex = ref(0)
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -97,8 +107,10 @@ const close = () => {
 }
 
 // Global hotkeys
-watch([meta_k, ctrl_k], ([mk, ck]) => {
-	if (mk || ck) {
+onKeyStroke(['k', 'K'], (e) => {
+	if (e.ctrlKey || e.metaKey) {
+		e.preventDefault()
+
 		open()
 	}
 })
@@ -110,7 +122,7 @@ watch(escape, (esc) => {
 })
 
 const fetchResults = useDebounceFn(async () => {
-	if (query.value.length < 3) {
+	if (query.value.length < 2) {
 		results.value = []
 
 		return
@@ -118,16 +130,76 @@ const fetchResults = useDebounceFn(async () => {
 
 	isLoading.value = true
 
+	const searchResults: SearchResult[] = []
+	const q = query.value.toLowerCase()
+
+	// 1. Search in Sidebar Navigation (Pages & Sections)
+	sidebarData.value.forEach((item: any) => {
+		// Main items
+		const translatedTitle = t(item.title).toLowerCase()
+
+		if (translatedTitle.includes(q)) {
+			searchResults.push({
+				id: `nav-${item.title}`,
+				title: t(item.title),
+				category: 'Pages',
+				path: item.path,
+				icon: item.icon,
+			})
+		}
+
+		// Sub-menu items
+		if (item.children) {
+			item.children.forEach((child: any) => {
+				const translatedChild = t(child.title).toLowerCase()
+
+				if (translatedChild.includes(q)) {
+					searchResults.push({
+						id: `nav-${child.title}`,
+						title: t(child.title),
+						category: 'Sections',
+						path: child.path,
+						icon: item.icon,
+						parent: t(item.title),
+					})
+				}
+			})
+		}
+	})
+
+	// 2. Search in API (Only for relevant "pages" or entities, filtering out raw content)
 	const res = await systemApi.search(query.value)
 
-	if (res.data) {
-		results.value = res.data.results || []
+	if (res.data?.results) {
+		const apiResults = res.data.results
+			.filter((item) => {
+				// Only keep items that look like pages/modules or schemas
+				const allowedCategories = ['Modules', 'Schemas', 'Tools']
 
-		activeIndex.value = 0
+				return allowedCategories.includes(item.category)
+			})
+			.map((item) => ({
+				...item,
+				id: `api-${item.id}`,
+			}))
+
+		searchResults.push(...apiResults)
 	}
 
+	// Filter duplicates by path
+	const seenPaths = new Set()
+
+	results.value = searchResults.filter((item) => {
+		if (!item.path || seenPaths.has(item.path)) return false
+		seenPaths.add(item.path)
+
+		return true
+	})
+
+	activeIndex.value = 0
+
 	isLoading.value = false
-}, 300)
+}, 200)
 
 const handleInput = () => {
 	fetchResults()
@@ -173,159 +245,226 @@ const handleEnter = () => {
 const navigate = (item: any) => {
 	close()
 
-	router.push(item.url)
+	if (item.path) {
+		router.push(item.path)
+	}
 }
 
-const getIcon = (category: string) => {
-	switch (category) {
-		case 'Users':
-			return User
-		case 'Content':
-			return Document
-		case 'Media':
-			return Picture
-		case 'Translations':
-			return ChatDotRound
+const getIcon = (item: any) => {
+	if (item.icon && (Icons as any)[item.icon]) {
+		return (Icons as any)[item.icon]
+	}
+
+	switch (item.category) {
+		case 'Pages':
+		case 'Sections':
+			return Icons.Document
+		case 'Modules':
+			return Icons.Box
+		case 'Schemas':
+			return Icons.Files
 		default:
-			return Search
+			return Icons.Search
 	}
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .global-search-overlay {
 	position: fixed;
 	display: flex;
 	align-items: flex-start;
 	justify-content: center;
 	background: rgb(0, 0, 0, 0.4);
+	transition: all 0.3s ease;
 	padding-top: 15vh;
 	z-index: 9999;
-	backdrop-filter: blur(4px);
+	backdrop-filter: blur(12px);
 	inset: 0;
 }
 
 .global-search-container {
 	width: 100%;
-	max-width: 650px;
+	max-width: 680px;
 	display: flex;
 	flex-direction: column;
-	border-radius: 16px;
-	box-shadow: 0 20px 40px rgb(0, 0, 0, 0.2);
-	background: var(--gp-bg-card);
+	border: 1px solid var(--gp-glass-border-inner);
+	border-radius: 20px;
+	box-shadow: var(--gp-glass-shadow);
+	background: var(--gp-glass-gradient);
+	background-color: var(--gp-bg-glass);
+	animation: slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 	overflow: hidden;
+}
+
+@keyframes slide-up {
+	from {
+		transform: translateY(20px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 .search-input-wrapper {
 	display: flex;
 	align-items: center;
-	border-bottom: 1px solid var(--gp-border-color);
-	padding: 16px 20px;
-	gap: 12px;
+	border-bottom: 1px solid var(--gp-glass-border);
+	padding: 20px 24px;
+	gap: 16px;
 }
 
 .search-icon {
-	font-size: 20px;
-	color: var(--gp-text-disabled);
+	font-size: 24px;
+	color: var(--gp-primary);
 }
 
 .search-input {
 	flex: 1;
 	outline: none;
 	border: none;
-	font-size: 1.1rem;
+	font-weight: 500;
+	font-size: 1.25rem;
 	color: var(--gp-text-main);
 	background: transparent;
+
+	&::placeholder {
+		color: var(--gp-text-secondary);
+	}
 }
 
 .search-kram {
 	display: flex;
-	gap: 4px;
+	gap: 6px;
 }
 
 .key {
-	border: 1px solid var(--gp-border-color);
-	border-radius: 4px;
-	box-shadow: 0 1px 0 var(--gp-border-color);
-	font-weight: 700;
-	font-size: 0.7rem;
+	border: 1px solid var(--gp-glass-border);
+	border-radius: 6px;
+	box-shadow: 0 2px 0 var(--gp-glass-border);
+	font-weight: 600;
+	font-size: 0.75rem;
 	color: var(--gp-text-secondary);
-	background: var(--gp-bg-lighter);
-	padding: 2px 6px;
+	background: var(--gp-bg-glass-hover);
+	padding: 4px 8px;
 }
 
 .search-results {
-	max-height: 400px;
-	padding: 12px 0;
+	max-height: 480px;
+	padding: 16px;
 	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 3px;
+		background: var(--gp-glass-border);
+	}
 }
 
 .result-group {
-	margin-bottom: 12px;
+	margin-bottom: 20px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
 .group-title {
 	font-weight: 700;
-	font-size: 0.75rem;
-	letter-spacing: 0.05em;
+	font-size: 0.7rem;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--gp-primary);
-	padding: 4px 20px;
+	color: var(--gp-text-secondary);
+	padding: 0 12px 10px;
 }
 
 .result-item {
 	display: flex;
 	align-items: center;
-	transition: background 0.1s;
+	border-radius: 12px;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
-	padding: 10px 20px;
-	gap: 14px;
-}
+	padding: 12px;
+	gap: 16px;
 
-.result-item.active {
-	background: var(--gp-bg-lighter);
+	&.active {
+		box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
+		background: var(--gp-bg-glass-hover);
+		transform: translateX(4px);
+
+		.item-icon {
+			color: var(--gp-white);
+			background: var(--gp-primary);
+			transform: scale(1.1);
+		}
+	}
 }
 
 .item-icon {
-	width: 32px;
-	height: 32px;
+	width: 40px;
+	height: 40px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 8px;
-	font-size: 16px;
+	border-radius: 10px;
+	font-size: 18px;
 	color: var(--gp-primary);
-	background: var(--gp-bg-lighter);
+	background: var(--gp-bg-glass-hover);
+	transition: all 0.2s ease;
 }
 
 .item-content {
 	flex: 1;
 }
 
-.item-title {
+.item-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.item-parent {
 	font-weight: 500;
-	font-size: 0.95rem;
+	font-size: 11px;
+	color: var(--gp-text-muted);
+}
+
+.item-separator {
+	font-size: 10px;
+	color: var(--gp-text-muted);
+	opacity: 0.5;
+}
+
+.item-title {
+	font-weight: 600;
+	font-size: 1rem;
 	color: var(--gp-text-main);
 }
 
 .item-desc {
-	font-size: 0.8rem;
+	font-size: 0.85rem;
 	color: var(--gp-text-secondary);
 }
 
 .no-results,
 .search-placeholder {
 	text-align: center;
-	color: var(--gp-text-disabled);
-	padding: 40px;
+	color: var(--gp-text-secondary);
+	padding: 60px 40px;
 }
 
 .search-footer {
 	display: flex;
-	border-top: 1px solid var(--gp-border-color);
-	background: var(--gp-bg-lighter);
-	padding: 12px 20px;
-	gap: 20px;
+	border-top: 1px solid var(--gp-glass-border);
+	background: var(--gp-bg-surface);
+	padding: 14px 24px;
+	gap: 24px;
 }
 
 .footer-item {
@@ -333,6 +472,11 @@ const getIcon = (category: string) => {
 	align-items: center;
 	font-size: 0.75rem;
 	color: var(--gp-text-secondary);
-	gap: 6px;
+	gap: 8px;
+
+	.key {
+		box-shadow: 0 1px 0 var(--gp-glass-border);
+		padding: 2px 5px;
+	}
 }
 </style>

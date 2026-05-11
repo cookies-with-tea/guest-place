@@ -68,7 +68,7 @@ const fetchData = async () => {
 			}
 		}
 	} catch (error: any) {
-		ElMessage.error(error.messages?.[0] || 'Failed to fetch content')
+		ElMessage.error(error.messages?.[0] || 'Schema not found or failed to fetch content')
 	} finally {
 		isLoading.value = false
 	}

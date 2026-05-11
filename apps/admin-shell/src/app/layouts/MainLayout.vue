@@ -60,7 +60,7 @@
 
 			<main class="page-content">
 				<RouterView v-slot="{ Component, route: currentRoute }">
-					<Transition mode="out-in" name="fade-transform">
+					<Transition mode="out-in" :name="(currentRoute.meta.transition as string) || 'fade-transform'">
 						<div :key="currentRoute.path" class="page-wrapper">
 							<component :is="Component" />
 						</div>

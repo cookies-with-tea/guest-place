@@ -54,6 +54,8 @@ const fetchData = async () => {
 
 	const schemaRes = await contentApi.getSchemaByIdentifier(SETTINGS_IDENTIFIER)
 
+	isLoading.value = false
+
 	if (schemaRes.data) {
 		schema.value = schemaRes.data
 
@@ -62,9 +64,9 @@ const fetchData = async () => {
 		if (entriesRes.data && entriesRes.data.length > 0) {
 			Object.assign(formData, entriesRes.data[0].data)
 		}
+	} else {
+		console.error('Schema not found')
 	}
-
-	isLoading.value = false
 }
 
 const onSave = async () => {
@@ -99,6 +101,7 @@ const createDefaultSchema = async () => {
 	await contentApi.createSchema({
 		name: 'Global Settings',
 		slug: SETTINGS_IDENTIFIER,
+		isSingleton: true,
 		fields: [
 			{ label: 'Site Name', name: 'siteName', fieldType: FieldType.Text, required: true },
 			{ label: 'Description', name: 'description', fieldType: FieldType.RichText, required: false },

@@ -88,23 +88,37 @@
 				<UiSeoEditor v-model="seoData" />
 			</el-tab-pane>
 
-			<el-tab-pane v-if="isEdit" label="History" name="history">
+			<el-tab-pane v-if="isEdit" label="Activity Log" name="history">
 				<div class="history-list">
-					<div v-if="isLoadingHistory" class="loading-state">Loading history...</div>
-					<el-table v-else :data="history" border stripe>
-						<el-table-column label="Version" prop="version_number" width="100" />
-						<el-table-column label="Date" width="180">
-							<template #default="{ row }">
-								{{ new Date(row.created_at).toLocaleString() }}
-							</template>
-						</el-table-column>
-						<el-table-column label="Comment" prop="comment" />
-						<el-table-column label="Actions" width="120">
-							<template #default="{ row }">
-								<el-button size="small" type="warning" @click="onRollback(row.id)">Rollback</el-button>
-							</template>
-						</el-table-column>
-					</el-table>
+					<div v-if="isLoadingHistory" class="loading-state">
+						<el-skeleton :rows="5" animated />
+					</div>
+					<div v-else-if="history.length > 0" class="activity-timeline">
+						<div v-for="log in history" :key="log.id" class="activity-item">
+							<div class="activity-avatar">
+								<el-avatar :size="32" :src="log.user?.avatar">
+									{{ log.user?.name?.[0] || 'A' }}
+								</el-avatar>
+							</div>
+							<div class="activity-content">
+								<div class="activity-header">
+									<span class="user-name">{{ log.user?.name || 'Administrator' }}</span>
+									<span class="activity-date">{{ new Date(log.created_at).toLocaleString() }}</span>
+								</div>
+								<div class="activity-desc">
+									Changed version to <el-tag size="small">v{{ log.version_number }}</el-tag>
+									<span v-if="log.comment" class="activity-comment">"{{ log.comment }}"</span>
+								</div>
+								<div class="activity-actions">
+									<el-button link size="small" type="primary">View Diff</el-button>
+									<el-button link size="small" type="warning" @click="onRollback(log.id)"
+										>Restore this version</el-button
+									>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div v-else class="empty-state">No activity recorded for this entry.</div>
 				</div>
 			</el-tab-pane>
 		</el-tabs>
@@ -415,5 +429,87 @@ watch(activeTab, (tab) => {
 
 .is-translation {
 	max-width: 1200px !important;
+}
+
+/* Activity Log Styles */
+.activity-timeline {
+	display: flex;
+	flex-direction: column;
+	padding: 10px 0;
+	gap: 20px;
+}
+
+.activity-item {
+	position: relative;
+	display: flex;
+	gap: 16px;
+
+	&:not(:last-child)::after {
+		content: '';
+		top: 40px;
+		left: 16px;
+		bottom: -20px;
+		width: 1px;
+		position: absolute;
+		background: var(--gp-glass-border);
+	}
+}
+
+.activity-avatar {
+	flex-shrink: 0;
+	z-index: 1;
+}
+
+.activity-content {
+	flex: 1;
+	border: 1px solid var(--gp-glass-border);
+	border-radius: 12px;
+	background: var(--gp-bg-glass-hover);
+	padding: 12px 16px;
+}
+
+.activity-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.user-name {
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--gp-text-main);
+}
+
+.activity-date {
+	font-size: 12px;
+	color: var(--gp-text-secondary);
+}
+
+.activity-desc {
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--gp-text-main);
+}
+
+.activity-comment {
+	display: block;
+	font-style: italic;
+	color: var(--gp-text-secondary);
+	margin-top: 4px;
+}
+
+.activity-actions {
+	display: flex;
+	border-top: 1px dashed var(--gp-glass-border);
+	padding-top: 8px;
+	margin-top: 8px;
+	gap: 12px;
+}
+
+.empty-state {
+	text-align: center;
+	color: var(--gp-text-secondary);
+	padding: 40px;
 }
 </style>

@@ -12,6 +12,7 @@
 				<el-table-column label="Fields count">
 					<template #default="scope">
 						<el-tag size="small" type="info">{{ scope.row.fields?.length || 0 }} fields</el-tag>
+						<el-tag v-if="scope.row.isSingleton" size="small" style="margin-left: 8px" type="warning">Singleton</el-tag>
 					</template>
 				</el-table-column>
 				<el-table-column label="Actions" width="280">
@@ -39,6 +40,9 @@
 					<el-form-item label="Identifier (Slug)">
 						<el-input v-model="form.slug" placeholder="e.g. products" />
 					</el-form-item>
+					<el-form-item label="Settings" style="display: flex; align-items: flex-end">
+						<el-checkbox v-model="form.isSingleton" label="Singleton (Single entry)" />
+					</el-form-item>
 				</div>
 
 				<div class="fields-section">
@@ -47,35 +51,36 @@
 						<el-button :icon="Plus" size="small" type="success" @click="addField"> Add Field </el-button>
 					</div>
 
-					<el-table border :data="form.fields" style="width: 100%">
-						<el-table-column label="Label" min-width="150">
-							<template #default="scope">
-								<el-input v-model="scope.row.label" placeholder="Field Label" size="small" />
-							</template>
-						</el-table-column>
-						<el-table-column label="Identifier" min-width="150">
-							<template #default="scope">
-								<el-input v-model="scope.row.name" placeholder="field_name" size="small" />
-							</template>
-						</el-table-column>
-						<el-table-column label="Type" width="160">
-							<template #default="scope">
-								<el-select v-model="scope.row.fieldType" size="small">
+					<div class="fields-list">
+						<div
+							v-for="(field, index) in form.fields"
+							:key="index"
+							class="field-item"
+							draggable="true"
+							@dragstart="handleDragStart(index)"
+							@dragover.prevent
+							@drop="handleDrop(index)"
+						>
+							<div class="field-drag-handle">
+								<el-icon><Operation /></el-icon>
+							</div>
+
+							<div class="field-inputs">
+								<el-input v-model="field.label" placeholder="Label" size="small" />
+								<el-input v-model="field.name" placeholder="identifier" size="small" />
+								<el-select v-model="field.fieldType" size="small" style="width: 140px">
 									<el-option v-for="item in fieldTypes" :key="item.value" :label="item.label" :value="item.value" />
 								</el-select>
-							</template>
-						</el-table-column>
-						<el-table-column label="Settings" width="120">
-							<template #default="scope">
-								<el-checkbox v-model="scope.row.required" label="Req" />
-							</template>
-						</el-table-column>
-						<el-table-column label="" width="60">
-							<template #default="scope">
-								<el-button circle :icon="Delete" size="small" type="danger" @click="removeField(scope.$index)" />
-							</template>
-						</el-table-column>
-					</el-table>
+								<el-checkbox v-model="field.required" label="Required" size="small" />
+							</div>
+
+							<el-button circle :icon="Delete" size="small" type="danger" @click="removeField(index)" />
+						</div>
+
+						<div v-if="form.fields.length === 0" class="fields-empty">
+							No fields added yet. Click "Add Field" to start.
+						</div>
+					</div>
 				</div>
 			</el-form>
 			<template #footer>
@@ -95,7 +100,7 @@ import { useRouter } from 'vue-router'
 import type { ContentSchema, FieldDefinition } from '@admin-panel/lib'
 import { createApi, FieldType } from '@admin-panel/lib'
 import { UiModal, UiTable, useTheme } from '@admin-panel/ui'
-import { Delete, Document, Edit, Plus } from '@element-plus/icons-vue'
+import { Delete, Document, Edit, Operation, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
@@ -112,6 +117,7 @@ const currentSchemaId = ref('')
 const form = reactive({
 	name: '',
 	slug: '',
+	isSingleton: false,
 	fields: [] as FieldDefinition[],
 })
 
@@ -149,6 +155,8 @@ const handleAddSchema = () => {
 
 	form.slug = ''
 
+	form.isSingleton = false
+
 	form.fields = []
 
 	dialogVisible.value = true
@@ -162,6 +170,8 @@ const handleEditSchema = (schema: ContentSchema) => {
 	form.name = schema.name
 
 	form.slug = schema.slug
+
+	form.isSingleton = !!schema.isSingleton
 
 	form.fields = JSON.parse(JSON.stringify(schema.fields))
 
@@ -180,6 +190,22 @@ const addField = () => {
 
 const removeField = (index: number) => {
 	form.fields.splice(index, 1)
+}
+
+const dragIndex = ref<number | null>(null)
+
+const handleDragStart = (index: number) => {
+	dragIndex.value = index
+}
+
+const handleDrop = (index: number) => {
+	if (dragIndex.value === null) return
+
+	const item = form.fields.splice(dragIndex.value, 1)[0]
+
+	form.fields.splice(index, 0, item)
+
+	dragIndex.value = null
 }
 
 const saveSchema = async () => {
@@ -233,12 +259,9 @@ const deleteSchema = async (id: string) => {
 onMounted(fetchSchemas)
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .schema-builder-page {
 	min-height: 100vh;
-	color: var(--text-primary);
-	background-color: var(--bg-page);
-	transition: all 0.3s ease;
 	padding: 32px;
 }
 
@@ -247,22 +270,35 @@ onMounted(fetchSchemas)
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 32px;
+
+	h1 {
+		font-weight: 800;
+		font-size: 2rem;
+		letter-spacing: -0.02em;
+		color: var(--gp-text-main);
+		margin: 0;
+	}
 }
 
-.page-header h1 {
-	font-weight: 800;
-	font-size: 32px;
-	color: var(--text-primary);
+.page-content {
+	border: 1px solid var(--gp-glass-border-inner);
+	border-radius: var(--gp-radius-md);
+	box-shadow: var(--gp-glass-shadow);
+	background: var(--gp-glass-gradient);
+	background-color: var(--gp-bg-glass);
+	padding: 1px;
+	overflow: hidden;
 }
 
 .form-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 20px;
+	margin-bottom: 32px;
+	gap: 24px;
 }
 
 .fields-section {
-	border-top: 1px solid var(--border-color);
+	border-top: 1px solid var(--gp-glass-border);
 	padding-top: 24px;
 	margin-top: 32px;
 }
@@ -271,17 +307,78 @@ onMounted(fetchSchemas)
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 16px;
-}
+	margin-bottom: 20px;
 
-.fields-header h3 {
-	font-weight: 700;
-	font-size: 16px;
-	margin: 0;
+	h3 {
+		font-weight: 700;
+		font-size: 1.1rem;
+		color: var(--gp-text-main);
+		margin: 0;
+	}
 }
 
 .action-buttons {
 	display: flex;
 	gap: 8px;
+}
+
+.fields-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.field-item {
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--gp-glass-border);
+	border-radius: var(--gp-radius-sm);
+	background: var(--gp-bg-glass-hover);
+	transition: all 0.2s ease;
+	cursor: grab;
+	padding: 12px;
+	gap: 16px;
+
+	&:hover {
+		border-color: var(--gp-primary-light);
+		box-shadow: var(--gp-glass-shadow);
+	}
+
+	&:active {
+		cursor: grabbing;
+	}
+}
+
+.field-drag-handle {
+	font-size: 18px;
+	color: var(--gp-text-secondary);
+	cursor: grab;
+}
+
+.field-inputs {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: 12px;
+}
+
+.fields-empty {
+	border: 2px dashed var(--gp-glass-border);
+	border-radius: var(--gp-radius-md);
+	text-align: center;
+	color: var(--gp-text-secondary);
+	padding: 40px;
+}
+
+:deep(.el-table) {
+	background: transparent !important;
+
+	tr {
+		background: transparent !important;
+	}
+
+	.el-table__inner-wrapper::before {
+		display: none;
+	}
 }
 </style>

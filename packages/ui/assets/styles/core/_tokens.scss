@@ -16,11 +16,13 @@
 	--gp-border-color-hover: rgb(0, 0, 0, 0.1);
 
 	/* Light Glassmorphism */
-	--gp-bg-glass: rgb(255, 255, 255, 0.6);
-	--gp-bg-glass-hover: rgb(255, 255, 255, 0.8);
-	--gp-glass-blur: 16px;
-	--gp-glass-border: rgb(0, 0, 0, 0.05);
-	--gp-glass-shadow: 0 4px 12px rgb(0, 0, 0, 0.05);
+	--gp-bg-glass: rgb(255, 255, 255, 0.4);
+	--gp-bg-glass-hover: rgb(255, 255, 255, 0.6);
+	--gp-glass-blur: 20px;
+	--gp-glass-border: rgb(255, 255, 255, 0.5);
+	--gp-glass-border-inner: rgb(255, 255, 255, 0.8);
+	--gp-glass-shadow: 0 8px 32px 0 rgb(31, 38, 135, 0.07);
+	--gp-glass-gradient: linear-gradient(135deg, rgb(255, 255, 255, 0.4) 0%, rgb(255, 255, 255, 0.1) 100%);
 
 	/* Component Specific (from old theme.scss) */
 	--bg-page: var(--gp-bg-main);
@@ -58,10 +60,12 @@
 	--gp-border-color-hover: rgb(255, 255, 255, 0.2);
 
 	/* Dark Glassmorphism - Lighter & Cleaner */
-	--gp-bg-glass: rgb(255, 255, 255, 0.03);
-	--gp-bg-glass-hover: rgb(255, 255, 255, 0.06);
+	--gp-bg-glass: rgb(15, 23, 42, 0.3);
+	--gp-bg-glass-hover: rgb(15, 23, 42, 0.5);
 	--gp-glass-border: rgb(255, 255, 255, 0.08);
-	--gp-glass-shadow: 0 8px 32px 0 rgb(0, 0, 0, 0.37);
+	--gp-glass-border-inner: rgb(255, 255, 255, 0.12);
+	--gp-glass-shadow: 0 8px 32px 0 rgb(0, 0, 0, 0.4);
+	--gp-glass-gradient: linear-gradient(135deg, rgb(255, 255, 255, 0.05) 0%, rgb(255, 255, 255, 0.01) 100%);
 
 	/* Component Specific Overrides */
 	--bg-page: transparent;

@@ -56,14 +56,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted,ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import type { Namespace } from '@admin-panel/i18n'
 import { UiTable } from '@admin-panel/ui'
-import { Delete,Edit, Files, Plus } from '@element-plus/icons-vue'
-import { ElMessage,ElMessageBox } from 'element-plus'
+import { Delete, Edit, Files, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-import { createNamespace, deleteNamespace,fetchNamespaces, updateNamespace } from '#entities/namespace/api'
+import { createNamespace, deleteNamespace, fetchNamespaces, updateNamespace } from '#entities/namespace/api'
 
 const namespaces = ref<Namespace[]>([])
 const isLoading = ref(false)
@@ -146,13 +146,11 @@ const handleDelete = async (id: string) => {
 		}
 	)
 
-	const { data } = await deleteNamespace(id)
+	const { errors } = await deleteNamespace(id)
 
-	if (data?.error) {
-		ElMessage.error('Failed to delete namespace')
-	} else {
-		ElMessage.success('Namespace deleted')
-	}
+	if (errors && errors.length) return ElMessage.error(errors[0])
+
+	ElMessage.success('Namespace deleted')
 
 	await loadData()
 }
@@ -164,12 +162,13 @@ onMounted(loadData)
 .namespaces-management {
 	padding: 16px 0;
 }
+
 .namespaces-management__header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 32px;
+	justify-content: space-between;
 	padding: 24px;
+	margin-bottom: 32px;
 }
 
 .namespaces-management__info {
@@ -184,9 +183,9 @@ onMounted(loadData)
 }
 
 .namespaces-management__header h3 {
-	margin: 0;
-	font-size: 18px;
 	font-weight: 600;
+	font-size: 18px;
+	margin: 0;
 }
 
 .action-buttons {
