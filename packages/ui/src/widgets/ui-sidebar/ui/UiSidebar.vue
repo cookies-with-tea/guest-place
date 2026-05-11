@@ -12,7 +12,7 @@
 			<div class="sidebar-header" :class="{ 'is-collapsed': isCollapsed }">
 				<h2 v-show="!isCollapsed" class="logo-text">GUEST PLACE</h2>
 				<div class="collapse-trigger" @click="toggleCollapse">
-					<el-icon><Expand v-if="isCollapsed" /><Fold v-else /></el-icon>
+					<ElIcon><Expand v-if="isCollapsed" /><Fold v-else /></ElIcon>
 				</div>
 			</div>
 
@@ -24,7 +24,7 @@
 					:class="{ active: activeContext === ctx }"
 					@click="setContext(ctx)"
 				>
-					<el-icon><component :is="ctx === 'system' ? 'Setting' : 'EditPen'" /></el-icon>
+					<ElIcon><component :is="ctx === 'system' ? 'Setting' : 'EditPen'" /></ElIcon>
 					<span v-show="!isCollapsed" class="label">{{ t(`shell.${ctx}`) }}</span>
 				</div>
 			</div>
@@ -42,7 +42,7 @@
 							custom
 						>
 							<div class="menu-item" :class="{ active: isActive }" @click="navigate">
-								<el-icon v-if="item.icon"><component :is="getIcon(item.icon)" /></el-icon>
+								<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
 								<span v-show="!isCollapsed" class="label">{{ t(child.title) }}</span>
 							</div>
 						</router-link>
@@ -56,7 +56,7 @@
 						custom
 					>
 						<div class="menu-item" :class="{ active: item.path === '/' ? isExactActive : isActive }" @click="navigate">
-							<el-icon v-if="item.icon"><component :is="getIcon(item.icon)" /></el-icon>
+							<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
 							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
 						</div>
 					</router-link>
@@ -64,10 +64,10 @@
 					<!-- Group Item (Two-column mode) -->
 					<div v-else class="menu-item" :class="{ active: isItemActive(item) }" @click="handlePrimaryClick(item)">
 						<div class="item-main">
-							<el-icon><component :is="getIcon(item.icon)" /></el-icon>
+							<ElIcon><component :is="getIcon(item.icon)" /></ElIcon>
 							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
 						</div>
-						<el-icon v-show="!isCollapsed" class="arrow"><ArrowRight /></el-icon>
+						<ElIcon v-show="!isCollapsed" class="arrow"><ArrowRight /></ElIcon>
 					</div>
 				</template>
 			</div>
@@ -89,9 +89,9 @@
 					>
 						<div class="secondary-item" :class="{ active: isExactActive }" @click="navigate">
 							<span>{{ t(child.title) }}</span>
-							<el-icon v-if="isExactActive" class="active-dot">
+							<ElIcon v-if="isExactActive" class="active-dot">
 								<CircleCheckFilled />
-							</el-icon>
+							</ElIcon>
 						</div>
 					</router-link>
 				</div>
@@ -107,6 +107,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '@admin-panel/i18n'
 import * as Icons from '@element-plus/icons-vue'
 import { ArrowRight, CircleCheckFilled, Expand, Fold } from '@element-plus/icons-vue'
+import { ElIcon } from 'element-plus'
 
 import { useSidebar } from '../lib/useSidebar'
 import type { ISidebarItem, SidebarContext } from '../model'

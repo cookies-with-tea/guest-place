@@ -1,24 +1,24 @@
 <template>
 	<div v-if="!isEmbedded" class="ui-floating-settings">
-		<el-dropdown trigger="click" placement="top-end" @command="handleLanguageCommand">
-			<el-button circle class="main-fab" type="primary">
-				<el-icon :size="20"><Setting /></el-icon>
-			</el-button>
+		<ElDropdown trigger="click" placement="top-end" @command="handleLanguageCommand">
+			<ElButton circle class="main-fab" type="primary">
+				<ElIcon :size="20"><Setting /></ElIcon>
+			</ElButton>
 			<template #dropdown>
-				<el-dropdown-menu class="settings-dropdown">
+				<ElDropdownMenu class="settings-dropdown">
 					<!-- Theme Section -->
 					<div class="dropdown-section">
 						<div class="section-title">Theme</div>
-						<el-dropdown-item class="theme-toggle-item" @click.stop="toggleTheme">
+						<ElDropdownItem class="theme-toggle-item" @click.stop="toggleTheme">
 							<div class="theme-content">
-								<el-icon v-if="isDark"><Moon /></el-icon>
-								<el-icon v-else><Sunny /></el-icon>
+								<ElIcon v-if="isDark"><Moon /></ElIcon>
+								<ElIcon v-else><Sunny /></ElIcon>
 								<span>{{ isDark ? 'Dark Mode' : 'Light Mode' }}</span>
 							</div>
-						</el-dropdown-item>
+						</ElDropdownItem>
 					</div>
 
-					<el-divider class="section-divider" />
+					<ElDivider class="section-divider" />
 
 					<!-- Theme Builder Section -->
 					<div class="dropdown-section theme-builder-dropdown-section">
@@ -28,12 +28,12 @@
 						</div>
 					</div>
 
-					<el-divider class="section-divider" />
+					<ElDivider class="section-divider" />
 
 					<!-- Language Section -->
 					<div class="dropdown-section">
 						<div class="section-title">Language</div>
-						<el-dropdown-item
+						<ElDropdownItem
 							v-for="lang in availableLanguages"
 							:key="lang.code"
 							:command="lang.code"
@@ -42,13 +42,13 @@
 						>
 							<div class="lang-item">
 								<span>{{ lang.name }}</span>
-								<el-icon v-if="lang.code === currentLocale" class="check-icon"><Check /></el-icon>
+								<ElIcon v-if="lang.code === currentLocale" class="check-icon"><Check /></ElIcon>
 							</div>
-						</el-dropdown-item>
+						</ElDropdownItem>
 					</div>
-				</el-dropdown-menu>
+				</ElDropdownMenu>
 			</template>
-		</el-dropdown>
+		</ElDropdown>
 	</div>
 </template>
 
@@ -57,6 +57,7 @@ import { onMounted, ref } from 'vue'
 
 import { useI18n } from '@admin-panel/i18n'
 import { Check, Moon, Setting, Sunny } from '@element-plus/icons-vue'
+import { ElButton, ElDivider, ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus'
 
 import { UiThemeBuilder } from '../../ui-theme-builder'
 import { useTheme } from '../../ui-theme-switcher/lib/composables/useTheme'
@@ -74,7 +75,6 @@ const handleLanguageCommand = (lang: string) => {
 }
 
 onMounted(async () => {
-	// Check if running inside Shell
 	isEmbedded.value = !!document.querySelector('.main-layout')
 
 	if (!isEmbedded.value && availableLanguages.value.length === 0) {

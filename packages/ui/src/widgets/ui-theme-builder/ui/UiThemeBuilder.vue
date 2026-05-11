@@ -3,7 +3,7 @@
 		<div class="theme-builder-section">
 			<label class="section-label">Accent Color</label>
 			<div class="color-picker-wrapper">
-				<el-color-picker v-model="accentColor" :predefine="predefinedColors" color-format="hex" />
+				<ElColorPicker v-model="accentColor" :predefine="predefinedColors" color-format="hex" />
 				<span class="color-value">{{ accentColor }}</span>
 			</div>
 		</div>
@@ -13,16 +13,18 @@
 				<label class="section-label">Glass Blur</label>
 				<span class="section-value">{{ glassBlur }}px</span>
 			</div>
-			<el-slider v-model="glassBlur" :max="40" :min="0" />
+			<ElSlider v-model="glassBlur" :max="40" :min="0" />
 		</div>
 
 		<div class="theme-builder-actions">
-			<el-button size="small" type="info" variant="text" @click="resetTheme"> Reset to Default </el-button>
+			<ElButton size="small" type="info" variant="text" @click="resetTheme"> Reset to Default </ElButton>
 		</div>
 	</div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
+import { ElButton, ElColorPicker, ElSlider } from 'element-plus'
+
 import { useThemeBuilder } from '../lib/composables/useThemeBuilder'
 
 const { accentColor, glassBlur, resetTheme } = useThemeBuilder()

@@ -1,22 +1,23 @@
 <template>
 	<div v-if="error" class="error-boundary-container glass-card">
 		<div class="error-content">
-			<el-icon class="error-icon"><Warning /></el-icon>
+			<ElIcon class="error-icon"><Warning /></ElIcon>
 			<h3>Module Error</h3>
 			<p>Something went wrong while rendering this module.</p>
 			<div v-if="showDetails" class="error-details">
 				<code>{{ error }}</code>
 			</div>
-			<el-button type="primary" plain @click="retry"> Try Again </el-button>
+			<ElButton type="primary" plain @click="retry"> Try Again </ElButton>
 		</div>
 	</div>
 	<slot v-else></slot>
 </template>
 
 <script setup lang="ts">
-import { onErrorCaptured,ref } from 'vue'
+import { onErrorCaptured, ref } from 'vue'
 
 import { Warning } from '@element-plus/icons-vue'
+import { ElButton, ElIcon } from 'element-plus'
 
 const error = ref<any>(null)
 const showDetails = ref(process.env.NODE_ENV === 'development')

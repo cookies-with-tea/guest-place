@@ -20,6 +20,134 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/analytics/engagement': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_engagement_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/funnel': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_funnel_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/referrals': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_referral_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/retention': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_retention_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/session': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['start_session']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/summary': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_summary_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/track': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['track_event']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/analytics/traffic': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_traffic_stats']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/api/v1/auth/login': {
 		parameters: {
 			query?: never
@@ -565,6 +693,24 @@ export interface components {
 			icon_uuid?: string | null
 			text: string
 		}
+		AnalyticsSummaryDto: {
+			/** Format: int64 */
+			avg_session_duration: number
+			/** Format: float */
+			clicks_trend: number
+			/** Format: int64 */
+			page_views: number
+			/** Format: float */
+			session_trend: number
+			/** Format: int64 */
+			total_clicks: number
+			/** Format: int64 */
+			total_visitors: number
+			/** Format: float */
+			views_trend: number
+			/** Format: float */
+			visitors_trend: number
+		}
 		ApiPaginationDTO_MediaItemDTO: {
 			items: {
 				alt?: string | null
@@ -635,6 +781,30 @@ export interface components {
 				who_we_are_guide?: null | components['schemas']['MediaDTO']
 				/** Format: uuid */
 				who_we_are_guide_uuid?: string | null
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_AnalyticsSummaryDto: {
+			data?: {
+				/** Format: int64 */
+				avg_session_duration: number
+				/** Format: float */
+				clicks_trend: number
+				/** Format: int64 */
+				page_views: number
+				/** Format: float */
+				session_trend: number
+				/** Format: int64 */
+				total_clicks: number
+				/** Format: int64 */
+				total_visitors: number
+				/** Format: float */
+				views_trend: number
+				/** Format: float */
+				visitors_trend: number
 			}
 			errors?: {
 				[key: string]: string[]
@@ -764,6 +934,27 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_SessionResponseDto: {
+			data?: {
+				/** Format: uuid */
+				id: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_TrafficStatsDto: {
+			data?: {
+				dau: number[]
+				labels: string[]
+				sessions: number[]
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_UserResponseDTO: {
 			data?: {
 				avatar?: string | null
@@ -793,6 +984,18 @@ export interface components {
 		}
 		ApiResponse_Value: {
 			data?: unknown
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_CohortRowDto: {
+			data?: {
+				cohort_month: string
+				retention_rates: number[]
+				/** Format: int64 */
+				total_users: number
+			}[]
 			errors?: {
 				[key: string]: string[]
 			} | null
@@ -857,6 +1060,32 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_EngagementStatsDto: {
+			data?: {
+				/** Format: int64 */
+				clicks: number
+				entity_id: string
+				/** Format: int64 */
+				views: number
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_FunnelStepDto: {
+			data?: {
+				/** Format: int64 */
+				count: number
+				name: string
+				/** Format: float */
+				percentage: number
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_Vec_LanguageDTO: {
 			data?: {
 				code: string
@@ -870,6 +1099,7 @@ export interface components {
 		ApiResponse_Vec_Mfe: {
 			data?: {
 				category: string
+				config: unknown
 				/** Format: date-time */
 				created_at: string
 				display_name: string
@@ -909,6 +1139,19 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_ReferralDto: {
+			data?: {
+				/** Format: int64 */
+				count: number
+				/** Format: float */
+				percentage: number
+				source: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		AuthRefreshTokenDTO: {
 			refresh_token: string
 		}
@@ -930,6 +1173,12 @@ export interface components {
 		}
 		CheckEmailCodeDTO: {
 			key: string
+		}
+		CohortRowDto: {
+			cohort_month: string
+			retention_rates: number[]
+			/** Format: int64 */
+			total_users: number
 		}
 		ContentEntry: {
 			/** Format: date-time */
@@ -994,6 +1243,7 @@ export interface components {
 		}
 		CreateMfeDto: {
 			category?: string | null
+			config?: unknown
 			display_name: string
 			icon?: string | null
 			module: string
@@ -1033,6 +1283,13 @@ export interface components {
 			status?: null | components['schemas']['UserStatus']
 			street?: string | null
 		}
+		EngagementStatsDto: {
+			/** Format: int64 */
+			clicks: number
+			entity_id: string
+			/** Format: int64 */
+			views: number
+		}
 		EntryFilterQuery: {
 			search?: string | null
 		}
@@ -1055,6 +1312,13 @@ export interface components {
 		}
 		/** @enum {string} */
 		FieldType: 'text' | 'rich_text' | 'number' | 'boolean' | 'media' | 'date' | 'relation'
+		FunnelStepDto: {
+			/** Format: int64 */
+			count: number
+			name: string
+			/** Format: float */
+			percentage: number
+		}
 		GuestOpportunityItemDTO: {
 			button_text: string
 			icon?: null | components['schemas']['MediaDTO']
@@ -1155,6 +1419,7 @@ export interface components {
 		MediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
 		Mfe: {
 			category: string
+			config: unknown
 			/** Format: date-time */
 			created_at: string
 			display_name: string
@@ -1227,11 +1492,19 @@ export interface components {
 			/** Format: uuid */
 			tools_guide_uuid?: string | null
 		}
+		ReferralDto: {
+			/** Format: int64 */
+			count: number
+			/** Format: float */
+			percentage: number
+			source: string
+		}
 		RegisterRequestDTO: {
 			email: string
 		}
 		RemoteDto: {
 			category: string
+			config: unknown
 			display_name: string
 			icon?: string | null
 			module: string
@@ -1246,6 +1519,18 @@ export interface components {
 			description: string
 			title: string
 		}
+		SessionResponseDto: {
+			/** Format: uuid */
+			id: string
+		}
+		StartSessionDto: {
+			referer?: string | null
+			user_agent?: string | null
+			/** Format: uuid */
+			user_id?: string | null
+			/** Format: uuid */
+			visitor_id: string
+		}
 		ToolItemDTO: {
 			text: string
 			title: string
@@ -1254,6 +1539,20 @@ export interface components {
 			items: components['schemas']['ToolItemDTO'][]
 			logo: components['schemas']['MediaDTO']
 			title: string
+		}
+		TrackEventDto: {
+			entity_id?: string | null
+			entity_type?: string | null
+			event_type: string
+			path?: string | null
+			properties?: unknown
+			/** Format: uuid */
+			session_id: string
+		}
+		TrafficStatsDto: {
+			dau: number[]
+			labels: string[]
+			sessions: number[]
 		}
 		TranslationDTO: {
 			/** Format: date-time */
@@ -1328,6 +1627,7 @@ export interface components {
 		}
 		UpdateMfeDto: {
 			category?: string | null
+			config?: unknown
 			display_name?: string | null
 			enabled?: boolean | null
 			icon?: string | null
@@ -1499,6 +1799,172 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content?: never
+			}
+		}
+	}
+	get_engagement_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Engagement stats */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_EngagementStatsDto']
+				}
+			}
+		}
+	}
+	get_funnel_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Conversion funnel */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_FunnelStepDto']
+				}
+			}
+		}
+	}
+	get_referral_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Referral sources */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_ReferralDto']
+				}
+			}
+		}
+	}
+	get_retention_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description User retention cohorts */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_CohortRowDto']
+				}
+			}
+		}
+	}
+	start_session: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['StartSessionDto']
+			}
+		}
+		responses: {
+			/** @description Session started */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_SessionResponseDto']
+				}
+			}
+		}
+	}
+	get_summary_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Analytics summary */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_AnalyticsSummaryDto']
+				}
+			}
+		}
+	}
+	track_event: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['TrackEventDto']
+			}
+		}
+		responses: {
+			/** @description Event tracked */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_traffic_stats: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Traffic stats */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_TrafficStatsDto']
+				}
 			}
 		}
 	}

@@ -1,22 +1,24 @@
 <template>
 	<div class="language-switcher">
-		<el-dropdown trigger="click" @command="handleCommand">
-			<div class="current-lang">
-				<span class="lang-code">{{ currentLocale.toUpperCase() }}</span>
-			</div>
-			<template #dropdown>
-				<el-dropdown-menu>
-					<el-dropdown-item
-						v-for="lang in availableLanguages"
-						:key="lang.code"
-						:command="lang.code"
-						:disabled="lang.code === currentLocale"
-					>
-						{{ lang.name }}
-					</el-dropdown-item>
-				</el-dropdown-menu>
-			</template>
-		</el-dropdown>
+		<div class="language-switcher">
+			<ElDropdown trigger="click" @command="handleCommand">
+				<div class="current-lang">
+					<span class="lang-code">{{ currentLocale.toUpperCase() }}</span>
+				</div>
+				<template #dropdown>
+					<ElDropdownMenu>
+						<ElDropdownItem
+							v-for="lang in availableLanguages"
+							:key="lang.code"
+							:command="lang.code"
+							:disabled="lang.code === currentLocale"
+						>
+							{{ lang.name }}
+						</ElDropdownItem>
+					</ElDropdownMenu>
+				</template>
+			</ElDropdown>
+		</div>
 	</div>
 </template>
 
@@ -24,6 +26,7 @@
 import { onMounted } from 'vue'
 
 import { useI18n } from '@admin-panel/i18n'
+import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus'
 
 const { currentLocale, availableLanguages, setLocale, loadLanguages } = useI18n()
 
