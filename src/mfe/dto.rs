@@ -20,6 +20,7 @@ pub struct Mfe {
     pub enabled: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub config: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -33,6 +34,7 @@ pub struct CreateMfeDto {
     pub version: Option<String>,
     pub category: Option<String>,
     pub order_index: Option<i32>,
+    pub config: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -46,6 +48,7 @@ pub struct UpdateMfeDto {
     pub category: Option<String>,
     pub order_index: Option<i32>,
     pub enabled: Option<bool>,
+    pub config: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -64,4 +67,5 @@ pub struct RemoteDto {
     pub version: Option<String>,
     pub category: String,
     pub order: i32,
+    pub config: serde_json::Value,
 }

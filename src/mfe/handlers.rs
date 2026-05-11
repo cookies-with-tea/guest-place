@@ -36,6 +36,7 @@ pub async fn get_manifest(
                 version: m.version,
                 category: m.category,
                 order: m.order_index,
+                config: m.config,
             }).collect();
             
             into_api_response(StatusCode::OK, Some(ManifestDto { remotes }), None, None)
@@ -108,8 +109,8 @@ pub async fn create(
 ) -> Result<Json<ApiResponse<Mfe>>, (StatusCode, Json<ApiResponse<Mfe>>)> {
     let result = sqlx::query_as::<_, Mfe>(
         r#"
-        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, version, category, order_index)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO microfrontends (name, display_name, url, scope, module, icon, version, category, order_index, config)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
         "#
     )
@@ -122,6 +123,7 @@ pub async fn create(
     .bind(&dto.version)
     .bind(dto.category.unwrap_or_else(|| "system".to_string()))
     .bind(dto.order_index.unwrap_or(0))
+    .bind(dto.config.unwrap_or(serde_json::json!({})))
     .fetch_one(&state.pool)
     .await;
 
@@ -179,8 +181,8 @@ pub async fn update(
     let result = sqlx::query_as::<_, Mfe>(
         r#"
         UPDATE microfrontends
-        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, version = $6, category = $7, order_index = $8, enabled = $9, updated_at = NOW()
-        WHERE id = $10
+        SET display_name = $1, url = $2, scope = $3, module = $4, icon = $5, version = $6, category = $7, order_index = $8, enabled = $9, config = $10, updated_at = NOW()
+        WHERE id = $11
         RETURNING *
         "#
     )
@@ -193,6 +195,7 @@ pub async fn update(
     .bind(dto.category.unwrap_or(current.category))
     .bind(dto.order_index.unwrap_or(current.order_index))
     .bind(dto.enabled.unwrap_or(current.enabled))
+    .bind(dto.config.unwrap_or(current.config))
     .bind(id)
     .fetch_one(&state.pool)
     .await;
