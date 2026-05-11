@@ -73,6 +73,179 @@
         }
       }
     },
+    "/api/v1/analytics/engagement": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_engagement_stats",
+        "responses": {
+          "200": {
+            "description": "Engagement stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_EngagementStatsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/funnel": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_funnel_stats",
+        "responses": {
+          "200": {
+            "description": "Conversion funnel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_FunnelStepDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/referrals": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_referral_stats",
+        "responses": {
+          "200": {
+            "description": "Referral sources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_ReferralDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/retention": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_retention_stats",
+        "responses": {
+          "200": {
+            "description": "User retention cohorts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_CohortRowDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/session": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "start_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSessionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Session started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_SessionResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/summary": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_summary_stats",
+        "responses": {
+          "200": {
+            "description": "Analytics summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_AnalyticsSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/track": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "track_event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackEventDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Event tracked"
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/traffic": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "get_traffic_stats",
+        "responses": {
+          "200": {
+            "description": "Traffic stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_TrafficStatsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -2024,6 +2197,53 @@
           }
         }
       },
+      "AnalyticsSummaryDto": {
+        "type": "object",
+        "required": [
+          "total_visitors",
+          "avg_session_duration",
+          "total_clicks",
+          "page_views",
+          "visitors_trend",
+          "session_trend",
+          "clicks_trend",
+          "views_trend"
+        ],
+        "properties": {
+          "avg_session_duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clicks_trend": {
+            "type": "number",
+            "format": "float"
+          },
+          "page_views": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "session_trend": {
+            "type": "number",
+            "format": "float"
+          },
+          "total_clicks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_visitors": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "views_trend": {
+            "type": "number",
+            "format": "float"
+          },
+          "visitors_trend": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
       "ApiPaginationDTO_MediaItemDTO": {
         "type": "object",
         "required": [
@@ -2357,6 +2577,82 @@
                   "null"
                 ],
                 "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_AnalyticsSummaryDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "total_visitors",
+              "avg_session_duration",
+              "total_clicks",
+              "page_views",
+              "visitors_trend",
+              "session_trend",
+              "clicks_trend",
+              "views_trend"
+            ],
+            "properties": {
+              "avg_session_duration": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "clicks_trend": {
+                "type": "number",
+                "format": "float"
+              },
+              "page_views": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "session_trend": {
+                "type": "number",
+                "format": "float"
+              },
+              "total_clicks": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "total_visitors": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "views_trend": {
+                "type": "number",
+                "format": "float"
+              },
+              "visitors_trend": {
+                "type": "number",
+                "format": "float"
               }
             }
           },
@@ -2936,6 +3232,106 @@
           }
         }
       },
+      "ApiResponse_SessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_TrafficStatsDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "labels",
+              "dau",
+              "sessions"
+            ],
+            "properties": {
+              "dau": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sessions": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_UserResponseDTO": {
         "type": "object",
         "properties": {
@@ -3058,6 +3454,62 @@
         "type": "object",
         "properties": {
           "data": {},
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_CohortRowDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "cohort_month",
+                "total_users",
+                "retention_rates"
+              ],
+              "properties": {
+                "cohort_month": {
+                  "type": "string"
+                },
+                "retention_rates": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "total_users": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
           "errors": {
             "type": [
               "object",
@@ -3312,6 +3764,112 @@
           }
         }
       },
+      "ApiResponse_Vec_EngagementStatsDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id",
+                "clicks",
+                "views"
+              ],
+              "properties": {
+                "clicks": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "entity_id": {
+                  "type": "string"
+                },
+                "views": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_FunnelStepDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "count",
+                "percentage"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "percentage": {
+                  "type": "number",
+                  "format": "float"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Vec_LanguageDTO": {
         "type": "object",
         "properties": {
@@ -3377,12 +3935,14 @@
                 "order_index",
                 "enabled",
                 "created_at",
-                "updated_at"
+                "updated_at",
+                "config"
               ],
               "properties": {
                 "category": {
                   "type": "string"
                 },
+                "config": {},
                 "created_at": {
                   "type": "string",
                   "format": "date-time"
@@ -3526,6 +4086,59 @@
           }
         }
       },
+      "ApiResponse_Vec_ReferralDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "source",
+                "count",
+                "percentage"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "percentage": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "source": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AuthRefreshTokenDTO": {
         "type": "object",
         "required": [
@@ -3600,6 +4213,30 @@
         "properties": {
           "key": {
             "type": "string"
+          }
+        }
+      },
+      "CohortRowDto": {
+        "type": "object",
+        "required": [
+          "cohort_month",
+          "total_users",
+          "retention_rates"
+        ],
+        "properties": {
+          "cohort_month": {
+            "type": "string"
+          },
+          "retention_rates": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "total_users": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -3840,6 +4477,7 @@
               "null"
             ]
           },
+          "config": {},
           "display_name": {
             "type": "string"
           },
@@ -4017,6 +4655,27 @@
           }
         }
       },
+      "EngagementStatsDto": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "clicks",
+          "views"
+        ],
+        "properties": {
+          "clicks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "views": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "EntryFilterQuery": {
         "type": "object",
         "properties": {
@@ -4107,6 +4766,27 @@
           "date",
           "relation"
         ]
+      },
+      "FunnelStepDto": {
+        "type": "object",
+        "required": [
+          "name",
+          "count",
+          "percentage"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "percentage": {
+            "type": "number",
+            "format": "float"
+          }
+        }
       },
       "GuestOpportunityItemDTO": {
         "type": "object",
@@ -4581,12 +5261,14 @@
           "order_index",
           "enabled",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "config"
         ],
         "properties": {
           "category": {
             "type": "string"
           },
+          "config": {},
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -4859,6 +5541,27 @@
           }
         }
       },
+      "ReferralDto": {
+        "type": "object",
+        "required": [
+          "source",
+          "count",
+          "percentage"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "percentage": {
+            "type": "number",
+            "format": "float"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      },
       "RegisterRequestDTO": {
         "type": "object",
         "required": [
@@ -4879,12 +5582,14 @@
           "scope",
           "module",
           "category",
-          "order"
+          "order",
+          "config"
         ],
         "properties": {
           "category": {
             "type": "string"
           },
+          "config": {},
           "display_name": {
             "type": "string"
           },
@@ -4933,6 +5638,49 @@
           }
         }
       },
+      "SessionResponseDto": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "StartSessionDto": {
+        "type": "object",
+        "required": [
+          "visitor_id"
+        ],
+        "properties": {
+          "referer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "user_agent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "visitor_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "ToolItemDTO": {
         "type": "object",
         "required": [
@@ -4967,6 +5715,71 @@
           },
           "title": {
             "type": "string"
+          }
+        }
+      },
+      "TrackEventDto": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "event_type"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entity_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "properties": {},
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TrafficStatsDto": {
+        "type": "object",
+        "required": [
+          "labels",
+          "dau",
+          "sessions"
+        ],
+        "properties": {
+          "dau": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         }
       },
@@ -5279,6 +6092,7 @@
               "null"
             ]
           },
+          "config": {},
           "display_name": {
             "type": [
               "string",
@@ -5787,6 +6601,10 @@
     {
       "name": "System",
       "description": "System monitoring and orchestration"
+    },
+    {
+      "name": "Analytics",
+      "description": "Website behavior analytics"
     }
   ]
 }

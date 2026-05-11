@@ -11,6 +11,7 @@ pub mod mfe;
 pub mod user;
 pub mod platforms;
 pub mod monitoring;
+pub mod analytics;
 
 pub use crate::core::dto::ApiResponse;
 
@@ -62,6 +63,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/guests", guests::router())
         .nest("/api/v1/platforms", platforms::handlers::router())
         .nest("/api/v1/features", features::router())
+        .nest("/api/v1/analytics", analytics::handlers::public_router())
         .nest_service("/uploads", ServeDir::new("uploads"));
 
     let protected_router = Router::new()
@@ -70,6 +72,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
         .nest("/api/v1/content", content::router())
+        .nest("/api/v1/analytics", analytics::handlers::protected_router())
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,

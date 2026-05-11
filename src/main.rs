@@ -71,6 +71,14 @@ use utoipa::{
     guest_place::platforms::handlers::update_platforms,
     guest_place::monitoring::handlers::get_health,
     guest_place::monitoring::handlers::get_stats_stream,
+    guest_place::analytics::handlers::start_session,
+    guest_place::analytics::handlers::track_event,
+    guest_place::analytics::handlers::get_traffic_stats,
+    guest_place::analytics::handlers::get_engagement_stats,
+    guest_place::analytics::handlers::get_summary_stats,
+    guest_place::analytics::handlers::get_referral_stats,
+    guest_place::analytics::handlers::get_funnel_stats,
+    guest_place::analytics::handlers::get_retention_stats,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -84,6 +92,7 @@ use utoipa::{
         (name = "Content", description = "Dynamic Content Management"),
         (name = "Platforms", description = "Platforms information"),
         (name = "System", description = "System monitoring and orchestration"),
+        (name = "Analytics", description = "Website behavior analytics"),
   ),
   components(
     schemas(
@@ -122,6 +131,15 @@ use utoipa::{
         guest_place::user::dto::ChangePasswordDTO,
         guest_place::core::dto::PaginationDTO,
         guest_place::monitoring::handlers::HealthStatus,
+        guest_place::analytics::dto::TrackEventDto,
+        guest_place::analytics::dto::StartSessionDto,
+        guest_place::analytics::dto::SessionResponseDto,
+        guest_place::analytics::dto::TrafficStatsDto,
+        guest_place::analytics::dto::EngagementStatsDto,
+        guest_place::analytics::dto::FunnelStepDto,
+        guest_place::analytics::dto::CohortRowDto,
+        guest_place::analytics::dto::ReferralDto,
+        guest_place::analytics::dto::AnalyticsSummaryDto,
     )
   )
 )]
