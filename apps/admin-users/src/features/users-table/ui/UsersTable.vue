@@ -1,11 +1,16 @@
 <template>
 	<div class="users-table-feature" :class="{ 'is-dark': isDark }">
 		<UiTable
+			v-model:page="pagination.page"
+			v-model:limit="pagination.limit"
 			v-loading="isLoading || isFetching"
 			border
 			class="ui-table"
 			:data="users"
 			element-loading-text="Loading data..."
+			:total="pagination.total"
+			@update:page="setPage"
+			@update:limit="setLimit"
 		>
 			<!-- Email Column -->
 			<UiTableColumn
@@ -190,19 +195,6 @@
 				</template>
 			</el-table-column>
 		</UiTable>
-
-		<div class="pagination-container">
-			<el-pagination
-				v-model:current-page="pagination.page"
-				v-model:page-size="pagination.limit"
-				background
-				layout="total, sizes, prev, pager, next, jumper"
-				:page-sizes="[10, 20, 50, 100]"
-				:total="pagination.total"
-				@current-change="setPage"
-				@size-change="setLimit"
-			/>
-		</div>
 	</div>
 </template>
 
@@ -267,41 +259,6 @@ const confirmDelete = (uuid: string) => {
 <style scoped>
 .users-table-feature {
 	width: 100%;
-}
-
-.ui-table {
-	border: 1px solid var(--border-color);
-	border-radius: 16px;
-	box-shadow: var(--shadow-sm);
-	background-color: var(--bg-card) !important;
-	overflow: hidden;
-}
-
-:deep(.el-table) {
-	--el-table-header-bg-color: var(--bg-header);
-	--el-table-row-hover-bg-color: var(--bg-surface);
-	--el-table-border-color: var(--border-color);
-
-	color: var(--text-primary);
-	background-color: var(--bg-card) !important;
-}
-
-:deep(.el-table__header-wrapper th) {
-	height: 60px;
-	border-bottom: 1px solid var(--border-color) !important;
-	font-weight: 700;
-	color: var(--text-muted);
-	background-color: var(--bg-header) !important;
-	padding: 0 !important;
-}
-
-.pagination-container {
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	background: transparent;
-	padding: 16px;
-	margin-top: 40px;
 }
 
 /* Dark Popover Styles */

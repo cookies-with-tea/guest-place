@@ -11,6 +11,20 @@
 				<slot :name="name" v-bind="slotData || {}" />
 			</template>
 		</el-table>
+
+		<!-- Пагинация -->
+		<div v-if="total !== undefined" class="ui-table__pagination">
+			<el-pagination
+				:current-page="page"
+				:page-size="limit"
+				:total="total"
+				layout="total, sizes, prev, pager, next, jumper"
+				:page-sizes="[10, 20, 50, 100]"
+				background
+				@update:current-page="$emit('update:page', $event)"
+				@update:page-size="$emit('update:limit', $event)"
+			/>
+		</div>
 	</div>
 </template>
 
@@ -29,9 +43,17 @@ interface ColumnConfig {
 
 interface Props {
 	columns?: ColumnConfig[]
+	total?: number
+	page?: number
+	limit?: number
 }
 
 defineProps<Props>()
+
+defineEmits<{
+	(e: 'update:page', val: number): void
+	(e: 'update:limit', val: number): void
+}>()
 
 defineOptions({
 	inheritAttrs: false,
@@ -71,5 +93,13 @@ defineOptions({
 
 :deep(.el-table__inner-wrapper::before) {
 	display: none !important;
+}
+
+.ui-table__pagination {
+	display: flex;
+	justify-content: center;
+	border-top: 1px solid var(--border-color);
+	background-color: var(--bg-header);
+	padding: 16px 24px;
 }
 </style>

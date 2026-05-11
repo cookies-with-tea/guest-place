@@ -3,6 +3,7 @@ import { type App, ref, watch } from 'vue'
 import { isBrowser } from '@admin-panel/lib'
 import { ofetch } from 'ofetch'
 
+import type { TranslationKey, TranslationNamespace, TranslationParams } from './src/types'
 import UiTranslation from './src/UiTranslation.vue'
 import { parseTranslation } from './parser'
 
@@ -12,6 +13,15 @@ type Locale = string
 export interface Language {
 	code: string
 	name: string
+}
+
+export interface Namespace {
+	id: string
+	name: string
+	description?: string
+	isDynamic: boolean
+	createdAt: string
+	updatedAt: string
 }
 
 // Global reactive state
@@ -61,7 +71,7 @@ function updateGlobalTranslations() {
 	globalTranslations.value = { ...dict }
 }
 
-export async function loadTranslations(dictKey: string): Promise<TranslationDict> {
+export async function loadTranslations(dictKey: TranslationNamespace | string): Promise<TranslationDict> {
 	const locale = currentLocale.value
 	const cacheKey = `${locale}:${dictKey}`
 
@@ -156,9 +166,13 @@ export async function loadNamespaces(): Promise<string[]> {
 	try {
 		const baseUrl = i18nConfig.apiBase || ''
 		const response = await ofetch(`${baseUrl}/api/v1/i18n/namespaces`)
-		const namespaces = response.data || response
+		const data = response.data || response
 
-		return namespaces
+		if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+			return data.map((ns: any) => ns.name)
+		}
+
+		return data
 	} catch (e) {
 		// eslint-disable-next-line no-console
 		console.error('Failed to load available namespaces', e)
@@ -167,7 +181,33 @@ export async function loadNamespaces(): Promise<string[]> {
 	}
 }
 
-export function t(key: string, locale: Locale = getLocale()): string {
+export async function fetchNamespacesFull(): Promise<Namespace[]> {
+	try {
+		const baseUrl = i18nConfig.apiBase || ''
+		const response = await ofetch(`${baseUrl}/api/v1/i18n/namespaces`)
+		const data = response.data || response
+
+		if (Array.isArray(data)) {
+			return data.map((ns: any) => ({
+				id: ns.id,
+				name: ns.name,
+				description: ns.description,
+				isDynamic: ns.is_dynamic,
+				createdAt: ns.created_at,
+				updatedAt: ns.updated_at,
+			}))
+		}
+
+		return []
+	} catch (e) {
+		// eslint-disable-next-line no-console
+		console.error('Failed to fetch full namespaces', e)
+
+		return []
+	}
+}
+
+export function t(key: TranslationKey | string, locale: Locale = getLocale()): string {
 	const dict = cache.get(locale)
 
 	return dict?.[key] || key
@@ -231,15 +271,11 @@ watch(currentLocale, () => {
 })
 
 export const useI18n = () => {
-	const loadDict = async (dictKey: string) => {
-		await loadTranslations(dictKey)
-	}
-
 	const getRaw = (key: string) => {
 		return globalTranslations.value[key] || key
 	}
 
-	const tt = (key: string, params: Record<string, any> = {}) => {
+	const tt = (key: TranslationKey | string, params: TranslationParams = {}) => {
 		let text = getRaw(key)
 
 		Object.entries(params).forEach(([k, v]) => {
@@ -249,21 +285,23 @@ export const useI18n = () => {
 		return text
 	}
 
-	const getNodes = (key: string) => {
-		return parseTranslation(getRaw(key))
-	}
-
 	return {
-		translations: globalTranslations,
-		loadDict,
+		loadDict: async (dictKey: TranslationNamespace | string) => {
+			await loadTranslations(dictKey)
+		},
 		t: tt,
-		getNodes,
-		getRaw,
+		getNodes: (key: TranslationKey | string) => {
+			return parseTranslation(getRaw(key))
+		},
+		getRaw: (key: TranslationKey | string) => {
+			return globalTranslations.value[key] || key
+		},
 		currentLocale,
 		availableLanguages,
 		setLocale,
 		loadLanguages,
 		loadNamespaces,
+		fetchNamespacesFull,
 		getState,
 		hydrateState,
 	}

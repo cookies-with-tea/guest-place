@@ -63,7 +63,7 @@ p {
 
 /* Glass Buttons (Glass Pills) */
 .el-button {
-	--el-border-radius-base: 100px; /* Pill shaped buttons */
+	--el-border-radius-base: 8px; /* Standard rounded buttons */
 
 	border: 1px solid var(--gp-glass-border) !important;
 	font-weight: 500;
@@ -106,18 +106,31 @@ p {
 }
 
 /* Inputs Styles */
-.el-input {
+.el-input,
+.el-select {
 	--el-input-border-radius: var(--gp-radius-md);
+	--el-select-border-radius: var(--gp-radius-md);
 }
 
-.el-input__wrapper {
+.el-input__wrapper,
+.el-select__wrapper {
 	box-shadow: 0 0 0 1px var(--gp-glass-border) inset !important;
 	background-color: var(--gp-bg-glass) !important;
 	transition: all 0.3s ease;
 	backdrop-filter: blur(var(--gp-glass-blur));
+
+	.el-select__caret,
+	.el-input__icon {
+		color: var(--gp-text-secondary) !important;
+	}
+
+	.el-select__placeholder {
+		color: var(--gp-text-main) !important;
+	}
 }
 
-.el-input__wrapper.is-focus {
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused {
 	box-shadow:
 		0 0 0 1px var(--gp-primary) inset,
 		0 0 8px var(--gp-primary-light) !important;
@@ -235,6 +248,39 @@ body .el-popper.is-dark,
 		&:hover {
 			color: var(--gp-primary) !important;
 			background-color: var(--gp-bg-glass-hover) !important;
+		}
+	}
+}
+
+/* Global Pagination (Glassmorphism) */
+.el-pagination {
+	--el-pagination-bg-color: transparent;
+	--el-pagination-hover-color: var(--gp-primary);
+	--el-pagination-button-bg-color: transparent;
+	--el-pagination-item-bg-color: transparent;
+
+	.el-pager li {
+		border-radius: 8px;
+		background: transparent !important;
+		transition: all 0.2s;
+
+		&:hover:not(.is-active) {
+			color: var(--gp-primary) !important;
+			background: var(--gp-bg-glass-hover) !important;
+		}
+
+		&.is-active {
+			color: #fff !important;
+			background-color: var(--gp-primary) !important;
+		}
+	}
+
+	button {
+		border-radius: 8px;
+		background: transparent !important;
+
+		&:hover {
+			background: var(--gp-bg-glass-hover) !important;
 		}
 	}
 }

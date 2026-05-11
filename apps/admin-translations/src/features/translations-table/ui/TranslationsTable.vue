@@ -1,6 +1,13 @@
 <template>
 	<div class="translations-table">
-		<UiTable v-loading="isLoading" border :data="translations">
+		<UiTable
+			v-model:limit="currentLimit"
+			v-model:page="currentPage"
+			v-loading="isLoading"
+			style="width: 100%"
+			:data="translations"
+			:total="pagination.total"
+		>
 			<el-table-column label="ID" prop="id" width="120" />
 			<el-table-column label="Namespace" prop="key" width="150">
 				<template #default="{ row }">
@@ -12,33 +19,48 @@
 			</el-table-column>
 			<el-table-column label="Key" min-width="200" prop="key" />
 			<el-table-column label="Translation" min-width="200" prop="value" />
-			<el-table-column label="Actions" width="160">
+			<el-table-column label="Actions" width="160" align="center">
 				<template #default="scope">
-					<el-button v-if="scope && scope.row" plain size="small" type="primary" @click="openEditModal(scope.row)">
-						Edit
-					</el-button>
-					<el-button v-if="scope && scope.row" plain size="small" type="warning" @click="openHistory(scope.row)">
-						History
-					</el-button>
-					<el-button v-if="scope && scope.row" plain size="small" type="danger" @click="confirmDelete(scope.row.id)">
-						Delete
-					</el-button>
+					<div class="action-buttons">
+						<el-tooltip content="Edit Translation" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="primary"
+								:icon="Edit"
+								@click="openEditModal(scope.row)"
+							/>
+						</el-tooltip>
+						<el-tooltip content="View History" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="warning"
+								:icon="Clock"
+								@click="openHistory(scope.row)"
+							/>
+						</el-tooltip>
+						<el-tooltip content="Delete Translation" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="danger"
+								:icon="Delete"
+								@click="confirmDelete(scope.row.id)"
+							/>
+						</el-tooltip>
+					</div>
 				</template>
 			</el-table-column>
 		</UiTable>
 
 		<TranslationsHistoryDialog />
-
-		<div class="translations-table__pagination">
-			<el-pagination
-				v-model:current-page="currentPage"
-				v-model:page-size="currentLimit"
-				layout="prev, pager, next, total"
-				:total="pagination.total"
-				@current-change="setPage"
-				@size-change="setLimit"
-			/>
-		</div>
 	</div>
 </template>
 
@@ -46,6 +68,7 @@
 import { computed } from 'vue'
 
 import { UiTable } from '@admin-panel/ui'
+import { Clock,Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'
@@ -75,5 +98,13 @@ const confirmDelete = (id: string) => {
 </script>
 
 <style scoped>
-/* ... */
+.translations-table {
+	width: 100%;
+}
+
+.action-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+}
 </style>
