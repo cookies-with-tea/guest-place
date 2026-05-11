@@ -1,3 +1,5 @@
+import '@admin-panel/ui/inject-styles'
+
 import { createApp } from 'vue'
 
 import { i18nPlugin, initUiStyles } from '@admin-panel/ui'

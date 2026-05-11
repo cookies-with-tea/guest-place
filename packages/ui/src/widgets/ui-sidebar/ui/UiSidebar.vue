@@ -83,17 +83,13 @@
 					<router-link
 						v-for="child in activeSubMenu.children"
 						:key="child.path"
-						v-slot="{ isExactActive, isActive, navigate }"
+						v-slot="{ isExactActive, navigate }"
 						:to="child.path || ''"
 						custom
 					>
-						<div
-							class="secondary-item"
-							:class="{ active: child.path === '/' ? isExactActive : isActive }"
-							@click="navigate"
-						>
+						<div class="secondary-item" :class="{ active: isExactActive }" @click="navigate">
 							<span>{{ t(child.title) }}</span>
-							<el-icon v-if="child.path === '/' ? isExactActive : isActive" class="active-dot">
+							<el-icon v-if="isExactActive" class="active-dot">
 								<CircleCheckFilled />
 							</el-icon>
 						</div>

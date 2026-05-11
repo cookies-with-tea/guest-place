@@ -19,7 +19,8 @@ const loadRemoteRoutes = async (app: any) => {
 	const addPrefixToRoute = (route: any, prefix: string): any => {
 		const { path, ...rest } = route
 		const basePath = path === '/' ? '' : path
-		const newPath = `${prefix}${basePath}`
+		const separator = basePath && !basePath.startsWith('/') ? '/' : ''
+		const newPath = `${prefix}${separator}${basePath}`
 
 		const modifiedRoute = {
 			...rest,
@@ -27,7 +28,7 @@ const loadRemoteRoutes = async (app: any) => {
 		}
 
 		if (Array.isArray(route.children)) {
-			modifiedRoute.children = route.children.map((child: any) => addPrefixToRoute(child, ''))
+			modifiedRoute.children = route.children.map((child: any) => addPrefixToRoute(child, newPath))
 		}
 
 		return modifiedRoute
@@ -43,8 +44,12 @@ const loadRemoteRoutes = async (app: any) => {
 			try {
 				const remoteModule = await loadRemoteModule(remote, { app })
 
+				console.log(`[Shell] Loaded remote: ${remote.name}`, remoteModule)
+
 				const routesFromModule = remoteModule.routes || remoteModule.default?.routes || remoteModule.default || []
 				const modifiedRoutes = routesFromModule.map((route: any) => addPrefixToRoute(route, `/${remote.name}`))
+
+				console.log(`[Shell] Modified routes for ${remote.name}:`, modifiedRoutes)
 
 				routes.push(...modifiedRoutes)
 

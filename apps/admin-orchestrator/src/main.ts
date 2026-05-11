@@ -1,3 +1,5 @@
+import '@admin-panel/ui/inject-styles'
+
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import { initUiStyles } from '@admin-panel/ui'

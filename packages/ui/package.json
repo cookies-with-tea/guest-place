@@ -23,6 +23,8 @@
 	},
 	"exports": {
 		".": "./index.ts",
+		"./inject-styles": "./src/inject-styles.ts",
+		"./package.json": "./package.json",
 		"./assets/styles/index.scss": "./assets/styles/index.scss",
 		"./assets/*": "./assets/*"
 	},

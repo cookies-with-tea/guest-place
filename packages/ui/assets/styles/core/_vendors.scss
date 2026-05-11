@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use '../variables' as *;
 
 :root,
 html.dark,
@@ -185,7 +185,7 @@ body .el-popper.is-dark,
 .el-popper.is-light,
 .el-popper.is-dark {
 	border: 1px solid var(--gp-glass-border) !important;
-	border-radius: 12px !important; /* Reduced from 24px */
+	border-radius: 12px !important;
 	box-shadow: var(--gp-glass-shadow) !important;
 	color: var(--gp-text-main) !important;
 	background: var(--gp-bg-glass) !important;

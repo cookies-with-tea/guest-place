@@ -10,6 +10,7 @@
 		},
 		"dev": {
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"dependsOn": ["^build"],
 			"cache": false,
 			"persistent": true
 		},
@@ -20,12 +21,11 @@
 			"cache": false
 		},
 		"lint": {
-			"dependsOn": ["^lint"],
 			"outputs": []
 		},
 		"lint:fix": {
-			"dependsOn": ["^lint:fix"],
-			"outputs": []
+			"outputs": [],
+			"cache": false
 		},
 		"type-check": {
 			"outputs": []

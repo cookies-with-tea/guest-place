@@ -4,5 +4,4 @@ export default createConfig({
 	name: 'translations',
 	displayName: 'Translations',
 	root: import.meta.dirname,
-	shared: ['vue', 'vue-router', 'element-plus', '@tanstack/vue-query'],
 })

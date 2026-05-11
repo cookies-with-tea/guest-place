@@ -55,6 +55,27 @@ export function createConfig(options: CreateConfigOptions) {
 			base: '/', // Keep base as / but override URLs for built assets
 			plugins: [
 				vue(),
+				{
+					name: 'gp-css-externalizer',
+					enforce: 'pre',
+					resolveId(id) {
+						// If we are NOT the shell, we skip bundling heavy global styles
+						// because they are already provided by the host (Shell).
+						const isHeavyStyle = (id.includes('element-plus') && id.endsWith('.css')) || id.endsWith('bundle.scss')
+
+						const isShellLike = name === 'shell' || name === 'orchestrator'
+						const isStandalone = !!process.env.VITE_STANDALONE || command === 'serve'
+
+						if (!isShellLike && isHeavyStyle && !isStandalone) {
+							return '\0virtual:gp-empty.css'
+						}
+					},
+					load(id) {
+						if (id === '\0virtual:gp-empty.css') {
+							return '/* Stripped in MFE mode to prevent duplication */'
+						}
+					},
+				},
 				federation({
 					name,
 					filename: 'remoteEntry.js',
@@ -62,7 +83,13 @@ export function createConfig(options: CreateConfigOptions) {
 						[`./${displayName.replace(/\s+/g, '')}Routes`]: './src/app/router/index.ts',
 					},
 					remotes,
-					shared,
+					shared: isProduction
+						? shared
+						: {
+								...shared,
+								'@admin-panel/ui': { singleton: true },
+								'@admin-panel/lib': { singleton: true },
+							},
 				}),
 				...plugins,
 			],
@@ -88,7 +115,7 @@ export function createConfig(options: CreateConfigOptions) {
 			build: {
 				target: 'esnext',
 				minify: false,
-				cssCodeSplit: false,
+				cssCodeSplit: true, // Enable code splitting for better performance
 				rollupOptions: {
 					external: ['fsevents', ...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
 				},

@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use '../variables' as *;
 
 :root {
 	/* Light Theme Colors */
@@ -46,7 +46,7 @@
 	--gp-header-height: 64px;
 }
 
-:root.dark {
+.dark {
 	/* Dark Theme Colors - More Transparent */
 	--gp-bg-main: rgb(15, 23, 42, 0.95);
 	--gp-bg-surface: rgb(30, 41, 59, 0.5);

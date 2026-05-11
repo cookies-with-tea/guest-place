@@ -1,4 +1,4 @@
-@use '../../../../assets/styles/helpers/functions/color';
+@use '../../../../assets/styles/helpers' as h;
 
 .ui-button {
 	display: flex;
@@ -18,7 +18,7 @@
 		background-color: var(--color-primary);
 
 		&:hover {
-			background-color: color.darken(var(--color-primary), 10);
+			background-color: h.darken(var(--color-primary), 10);
 		}
 	}
 

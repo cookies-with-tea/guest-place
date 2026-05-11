@@ -3,7 +3,7 @@ import pkg from 'enquirer'
 import { execSync } from 'child_process'
 import path from 'path'
 
-const { Select } = pkg
+const { MultiSelect } = pkg
 
 const command = process.argv[2]
 
@@ -45,28 +45,35 @@ try {
 		process.exit(1)
 	}
 
-	const prompt = new Select({
-		name: 'project',
-		message: `Select a project to run "${command}":`,
+	const prompt = new MultiSelect({
+		name: 'projects',
+		message: `Select projects to run "${command}" (Space to select, Enter to confirm):`,
 		choices: projectNames,
+		initial: [],
 	})
 
 	prompt
 		.run()
-		.then((projectName) => {
-			console.log(`\n🚀 Starting "${command}" for: ${projectName}`)
+		.then((selectedProjects) => {
+			if (selectedProjects.length === 0) {
+				console.log('⚠️ No projects selected.')
+				return
+			}
 
-			let turboCmd = `pnpm turbo run ${command} --filter=${projectName}`
+			console.log(`\n🚀 Starting "${command}" for: ${selectedProjects.join(', ')}`)
+
+			const filters = selectedProjects.map((name) => `--filter=${name}`).join(' ')
+			let turboCmd = `pnpm turbo run ${command} ${filters} --parallel`
 
 			execSync(turboCmd, {
 				stdio: 'inherit',
 			})
 		})
 		.catch((err) => {
-			if (err.isCanceled) {
+			if (err && err.isCanceled) {
 				console.log('\n🚫 Selection cancelled.')
 			} else {
-				console.error('\n❌ Error:', err.message)
+				console.error('\n❌ Error:', err?.message || 'Unknown error')
 			}
 
 			process.exit(1)

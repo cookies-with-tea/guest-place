@@ -5,5 +5,4 @@ export default createConfig({
 	displayName: 'Admin Docs',
 	root: import.meta.dirname,
 	exposes: {},
-	shared: [],
 })

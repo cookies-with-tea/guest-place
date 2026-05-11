@@ -58,11 +58,13 @@ export function initUiStyles() {
 	if (!isBrowser) return
 
 	// Check if core styles are already loaded by the Shell or another MF
-	if (window.document.documentElement.dataset.gpUiStylesLoaded) {
+	if (window.document.documentElement.dataset.gpUiStylesLoaded || (window as any).__gp_styles_loading) {
 		return
 	}
 
-	// Mark as loaded
+	// Mark as loading/loaded
+	;(window as any).__gp_styles_loading = true
+
 	window.document.documentElement.dataset.gpUiStylesLoaded = 'true'
 
 	// 1. Inject critical CSS synchronously — prevents FOUC on first paint
@@ -85,16 +87,9 @@ export function initUiStyles() {
 
 	document.head.insertBefore(criticalStyle, document.head.firstChild)
 
-	// 2. Load heavy library styles asynchronously (non-blocking)
-	// @ts-ignore
-	const elPlusMain = import('element-plus/dist/index.css')
-	// @ts-ignore
-	const elPlusDark = import('element-plus/theme-chalk/dark/css-vars.css')
-	// @ts-ignore
-	const globalStyles = import('../assets/styles/index.scss')
-
-	// 3. Reveal body once critical assets are ready
-	Promise.all([elPlusMain, elPlusDark, globalStyles]).then(() => {
+	// Heavy styles are now injected via import '@admin-panel/ui/inject-styles' in main.ts
+	// We still reveal the body after a short tick to ensure styles are applied
+	setTimeout(() => {
 		document.body.classList.add('gp-ready')
-	})
+	}, 100)
 }
