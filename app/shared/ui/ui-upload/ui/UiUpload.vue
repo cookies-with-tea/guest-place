@@ -42,7 +42,7 @@
     </template>
   </div>
 
-  <!-- Плавное появление/исчезновение превью файла -->
+<!--   Плавное появление/исчезновение превью файла -->
   <template v-if="!!modelValue">
     <div class="ui-uploader__preview">
       <i>Icon</i>
@@ -53,6 +53,9 @@
       </button>
     </div>
   </template>
+  <div style="color: red">
+    {{error}}
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +85,7 @@ const classes = computed(() => {
 
 
 let dragCounter = 0
+const error = ref('')
 
 const dragenter = (e) => {
   // e.dataTransfer.dropEffect = 'copy'
@@ -112,10 +116,20 @@ function onDragOver(e: DragEvent) {
 }
 
 const drop = (event: DragEvent) => {
-  console.log('элемент сброшен', event.dataTransfer.files[0], event);
+  console.log('элемент сброшен', event.dataTransfer.files[0]);
   // Сбрасываем состояние сразу
   dragCounter = 0
   isDragover.value = false
+
+  const isDropDirectory = event.dataTransfer.items[0].webkitGetAsEntry?.()
+
+  if (isDropDirectory?.isDirectory) {
+    console.log('элемент сброшен 2',  event.dataTransfer.items[0].webkitGetAsEntry?.());
+    error.value = "эй ты, черт! скинь файл , а не целую папку"
+    return
+  }
+
+
 
   // emit('upload', event.dataTransfer.files)
   // const files = event.dataTransfer?.files
