@@ -23,6 +23,12 @@ cp .env.example .env
 docker-compose up -d --build
 ```
 
+### Если необходимо удалить все данные
+
+```bash
+docker-compose down -v
+```
+
 ### Для локальной разработки
 
 - Изменить POSTGRES_HOST = `localhost`
