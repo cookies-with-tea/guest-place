@@ -178,7 +178,8 @@ const tabs = [
 <style lang="scss" scoped>
 .ui-kit {
   display: grid;
-  background-color: #ECF4FD;
+  background-color: #ecf4fd;
+
   //вернуть #f7faff
   padding: 20px;
   gap: 20px;

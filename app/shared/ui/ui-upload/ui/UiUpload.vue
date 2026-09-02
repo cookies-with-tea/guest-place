@@ -20,11 +20,11 @@
 
     <input
       id="avatar"
+      ref="input-ref"
       type="file"
       hidden
       name="avatar"
       accept="image/png, image/jpeg"
-      ref="input-ref"
       @change="handleFileUpload"
     />
 
@@ -79,19 +79,21 @@
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui';
 import { mediaApi } from '#entities/media'
-import { computed, ref, useAttrs, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 interface IProps {
   maxSize?: number | string
 }
 
-interface IEmits {
-  upload: [file: File]
-}
+// interface IEmits {
+//   upload: [file: File]
+// }
 
 const props = withDefaults(defineProps<IProps>(), {
   maxSize: 1000,
 })
+
+console.log(props)
 
 const isDragover = ref(false)
 
@@ -136,20 +138,25 @@ const dragleave = () => {
   // Сбрасываем флаг только когда счётчик <= 0 (полный выход из зоны)
   if (dragCounter <= 0) {
     isDragover.value = false
+
     dragCounter = 0 // защита от отрицательных значений
   }
 }
 
 function onDragOver(e: DragEvent) {
   console.log('работаю всегда в зоне дропа')
+
   e.preventDefault()
+
   e.dataTransfer.dropEffect = 'copy';
 }
 
 const drop = (event: DragEvent) => {
   console.log('элемент сброшен', event.dataTransfer.files[0]);
+
   // Сбрасываем состояние сразу
   dragCounter = 0
+
   isDragover.value = false
 
   const fileDrop = event.dataTransfer.files[0]
@@ -165,7 +172,7 @@ const drop = (event: DragEvent) => {
 // 1. типизировать: все
 // 2.
 
-const emit = defineEmits<IEmits>()
+//const emit = defineEmits<IEmits>()
 
 const modelValue = defineModel<File | null>()
 
@@ -185,6 +192,7 @@ async function uploadMedia(file) {
 
   if (data) {
     modelValue.value = data.uuid
+
     dataFiles.value = file.name
   }
 }
@@ -213,14 +221,12 @@ const handleFileUpload = () => {
 
 
 .ui-upload {
-  --ui-upload-border-color: #A8ABB2;
+  --ui-upload-border-color: #a8abb2;
   --ui-upload-bg-color: transparent;
-  --ui-upload-error: #D51A52;
-
+  --ui-upload-error: #d51a52;
   --ui-upload-button-bg-color: var(--color-accent);
   --ui-upload-button-color: #fff;
-
-  --ui-upload-icon-color: #A8ABB2;
+  --ui-upload-icon-color: #a8abb2;
 
   width: 100%;
   height: 204px;
@@ -233,45 +239,19 @@ const handleFileUpload = () => {
   background-position: 0 0, 0 0, 100% 0, 0 100%;
   background-size: 2px calc(100% + 17px), calc(100% + 17px) 2px, 2px calc(100% + 17px) , calc(100% + 17px) 2px;
   background-repeat: no-repeat;
-  animation: borderAnimation 0.9s infinite linear reverse;
-  animation-play-state: paused;
   background-color: var(--ui-upload-bg-color);
-  cursor: pointer;
-  gap: 8px;
   transition:
     border var(--transition-duration-primary),
     background-color var(--transition-duration-primary),
   ;
-
-  &:hover,
-  &.is-dragover {
-    --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
-    --ui-upload-bg-color: #{darken(#ECF4FD, 5)};
-    --ui-upload-icon-color: var(--color-accent);
-    animation-play-state: running;
-  }
-
-  &:active {
-    --ui-upload-bg-color: #{darken(#ECF4FD, 3)};
-  }
+  animation: borderAnimation 0.9s infinite linear reverse;
+  animation-play-state: paused;
+  cursor: pointer;
+  gap: 8px;
 
   & > :deep(.ui-icon) {
     color: var(--ui-upload-icon-color);
     transition: color var(--transition-duration-primary);
-  }
-
-  &--error {
-    --ui-upload-border-color: var(--ui-upload-error);
-    --ui-upload-icon-color: var(--ui-upload-error);
-  }
-
-  @keyframes borderAnimation {
-    from {
-      background-position: 0 0, -17px 0, 100% -17px, 0 100%;
-    }
-    to {
-      background-position: 0 -17px, 0 0, 100% 0, -17px 100%;
-    }
   }
 
   &__on-drag {
@@ -324,16 +304,44 @@ const handleFileUpload = () => {
 
   &__file {
     &-text {
-      color: #0F0BAB;
-
       @include typography(h5);
+
+      color: #0f0bab;
     }
   }
 
   &__status {
-    color: #00B998;
-
     @include typography(body);
+
+    color: #00b998;
+  }
+
+  &:hover,
+  &.is-dragover {
+    --ui-upload-border-color: #{lighten(var(--color-accent), 30)};
+    --ui-upload-bg-color: #{darken(#ecf4fd, 5)};
+    --ui-upload-icon-color: var(--color-accent);
+
+    animation-play-state: running;
+  }
+
+  &:active {
+    --ui-upload-bg-color: #{darken(#ecf4fd, 3)};
+  }
+
+  &--error {
+    --ui-upload-border-color: var(--ui-upload-error);
+    --ui-upload-icon-color: var(--ui-upload-error);
+  }
+
+  @keyframes borderAnimation {
+    from {
+      background-position: 0 0, -17px 0, 100% -17px, 0 100%;
+    }
+
+    to {
+      background-position: 0 -17px, 0 0, 100% 0, -17px 100%;
+    }
   }
 }
 </style>
