@@ -43,25 +43,43 @@
   </div>
 
 <!--   Плавное появление/исчезновение превью файла -->
-  <template v-if="!!modelValue">
-    <div class="ui-uploader__preview">
-      <i>Icon</i>
-      <p class="ui-uploader__preview-name">{{ modelValue.name }}</p>
-      <p class="ui-uploader__preview-success">Файл загружен</p>
-      <button class="ui-uploader__preview-delete" @click="resetFiles">
-        <i>Delete</i>
-      </button>
+  <div style="color: red">
+    {{ error }}
+  </div>
+<!--  v-if="!!modelValue"-->
+  <template v-if="true">
+    <div class="ui-upload__preview">
+      <div class="ui-upload__group">
+        <UiIcon
+          name="attach"
+          width="16px"
+          height="16px"
+        />
+
+        <div class="ui-upload__file">
+          <div class="ui-upload__file-text">
+            {{ dataFiles }}
+          </div>
+
+          <div class="ui-upload__status">
+            Файл загружен
+          </div>
+        </div>
+      </div>
+
+      <UiIcon
+        name="close"
+        width="12px"
+        height="12px"
+      />
     </div>
   </template>
-  <div style="color: red">
-    {{error}}
-  </div>
 </template>
 
 <script setup lang="ts">
 import { UiIcon } from '#shared/ui';
 import { mediaApi } from '#entities/media'
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useAttrs, useTemplateRef } from 'vue'
 
 interface IProps {
   maxSize?: number | string
@@ -72,7 +90,7 @@ interface IEmits {
 }
 
 const props = withDefaults(defineProps<IProps>(), {
-  maxSize: 30
+  maxSize: 1000,
 })
 
 const isDragover = ref(false)
@@ -86,6 +104,7 @@ const classes = computed(() => {
 
 let dragCounter = 0
 const error = ref('')
+const dataFiles = ref('')
 
 const dragenter = (e) => {
   // e.dataTransfer.dropEffect = 'copy'
@@ -95,6 +114,18 @@ const dragenter = (e) => {
   dragCounter++
 
   isDragover.value = true
+}
+
+function validationFile(event) {
+  const isDropDirectory = event.dataTransfer.items[0].webkitGetAsEntry?.()
+
+  if (isDropDirectory?.isDirectory) {
+    error.value = "эй ты, черт! скинь файл , а не целую папку"
+
+    return
+  }
+
+  return true
 }
 
 const dragleave = () => {
@@ -121,23 +152,14 @@ const drop = (event: DragEvent) => {
   dragCounter = 0
   isDragover.value = false
 
-  const isDropDirectory = event.dataTransfer.items[0].webkitGetAsEntry?.()
+  const fileDrop = event.dataTransfer.files[0]
 
-  if (isDropDirectory?.isDirectory) {
-    console.log('элемент сброшен 2',  event.dataTransfer.items[0].webkitGetAsEntry?.());
-    error.value = "эй ты, черт! скинь файл , а не целую папку"
-    return
+  if (validationFile()){
+    uploadMedia(fileDrop)
   }
 
+  console.log(event.dataTransfer?.files[0].name)
 
-
-  // emit('upload', event.dataTransfer.files)
-  // const files = event.dataTransfer?.files
-  // if (files?.length) {
-  //   const file = files[0]
-  //   // Ваша логика валидации/отправки...
-  //   // emit('upload', file)
-  // }
 }
 
 // 1. типизировать: все
@@ -163,9 +185,8 @@ async function uploadMedia(file) {
 
   if (data) {
     modelValue.value = data.uuid
+    dataFiles.value = file.name
   }
-
-  console.log(file)
 }
 
 const resetFiles = () => {
@@ -178,7 +199,6 @@ const resetFiles = () => {
 
 const handleFileUpload = () => {
   const file = inputRef.value?.files?.[0]
-  // console.log(inputRef.value?.files)
 
   if (file) {
     uploadMedia(file)
@@ -190,6 +210,7 @@ const handleFileUpload = () => {
 
 <style scoped lang="scss">
 @use 'public/styles/helpers/functions' as *;
+
 
 .ui-upload {
   --ui-upload-border-color: #A8ABB2;
@@ -287,6 +308,32 @@ const handleFileUpload = () => {
 
     vertical-align: middle;
     color: var(--color-text-regular);
+  }
+
+  &__preview {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  &__group {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  &__file {
+    &-text {
+      color: #0F0BAB;
+
+      @include typography(h5);
+    }
+  }
+
+  &__status {
+    color: #00B998;
+
+    @include typography(body);
   }
 }
 </style>
