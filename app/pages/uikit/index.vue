@@ -86,6 +86,8 @@
       </div>
     </div>
   </div>
+
+  <UiFooter/>
 </template>
 
 <script setup lang="ts">
@@ -96,6 +98,7 @@ import { FORM_RULES } from '#shared/constants'
 import { authApi, type IAuthRefreshResponse, type IAuthRefreshUpdateRequest } from '#entities/auth'
 import { useForm } from '#shared/ui/ui-form'
 import type { Rules } from 'async-validator'
+import UiFooter from '../../widgets/UiFooter.vue'
 
 const formRules: Rules = {
   refreshToken: FORM_RULES.name,
@@ -189,6 +192,7 @@ const tabs = [
   padding: 20px;
   margin: 8px;
   gap: 40px;
+  display: none !important;
 }
 
 .column {
