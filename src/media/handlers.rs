@@ -20,6 +20,10 @@ use axum::{
 use std::sync::Arc;
 use std::collections::{BTreeMap, HashMap};
 use uuid::Uuid;
+use axum::body::Bytes;
+use crate::media::chunk::{
+    ChunkManager, ChunkStatusResponse, ChunkUploadResultDTO, InitChunkUploadDTO, InitChunkUploadResponse,
+};
 
 #[utoipa::path(
     post,
@@ -1019,8 +1023,326 @@ pub async fn update_bulk(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/init",
+    tag = "Media",
+    request_body = InitChunkUploadDTO,
+    responses(
+        (status = 200, description = "Chunk upload session initialized", body = ApiResponse<InitChunkUploadResponse>),
+        (status = 400, description = "Invalid parameters"),
+        (status = 413, description = "Quota exceeded")
+    ),
+    operation_id = "init_chunk_upload"
+)]
+pub async fn init_chunk_upload(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<InitChunkUploadDTO>,
+) -> Result<Json<ApiResponse<InitChunkUploadResponse>>, (StatusCode, Json<ApiResponse<InitChunkUploadResponse>>)> {
+    if payload.filename.trim().is_empty() || payload.total_chunks == 0 || payload.chunk_size == 0 || payload.total_size < 0 {
+        let msg = state.i18n.t("media.invalid_request", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map("chunk", "Invalid chunk upload parameters")),
+            Some(vec![msg]),
+        );
+    }
+
+    match state.media_quota.check_quota(payload.total_size).await {
+        Ok(true) => {},
+        Ok(false) => {
+            let msg = state.i18n.t("media.quota_exceeded", &locale).await;
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Storage quota exceeded")),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("media.quota_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to check quota")),
+                Some(vec![msg]),
+            );
+        }
+    }
+
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.init_session(payload).await {
+        Ok(resp) => {
+            into_api_response(StatusCode::OK, Some(resp), None, None)
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.upload_failed", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("chunk", &format!("Failed to initialize chunk session: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/{upload_id}/{chunk_index}",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID"),
+        ("chunk_index" = usize, Path, description = "Index of the chunk (0-based)")
+    ),
+    request_body(content = Vec<u8>, content_type = "application/octet-stream"),
+    responses(
+        (status = 200, description = "Chunk uploaded successfully", body = ApiResponse<ChunkUploadResultDTO>),
+        (status = 400, description = "Invalid chunk"),
+        (status = 404, description = "Session not found")
+    ),
+    operation_id = "upload_chunk"
+)]
+pub async fn upload_chunk(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path((upload_id, chunk_index)): Path<(Uuid, usize)>,
+    body: Bytes,
+) -> Result<Json<ApiResponse<ChunkUploadResultDTO>>, (StatusCode, Json<ApiResponse<ChunkUploadResultDTO>>)> {
+    if body.is_empty() {
+        let msg = state.i18n.t("media.invalid_request", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map("chunk", "Chunk body is empty")),
+            Some(vec![msg]),
+        );
+    }
+
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.save_chunk(&upload_id, chunk_index, &body).await {
+        Ok(res) => {
+            into_api_response(StatusCode::OK, Some(res), None, None)
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.upload_failed", &locale).await;
+            into_api_response(
+                StatusCode::BAD_REQUEST,
+                None,
+                Some(error_map("chunk", &format!("Failed to save chunk: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/media/upload/chunk/{upload_id}/status",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID")
+    ),
+    responses(
+        (status = 200, description = "Upload session status", body = ApiResponse<ChunkStatusResponse>),
+        (status = 404, description = "Session not found")
+    ),
+    operation_id = "get_chunk_status"
+)]
+pub async fn get_chunk_status(
+    State(_state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(upload_id): Path<Uuid>,
+) -> Result<Json<ApiResponse<ChunkStatusResponse>>, (StatusCode, Json<ApiResponse<ChunkStatusResponse>>)> {
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.get_status(&upload_id).await {
+        Ok(res) => into_api_response(StatusCode::OK, Some(res), None, None),
+        Err(e) => {
+            let msg = _state.i18n.t("media.not_found", &locale).await;
+            into_api_response(
+                StatusCode::NOT_FOUND,
+                None,
+                Some(error_map("session", &format!("Session not found: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/{upload_id}/complete",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID")
+    ),
+    responses(
+        (status = 201, description = "File assembled and saved successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 400, description = "Validation or checksum error"),
+        (status = 413, description = "Quota exceeded"),
+        (status = 500, description = "Internal server error")
+    ),
+    operation_id = "complete_chunk_upload"
+)]
+pub async fn complete_chunk_upload(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(upload_id): Path<Uuid>,
+) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
+    let chunk_manager = ChunkManager::new("uploads");
+    let (assembled_data, meta) = match chunk_manager.assemble(&upload_id).await {
+        Ok(res) => res,
+        Err(e) => {
+            let msg = state.i18n.t("media.invalid_request", &locale).await;
+            return into_api_response(
+                StatusCode::BAD_REQUEST,
+                None,
+                Some(error_map("assemble", &format!("Assembly failed: {}", e))),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let file_name = meta.filename;
+    let content_type = mime_guess::from_path(&file_name)
+        .first()
+        .map(|m| m.to_string())
+        .unwrap_or_else(|| "application/octet-stream".to_string());
+
+    let (media_type_str, _) = if content_type.starts_with("image/") {
+        ("image", crate::media::dto::MediaType::Image)
+    } else if content_type.starts_with("video/") {
+        ("video", crate::media::dto::MediaType::Video)
+    } else if content_type.contains("pdf") || content_type.contains("document") || content_type.contains("msword") || content_type.contains("officedocument") || content_type.contains("text/csv") || content_type.contains("text/plain") {
+        ("document", crate::media::dto::MediaType::Document)
+    } else if content_type.contains("zip") || content_type.contains("tar") || content_type.contains("compressed") {
+        ("archive", crate::media::dto::MediaType::Archive)
+    } else {
+        ("other", crate::media::dto::MediaType::Other)
+    };
+
+    let file_size = assembled_data.len() as i64;
+    match state.media_quota.check_quota(file_size).await {
+        Ok(true) => {},
+        Ok(false) => {
+            let msg = state.i18n.t("media.quota_exceeded", &locale).await;
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Storage quota exceeded")),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("media.quota_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to check quota")),
+                Some(vec![msg]),
+            );
+        }
+    }
+
+    let media_uuid = Uuid::new_v4();
+    let extension = std::path::Path::new(&file_name)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("bin");
+    let final_name = std::path::Path::new(&file_name)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(&file_name)
+        .to_string();
+
+    let convert_to_webp = meta.convert_to_webp.unwrap_or(true);
+    let save_result = if media_type_str == "image" && convert_to_webp {
+        let processed_data = state.media_storage.process_image(&assembled_data).await;
+        if let Ok(p_data) = processed_data {
+            state.media_storage.save_cas(&p_data, "webp").await
+        } else {
+            state.media_storage.save_cas(&assembled_data, extension).await
+        }
+    } else {
+        state.media_storage.save_cas(&assembled_data, extension).await
+    };
+
+    let (_hash, relative_path) = match save_result {
+        Ok(res) => res,
+        Err(e) => {
+            let msg = state.i18n.t("media.save_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("storage", &format!("Save error: {}", e))),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
+    let upload_source = meta.source.unwrap_or_else(|| "site".to_string());
+    let tags = meta.tags.unwrap_or_default();
+
+    let db_result = sqlx::query_as::<_, MediaItemFromDb>(
+        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
+    )
+    .bind(media_uuid)
+    .bind(media_type_str)
+    .bind(&full_url)
+    .bind(&final_name)
+    .bind(extension)
+    .bind(&meta.title)
+    .bind(&meta.alt)
+    .bind(file_size)
+    .bind(&meta.category)
+    .bind(&tags)
+    .bind(&upload_source)
+    .fetch_one(&state.pool)
+    .await;
+
+    match db_result {
+        Ok(item) => {
+            if media_type_str == "image" {
+                state.media_optimizer.process_image(media_uuid, relative_path).await;
+            }
+            let dto = MediaItemDTO {
+                uuid: item.uuid.to_string(),
+                url: item.url,
+                name: item.name,
+                extension: item.extension,
+                title: item.title,
+                alt: item.alt,
+                category: item.category,
+                tags: item.tags,
+                source: item.source,
+                size_bytes: item.size_bytes,
+                created_at: item.created_at,
+                media_type: item.media_type,
+            };
+            let msg = state.i18n.t("media.upload_success", &locale).await;
+            into_api_response(StatusCode::CREATED, Some(dto), None, Some(vec![msg]))
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &format!("Database error: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/upload/chunk/init", post(init_chunk_upload))
+        .route("/upload/chunk/{upload_id}/{chunk_index}", post(upload_chunk).layer(DefaultBodyLimit::disable()))
+        .route("/upload/chunk/{upload_id}/status", get(get_chunk_status))
+        .route("/upload/chunk/{upload_id}/complete", post(complete_chunk_upload))
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))

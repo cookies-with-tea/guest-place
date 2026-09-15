@@ -33,6 +33,10 @@ use utoipa::{
     guest_place::user::handlers::update_me,
     guest_place::user::handlers::change_password,
     guest_place::media::handlers::create,
+    guest_place::media::handlers::init_chunk_upload,
+    guest_place::media::handlers::upload_chunk,
+    guest_place::media::handlers::get_chunk_status,
+    guest_place::media::handlers::complete_chunk_upload,
     guest_place::media::handlers::get_all,
     guest_place::media::handlers::get_one,
     guest_place::media::handlers::update,
@@ -116,6 +120,10 @@ use utoipa::{
         guest_place::media::dto::UpdateMediaDTO,
         guest_place::media::dto::MediaType,
         guest_place::media::dto::MediaFilterQuery,
+        guest_place::media::chunk::InitChunkUploadDTO,
+        guest_place::media::chunk::InitChunkUploadResponse,
+        guest_place::media::chunk::ChunkStatusResponse,
+        guest_place::media::chunk::ChunkUploadResultDTO,
         guest_place::i18n::dto::LanguageDTO,
         guest_place::i18n::dto::TranslationDTO,
         guest_place::i18n::dto::CreateTranslationDTO,
@@ -177,7 +185,10 @@ async fn main() {
         return;
     }
 
-    dotenv::dotenv().ok();
+    match dotenv::dotenv() {
+        Ok(path) => println!("[dotenv] Loaded env from: {:?}", path),
+        Err(e) => eprintln!("[dotenv] Error loading .env: {:?}", e),
+    }
 
     let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let log_layer = guest_place::monitoring::service::LogBroadcastLayer { tx: log_tx.clone() };
@@ -200,7 +211,9 @@ async fn main() {
         .expect("Invalid SMTP_PORT");
     let smtp_username = std::env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
     let smtp_password = std::env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
-    let smtp_from = std::env::var("SMTP_FROM").expect("SMTP_FROM must be set");
+    let smtp_from = std::env::var("SMTP_FROM")
+        .or_else(|_| std::env::var("MAIL_FROM"))
+        .expect("SMTP_FROM or MAIL_FROM must be set");
 
     let i18n = I18nService::new(pool.clone());
     let media_storage = Arc::new(StorageService::new("uploads"));

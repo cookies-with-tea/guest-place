@@ -237,14 +237,14 @@ pub async fn get_summary_stats(
         Ok(row) => {
             use sqlx::Row;
             let summary = AnalyticsSummaryDto {
-                total_visitors: row.get::<i64, _>("total_visitors"),
-                avg_session_duration: row.get::<i64, _>("avg_session_duration"),
-                total_clicks: row.get::<i64, _>("total_clicks"),
-                page_views: row.get::<i64, _>("page_views"),
-                visitors_trend: row.get::<f32, _>("visitors_trend"),
-                session_trend: row.get::<f32, _>("session_trend"),
-                clicks_trend: row.get::<f32, _>("clicks_trend"),
-                views_trend: row.get::<f32, _>("views_trend"),
+                total_visitors: row.try_get::<i64, _>("total_visitors").unwrap_or(0),
+                avg_session_duration: row.try_get::<i64, _>("avg_session_duration").unwrap_or(0),
+                total_clicks: row.try_get::<i64, _>("total_clicks").unwrap_or(0),
+                page_views: row.try_get::<i64, _>("page_views").unwrap_or(0),
+                visitors_trend: row.try_get::<f32, _>("visitors_trend").unwrap_or(0.0),
+                session_trend: row.try_get::<f32, _>("session_trend").unwrap_or(0.0),
+                clicks_trend: row.try_get::<f32, _>("clicks_trend").unwrap_or(0.0),
+                views_trend: row.try_get::<f32, _>("views_trend").unwrap_or(0.0),
             };
             into_api_response(StatusCode::OK, Some(summary), None, None)
         },
@@ -276,7 +276,7 @@ pub async fn get_referral_stats(
         SELECT 
             COALESCE(referer, 'Direct') as source,
             count(*) as count,
-            (count(*) * 100.0 / NULLIF((SELECT count(*) FROM analytics_sessions WHERE started_at > current_date - ($1 * interval '1 day')), 0))::real as percentage
+            COALESCE((count(*) * 100.0 / NULLIF((SELECT count(*) FROM analytics_sessions WHERE started_at > current_date - ($1 * interval '1 day')), 0))::real, 0.0::real) as percentage
         FROM analytics_sessions
         WHERE started_at > current_date - ($1 * interval '1 day')
         GROUP BY source
@@ -293,8 +293,8 @@ pub async fn get_referral_stats(
             use sqlx::Row;
             let referrals = rows.into_iter().map(|row| ReferralDto {
                 source: row.get::<String, _>("source"),
-                count: row.get::<i64, _>("count"),
-                percentage: row.get::<f32, _>("percentage"),
+                count: row.try_get::<i64, _>("count").unwrap_or(0),
+                percentage: row.try_get::<f32, _>("percentage").unwrap_or(0.0),
             }).collect();
             into_api_response(StatusCode::OK, Some(referrals), None, None)
         },
@@ -334,11 +334,11 @@ pub async fn get_funnel_stats(
             FROM filtered_sessions s
             LEFT JOIN analytics_events ON s.id = analytics_events.session_id
         )
-        SELECT 'Total Sessions' as name, total_sessions as count, 100.0::real as percentage FROM steps
+        SELECT 'Total Sessions' as name, total_sessions as count, (CASE WHEN total_sessions = 0 THEN 0.0 ELSE 100.0 END)::real as percentage FROM steps
         UNION ALL
-        SELECT 'Venue Views' as name, venue_views as count, (venue_views * 100.0 / NULLIF(total_sessions, 0))::real as percentage FROM steps
+        SELECT 'Venue Views' as name, venue_views as count, COALESCE((venue_views * 100.0 / NULLIF(total_sessions, 0))::real, 0.0::real) as percentage FROM steps
         UNION ALL
-        SELECT 'Bookings' as name, booking_clicks as count, (booking_clicks * 100.0 / NULLIF(total_sessions, 0))::real as percentage FROM steps
+        SELECT 'Bookings' as name, booking_clicks as count, COALESCE((booking_clicks * 100.0 / NULLIF(total_sessions, 0))::real, 0.0::real) as percentage FROM steps
         "#
     )
     .bind(days)
@@ -350,8 +350,8 @@ pub async fn get_funnel_stats(
             use sqlx::Row;
             let funnel = rows.into_iter().map(|row| FunnelStepDto {
                 name: row.get::<String, _>("name"),
-                count: row.get::<i64, _>("count"),
-                percentage: row.get::<f32, _>("percentage"),
+                count: row.try_get::<i64, _>("count").unwrap_or(0),
+                percentage: row.try_get::<f32, _>("percentage").unwrap_or(0.0),
             }).collect();
             into_api_response(StatusCode::OK, Some(funnel), None, None)
         },
@@ -408,9 +408,12 @@ pub async fn get_retention_stats(
         SELECT 
             to_char(c.cohort_month, 'YYYY-MM') as cohort_month,
             c.total_users::bigint,
-            ARRAY_AGG(
-                (r.user_count * 100.0 / c.total_users)::real 
-                ORDER BY r.month_number
+            COALESCE(
+                ARRAY_AGG(
+                    (r.user_count * 100.0 / c.total_users)::real 
+                    ORDER BY r.month_number
+                ) FILTER (WHERE r.user_count IS NOT NULL),
+                '{}'::real[]
             ) as retention_rates
         FROM cohort_size c
         LEFT JOIN retention_counts r ON c.cohort_month = r.cohort_month
@@ -427,8 +430,8 @@ pub async fn get_retention_stats(
             use sqlx::Row;
             let cohorts = rows.into_iter().map(|row| CohortRowDto {
                 cohort_month: row.get::<String, _>("cohort_month"),
-                total_users: row.get::<i64, _>("total_users"),
-                retention_rates: row.get::<Vec<f32>, _>("retention_rates"),
+                total_users: row.try_get::<i64, _>("total_users").unwrap_or(0),
+                retention_rates: row.try_get::<Vec<f32>, _>("retention_rates").unwrap_or_default(),
             }).collect();
             into_api_response(StatusCode::OK, Some(cohorts), None, None)
         },
