@@ -87,6 +87,19 @@ export const completeChunkUpload = (uploadId: string) => {
 	})
 }
 
+export const optimize = (uuid: string) => {
+	return fetchData<MediaItem>(`/${uuid}/optimize`, {
+		method: 'POST',
+	})
+}
+
+export const optimizeBulk = (uuids: string[]) => {
+	return fetchData<MediaItem[]>('/optimize/bulk', {
+		method: 'POST',
+		body: { uuids },
+	})
+}
+
 export const mediaApi = {
 	create,
 	getAll,
@@ -98,4 +111,6 @@ export const mediaApi = {
 	uploadChunk,
 	getChunkStatus,
 	completeChunkUpload,
+	optimize,
+	optimizeBulk,
 }

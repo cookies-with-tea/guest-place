@@ -162,6 +162,18 @@ export const useMedia = () => {
 		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
 	}
 
+	const handleBulkOptimize = async (uuids: string[]) => {
+		await mediaApi.optimizeBulk(uuids)
+
+		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+	}
+
+	const handleOptimize = async (uuid: string) => {
+		await mediaApi.optimize(uuid)
+
+		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+	}
+
 	// === Pagination & Filters ===
 	const setPage = (page: number) => {
 		pagination.value.page = page
@@ -229,6 +241,8 @@ export const useMedia = () => {
 		handleDelete,
 		handleMultipleDelete,
 		handleBulkUpdate,
+		handleBulkOptimize,
+		handleOptimize,
 		createMedia: createMutation.mutateAsync,
 		updateMedia: updateMutation.mutate,
 		setPage,

@@ -1,5 +1,21 @@
 export const MEDIA_QUERY_KEY = 'media'
 
+export interface MediaVariant {
+	path: string
+	url: string
+	width: number
+	height: number
+	format: string
+	sizeBytes: number
+}
+
+export interface MediaVariants {
+	thumbnail?: MediaVariant
+	medium?: MediaVariant
+	large?: MediaVariant
+	original?: MediaVariant
+}
+
 export interface MediaItem {
 	uuid: string
 	title?: string
@@ -13,6 +29,14 @@ export interface MediaItem {
 	createdAt: Date | string
 	source: string
 	mediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
+	width?: number
+	height?: number
+	blurhash?: string
+	optimizedPath?: string
+	variants?: MediaVariants
+	dominantColor?: string
+	palette?: string[]
+	exif?: Record<string, any>
 }
 
 export interface MediaFilters {

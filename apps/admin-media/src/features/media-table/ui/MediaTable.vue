@@ -160,7 +160,19 @@
 			<el-table-column label="Preview" width="100">
 				<template #default="{ row }">
 					<div class="media-preview-cell">
-						<el-image v-if="row.mediaType === 'image'" class="preview-img" fit="cover" lazy :src="row.url" />
+						<span
+							v-if="row.dominantColor"
+							class="cell-color-dot"
+							:style="{ backgroundColor: row.dominantColor }"
+							:title="`Dominant color: ${row.dominantColor}`"
+						/>
+						<el-image
+							v-if="row.mediaType === 'image'"
+							class="preview-img"
+							fit="cover"
+							lazy
+							:src="row.variants?.thumbnail?.url || row.optimizedPath || row.url"
+						/>
 						<video
 							v-else-if="row.mediaType === 'video'"
 							class="preview-img"
@@ -287,6 +299,7 @@ const {
 	handleDelete,
 	handleMultipleDelete,
 	handleBulkUpdate,
+	handleBulkOptimize,
 } = useMedia()
 
 const { isDark } = useTheme()
@@ -366,13 +379,15 @@ const handleBulkCommand = (command: string) => {
 
 			break
 		case 'convertToWebP':
-			ElMessage.info('Инициирована конвертация в WebP...')
-
-			setTimeout(() => {
-				ElMessage.success(`Файлы (${uuids.length}) успешно сконвертированы в WebP`)
-
-				selectedItems.value = []
-			}, 1500)
+			ElMessage.info(`Генерация responsive превью и WebP для ${uuids.length} файлов...`)
+			handleBulkOptimize(uuids)
+				.then(() => {
+					ElMessage.success(`Файлы (${uuids.length}) успешно обработаны и сконвертированы в WebP`)
+					selectedItems.value = []
+				})
+				.catch((err: any) => {
+					ElMessage.error(`Ошибка оптимизации: ${err?.message || 'Не удалось обработать'}`)
+				})
 
 			break
 	}
@@ -399,9 +414,22 @@ const handleBulkCommand = (command: string) => {
 }
 
 .media-preview-cell {
-	display: flex;
+	position: relative;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.cell-color-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	position: absolute;
+	top: -3px;
+	left: -3px;
+	z-index: 2;
+	border: 1.5px solid #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .preview-img {
