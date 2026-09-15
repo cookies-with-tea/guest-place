@@ -6,6 +6,7 @@ use crate::media::dto::{
   MediaItemFromDb,
   UpdateMediaDTO,
   BulkUpdateMediaDTO,
+  BulkOptimizeMediaDTO,
 };
 use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
@@ -55,7 +56,7 @@ pub async fn create(
             );
         }
     };
-    let mut uploaded_items = Vec::new();
+    let mut uploaded_items: Vec<MediaItemDTO> = Vec::new();
     let mut files: Vec<(String, Vec<u8>)> = Vec::new();
     let mut titles: BTreeMap<u32, String> = BTreeMap::new();
     let mut alts: BTreeMap<u32, String> = BTreeMap::new();
@@ -240,7 +241,7 @@ pub async fn create(
                     let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
 
                     let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
+                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif",
                     )
                     .bind(media_uuid)
                     .bind(media_type_str)
@@ -261,20 +262,7 @@ pub async fn create(
                             state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
                         }
 
-                        uploaded_items.push(MediaItemDTO {
-                            uuid: row.uuid.to_string(),
-                            url: row.url,
-                            name: row.name,
-                            extension: row.extension,
-                            title: row.title,
-                            alt: row.alt,
-                            category: row.category,
-                            tags: row.tags,
-                            size_bytes: row.size_bytes,
-                            created_at: row.created_at,
-                            source: row.source,
-                            media_type: row.media_type,
-                        });
+                        uploaded_items.push(row.into());
                     }
                 }
             },
@@ -353,7 +341,7 @@ pub async fn get_all(
 
     // 2. Build SELECT query
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media"
     );
     
     let mut select_where_clause = false;
@@ -384,20 +372,7 @@ pub async fn get_all(
         Ok(db_items) => {
             let media_list = db_items
                 .into_iter()
-                .map(|row| MediaItemDTO {
-                    uuid: row.uuid.to_string(),
-                    url: row.url,
-                    name: row.name,
-                    extension: row.extension,
-                    title: row.title,
-                    alt: row.alt,
-                    category: row.category,
-                    tags: row.tags,
-                    size_bytes: row.size_bytes,
-                    created_at: row.created_at,
-                    source: row.source,
-                    media_type: row.media_type,
-                })
+                .map(MediaItemDTO::from)
                 .collect();
 
             let pagination = PaginationDTO {
@@ -517,7 +492,7 @@ pub async fn get_one(
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -525,20 +500,7 @@ pub async fn get_one(
 
     match result {
         Ok(Some(media)) => {
-                let media_response = MediaItemDTO {
-                uuid: media.uuid.to_string(),
-                url: media.url,
-                name: media.name,
-                extension: media.extension,
-                title: media.title,
-                alt: media.alt,
-                category: media.category,
-                tags: media.tags,
-                size_bytes: media.size_bytes,
-                created_at: media.created_at,
-                source: media.source,
-                media_type: media.media_type,
-            };
+            let media_response: MediaItemDTO = media.into();
 
             let msg = state.i18n.t("media.fetch_success", &locale).await;
             into_api_response(
@@ -643,7 +605,7 @@ pub async fn update(
     }
 
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -724,7 +686,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -732,20 +694,7 @@ pub async fn update(
 
                     match updated_media {
                         Ok(media) => {
-                            let media_response = MediaItemDTO {
-                                uuid: media.uuid.to_string(),
-                                url: media.url,
-                                name: media.name,
-                                extension: media.extension,
-                                title: media.title,
-                                alt: media.alt,
-                                category: media.category,
-                                tags: media.tags,
-                                size_bytes: media.size_bytes,
-                                created_at: media.created_at,
-                                source: media.source,
-                                media_type: media.media_type,
-                            };
+                            let media_response: MediaItemDTO = media.into();
 
                             let msg = state.i18n.t("media.update_success", &locale).await;
                             into_api_response(
@@ -834,6 +783,9 @@ pub async fn delete_one(
                 .await;
             match result {
                 Ok(_) => {
+                    let variants_dir = std::path::Path::new("uploads").join("variants").join(uuid.to_string());
+                    let _ = tokio::fs::remove_dir_all(&variants_dir).await;
+
                     let msg = state.i18n.t("media.delete_success", &locale).await;
                     into_api_response(
                         StatusCode::OK,
@@ -1287,7 +1239,7 @@ pub async fn complete_chunk_upload(
     let tags = meta.tags.unwrap_or_default();
 
     let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
+        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif",
     )
     .bind(media_uuid)
     .bind(media_type_str)
@@ -1308,20 +1260,7 @@ pub async fn complete_chunk_upload(
             if media_type_str == "image" {
                 state.media_optimizer.process_image(media_uuid, relative_path).await;
             }
-            let dto = MediaItemDTO {
-                uuid: item.uuid.to_string(),
-                url: item.url,
-                name: item.name,
-                extension: item.extension,
-                title: item.title,
-                alt: item.alt,
-                category: item.category,
-                tags: item.tags,
-                source: item.source,
-                size_bytes: item.size_bytes,
-                created_at: item.created_at,
-                media_type: item.media_type,
-            };
+            let dto: MediaItemDTO = item.into();
             let msg = state.i18n.t("media.upload_success", &locale).await;
             into_api_response(StatusCode::CREATED, Some(dto), None, Some(vec![msg]))
         }
@@ -1337,12 +1276,94 @@ pub async fn complete_chunk_upload(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/{uuid}/optimize",
+    tag = "Media",
+    params(
+        ("uuid" = Uuid, Path, description = "Media UUID")
+    ),
+    responses(
+        (status = 200, description = "Media optimized successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Optimization error")
+    ),
+    operation_id = "optimize_media",
+)]
+pub async fn optimize_one(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(uuid): Path<Uuid>,
+) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
+    match state.media_optimizer.reoptimize_by_uuid(uuid).await {
+        Ok(_) => {
+            let row = sqlx::query_as::<_, MediaItemFromDb>(
+                "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media WHERE uuid = $1"
+            )
+            .bind(uuid)
+            .fetch_optional(&state.pool)
+            .await;
+
+            match row {
+                Ok(Some(item)) => {
+                    let msg = state.i18n.t("media.fetch_success", &locale).await;
+                    into_api_response(StatusCode::OK, Some(item.into()), None, Some(vec![msg]))
+                }
+                _ => {
+                    let msg = state.i18n.t("media.not_found", &locale).await;
+                    into_api_response(StatusCode::NOT_FOUND, None, Some(error_map("media", "Not found")), Some(vec![msg]))
+                }
+            }
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.save_error", &locale).await;
+            into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, Some(error_map("optimize", &format!("Optimization failed: {}", e))), Some(vec![msg]))
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/optimize/bulk",
+    tag = "Media",
+    request_body = BulkOptimizeMediaDTO,
+    responses(
+        (status = 200, description = "Media items optimized successfully", body = ApiResponse<Vec<MediaItemDTO>>),
+        (status = 500, description = "Optimization error")
+    ),
+    operation_id = "bulk_optimize_media",
+)]
+pub async fn optimize_bulk(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<BulkOptimizeMediaDTO>,
+) -> Result<Json<ApiResponse<Vec<MediaItemDTO>>>, (StatusCode, Json<ApiResponse<Vec<MediaItemDTO>>>)> {
+    let mut optimized_items = Vec::new();
+    for uuid in payload.uuids {
+        if state.media_optimizer.reoptimize_by_uuid(uuid).await.is_ok() {
+            if let Ok(Some(item)) = sqlx::query_as::<_, MediaItemFromDb>(
+                "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif FROM media WHERE uuid = $1"
+            )
+            .bind(uuid)
+            .fetch_optional(&state.pool)
+            .await {
+                optimized_items.push(item.into());
+            }
+        }
+    }
+
+    let msg = state.i18n.t("media.fetch_success", &locale).await;
+    into_api_response(StatusCode::OK, Some(optimized_items), None, Some(vec![msg]))
+}
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/upload/chunk/init", post(init_chunk_upload))
         .route("/upload/chunk/{upload_id}/{chunk_index}", post(upload_chunk).layer(DefaultBodyLimit::disable()))
         .route("/upload/chunk/{upload_id}/status", get(get_chunk_status))
         .route("/upload/chunk/{upload_id}/complete", post(complete_chunk_upload))
+        .route("/optimize/bulk", post(optimize_bulk))
+        .route("/{uuid}/optimize", post(optimize_one))
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))

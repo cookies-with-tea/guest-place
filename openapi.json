@@ -79,9 +79,24 @@
           "Analytics"
         ],
         "operationId": "get_engagement_stats",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to look back",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Engagement stats",
+            "description": "Engagement stats by entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -99,6 +114,21 @@
           "Analytics"
         ],
         "operationId": "get_funnel_stats",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to look back",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Conversion funnel",
@@ -119,6 +149,21 @@
           "Analytics"
         ],
         "operationId": "get_referral_stats",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to look back",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Referral sources",
@@ -189,6 +234,21 @@
           "Analytics"
         ],
         "operationId": "get_summary_stats",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to look back",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Analytics summary",
@@ -232,6 +292,21 @@
           "Analytics"
         ],
         "operationId": "get_traffic_stats",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Number of days to look back",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Traffic stats",
@@ -1436,6 +1511,214 @@
         }
       }
     },
+    "/api/v1/media/optimize/bulk": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "bulk_optimize_media",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkOptimizeMediaDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Media items optimized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_MediaItemDTO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Optimization error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/upload/chunk/init": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "init_chunk_upload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitChunkUploadDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Chunk upload session initialized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_InitChunkUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "413": {
+            "description": "Quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/v1/media/upload/chunk/{upload_id}/complete": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "complete_chunk_upload",
+        "parameters": [
+          {
+            "name": "upload_id",
+            "in": "path",
+            "description": "Upload session UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File assembled and saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MediaItemDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or checksum error"
+          },
+          "413": {
+            "description": "Quota exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/upload/chunk/{upload_id}/status": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "get_chunk_status",
+        "parameters": [
+          {
+            "name": "upload_id",
+            "in": "path",
+            "description": "Upload session UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload session status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_ChunkStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
+    "/api/v1/media/upload/chunk/{upload_id}/{chunk_index}": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "upload_chunk",
+        "parameters": [
+          {
+            "name": "upload_id",
+            "in": "path",
+            "description": "Upload session UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "chunk_index",
+            "in": "path",
+            "description": "Index of the chunk (0-based)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Chunk uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_ChunkUploadResultDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid chunk"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
     "/api/v1/media/{uuid}": {
       "get": {
         "tags": [
@@ -1552,6 +1835,44 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/{uuid}/optimize": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "optimize_media",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Media UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Media optimized successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MediaItemDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Media not found"
+          },
+          "500": {
+            "description": "Optimization error"
           }
         }
       }
@@ -2270,6 +2591,12 @@
                     "null"
                   ]
                 },
+                "blurhash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "category": {
                   "type": [
                     "string",
@@ -2280,11 +2607,25 @@
                   "type": "string",
                   "format": "date-time"
                 },
+                "dominantColor": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "exif": {},
                 "extension": {
                   "type": [
                     "string",
                     "null"
                   ]
+                },
+                "height": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
                 },
                 "mediaType": {
                   "$ref": "#/components/schemas/MediaType"
@@ -2295,6 +2636,13 @@
                     "null"
                   ]
                 },
+                "optimizedPath": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "palette": {},
                 "sizeBytes": {
                   "type": "integer",
                   "format": "int64"
@@ -2322,6 +2670,14 @@
                 },
                 "uuid": {
                   "type": "string"
+                },
+                "variants": {},
+                "width": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
                 }
               }
             }
@@ -2736,6 +3092,128 @@
           }
         }
       },
+      "ApiResponse_ChunkStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "upload_id",
+              "total_chunks",
+              "total_size",
+              "received_chunks",
+              "is_complete"
+            ],
+            "properties": {
+              "is_complete": {
+                "type": "boolean"
+              },
+              "received_chunks": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "total_chunks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total_size": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "upload_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_ChunkUploadResultDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "upload_id",
+              "chunk_index",
+              "received_chunks",
+              "total_chunks"
+            ],
+            "properties": {
+              "chunk_index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "received_chunks": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "total_chunks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "upload_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_ContentEntry": {
         "type": "object",
         "properties": {
@@ -3028,6 +3506,65 @@
           }
         }
       },
+      "ApiResponse_InitChunkUploadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "upload_id",
+              "chunk_size",
+              "total_chunks",
+              "received_chunks"
+            ],
+            "properties": {
+              "chunk_size": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "received_chunks": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "total_chunks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "upload_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_MediaItemDTO": {
         "type": "object",
         "properties": {
@@ -3048,6 +3585,12 @@
                   "null"
                 ]
               },
+              "blurhash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "category": {
                 "type": [
                   "string",
@@ -3058,11 +3601,25 @@
                 "type": "string",
                 "format": "date-time"
               },
+              "dominantColor": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "exif": {},
               "extension": {
                 "type": [
                   "string",
                   "null"
                 ]
+              },
+              "height": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
               },
               "mediaType": {
                 "$ref": "#/components/schemas/MediaType"
@@ -3073,6 +3630,13 @@
                   "null"
                 ]
               },
+              "optimizedPath": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "palette": {},
               "sizeBytes": {
                 "type": "integer",
                 "format": "int64"
@@ -3100,6 +3664,14 @@
               },
               "uuid": {
                 "type": "string"
+              },
+              "variants": {},
+              "width": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
               }
             }
           },
@@ -3917,6 +4489,145 @@
           }
         }
       },
+      "ApiResponse_Vec_MediaItemDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "uuid",
+                "url",
+                "source",
+                "sizeBytes",
+                "createdAt",
+                "mediaType"
+              ],
+              "properties": {
+                "alt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "blurhash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "category": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "dominantColor": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "exif": {},
+                "extension": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "height": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "mediaType": {
+                  "$ref": "#/components/schemas/MediaType"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "optimizedPath": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "palette": {},
+                "sizeBytes": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "url": {
+                  "type": "string"
+                },
+                "uuid": {
+                  "type": "string"
+                },
+                "variants": {},
+                "width": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Vec_Mfe": {
         "type": "object",
         "properties": {
@@ -4190,6 +4901,21 @@
           }
         }
       },
+      "BulkOptimizeMediaDTO": {
+        "type": "object",
+        "required": [
+          "uuids"
+        ],
+        "properties": {
+          "uuids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "ChangePasswordDTO": {
         "type": "object",
         "required": [
@@ -4213,6 +4939,70 @@
         "properties": {
           "key": {
             "type": "string"
+          }
+        }
+      },
+      "ChunkStatusResponse": {
+        "type": "object",
+        "required": [
+          "upload_id",
+          "total_chunks",
+          "total_size",
+          "received_chunks",
+          "is_complete"
+        ],
+        "properties": {
+          "is_complete": {
+            "type": "boolean"
+          },
+          "received_chunks": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "total_chunks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "upload_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ChunkUploadResultDTO": {
+        "type": "object",
+        "required": [
+          "upload_id",
+          "chunk_index",
+          "received_chunks",
+          "total_chunks"
+        ],
+        "properties": {
+          "chunk_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "received_chunks": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "total_chunks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upload_id": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -4971,6 +5761,107 @@
           }
         }
       },
+      "InitChunkUploadDTO": {
+        "type": "object",
+        "required": [
+          "filename",
+          "total_size",
+          "chunk_size",
+          "total_chunks"
+        ],
+        "properties": {
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checksum_sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "chunk_size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "convert_to_webp": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total_chunks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_size": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "InitChunkUploadResponse": {
+        "type": "object",
+        "required": [
+          "upload_id",
+          "chunk_size",
+          "total_chunks",
+          "received_chunks"
+        ],
+        "properties": {
+          "chunk_size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "received_chunks": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "total_chunks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upload_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "InteractionCardDTO": {
         "type": "object",
         "required": [
@@ -5182,6 +6073,12 @@
               "null"
             ]
           },
+          "blurhash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "category": {
             "type": [
               "string",
@@ -5192,11 +6089,25 @@
             "type": "string",
             "format": "date-time"
           },
+          "dominantColor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exif": {},
           "extension": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "height": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "mediaType": {
             "$ref": "#/components/schemas/MediaType"
@@ -5207,6 +6118,13 @@
               "null"
             ]
           },
+          "optimizedPath": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "palette": {},
           "sizeBytes": {
             "type": "integer",
             "format": "int64"
@@ -5234,6 +6152,14 @@
           },
           "uuid": {
             "type": "string"
+          },
+          "variants": {},
+          "width": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -5247,6 +6173,87 @@
           "archive",
           "other"
         ]
+      },
+      "MediaVariantDTO": {
+        "type": "object",
+        "required": [
+          "path",
+          "url",
+          "width",
+          "height",
+          "format",
+          "sizeBytes"
+        ],
+        "properties": {
+          "format": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "path": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "MediaVariantsDTO": {
+        "type": "object",
+        "properties": {
+          "large": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaVariantDTO"
+              }
+            ]
+          },
+          "medium": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaVariantDTO"
+              }
+            ]
+          },
+          "original": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaVariantDTO"
+              }
+            ]
+          },
+          "thumbnail": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaVariantDTO"
+              }
+            ]
+          }
+        }
       },
       "Mfe": {
         "type": "object",

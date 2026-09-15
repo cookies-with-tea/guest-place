@@ -24,6 +24,14 @@ async fn setup_test_server() -> TestServer {
         redis.clone(),
     ));
 
+    let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(100));
+    let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
+        pool.clone(),
+        bus.clone(),
+        "tmp".to_string(),
+        "http://localhost:8000".to_string(),
+    ));
+
     let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let state = Arc::new(AppState {
         pool: pool.clone(),
@@ -36,6 +44,7 @@ async fn setup_test_server() -> TestServer {
             pool.clone(),
             1024 * 1024 * 1024,
         )),
+        media_optimizer,
         frontend_url: "http://localhost:3000".to_string(),
         smtp_host: "localhost".to_string(),
         smtp_port: 587,
@@ -43,6 +52,7 @@ async fn setup_test_server() -> TestServer {
         smtp_password: "test".to_string(),
         smtp_from: "test@example.com".to_string(),
         log_tx,
+        bus,
     });
 
     let openapi = ApiDoc::openapi();

@@ -37,6 +37,8 @@ use utoipa::{
     guest_place::media::handlers::upload_chunk,
     guest_place::media::handlers::get_chunk_status,
     guest_place::media::handlers::complete_chunk_upload,
+    guest_place::media::handlers::optimize_one,
+    guest_place::media::handlers::optimize_bulk,
     guest_place::media::handlers::get_all,
     guest_place::media::handlers::get_one,
     guest_place::media::handlers::update,
@@ -117,6 +119,9 @@ use utoipa::{
         guest_place::content::model::UpdateContentEntryDTO,
         guest_place::content::model::EntryFilterQuery,
         guest_place::media::dto::MediaItemDTO,
+        guest_place::media::dto::MediaVariantDTO,
+        guest_place::media::dto::MediaVariantsDTO,
+        guest_place::media::dto::BulkOptimizeMediaDTO,
         guest_place::media::dto::UpdateMediaDTO,
         guest_place::media::dto::MediaType,
         guest_place::media::dto::MediaFilterQuery,
@@ -227,6 +232,7 @@ async fn main() {
         pool.clone(),
         bus.clone(),
         "uploads".to_string(),
+        config.public_url.clone(),
     ));
 
     let mut plugin_manager = guest_place::core::plugin::PluginManager::new();

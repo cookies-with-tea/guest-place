@@ -13,6 +13,26 @@ pub struct CreateMediaDTO {
     pub file: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaVariantDTO {
+    pub path: String,
+    pub url: String,
+    pub width: u32,
+    pub height: u32,
+    pub format: String,
+    pub size_bytes: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaVariantsDTO {
+    pub thumbnail: Option<MediaVariantDTO>,
+    pub medium: Option<MediaVariantDTO>,
+    pub large: Option<MediaVariantDTO>,
+    pub original: Option<MediaVariantDTO>,
+}
+
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaItemDTO {
@@ -28,6 +48,41 @@ pub struct MediaItemDTO {
     pub size_bytes: i64,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub media_type: MediaType,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+    pub blurhash: Option<String>,
+    pub optimized_path: Option<String>,
+    pub variants: Option<serde_json::Value>,
+    pub dominant_color: Option<String>,
+    pub palette: Option<serde_json::Value>,
+    pub exif: Option<serde_json::Value>,
+}
+
+impl From<MediaItemFromDb> for MediaItemDTO {
+    fn from(row: MediaItemFromDb) -> Self {
+        Self {
+            uuid: row.uuid.to_string(),
+            url: row.url,
+            name: row.name,
+            extension: row.extension,
+            title: row.title,
+            alt: row.alt,
+            category: row.category,
+            tags: row.tags,
+            source: row.source,
+            size_bytes: row.size_bytes,
+            created_at: row.created_at,
+            media_type: row.media_type,
+            width: row.width,
+            height: row.height,
+            blurhash: row.blurhash,
+            optimized_path: row.optimized_path,
+            variants: row.variants,
+            dominant_color: row.dominant_color,
+            palette: row.palette,
+            exif: row.exif,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug, ToSchema)]
@@ -46,6 +101,12 @@ pub struct UpdateMediaDTO {
 pub struct BulkUpdateMediaDTO {
     pub uuids: Vec<String>,
     pub data: UpdateMediaDTO,
+}
+
+#[derive(Deserialize, Debug, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkOptimizeMediaDTO {
+    pub uuids: Vec<uuid::Uuid>,
 }
 
 #[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
@@ -75,6 +136,14 @@ pub struct MediaItemFromDb {
     pub size_bytes: i64,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub media_type: MediaType,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+    pub blurhash: Option<String>,
+    pub optimized_path: Option<String>,
+    pub variants: Option<serde_json::Value>,
+    pub dominant_color: Option<String>,
+    pub palette: Option<serde_json::Value>,
+    pub exif: Option<serde_json::Value>,
 }
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema, Clone, Copy)]
