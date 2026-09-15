@@ -1,337 +1,218 @@
-# Admin Panel Architecture
+# Архитектура Admin Panel
 
-## Overview
+## 1. Введение и общая картина
 
-This document describes the architecture of the Admin Panel monorepo, which uses a microfrontend approach with Vite + Module Federation.
+**Admin Panel** — это масштабируемая панель администрирования проекта **Guest Place**, построенная по принципу микрофронтендной архитектуры на базе **Vue 3**, **Vite**, **Module Federation** (`@originjs/vite-plugin-federation`) и **Turborepo**.
 
-## Architecture Diagram
+Вся экосистема **Guest Place** состоит из трёх ключевых узлов:
+1. **`server`** — бэкенд на **Rust (Axum)**, использующий **PostgreSQL** для хранения данных и **Redis** для кэша и сессий. Предоставляет REST API (`/api/v1/*`), включая реестр микрофронтендов (`/api/v1/mfe/manifest`).
+2. **`admin-panel`** — административная панель (данный репозиторий), объединяющая 11 бизнес-микрофронтендов под управлением хост-приложения `admin-shell`.
+3. **`client`** — публичный сайт для гостей на **Nuxt 4**, взаимодействующий с бэкендом.
+
+---
+
+## 2. Диаграмма взаимодействия системы
 
 ```mermaid
 graph TD
-    A[Admin Panel Monorepo] --> B[Apps]
-    A --> C[Packages]
-    B --> B1[admin-shell]
-    B --> B2[admin-statistics]
-    B --> B3[admin-translations]
-    B --> B4[admin-users]
-    B --> B5[admin-docs]
-    C --> C1[ui]
-    C --> C2[utils]
-    C --> C3[eslint-config]
-    C --> C4[prettier-config]
-    C --> C5[stylelint-config]
-    C --> C6[typescript-config]
-    C --> C7[i18n]
-
-    subgraph Module Federation
-        B1 -->|Loads| B2
-        B1 -->|Loads| B3
-        B1 -->|Loads| B4
+    subgraph Browser["Браузер пользователя"]
+        Shell["Хост-приложение (admin-shell :4173/:3000)"]
+        subgraph MFE["Удалённые микрофронтенды (Remotes :3001-:3010)"]
+            Orchestrator["admin-orchestrator (:3005)"]
+            Statistics["admin-statistics (:3001)"]
+            Translations["admin-translations (:3002)"]
+            Users["admin-users (:3003)"]
+            Media["admin-media (:3004)"]
+            Content["admin-content (:3007)"]
+            About["admin-about (:3006)"]
+            Guests["admin-guests (:3008)"]
+            Platforms["admin-platforms (:3009)"]
+            Profile["admin-profile (:3010)"]
+        end
     end
 
-    subgraph Shared Dependencies
-        B2 --> C1
-        B2 --> C2
-        B3 --> C1
-        B3 --> C2
-        B3 --> C7
-        B4 --> C1
-        B4 --> C2
+    subgraph Backend["Бэкенд-инфраструктура"]
+        Server["Rust Axum Server (:8000)"]
+        DB[(PostgreSQL :5432)]
+        Redis[(Redis :6379)]
     end
+
+    Shell -->|1. GET /api/v1/mfe/manifest| Server
+    Server -->|Запрос реестра MFE| DB
+    Server -->|Ответ: список активных MFE| Shell
+    Shell -->|2. Динамический импорт remoteEntry.js| MFE
+    Shell -->|3. Монтирование роутов и сайдбара| MFE
+    MFE -->|API запросы через прокси /api/*| Server
+    Server --> DB
+    Server --> Redis
 ```
 
-## Core Concepts
+---
 
-### Microfrontends
+## 3. Структура монорепозитория
 
-Each microfrontend is an independent Vue 3 application that:
+Проект управляется через **pnpm workspaces** и оркестратор задач **Turborepo**.
 
-1. **Exposes routes** via Module Federation
-2. **Consumes shared dependencies** from the packages directory
-3. **Runs independently** in development mode
-4. **Integrates** into the shell in production
+```
+admin-panel/
+├── apps/                          # Приложения и микрофронтенды
+│   ├── admin-shell/               # Хост-приложение: ядро, авторизация, сайдбар, динамический загрузчик MFE
+│   ├── admin-orchestrator/        # Оркестратор: реестр MFE, статусы, конфигурация модулей
+│   ├── admin-statistics/          # Статистика: аналитика, воронки, когорты, графики посещаемости
+│   ├── admin-translations/        # Переводы: управление ключами i18n, неймспейсы, версии
+│   ├── admin-users/               # Пользователи: список пользователей, RBAC (роли и права)
+│   ├── admin-media/               # Медиатека: загрузка, кроп, оптимизация, привязка файлов
+│   ├── admin-content/             # Headless CMS: конструктор схем (singletons/collections), записи, ревизии
+│   ├── admin-about/               # О проекте: визуальные гайды, информационные страницы
+│   ├── admin-guests/              # Гости: база гостей, гостевые возможности, ссылки
+│   ├── admin-platforms/           # Платформы: внешние платформы и интеграции
+│   ├── admin-profile/             # Профиль: настройки учётной записи администратора, безопасность
+│   └── admin-docs/                # Storybook: документация компонентов дизайн-системы
+│
+├── packages/                      # Общие разделяемые библиотеки и конфигурации
+│   ├── ui/                        # Единый UI-Kit (@admin-panel/ui): кнопки, инпуты, таблицы, модалки
+│   ├── lib/                       # Базовая библиотека (@admin-panel/lib): API-клиент, события, роутинг, Vite-хэлперы
+│   ├── i18n/                      # Пакет локализации (@admin-panel/i18n): словари и утилиты
+│   ├── testing-utils/             # Утилиты для тестирования (моки, хелперы Vitest)
+│   ├── eslint-config/             # Единый конфиг ESLint
+│   ├── prettier-config/           # Единый конфиг Prettier
+│   ├── stylelint-config/          # Единый конфиг Stylelint
+│   └── typescript-config/         # Базовые конфигурации tsconfig
+│
+├── scripts/                       # Вспомогательные скрипты разработки
+│   ├── choose-project.js          # Интерактивное меню выбора запуска приложений
+│   ├── check-bundle-size.mjs      # Анализ размеров бандлов
+│   └── create-mf/                 # Генератор шаблона нового микрофронтенда
+│
+├── pnpm-workspace.yaml            # Декларация пакетов монорепозитория
+└── turbo.json                     # Конфигурация конвейера задач Turborepo
+```
 
-### Module Federation Configuration
+---
 
-Each microfrontend has a `vite.config.ts` that defines:
+## 4. Принципы работы микрофронтендов (Module Federation)
+
+### 4.1. Динамический манифест (Dynamic Remote Resolution)
+
+В отличие от статического указания `remotes` в конфиге сборщика, в данном проекте адреса микрофронтендов определяются динамически во время выполнения:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Пользователь
+    participant Shell as admin-shell
+    participant Server as Rust Server
+    participant Remote as Remote MFE (e.g. statistics)
+
+    Пользователь->>Shell: Открывает админку (http://localhost:4173)
+    Shell->>Shell: Проверка авторизации (gp_access_token)
+    Shell->>Server: GET /api/v1/mfe/manifest
+    Server-->>Shell: 200 OK (список активных MFE: url, scope, module, order, category)
+    loop Для каждого активного MFE
+        Shell->>Remote: Динамический import(remote.url) [remoteEntry.js]
+        Remote-->>Shell: Remote Container
+        Shell->>Shell: container.init(__federation_shared__)
+        Shell->>Remote: container.get(remote.module)
+        Remote-->>Shell: Экспортированные роуты
+        Shell->>Shell: Добавление префикса пути (напр. /statistics/*)
+        Shell->>Shell: Регистрация маршрутов в Vue Router и элементов в сайдбаре
+    end
+    Shell->>Пользователь: Отображение готового интерфейса со всеми разделами
+```
+
+### 4.2. Конфигурация Vite (`@admin-panel/lib/vite`)
+
+Все микрофронтенды создаются через фабрику `createConfig` из пакета `@admin-panel/lib/vite`. Это гарантирует строгую единообразность:
+
+- **Автоматическое назначение портов** из константы `APPS_PORTS`.
+- **Настройка проксирования API**: все запросы к `/api/*` автоматически перенаправляются на адрес бэкенда (`http://localhost:8000` по умолчанию или из `VITE_API_BASE`).
+- **Сжатие Gzip**: предкомпрессия статики через `vite-plugin-compression`.
+- **Анализ размера бандлов**: генерация отчёта `stats.html` через `rollup-plugin-visualizer`.
+
+### 4.3. Оптимизация стилей (`gp-css-externalizer`)
+
+Одной из главных проблем Module Federation является дублирование тяжелых глобальных стилей (таких как стили `element-plus` и базовые сбросы) в каждом отдельном бандле микрофронтенда.
+
+В проекте реализован плагин `gp-css-externalizer`:
+- Когда микрофронтенд собирается для работы внутри хоста (`admin-shell`), плагин заменяет импорты глобальных CSS библиотек на пустой виртуальный модуль `\0virtual:gp-empty.css`.
+- Все глобальные стили и токены единожды загружаются и применяются хост-приложением `admin-shell`.
+- В автономном dev-режиме микрофронтенда (`isStandalone`) стили подгружаются полностью для независимой работы.
+
+### 4.4. Разделяемые зависимости (Shared Singletons)
+
+Чтобы избежать многократной загрузки библиотек в память браузера и поломки контекстов реактивности, следующие зависимости объявлены синглтонами:
+- `vue`
+- `vue-router`
+- `pinia`
+- `element-plus`
+- `@tanstack/vue-query`
+- `@admin-panel/ui`
+- `@admin-panel/lib`
+- `@admin-panel/i18n`
+
+---
+
+## 5. Потоки данных и коммуникация
+
+### 5.1. Шина событий (`useEvents` & `GP_EVENTS`)
+
+Для слабой связанности (loose coupling) между микрофронтендами используется типизированная шина событий:
 
 ```typescript
-federation({
-	name: 'microfrontend-name',
-	filename: 'remoteEntry.js',
-	exposes: {
-		'./MicrofrontendRoutes': './src/app/router/index.ts',
-	},
-	shared: ['vue', 'vue-router'],
+import { useEvents, GP_EVENTS } from '@admin-panel/lib'
+
+const { dispatch, on } = useEvents()
+
+// Отправка события обновления данных
+dispatch(GP_EVENTS.UPDATED, { entity: 'translations' })
+
+// Подписка на системные события
+on(GP_EVENTS.UNAUTHORIZED, () => {
+    // Реакция на истечение сессии
 })
 ```
 
-### Shell Application
-
-The `admin-shell` application:
-
-1. **Hosts** all microfrontends
-2. **Loads routes dynamically** from remoteEntry.js files
-3. **Provides shared layout** and navigation
-4. **Manages authentication** and authorization
-
-## Development Workflow
-
-### Local Development
-
-```mermaid
-sequenceDiagram
-    participant Developer
-    participant Shell
-    participant Microfrontend
-    participant Vite
-
-    Developer->>Shell: pnpm dev:shell
-    Developer->>Microfrontend: pnpm dev (in separate terminal)
-    Shell->>Vite: Start dev server
-    Microfrontend->>Vite: Start dev server
-    Shell->>Microfrontend: Load remoteEntry.js
-    Shell->>Microfrontend: Fetch routes
-    Shell->>Microfrontend: Render components
-```
-
-### Production Build
-
-```mermaid
-sequenceDiagram
-    participant CI
-    participant Shell
-    participant Microfrontend
-    participant CD
-
-    CI->>Shell: pnpm build
-    CI->>Microfrontend: pnpm build
-    Shell->>CD: Deploy shell
-    Microfrontend->>CD: Deploy microfrontend
-    CD->>Shell: Serve remoteEntry.js
-    CD->>Shell: Load microfrontend routes
-```
-
-## Communication Patterns
-
-### Route Exposure
-
-Each microfrontend exposes its routes through a named export:
-
-```typescript
-// src/app/router/index.ts
-const routes: RouteRecordRaw[] = [
-	{
-		path: '/statistics',
-		component: () => import('#pages/IndexPage.vue'),
-	},
-]
-
-export default routes
-```
-
-### Component Communication
-
-Microfrontends communicate through:
-
-1. **Props** - Parent components pass data to child components
-2. **Events** - Child components emit events to parent components
-3. **Shared State** - Using Vuex or Pinia for cross-microfrontend state
-4. **Custom Events** - Using the `mit` library for event-based communication
-
-## Build Pipeline
-
-### Development Build
-
-```mermaid
-graph TD
-    A[Source Code] --> B[Vite Dev Server]
-    B --> C[HMR]
-    C --> A
-    B --> D[Module Federation]
-    D --> E[Shell Integration]
-```
-
-### Production Build
-
-```mermaid
-graph TD
-    A[Source Code] --> B[TypeScript Compilation]
-    B --> C[Vite Production Build]
-    C --> D[Module Federation Bundle]
-    D --> E[Shell Integration]
-    E --> F[Optimized Assets]
-    F --> G[CDN Deployment]
-```
-
-## Performance Optimization
-
-### Caching Strategy
-
-- **Vite**: Uses esbuild for fast bundling
-- **Turborepo**: Caches build outputs and dependencies
-- **Module Federation**: Caches remoteEntry.js files
-- **Browser**: Uses service workers for offline support
-
-### Build Optimization
-
-- **Code Splitting**: Each microfrontend is a separate chunk
-- **Tree Shaking**: Removes unused code
-- **Lazy Loading**: Loads components on demand
-- **Compression**: Uses Brotli compression for assets
-
-## Monitoring and Analytics
-
-### Error Tracking
-
-- **Sentry**: Catches and reports errors
-- **Log Rocket**: Records user sessions
-- **New Relic**: Monitors performance
-
-### Health Checks
-
-Each microfrontend exposes:
-
-- `/health` - Basic health check
-- `/metrics` - Prometheus metrics
-- `/ready` - Readiness probe
-
-## Security Considerations
-
-### Authentication
-
-- **JWT**: JSON Web Tokens for authentication
-- **OAuth**: Support for external providers
-- **Session Management**: Secure cookie storage
-
-### Authorization
-
-- **Access Management**: Role-Based Access Control and Permissions
-- **ABAC**: Attribute-Based Access Control
-- **Policy Engine**: Centralized policy management
-
-### Security Headers
-
-- **CSP**: Content Security Policy
-- **HSTS**: HTTP Strict Transport Security
-- **XSS Protection**: Cross-Site Scripting protection
-
-## Deployment Strategy
-
-### Blue-Green Deployment
-
-```mermaid
-graph TD
-    A[Current Version] --> B[New Version]
-    B --> C[Canary Testing]
-    C --> D[Full Rollout]
-    D --> A
-```
-
-### Feature Flags
-
-- **LaunchDarkly**: Feature flag management
-- **Flagsmith**: Open-source alternative
-- **Custom Implementation**: Using environment variables
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Module Federation Loading Errors**
-   - Check network tab for failed remoteEntry.js requests
-   - Verify CORS headers are set correctly
-   - Ensure ports are not blocked
-
-2. **HMR Not Working**
-   - Restart Vite dev servers
-   - Clear browser cache
-   - Check for port conflicts
-
-3. **Build Failures**
-   - Run `pnpm lint` to check for code issues
-   - Run `pnpm type-check` to check TypeScript errors
-   - Check `pnpm outdated` for dependency issues
-
-### Debugging Tools
-
-- **Vite Inspector**: Debug Vite plugins
-- **Module Federation Inspector**: Inspect remote modules
-- **Chrome DevTools**: Debug performance issues
-- **Vue DevTools**: Inspect Vue components
-
-## Best Practices
-
-### Code Organization
-
-- **Feature-based**: Organize code by feature, not by type
-- **Atomic Design**: Use atoms, molecules, organisms, templates, pages
-- **Layered Architecture**: Separate concerns into layers
-
-### Тестирование (Testing Strategy)
-
-Мы придерживаемся стратегии «Пирамиды Тестирования»:
-
-1. **Unit Tests (Основание)**:
-   - **Frontend**: Vitest. Покрывают чистые функции и мелкие компоненты в `packages/lib` и `packages/ui`.
-   - **Цель**: 80%+ покрытие логики.
-
-2. **Integration Tests (Середина)**:
-   - **Frontend**: Vitest + Vue Test Utils. Проверка рендеринга виджетов и страниц с моканием API.
-   - **Backend**: Axum-test. Проверка эндпоинтов API с использованием `TestBearer` для обхода авторизации без обращения к БД.
-   - **Скрипты**: `pnpm -C server test` (интеграционные тесты сервера).
-
-3. **E2E Tests (Вершина)**:
-   - **Инструменты**: Cypress / Playwright.
-   - **Область**: Критические пути пользователя (Login, Dashboard navigation).
-   - **Команды**: `pnpm test:e2e`.
-
-#### Особенности реализации
-
-- **Auth Bypass**: В интеграционных тестах сервера используется заголовок `Authorization: TestBearer`, который позволяет Middleware пропускать запросы для тестирования маршрутов.
-- **Microfrontends**: Тесты МФ запускаются в изоляции, но используют общие конфигурации Vitest из `@admin-panel/lib/vite`.
-
-### Documentation
-
-- **Code Comments**: Explain complex logic
-- **TypeScript**: Use types for better documentation
-- **Storybook**: Document UI components
-- **Architecture Diagrams**: Visualize system structure
-
-## Future Improvements
-
-1. **Performance**
-   - Implement edge caching
-   - Add service worker support
-   - Optimize asset loading
-
-2. **Developer Experience**
-   - Add local development UI
-   - Improve error messages
-   - Add performance metrics
-
-3. **Security**
-   - Implement security headers
-   - Add vulnerability scanning
-   - Improve authentication flow
-
-4. **Observability**
-   - Add distributed tracing
-   - Implement logging standards
-   - Add alerting system
-
-## Glossary
-
-- **Microfrontend**: Independent application that can be developed and deployed separately
-- **Module Federation**: Webpack/Vite plugin for sharing code between applications
-- **Shell**: Host application that loads and integrates microfrontends
-- **HMR**: Hot Module Replacement for fast development
-- **CORS**: Cross-Origin Resource Sharing for secure resource access
-- **Access Management**: Role-Based Access Control for authorization
-- **JWT**: JSON Web Token for authentication
-- **CSP**: Content Security Policy for security headers
-
-```
-
-Now let's create a CI/CD workflow file:
-```
+### 5.2. Общее состояние Pinia (`registerSharedStore` / `getSharedStore`)
+
+Для случаев, когда требуется общий реактивный стейт между микрофронтендами, используется реестр разделяемых хранилищ Pinia, изолированный от конфликтов имён.
+
+### 5.3. Сетевой слой и API-клиент (`createApi`)
+
+Сетевое взаимодействие реализовано на базе библиотеки `ofetch` с автоматической нормализацией данных:
+- **Автоматическая конвертация форматов**:
+  - Данные, отправляемые на сервер, преобразуются из `camelCase` (JS-стиль) в `snake_case` (Rust/PostgreSQL стиль).
+  - Данные, получаемые с сервера, преобразуются обратно из `snake_case` в `camelCase`.
+- **Авторизация**:
+  - Токен извлекается из `localStorage.getItem('gp_access_token')` и подставляется в заголовок `Authorization: Bearer <token>`.
+- **Обработка 401/403**:
+  - При ошибке авторизации токены очищаются, диспатчится событие `GP_EVENTS.UNAUTHORIZED`, и пользователь перенаправляется на `/login`.
+
+---
+
+## 6. Безопасность и авторизация
+
+1. **Аутентификация по JWT**:
+   - Токены доступа (`access_token`) с коротким временем жизни и токены обновления (`refresh_token`).
+   - Маршруты бэкенда защищены middleware проверки JWT.
+2. **RBAC (Role-Based Access Control)**:
+   - Модель прав: роли (`SuperAdmin`, `Admin`, `Editor`, `Viewer`) и матрица гранулярных разрешений (`permissions`).
+   - Сайдбар и роутер хоста фильтруют доступные разделы в соответствии с правами пользователя.
+3. **Навигационные гарды (Router Guards)**:
+   - Проверка наличия токена перед каждым переходом по маршрутам. Публичные маршруты (например, `/login`) помечаются флагом `meta: { public: true }`.
+
+---
+
+## 7. Стратегия тестирования
+
+Проект следует классической пирамиде тестирования:
+
+1. **Unit-тесты (Vitest)**:
+   - Проверка чистых функций, утилит форматирования, валидаторов и хуков в `packages/lib` и `packages/ui`.
+   - Запуск: `pnpm test:unit`
+2. **Интеграционные тесты (Vitest + Vue Test Utils)**:
+   - Тестирование компонентов, виджетов и страниц с мокированием API-ответов.
+   - Изолированное тестирование маршрутизации отдельных микрофронтендов.
+3. **Интеграционные тесты бэкенда (Axum-test)**:
+   - Проверка контрактов эндпоинтов на стороне Rust с обходом авторизации через `Authorization: TestBearer`.
+4. **E2E-тесты (Cypress)**:
+   - Проверка критических сценариев в реальном браузере: вход в систему, переключение между микрофронтендами, создание и редактирование контента.

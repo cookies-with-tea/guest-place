@@ -5,9 +5,11 @@
 		"@admin-panel/lib": "workspace:*",
 		"@admin-panel/ui": "workspace:*",
 		"@tanstack/vue-query": "^5.92.1",
+		"echarts": "^6.1.0",
 		"element-plus": "^2.13.0",
 		"pinia": "^2.1.7",
 		"vue": "^3.5.22",
+		"vue-echarts": "^8.2.0",
 		"vue-router": "^4.5.1"
 	},
 	"devDependencies": {

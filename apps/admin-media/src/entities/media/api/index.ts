@@ -58,6 +58,35 @@ export const updateBulk = (uuids: string[], data: Partial<MediaItem>) => {
 	})
 }
 
+export const initChunkUpload = (data: import('../model').InitChunkUploadDTO) => {
+	return fetchData<import('../model').InitChunkUploadResponse>('/upload/chunk/init', {
+		method: 'POST',
+		body: data,
+	})
+}
+
+export const uploadChunk = (uploadId: string, chunkIndex: number, chunkData: Blob | ArrayBuffer) => {
+	return fetchData<import('../model').ChunkUploadResultDTO>(`/upload/chunk/${uploadId}/${chunkIndex}`, {
+		method: 'POST',
+		body: chunkData,
+		headers: {
+			'Content-Type': 'application/octet-stream',
+		},
+	})
+}
+
+export const getChunkStatus = (uploadId: string) => {
+	return fetchData<import('../model').ChunkStatusResponse>(`/upload/chunk/${uploadId}/status`, {
+		method: 'GET',
+	})
+}
+
+export const completeChunkUpload = (uploadId: string) => {
+	return fetchData<MediaItem>(`/upload/chunk/${uploadId}/complete`, {
+		method: 'POST',
+	})
+}
+
 export const mediaApi = {
 	create,
 	getAll,
@@ -65,4 +94,8 @@ export const mediaApi = {
 	getById,
 	deleteById,
 	updateBulk,
+	initChunkUpload,
+	uploadChunk,
+	getChunkStatus,
+	completeChunkUpload,
 }

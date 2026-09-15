@@ -67,3 +67,39 @@ export interface MediaResponse {
 		}
 	}
 }
+
+export interface InitChunkUploadDTO {
+	filename: string
+	totalSize: number
+	chunkSize: number
+	totalChunks: number
+	checksumSha256?: string
+	title?: string
+	alt?: string
+	category?: string
+	tags?: string[]
+	source?: string
+	convertToWebp?: boolean
+}
+
+export interface InitChunkUploadResponse {
+	uploadId: string
+	chunkSize: number
+	totalChunks: number
+	receivedChunks: number[]
+}
+
+export interface ChunkStatusResponse {
+	uploadId: string
+	totalChunks: number
+	totalSize: number
+	receivedChunks: number[]
+	isComplete: boolean
+}
+
+export interface ChunkUploadResultDTO {
+	uploadId: string
+	chunkIndex: number
+	receivedChunks: number[]
+	totalChunks: number
+}

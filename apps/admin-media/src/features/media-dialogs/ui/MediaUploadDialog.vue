@@ -7,7 +7,7 @@
 		@close="closeAndReset"
 	>
 		<div
-			v-loading="isSubmitting"
+			v-loading="isUploading"
 			element-loading-text="Uploading & processing files..."
 			element-loading-background="rgba(0, 0, 0, 0.7)"
 			class="upload-container"
@@ -18,6 +18,7 @@
 					<div class="card-header">
 						<span class="header-title">Global Metadata</span>
 						<div class="header-actions">
+							<el-checkbox v-model="useChunkedUpload">Resumable Chunked</el-checkbox>
 							<el-checkbox v-model="convertToWebP">Auto-convert to WebP</el-checkbox>
 							<el-checkbox v-model="isApplyToAll">Apply to all files</el-checkbox>
 						</div>
@@ -86,6 +87,13 @@
 						</div>
 						<span class="file-name">{{ file.file.name.substring(0, 20) }}...</span>
 						<el-tag size="small" type="info">{{ (file.file.size / 1024 / 1024).toFixed(2) }}MB</el-tag>
+						<el-tag
+							v-if="file.status && file.status !== 'idle'"
+							size="small"
+							:type="file.status === 'completed' ? 'success' : file.status === 'error' ? 'danger' : 'warning'"
+						>
+							{{ file.status }}
+						</el-tag>
 						<el-button
 							circle
 							size="small"
@@ -93,6 +101,15 @@
 							:icon="Edit"
 							@click="toggleCustom(index)"
 						/>
+					</div>
+
+					<div v-if="file.status && file.status !== 'idle'" class="item-upload-progress">
+						<el-progress
+							:percentage="file.progress || 0"
+							:status="file.status === 'error' ? 'exception' : file.status === 'completed' ? 'success' : ''"
+							:stroke-width="4"
+						/>
+						<div class="progress-message">{{ file.statusMessage }}</div>
 					</div>
 
 					<el-collapse-transition>
@@ -130,7 +147,7 @@
 				<el-badge :value="filesToUpload.length" :hidden="filesToUpload.length === 0" type="primary">
 					<el-button
 						:disabled="filesToUpload.length === 0"
-						:loading="isSubmitting"
+						:loading="isUploading"
 						type="primary"
 						@click="handleUpload"
 					>
@@ -163,14 +180,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { UiModal } from '@admin-panel/ui'
 import { Edit, UploadFilled } from '@element-plus/icons-vue'
+import { useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 
-import { useMedia } from '#entities/media'
+import { MEDIA_QUERY_KEY, uploadFileInChunks, useMedia } from '#entities/media'
 
+const queryClient = useQueryClient()
 const { isUploadModalOpen, closeUploadModal, createMedia, isSubmitting } = useMedia()
 
 const globalTitle = ref('')
@@ -179,6 +198,10 @@ const globalCategory = ref('')
 const globalTags = ref<string[]>([])
 const isApplyToAll = ref(true)
 const convertToWebP = ref(true)
+const useChunkedUpload = ref(true)
+const isChunkUploading = ref(false)
+
+const isUploading = computed(() => isSubmitting.value || isChunkUploading.value)
 
 interface FileWithMeta {
 	file: File
@@ -188,6 +211,9 @@ interface FileWithMeta {
 	tags: string[]
 	isCustom: boolean
 	preview?: string
+	progress?: number
+	status?: 'idle' | 'hashing' | 'uploading' | 'verifying' | 'completed' | 'error'
+	statusMessage?: string
 }
 
 const filesToUpload = ref<FileWithMeta[]>([])
@@ -213,6 +239,9 @@ const handleFileChange = (file: any) => {
 		tags: [],
 		isCustom: false,
 		preview,
+		progress: 0,
+		status: 'idle',
+		statusMessage: '',
 	})
 }
 
@@ -234,6 +263,41 @@ const toggleCustom = (index: number) => {
 
 const handleUpload = async () => {
 	if (filesToUpload.value.length === 0) return
+
+	if (useChunkedUpload.value) {
+		isChunkUploading.value = true
+		try {
+			for (const item of filesToUpload.value) {
+				const finalTitle = isApplyToAll.value && !item.isCustom ? globalTitle.value : item.title
+				const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
+				const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
+				const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
+
+				await uploadFileInChunks({
+					file: item.file,
+					title: finalTitle,
+					alt: finalAlt,
+					category: finalCategory,
+					tags: finalTags,
+					convertToWebp: convertToWebP.value,
+					onProgress: (p) => {
+						item.progress = p.percent
+						item.status = p.stage
+						item.statusMessage = p.message
+					},
+				})
+			}
+
+			await queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			ElMessage.success('Files uploaded successfully')
+			closeAndReset()
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Chunked upload failed')
+		} finally {
+			isChunkUploading.value = false
+		}
+		return
+	}
 
 	try {
 		const formData = new FormData()
@@ -382,6 +446,22 @@ const closeAndReset = () => {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
+}
+
+.item-upload-progress {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	gap: 4px;
+	padding: 2px 0;
+}
+
+.progress-message {
+	font-size: 11px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .file-thumb {

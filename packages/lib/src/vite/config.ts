@@ -51,6 +51,7 @@ export function createConfig(options: CreateConfigOptions) {
 
 		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
 		const isProduction = mode === 'production' || command === 'build'
+		const apiTarget = env.VITE_API_BASE || env.VITE_BASE_URL || 'http://localhost:8000'
 
 		const baseConfig: ViteUserConfig = {
 			root: appDir,
@@ -156,47 +157,43 @@ export function createConfig(options: CreateConfigOptions) {
 			server: {
 				port: serverPort || portConfig?.dev,
 				cors: true,
-				proxy: env.VITE_API_BASE
-					? {
-							'/api': {
-								target: env.VITE_API_BASE,
-								changeOrigin: true,
-								secure: false,
-								// Ensure SSE works by disabling buffering
-								configure: (proxy) => {
-									proxy.on('proxyRes', (proxyRes, req) => {
-										// For SSE, we want to ensure no buffering
-										if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
-											proxyRes.headers['cache-control'] = 'no-cache'
+				proxy: {
+					'/api': {
+						target: apiTarget,
+						changeOrigin: true,
+						secure: false,
+						// Ensure SSE works by disabling buffering
+						configure: (proxy) => {
+							proxy.on('proxyRes', (proxyRes, req) => {
+								// For SSE, we want to ensure no buffering
+								if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
+									proxyRes.headers['cache-control'] = 'no-cache'
 
-											proxyRes.headers['connection'] = 'keep-alive'
-										}
-									})
-								},
-							},
-						}
-					: {},
+									proxyRes.headers['connection'] = 'keep-alive'
+								}
+							})
+						},
+					},
+				},
 			},
 			preview: {
 				port: previewPort || portConfig?.preview,
-				proxy: env.VITE_API_BASE
-					? {
-							'/api': {
-								target: env.VITE_API_BASE,
-								changeOrigin: true,
-								secure: false,
-								configure: (proxy) => {
-									proxy.on('proxyRes', (proxyRes, req) => {
-										if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
-											proxyRes.headers['cache-control'] = 'no-cache'
+				proxy: {
+					'/api': {
+						target: apiTarget,
+						changeOrigin: true,
+						secure: false,
+						configure: (proxy) => {
+							proxy.on('proxyRes', (proxyRes, req) => {
+								if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
+									proxyRes.headers['cache-control'] = 'no-cache'
 
-											proxyRes.headers['connection'] = 'keep-alive'
-										}
-									})
-								},
-							},
-						}
-					: {},
+									proxyRes.headers['connection'] = 'keep-alive'
+								}
+							})
+						},
+					},
+				},
 			},
 			test: {
 				globals: true,
