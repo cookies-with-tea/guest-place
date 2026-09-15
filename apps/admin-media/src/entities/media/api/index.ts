@@ -1,6 +1,13 @@
 import { createApi } from '@admin-panel/lib'
 
-import type { MediaFilters, MediaItem } from '../model'
+import type {
+	ChunkStatusResponse,
+	ChunkUploadResultDTO,
+	InitChunkUploadDTO,
+	InitChunkUploadResponse,
+	MediaFilters,
+	MediaItem,
+} from '../model'
 
 const { fetchData } = createApi('media')
 
@@ -22,6 +29,10 @@ export const getAll = (params?: MediaFilters) => {
 		if (params.category && params.category.length > 0) query.category = params.category.join(',')
 		if (params.tags && params.tags.length > 0) query.tags = params.tags.join(',')
 		if (params.source && params.source.length > 0) query.source = params.source.join(',')
+		if (params.minSizeBytes !== undefined) query.min_size_bytes = params.minSizeBytes
+		if (params.maxSizeBytes !== undefined) query.max_size_bytes = params.maxSizeBytes
+		if (params.dateFrom) query.date_from = params.dateFrom
+		if (params.dateTo) query.date_to = params.dateTo
 		if (params.page) query.page = params.page
 		if (params.limit) query.limit = params.limit
 	}
@@ -58,15 +69,15 @@ export const updateBulk = (uuids: string[], data: Partial<MediaItem>) => {
 	})
 }
 
-export const initChunkUpload = (data: import('../model').InitChunkUploadDTO) => {
-	return fetchData<import('../model').InitChunkUploadResponse>('/upload/chunk/init', {
+export const initChunkUpload = (data: InitChunkUploadDTO) => {
+	return fetchData<InitChunkUploadResponse>('/upload/chunk/init', {
 		method: 'POST',
 		body: data,
 	})
 }
 
 export const uploadChunk = (uploadId: string, chunkIndex: number, chunkData: Blob | ArrayBuffer) => {
-	return fetchData<import('../model').ChunkUploadResultDTO>(`/upload/chunk/${uploadId}/${chunkIndex}`, {
+	return fetchData<ChunkUploadResultDTO>(`/upload/chunk/${uploadId}/${chunkIndex}`, {
 		method: 'POST',
 		body: chunkData,
 		headers: {
@@ -76,7 +87,7 @@ export const uploadChunk = (uploadId: string, chunkIndex: number, chunkData: Blo
 }
 
 export const getChunkStatus = (uploadId: string) => {
-	return fetchData<import('../model').ChunkStatusResponse>(`/upload/chunk/${uploadId}/status`, {
+	return fetchData<ChunkStatusResponse>(`/upload/chunk/${uploadId}/status`, {
 		method: 'GET',
 	})
 }

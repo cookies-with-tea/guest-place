@@ -215,6 +215,66 @@ export const useMedia = () => {
 		{ deep: true }
 	)
 
+	const resetFilters = () => {
+		filters.value.search = ''
+
+		filters.value.mediaTypes = []
+
+		filters.value.category = []
+
+		filters.value.tags = []
+
+		filters.value.source = []
+
+		filters.value.minSizeBytes = undefined
+
+		filters.value.maxSizeBytes = undefined
+
+		filters.value.dateFrom = undefined
+
+		filters.value.dateTo = undefined
+
+		filters.value.sortBy = 'created_at'
+
+		filters.value.sortOrder = 'DESC'
+	}
+
+	const setSizePreset = (preset: 'all' | 'small' | 'medium' | 'large' | 'huge') => {
+		switch (preset) {
+			case 'small':
+				filters.value.minSizeBytes = undefined
+
+				filters.value.maxSizeBytes = 1024 * 1024 // < 1MB
+
+				break
+			case 'medium':
+				filters.value.minSizeBytes = 1024 * 1024 // 1MB
+
+				filters.value.maxSizeBytes = 5 * 1024 * 1024 // 5MB
+
+				break
+			case 'large':
+				filters.value.minSizeBytes = 5 * 1024 * 1024 // 5MB
+
+				filters.value.maxSizeBytes = 20 * 1024 * 1024 // 20MB
+
+				break
+			case 'huge':
+				filters.value.minSizeBytes = 20 * 1024 * 1024 // > 20MB
+
+				filters.value.maxSizeBytes = undefined
+
+				break
+			case 'all':
+			default:
+				filters.value.minSizeBytes = undefined
+
+				filters.value.maxSizeBytes = undefined
+
+				break
+		}
+	}
+
 	return {
 		// state
 		filters,
@@ -249,5 +309,59 @@ export const useMedia = () => {
 		setLimit,
 		setSort,
 		removeFilter,
+		resetFilters,
+		setSizePreset,
 	}
+}
+
+export const filterMediaItemLocally = (item: MediaItem, filterValues: MediaFilters): boolean => {
+	if (filterValues.search) {
+		const q = filterValues.search.toLowerCase()
+		const matchesName = item.name?.toLowerCase().includes(q)
+		const matchesTitle = item.title?.toLowerCase().includes(q)
+		const matchesAlt = item.alt?.toLowerCase().includes(q)
+		const matchesCategory = item.category?.toLowerCase().includes(q)
+		const matchesExtension = item.extension?.toLowerCase().includes(q)
+		const matchesTags = item.tags?.some((t) => t.toLowerCase().includes(q))
+
+		if (!matchesName && !matchesTitle && !matchesAlt && !matchesCategory && !matchesExtension && !matchesTags) {
+			return false
+		}
+	}
+
+	if (filterValues.mediaTypes && filterValues.mediaTypes.length > 0) {
+		if (!filterValues.mediaTypes.includes(item.mediaType)) return false
+	}
+
+	if (filterValues.category && filterValues.category.length > 0) {
+		if (!item.category || !filterValues.category.includes(item.category)) return false
+	}
+
+	if (filterValues.tags && filterValues.tags.length > 0) {
+		if (!item.tags || !filterValues.tags.some((t) => item.tags?.includes(t))) return false
+	}
+
+	if (filterValues.minSizeBytes !== undefined && item.sizeBytes < filterValues.minSizeBytes) {
+		return false
+	}
+
+	if (filterValues.maxSizeBytes !== undefined && item.sizeBytes > filterValues.maxSizeBytes) {
+		return false
+	}
+
+	if (filterValues.dateFrom) {
+		const fromTime = new Date(filterValues.dateFrom).getTime()
+		const itemTime = new Date(item.createdAt).getTime()
+
+		if (itemTime < fromTime) return false
+	}
+
+	if (filterValues.dateTo) {
+		const toTime = new Date(filterValues.dateTo).getTime()
+		const itemTime = new Date(item.createdAt).getTime()
+
+		if (itemTime > toTime) return false
+	}
+
+	return true
 }

@@ -73,10 +73,15 @@ describe('chunkUploader', () => {
 		})
 
 		expect(initMock).toHaveBeenCalledTimes(1)
+
 		expect(uploadChunkMock).toHaveBeenCalledTimes(3)
+
 		expect(completeMock).toHaveBeenCalledTimes(1)
+
 		expect(result.uuid).toBe('final-media-uuid')
+
 		expect(progressUpdates.some((p) => p.stage === 'hashing')).toBe(true)
+
 		expect(progressUpdates.some((p) => p.stage === 'completed')).toBe(true)
 	})
 })

@@ -8,7 +8,7 @@ vi.mock('@admin-panel/lib', () => ({
 	}),
 }))
 
-import { mediaApi, optimize, optimizeBulk } from '../entities/media/api'
+import { optimize, optimizeBulk } from '../entities/media/api'
 import type { MediaItem } from '../entities/media/model'
 
 describe('Media Variants and Optimization API', () => {
@@ -55,18 +55,23 @@ describe('Media Variants and Optimization API', () => {
 		fetchDataMock.mockResolvedValueOnce({ data: mockResponse })
 
 		const res = await optimize('11111111-2222-3333-4444-555555555555')
+
 		expect(fetchDataMock).toHaveBeenCalledWith('/11111111-2222-3333-4444-555555555555/optimize', {
 			method: 'POST',
 		})
+
 		expect(res.data.variants?.thumbnail?.format).toBe('webp')
+
 		expect(res.data.variants?.thumbnail?.width).toBe(256)
 	})
 
 	it('calls optimizeBulk endpoint with POST /optimize/bulk', async () => {
 		const uuids = ['uuid-1', 'uuid-2']
+
 		fetchDataMock.mockResolvedValueOnce({ data: [] })
 
 		await optimizeBulk(uuids)
+
 		expect(fetchDataMock).toHaveBeenCalledWith('/optimize/bulk', {
 			method: 'POST',
 			body: { uuids },
@@ -104,9 +109,8 @@ describe('Media Variants and Optimization API', () => {
 
 		const getPreviewUrl = (row: MediaItem) => row.variants?.thumbnail?.url || row.optimizedPath || row.url
 
-		expect(getPreviewUrl(itemWithVariants)).toBe(
-			'http://localhost:8080/uploads/variants/u1/thumbnail.webp'
-		)
+		expect(getPreviewUrl(itemWithVariants)).toBe('http://localhost:8080/uploads/variants/u1/thumbnail.webp')
+
 		expect(getPreviewUrl(itemWithoutVariants)).toBe('http://localhost:8080/uploads/orig.png')
 	})
 })

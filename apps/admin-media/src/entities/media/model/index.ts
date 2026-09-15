@@ -47,6 +47,10 @@ export interface MediaFilters {
 	category?: string[]
 	tags?: string[]
 	source?: string[]
+	minSizeBytes?: number
+	maxSizeBytes?: number
+	dateFrom?: string
+	dateTo?: string
 	page?: number
 	limit?: number
 }

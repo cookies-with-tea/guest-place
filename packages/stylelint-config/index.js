@@ -4,7 +4,14 @@ export default {
 	plugins: ['stylelint-scss', 'stylelint-order', '@stylistic/stylelint-plugin'],
 	ignoreFiles: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/storybook-static/**'],
 	overrides: [
-		{ files: ['**/*.scss'], customSyntax: 'postcss-scss' },
+		{
+			files: ['**/*.scss'],
+			customSyntax: 'postcss-scss',
+			rules: {
+				'at-rule-prelude-no-invalid': null,
+				'at-rule-no-unknown': null,
+			},
+		},
 		{ files: ['**/*.vue'], customSyntax: 'postcss-html' },
 	],
 	rules: {

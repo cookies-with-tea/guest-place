@@ -60,7 +60,11 @@
 						<el-tag size="small" type="info">{{ currentMedia.data.mediaType }}</el-tag>
 					</el-descriptions-item>
 					<el-descriptions-item label="Dimensions">
-						{{ currentMedia.data.width && currentMedia.data.height ? `${currentMedia.data.width} × ${currentMedia.data.height} px` : '—' }}
+						{{
+							currentMedia.data.width && currentMedia.data.height
+								? `${currentMedia.data.width} × ${currentMedia.data.height} px`
+								: '—'
+						}}
 					</el-descriptions-item>
 					<el-descriptions-item label="Category">
 						{{ currentMedia.data.category || '—' }}
@@ -116,21 +120,30 @@
 					<div class="exif-details">
 						<div v-if="currentMedia.data.exif.make || currentMedia.data.exif.model" class="exif-row">
 							<span class="exif-label">Camera:</span>
-							<span class="exif-val">{{ [currentMedia.data.exif.make, currentMedia.data.exif.model].filter(Boolean).join(' ') }}</span>
+							<span class="exif-val">{{
+								[currentMedia.data.exif.make, currentMedia.data.exif.model].filter(Boolean).join(' ')
+							}}</span>
 						</div>
 						<div v-if="currentMedia.data.exif.dateTime" class="exif-row">
 							<span class="exif-label">Taken:</span>
 							<span class="exif-val">{{ currentMedia.data.exif.dateTime }}</span>
 						</div>
-						<div v-if="currentMedia.data.exif.fNumber || currentMedia.data.exif.exposureTime || currentMedia.data.exif.iso" class="exif-row">
+						<div
+							v-if="currentMedia.data.exif.fNumber || currentMedia.data.exif.exposureTime || currentMedia.data.exif.iso"
+							class="exif-row"
+						>
 							<span class="exif-label">Settings:</span>
 							<span class="exif-val">
-								{{ [
-									currentMedia.data.exif.fNumber ? `f/${currentMedia.data.exif.fNumber}` : '',
-									currentMedia.data.exif.exposureTime ? `${currentMedia.data.exif.exposureTime}s` : '',
-									currentMedia.data.exif.iso ? `ISO ${currentMedia.data.exif.iso}` : '',
-									currentMedia.data.exif.focalLength ? `${currentMedia.data.exif.focalLength}mm` : '',
-								].filter(Boolean).join(' · ') }}
+								{{
+									[
+										currentMedia.data.exif.fNumber ? `f/${currentMedia.data.exif.fNumber}` : '',
+										currentMedia.data.exif.exposureTime ? `${currentMedia.data.exif.exposureTime}s` : '',
+										currentMedia.data.exif.iso ? `ISO ${currentMedia.data.exif.iso}` : '',
+										currentMedia.data.exif.focalLength ? `${currentMedia.data.exif.focalLength}mm` : '',
+									]
+										.filter(Boolean)
+										.join(' · ')
+								}}
 							</span>
 						</div>
 						<div v-if="currentMedia.data.exif.gpsStripped" class="exif-privacy-row">
@@ -142,28 +155,40 @@
 				<div v-if="currentMedia.data.mediaType === 'image'" class="variants-box">
 					<div class="variants-header">
 						<span class="variants-title">WebP Variants</span>
-						<el-button size="small" :loading="isOptimizing" @click="onOptimize">
-							Regenerate
-						</el-button>
+						<el-button size="small" :loading="isOptimizing" @click="onOptimize"> Regenerate </el-button>
 					</div>
 					<div v-if="currentMedia.data.variants" class="variants-list">
 						<div v-if="currentMedia.data.variants.thumbnail" class="variant-row">
 							<span class="variant-tag">Thumb</span>
-							<span class="variant-meta">{{ currentMedia.data.variants.thumbnail.width }}×{{ currentMedia.data.variants.thumbnail.height }}</span>
+							<span class="variant-meta"
+								>{{ currentMedia.data.variants.thumbnail.width }}×{{
+									currentMedia.data.variants.thumbnail.height
+								}}</span
+							>
 							<span class="variant-meta">{{ formatFileSize(currentMedia.data.variants.thumbnail.sizeBytes) }}</span>
-							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.thumbnail.url)">Copy</el-button>
+							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.thumbnail.url)"
+								>Copy</el-button
+							>
 						</div>
 						<div v-if="currentMedia.data.variants.medium" class="variant-row">
 							<span class="variant-tag">Medium</span>
-							<span class="variant-meta">{{ currentMedia.data.variants.medium.width }}×{{ currentMedia.data.variants.medium.height }}</span>
+							<span class="variant-meta"
+								>{{ currentMedia.data.variants.medium.width }}×{{ currentMedia.data.variants.medium.height }}</span
+							>
 							<span class="variant-meta">{{ formatFileSize(currentMedia.data.variants.medium.sizeBytes) }}</span>
-							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.medium.url)">Copy</el-button>
+							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.medium.url)"
+								>Copy</el-button
+							>
 						</div>
 						<div v-if="currentMedia.data.variants.large" class="variant-row">
 							<span class="variant-tag">Large</span>
-							<span class="variant-meta">{{ currentMedia.data.variants.large.width }}×{{ currentMedia.data.variants.large.height }}</span>
+							<span class="variant-meta"
+								>{{ currentMedia.data.variants.large.width }}×{{ currentMedia.data.variants.large.height }}</span
+							>
 							<span class="variant-meta">{{ formatFileSize(currentMedia.data.variants.large.sizeBytes) }}</span>
-							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.large.url)">Copy</el-button>
+							<el-button link size="small" type="primary" @click="copyUrl(currentMedia.data.variants.large.url)"
+								>Copy</el-button
+							>
 						</div>
 					</div>
 				</div>
@@ -205,23 +230,29 @@ const isOptimizing = ref(false)
 const activeVariantUrl = computed(() => {
 	if (!currentMedia.value?.data) return ''
 	const item = currentMedia.value.data
+
 	if (selectedVariantKey.value === 'thumbnail' && item.variants?.thumbnail) {
 		return item.variants.thumbnail.url
 	}
+
 	if (selectedVariantKey.value === 'medium' && item.variants?.medium) {
 		return item.variants.medium.url
 	}
+
 	if (selectedVariantKey.value === 'large' && item.variants?.large) {
 		return item.variants.large.url
 	}
+
 	return item.url
 })
 
 const onOptimize = async () => {
 	if (!currentMediaUuid.value) return
 	isOptimizing.value = true
+
 	try {
 		await handleOptimize(currentMediaUuid.value)
+
 		ElMessage.success('WebP варианты успешно созданы')
 	} catch (e: any) {
 		ElMessage.error(`Ошибка оптимизации: ${e?.message || 'Не удалось сгенерировать'}`)
@@ -233,6 +264,7 @@ const onOptimize = async () => {
 const copyUrl = async (url: string) => {
 	try {
 		await navigator.clipboard.writeText(url)
+
 		ElMessage.success('Ссылка скопирована')
 	} catch {
 		ElMessage.error('Не удалось скопировать ссылку')
@@ -242,6 +274,7 @@ const copyUrl = async (url: string) => {
 const copyHex = async (hex: string) => {
 	try {
 		await navigator.clipboard.writeText(hex)
+
 		ElMessage.success(`Цвет ${hex} скопирован`)
 	} catch {
 		ElMessage.error('Не удалось скопировать цвет')
@@ -251,13 +284,13 @@ const copyHex = async (hex: string) => {
 const hasExifData = (exif: Record<string, any>) => {
 	return Boolean(
 		exif.make ||
-		exif.model ||
-		exif.dateTime ||
-		exif.iso ||
-		exif.fNumber ||
-		exif.exposureTime ||
-		exif.sanitized ||
-		exif.gpsStripped
+			exif.model ||
+			exif.dateTime ||
+			exif.iso ||
+			exif.fNumber ||
+			exif.exposureTime ||
+			exif.sanitized ||
+			exif.gpsStripped
 	)
 }
 
@@ -374,13 +407,13 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 }
 
 .variants-box {
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
-	padding: 12px;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
 	background: var(--bg-surface);
+	padding: 12px;
+	gap: 8px;
 }
 
 .variants-header {
@@ -390,8 +423,8 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 }
 
 .variants-title {
-	font-size: 13px;
 	font-weight: 600;
+	font-size: 13px;
 }
 
 .variants-list {
@@ -408,9 +441,9 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 }
 
 .variant-tag {
+	width: 50px;
 	font-weight: 500;
 	color: var(--text-primary);
-	width: 50px;
 }
 
 .variant-meta {
@@ -420,23 +453,23 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 .color-badge {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	cursor: pointer;
-	padding: 2px 6px;
 	border-radius: 4px;
 	transition: background 0.15s;
+	cursor: pointer;
+	padding: 2px 6px;
+	gap: 6px;
 }
 
 .color-badge:hover {
-	background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+	background: var(--bg-hover, rgb(0, 0, 0, 0.05));
 }
 
 .color-dot {
 	width: 12px;
 	height: 12px;
-	border-radius: 50%;
 	display: inline-block;
-	border: 1px solid rgba(0, 0, 0, 0.15);
+	border: 1px solid rgb(0, 0, 0, 0.15);
+	border-radius: 50%;
 }
 
 .color-hex {
@@ -446,13 +479,13 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 
 .palette-box,
 .exif-box {
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
-	padding: 12px;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
 	background: var(--bg-surface);
+	padding: 12px;
+	gap: 8px;
 }
 
 .palette-header,
@@ -464,48 +497,50 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 
 .palette-title,
 .exif-title {
-	font-size: 13px;
 	font-weight: 600;
+	font-size: 13px;
 }
 
 .palette-swatches {
 	display: flex;
-	gap: 6px;
 	flex-wrap: wrap;
+	gap: 6px;
 }
 
 .palette-swatch {
-	flex: 1;
-	min-width: 44px;
 	height: 32px;
-	border-radius: 6px;
+	min-width: 44px;
+	position: relative;
 	display: flex;
+	flex: 1;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgb(0, 0, 0, 0.15);
+	border-radius: 6px;
+	transition:
+		transform 0.15s,
+		box-shadow 0.15s;
 	cursor: pointer;
-	transition: transform 0.15s, box-shadow 0.15s;
-	border: 1px solid rgba(0, 0, 0, 0.15);
-	position: relative;
 }
 
 .palette-swatch:hover {
+	box-shadow: 0 4px 8px rgb(0, 0, 0, 0.15);
 	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .swatch-hex {
-	font-size: 10px;
 	font-family: monospace;
+	font-size: 10px;
+	text-shadow: 0 1px 2px rgb(0, 0, 0, 0.8);
 	color: #fff;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 	opacity: 0.9;
 }
 
 .exif-details {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
 	font-size: 12px;
+	gap: 4px;
 }
 
 .exif-row {
@@ -514,25 +549,25 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 }
 
 .exif-label {
-	color: var(--text-muted);
 	min-width: 60px;
+	color: var(--text-muted);
 }
 
 .exif-val {
-	color: var(--text-primary);
 	font-weight: 500;
+	color: var(--text-primary);
 }
 
 .exif-privacy-row {
-	margin-top: 4px;
-	padding-top: 4px;
 	border-top: 1px dashed var(--border-color);
+	padding-top: 4px;
+	margin-top: 4px;
 }
 
 .privacy-note {
+	font-weight: 500;
 	font-size: 11px;
 	color: var(--el-color-success, #67c23a);
-	font-weight: 500;
 }
 
 .dialog-footer {

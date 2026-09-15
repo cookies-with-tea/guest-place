@@ -41,7 +41,7 @@
 				</el-form-item>
 
 				<el-form-item label="Value" prop="value">
-					<el-input v-model="form.value" :rows="3" type="textarea" />
+					<TranslationEditor v-model="form.value" />
 				</el-form-item>
 			</template>
 		</el-form>
@@ -61,6 +61,8 @@ import { computed, ref, watch } from 'vue'
 import { UiModal } from '@admin-panel/ui'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
+
+import { TranslationEditor } from '#features/translation-editor'
 
 import { useTranslations } from '#entities/translation/lib/composables'
 

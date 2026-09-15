@@ -27,13 +27,16 @@ export interface ChunkUploadOptions {
  */
 export async function calculateSha256(file: File): Promise<string> {
 	let arrayBuffer: ArrayBuffer
+
 	if (typeof file.arrayBuffer === 'function') {
 		arrayBuffer = await file.arrayBuffer()
 	} else {
 		arrayBuffer = await new Response(file).arrayBuffer()
 	}
+
 	const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
 	const hashArray = Array.from(new Uint8Array(hashBuffer))
+
 	return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
@@ -67,6 +70,7 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 	})
 
 	let checksumSha256: string | undefined
+
 	try {
 		checksumSha256 = await calculateSha256(file)
 	} catch (e) {
@@ -101,20 +105,20 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 	})
 
 	const uploadId = initRes.data.uploadId || (initRes.data as any).upload_id
+
 	if (!uploadId) {
 		throw new Error('Server did not return a valid uploadId')
 	}
 
 	// Check if any chunks are already uploaded (resuming support)
-	let receivedChunks = new Set<number>(
-		initRes.data.receivedChunks || (initRes.data as any).received_chunks || []
-	)
+	let receivedChunks = new Set<number>(initRes.data.receivedChunks || (initRes.data as any).received_chunks || [])
 
 	// If resuming later or reconnecting, query status
 	if (receivedChunks.size === 0) {
 		try {
 			const statusRes = await getChunkStatus(uploadId)
 			const statusReceived = statusRes.data.receivedChunks || (statusRes.data as any).received_chunks || []
+
 			receivedChunks = new Set(statusReceived)
 		} catch {
 			// Start fresh if status check fails
@@ -130,6 +134,7 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 		// Skip if already received by server (resumable)
 		if (receivedChunks.has(chunkIndex)) {
 			const progressPercent = Math.round(10 + ((chunkIndex + 1) / totalChunks) * 80)
+
 			onProgress?.({
 				percent: progressPercent,
 				currentChunk: chunkIndex + 1,
@@ -137,6 +142,7 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 				stage: 'uploading',
 				message: `Chunk ${chunkIndex + 1}/${totalChunks} already uploaded, resuming...`,
 			})
+
 			continue
 		}
 
@@ -153,13 +159,18 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 			if (signal?.aborted) {
 				throw new Error('Upload aborted by user')
 			}
+
 			try {
 				attempts++
+
 				await uploadChunk(uploadId, chunkIndex, chunkBlob)
+
 				success = true
+
 				receivedChunks.add(chunkIndex)
 			} catch (err) {
 				lastError = err
+
 				if (attempts < 3) {
 					await new Promise((resolve) => setTimeout(resolve, 1000 * attempts))
 				}
@@ -174,10 +185,12 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 				stage: 'error',
 				message: `Failed to upload chunk ${chunkIndex + 1}/${totalChunks}`,
 			})
+
 			throw lastError || new Error(`Failed to upload chunk ${chunkIndex}`)
 		}
 
 		const progressPercent = Math.round(10 + ((chunkIndex + 1) / totalChunks) * 80)
+
 		onProgress?.({
 			percent: progressPercent,
 			currentChunk: chunkIndex + 1,

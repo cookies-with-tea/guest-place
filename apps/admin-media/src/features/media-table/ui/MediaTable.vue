@@ -380,9 +380,11 @@ const handleBulkCommand = (command: string) => {
 			break
 		case 'convertToWebP':
 			ElMessage.info(`Генерация responsive превью и WebP для ${uuids.length} файлов...`)
+
 			handleBulkOptimize(uuids)
 				.then(() => {
 					ElMessage.success(`Файлы (${uuids.length}) успешно обработаны и сконвертированы в WebP`)
+
 					selectedItems.value = []
 				})
 				.catch((err: any) => {
@@ -421,15 +423,15 @@ const handleBulkCommand = (command: string) => {
 }
 
 .cell-color-dot {
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-	position: absolute;
 	top: -3px;
 	left: -3px;
-	z-index: 2;
+	width: 10px;
+	height: 10px;
+	position: absolute;
 	border: 1.5px solid #fff;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgb(0, 0, 0, 0.4);
+	z-index: 2;
 }
 
 .preview-img {

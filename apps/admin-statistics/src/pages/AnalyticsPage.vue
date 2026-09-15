@@ -40,7 +40,7 @@
 import { ref } from 'vue'
 
 import { Download, Refresh } from '@element-plus/icons-vue'
-import { ElButton, ElRadioButton,ElRadioGroup } from 'element-plus'
+import { ElButton, ElRadioButton, ElRadioGroup } from 'element-plus'
 
 import ConversionFunnel from '../features/conversion-funnel/ui/ConversionFunnel.vue'
 import ReferralSources from '../features/referral-sources/ui/ReferralSources.vue'

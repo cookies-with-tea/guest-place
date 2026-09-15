@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import type { MediaItem } from '../entities/media/model'
 
 describe('Media Metadata, Palette, and EXIF Handling', () => {
@@ -28,34 +29,46 @@ describe('Media Metadata, Palette, and EXIF Handling', () => {
 		}
 
 		expect(item.dominantColor).toBe('#3a5f8b')
+
 		expect(item.palette).toHaveLength(5)
+
 		expect(item.palette).toContain('#3a5f8b')
+
 		expect(item.palette).toContain('#e2d5c3')
+
 		expect(item.exif?.make).toBe('Canon')
+
 		expect(item.exif?.model).toBe('EOS R5')
+
 		expect(item.exif?.sanitized).toBe(true)
+
 		expect(item.exif?.gpsStripped).toBe(true)
 	})
 
 	it('detects when EXIF data is present vs empty', () => {
 		const hasExifData = (exif?: Record<string, any>) => {
 			if (!exif) return false
+
 			return Boolean(
 				exif.make ||
-				exif.model ||
-				exif.dateTime ||
-				exif.iso ||
-				exif.fNumber ||
-				exif.exposureTime ||
-				exif.sanitized ||
-				exif.gpsStripped
+					exif.model ||
+					exif.dateTime ||
+					exif.iso ||
+					exif.fNumber ||
+					exif.exposureTime ||
+					exif.sanitized ||
+					exif.gpsStripped
 			)
 		}
 
 		expect(hasExifData(undefined)).toBe(false)
+
 		expect(hasExifData({})).toBe(false)
+
 		expect(hasExifData({ make: 'Apple' })).toBe(true)
+
 		expect(hasExifData({ sanitized: true })).toBe(true)
+
 		expect(hasExifData({ gpsStripped: true })).toBe(true)
 	})
 
@@ -66,7 +79,9 @@ describe('Media Metadata, Palette, and EXIF Handling', () => {
 				exif.exposureTime ? `${exif.exposureTime}s` : '',
 				exif.iso ? `ISO ${exif.iso}` : '',
 				exif.focalLength ? `${exif.focalLength}mm` : '',
-			].filter(Boolean).join(' · ')
+			]
+				.filter(Boolean)
+				.join(' · ')
 		}
 
 		const exif = {

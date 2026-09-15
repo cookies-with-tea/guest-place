@@ -145,12 +145,7 @@
 			<div class="dialog-footer">
 				<el-button @click="closeAndReset">Cancel</el-button>
 				<el-badge :value="filesToUpload.length" :hidden="filesToUpload.length === 0" type="primary">
-					<el-button
-						:disabled="filesToUpload.length === 0"
-						:loading="isUploading"
-						type="primary"
-						@click="handleUpload"
-					>
+					<el-button :disabled="filesToUpload.length === 0" :loading="isUploading" type="primary" @click="handleUpload">
 						Upload All
 					</el-button>
 				</el-badge>
@@ -181,10 +176,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
 
 import { UiModal } from '@admin-panel/ui'
 import { Edit, UploadFilled } from '@element-plus/icons-vue'
-import { useQueryClient } from '@tanstack/vue-query'
 import { ElMessage } from 'element-plus'
 
 import { MEDIA_QUERY_KEY, uploadFileInChunks, useMedia } from '#entities/media'
@@ -266,6 +261,7 @@ const handleUpload = async () => {
 
 	if (useChunkedUpload.value) {
 		isChunkUploading.value = true
+
 		try {
 			for (const item of filesToUpload.value) {
 				const finalTitle = isApplyToAll.value && !item.isCustom ? globalTitle.value : item.title
@@ -282,20 +278,25 @@ const handleUpload = async () => {
 					convertToWebp: convertToWebP.value,
 					onProgress: (p) => {
 						item.progress = p.percent
+
 						item.status = p.stage
+
 						item.statusMessage = p.message
 					},
 				})
 			}
 
 			await queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+
 			ElMessage.success('Files uploaded successfully')
+
 			closeAndReset()
 		} catch (err: any) {
 			ElMessage.error(err?.message || 'Chunked upload failed')
 		} finally {
 			isChunkUploading.value = false
 		}
+
 		return
 	}
 
@@ -449,19 +450,19 @@ const closeAndReset = () => {
 }
 
 .item-upload-progress {
+	width: 100%;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-	gap: 4px;
 	padding: 2px 0;
+	gap: 4px;
 }
 
 .progress-message {
 	font-size: 11px;
-	color: var(--text-muted);
 	white-space: nowrap;
-	overflow: hidden;
 	text-overflow: ellipsis;
+	color: var(--text-muted);
+	overflow: hidden;
 }
 
 .file-thumb {
