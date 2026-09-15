@@ -417,6 +417,12 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
         builder.push_bind(format!("%{}%", search));
         builder.push(" OR alt ILIKE ");
         builder.push_bind(format!("%{}%", search));
+        builder.push(" OR category ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR extension ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR array_to_string(tags, ' ') ILIKE ");
+        builder.push_bind(format!("%{}%", search));
         builder.push(")");
     }
 
@@ -461,6 +467,46 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
                     separated.push_bind(t.trim());
                 }
                 builder.push("]::text[]");
+            }
+        }
+    }
+
+    if let Some(min_size) = filter.min_size_bytes {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("size_bytes >= ");
+        builder.push_bind(min_size);
+    }
+
+    if let Some(max_size) = filter.max_size_bytes {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("size_bytes <= ");
+        builder.push_bind(max_size);
+    }
+
+    if let Some(date_from) = &filter.date_from {
+        if !date_from.is_empty() {
+            if let Ok(parsed_date) = chrono::DateTime::parse_from_rfc3339(date_from) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at >= ");
+                builder.push_bind(parsed_date.with_timezone(&chrono::Utc));
+            } else if let Ok(parsed_naive) = chrono::NaiveDateTime::parse_from_str(date_from, "%Y-%m-%d %H:%M:%S").or_else(|_| chrono::NaiveDate::parse_from_str(date_from, "%Y-%m-%d").map(|d| d.and_hms_opt(0, 0, 0).unwrap())) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at >= ");
+                builder.push_bind(chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(parsed_naive, chrono::Utc));
+            }
+        }
+    }
+
+    if let Some(date_to) = &filter.date_to {
+        if !date_to.is_empty() {
+            if let Ok(parsed_date) = chrono::DateTime::parse_from_rfc3339(date_to) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at <= ");
+                builder.push_bind(parsed_date.with_timezone(&chrono::Utc));
+            } else if let Ok(parsed_naive) = chrono::NaiveDateTime::parse_from_str(date_to, "%Y-%m-%d %H:%M:%S").or_else(|_| chrono::NaiveDate::parse_from_str(date_to, "%Y-%m-%d").map(|d| d.and_hms_opt(23, 59, 59).unwrap())) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at <= ");
+                builder.push_bind(chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(parsed_naive, chrono::Utc));
             }
         }
     }

@@ -120,6 +120,10 @@ pub struct MediaFilterQuery {
     pub source: Option<String>,
     pub media_type: Option<String>,
     pub tags: Option<String>,
+    pub min_size_bytes: Option<i64>,
+    pub max_size_bytes: Option<i64>,
+    pub date_from: Option<String>,
+    pub date_to: Option<String>,
 }
 
 #[derive(sqlx::FromRow, Debug)]
