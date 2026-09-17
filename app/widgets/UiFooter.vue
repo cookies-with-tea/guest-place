@@ -13,8 +13,8 @@
         </div>
 
         <ul class="footer__list">
-          <li v-for="({ text, link }, index) in navList" :key="index" class="footer__item">
-            <nuxt-link :to="link">
+          <li v-for="({ text, to }, index) in navList" :key="index" class="footer__item">
+            <nuxt-link class="footer__link" :to>
               {{ text }}
             </nuxt-link>
           </li>
@@ -28,13 +28,13 @@
 import { UiIcon } from '#shared/ui'
 
 const navList = [
-  { text: 'О проекте', link: '/' },
-  { text: 'Площадкам', link: '/' },
-  { text: 'Гостям', link: '/' },
-  { text: 'Контакты', link: '/' },
-  { text: 'Помощь', link: '/' },
-  { text: 'Вакансии', link: '/' },
-  { text: 'Техподдержка', link: '/' },
+  { text: 'О проекте', to: '/' },
+  { text: 'Площадкам', to: '/' },
+  { text: 'Гостям', to: '/' },
+  { text: 'Контакты', to: '/' },
+  { text: 'Помощь', to: '/' },
+  { text: 'Вакансии', to: '/' },
+  { text: 'Техподдержка', to: '/' },
 ]
 </script>
 
@@ -43,14 +43,14 @@ const navList = [
   position: relative;
   border-top: 1px solid #3333331a;
 
-  .ui-icon--footer-decor-one,
-  .ui-icon--footer-decor-two {
-    top: -5px;
-    position: absolute;
-  }
+  .ui-icon {
+    &--footer-decor-one,
+    &--footer-decor-two {
+      top: -5px;
+      position: absolute;
+    }
 
-  .ui-icon--footer-decor {
-    &-one {
+    &--footer-decor-one {
       left: 0;
       width: 138px;
       height: 141px;
@@ -60,7 +60,7 @@ const navList = [
       }
     }
 
-    &-two {
+    &--footer-decor-two {
       right: 0;
       width: 110px;
       height: 132px;
@@ -94,19 +94,19 @@ const navList = [
 
     @include responsive-max(xs) {
       display: grid;
-      grid-auto-flow: column; /* заполнение по колонкам, а не по строкам */
+      grid-auto-flow: column;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: repeat(4, auto); /* 4 строки (ceil(7/2) = 4) */
+      grid-template-rows: repeat(4, auto);
       gap: 10px;
     }
   }
 
   &__item {
     @include typography(h5);
+  }
 
-    a {
-      color: var(--color-text-dark);
-    }
+  &__link {
+    color: var(--color-text-dark);
   }
 
   @include responsive-max(xs) {
