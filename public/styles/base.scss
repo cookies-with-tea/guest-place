@@ -23,3 +23,14 @@ body {
 	color: var(--color-text-dark);
 	background-color: var(--color-white);
 }
+
+.container {
+  max-width: 1170px;
+  padding: 0 30px;
+  margin: 0 auto;
+  width: 100%;
+
+  @include responsive-max(xs) {
+    padding: 0 15px;
+  };
+}
