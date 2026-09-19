@@ -83,7 +83,7 @@
 		"prepare": "husky",
 		"prettier": "prettier --check .",
 		"prettier:fix": "prettier --write .",
-		"preview": "turbo run preview --parallel --filter=\"admin-*\" && turbo run dev --filter=\"admin-shell\"",
+		"preview": "turbo run preview --parallel --filter=\"admin-*\" --filter=!admin-docs",
 		"preview:project": "pnpm build:packages && node scripts/choose-project.js preview",
 		"preview-storybook": "turbo run preview-storybook",
 		"preview:mf": "turbo run preview --parallel --filter=\"admin-*\" --filter=!admin-shell --filter=!admin-docs",

@@ -1,6 +1,6 @@
 export const APPS_PORTS = {
 	shell: {
-		preview: 3000,
+		preview: 4173,
 		dev: 4173,
 	},
 	statistics: {
