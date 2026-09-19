@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment & local state
+.env
+.env.local
+*.log
+scratch/
+
+# Test & coverage artifacts
+playwright-report/
+test-results/
+coverage/
+
+# Subprojects (each tracked in its own git branch)
+/admin-panel/
+/client/
+/server/
