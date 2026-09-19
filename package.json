@@ -1,0 +1,33 @@
+{
+  "name": "guest-place-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Guest Place Monorepo (Rust Axum + Vue Microfrontends + Nuxt Client)",
+  "type": "module",
+  "scripts": {
+    "dev:full": "node scripts/dev-full.mjs",
+    "dev:client": "docker compose up -d db redis server admin-panel && cd client && pnpm dev",
+    "dev:admin": "docker compose up -d db redis server && cd admin-panel && pnpm dev:all",
+    "dev:server": "docker compose up -d db redis && cd server && cargo watch -x run",
+    "seed": "cargo run --manifest-path server/Cargo.toml --bin seed",
+    "generate:api": "cargo run --manifest-path server/Cargo.toml --bin guest-place -- --export-openapi && cd admin-panel && pnpm generate:api",
+    "test:e2e": "cd admin-panel && pnpm --filter admin-shell test:e2e:pw --project=chromium",
+    "test:unit": "cd admin-panel && pnpm test:unit -- --run",
+    "build:admin": "pnpm --dir admin-panel build",
+    "build:server": "cargo build --manifest-path server/Cargo.toml --release",
+    "build:client": "pnpm --dir client build",
+    "docker:up": "docker compose up -d db redis",
+    "docker:up:deps": "docker compose up -d db redis server admin-panel",
+    "docker:up:all": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "keywords": [
+    "guest-place",
+    "microfrontends",
+    "rust",
+    "vue3",
+    "nuxt3"
+  ],
+  "author": "miirsery",
+  "license": "ISC"
+}
