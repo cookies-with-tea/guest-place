@@ -7,6 +7,7 @@ import UiErrorBoundary from './src/components/ui-error-boundary/ui/UiErrorBounda
 import UiIcon from './src/components/ui-icon'
 import UiInput from './src/components/ui-input'
 import UiMediaPicker from './src/components/ui-media-picker'
+import UiMfeFallback from './src/components/ui-mfe-fallback/ui/UiMfeFallback.vue'
 import UiModal from './src/components/ui-modal'
 import UiSelect from './src/components/ui-select'
 import UiSeoEditor from './src/components/ui-seo-editor'
@@ -17,6 +18,7 @@ import { initUiStyles } from './src/styles-loader'
 import UiAuthWidget from './src/widgets/ui-auth-widget'
 import UiFloatingSettings from './src/widgets/ui-floating-settings/ui/UiFloatingSettings.vue'
 import UiLanguageSwitcher from './src/widgets/ui-language-switcher/UiLanguageSwitcher.vue'
+import UiNotificationBell from './src/widgets/ui-notification-bell'
 import UiSidebar from './src/widgets/ui-sidebar'
 import { useSidebar } from './src/widgets/ui-sidebar'
 import { UiThemeBuilder, useThemeBuilder } from './src/widgets/ui-theme-builder'
@@ -36,7 +38,9 @@ export {
 	UiInput,
 	UiLanguageSwitcher,
 	UiMediaPicker,
+	UiMfeFallback,
 	UiModal,
+	UiNotificationBell,
 	UiSelect,
 	UiSeoEditor,
 	UiSidebar,

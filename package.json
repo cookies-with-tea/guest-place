@@ -74,6 +74,7 @@
 		"eslint": "eslint . --cache",
 		"eslint:fix": "eslint . --fix --cache",
 		"format": "prettier --write src/",
+		"generate:api": "pnpm --filter @admin-panel/lib generate:api",
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
 		"lint:changes": "node scripts/lint-changed.mjs",
@@ -94,6 +95,7 @@
 		"test": "pnpm test:unit",
 		"test:changes": "vitest --changed",
 		"test:coverage": "turbo run test:coverage --parallel",
+		"test:e2e": "pnpm --filter admin-shell test:e2e:pw",
 		"test:unit": "turbo run test:unit --parallel",
 		"type-check": "vue-tsc --build"
 	},

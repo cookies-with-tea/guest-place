@@ -30,6 +30,12 @@ export const routes: RouteRecordRaw[] = [
 		meta: { hideInSidebar: true },
 	},
 	{
+		path: '/docs',
+		name: 'ContentDocs',
+		component: () => import('#pages/docs-page/ui/ContentDocsPage.vue'),
+		meta: { title: 'Документация: Схемы и Live Preview' },
+	},
+	{
 		path: '/settings',
 		name: 'GlobalSettings',
 		component: () => import('#pages/settings-page/ui/SettingsPage.vue'),

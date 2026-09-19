@@ -11,6 +11,7 @@ const { dispatch } = useEvents()
 type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 	body?: Record<string, any>
+	silent?: boolean
 }
 
 const PREFIX = '/api/v1'
@@ -84,7 +85,7 @@ export const createApi = (entityName: string) => {
 				}
 			}
 
-			if (error.statusCode !== 401 && error.statusCode !== 403) {
+			if (!options?.silent && error.statusCode !== 401 && error.statusCode !== 403) {
 				const message = messages[0] || error.message || 'Network error'
 
 				ElMessage.error(message)

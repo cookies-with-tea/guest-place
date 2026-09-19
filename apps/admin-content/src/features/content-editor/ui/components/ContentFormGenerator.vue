@@ -8,14 +8,22 @@
 				:prop="field.name"
 				:rules="field.required ? [{ required: true, message: `${field.label} is required` }] : []"
 			>
-				<!-- Text / RichText -->
-				<template v-if="field.fieldType === FieldType.Text || field.fieldType === FieldType.RichText">
+				<!-- Text -->
+				<template v-if="field.fieldType === FieldType.Text">
 					<el-input
 						v-model="modelValue[field.name]"
 						:disabled="readonly"
 						:placeholder="field.label"
-						:rows="field.fieldType === FieldType.RichText ? 4 : 1"
-						:type="field.fieldType === FieldType.RichText ? 'textarea' : 'text'"
+						type="text"
+					/>
+				</template>
+
+				<!-- RichText — Tiptap block editor -->
+				<template v-else-if="field.fieldType === FieldType.RichText">
+					<TiptapEditor
+						v-model="modelValue[field.name]"
+						:disabled="readonly"
+						:placeholder="`Write ${field.label}...`"
 					/>
 				</template>
 
@@ -85,6 +93,7 @@ import { FieldType } from '@admin-panel/lib'
 import { useTheme } from '@admin-panel/ui'
 import { UiMediaPicker } from '@admin-panel/ui'
 
+import TiptapEditor from './TiptapEditor.vue'
 import UiRelationPicker from './UiRelationPicker.vue'
 
 const modelValue = defineModel<Record<string, any>>({ required: true })

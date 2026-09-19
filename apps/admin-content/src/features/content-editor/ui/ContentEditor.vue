@@ -22,8 +22,9 @@
 				<el-button :type="isTranslationMode ? 'warning' : 'default'" @click="isTranslationMode = !isTranslationMode">
 					{{ isTranslationMode ? 'Exit Translation' : 'Translation Mode' }}
 				</el-button>
-				<el-button @click="isPreviewing = !isPreviewing">
-					{{ isPreviewing ? 'Edit Mode' : 'Live Preview' }}
+				<el-button :type="isPreviewing ? 'primary' : 'default'" @click="isPreviewing = !isPreviewing">
+					<svg v-if="isPreviewing" width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right:4px;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><path d="M11 19H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 19h6M19 16v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					{{ isPreviewing ? 'Split Preview' : 'Live Preview' }}
 				</el-button>
 				<el-button @click="emit('cancel')">Cancel</el-button>
 				<el-button :loading="isSaving" type="primary" @click="handleSave">
@@ -32,23 +33,7 @@
 			</div>
 		</div>
 
-		<div v-if="isPreviewing" class="preview-container">
-			<div class="preview-toolbar">
-				<span>Previewing: {{ schema?.name }}</span>
-				<el-radio-group v-model="previewDevice" size="small">
-					<el-radio-button label="desktop">Desktop</el-radio-button>
-					<el-radio-button label="mobile">Mobile</el-radio-button>
-				</el-radio-group>
-			</div>
-			<iframe
-				ref="previewIframe"
-				:class="['preview-iframe', `is-${previewDevice}`]"
-				:src="previewUrl"
-				@load="sendPreviewData"
-			></iframe>
-		</div>
-
-		<el-tabs v-else v-model="activeTab" class="editor-tabs">
+		<el-tabs v-model="activeTab" class="editor-tabs">
 			<el-tab-pane label="Content" name="content">
 				<div class="editor-content" :class="{ 'is-translation': isTranslationMode }">
 					<template v-if="!isTranslationMode">
@@ -88,39 +73,97 @@
 				<UiSeoEditor v-model="seoData" />
 			</el-tab-pane>
 
-			<el-tab-pane v-if="isEdit" label="Activity Log" name="history">
+			<el-tab-pane v-if="isEdit" name="history">
+				<template #label>
+					<span class="history-tab-label">
+						History
+						<el-badge v-if="history.length > 0" :value="history.length" class="history-badge" />
+					</span>
+				</template>
+
 				<div class="history-list">
-					<div v-if="isLoadingHistory" class="loading-state">
-						<el-skeleton :rows="5" animated />
+					<!-- Toolbar -->
+					<div class="history-toolbar">
+						<span class="history-toolbar__title">Version History</span>
+						<el-button size="small" :loading="isLoadingHistory" @click="fetchHistory">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M3 12A9 9 0 1 0 6 5.68" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 5v4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+							Refresh
+						</el-button>
 					</div>
+
+					<div v-if="isLoadingHistory" class="loading-state">
+						<el-skeleton :rows="4" animated />
+					</div>
+
 					<div v-else-if="history.length > 0" class="activity-timeline">
-						<div v-for="log in history" :key="log.id" class="activity-item">
+						<div v-for="(log, idx) in history" :key="log.id" class="activity-item">
 							<div class="activity-avatar">
 								<el-avatar :size="32" :src="log.user?.avatar">
-									{{ log.user?.name?.[0] || 'A' }}
+									{{ log.user?.name?.[0]?.toUpperCase() || 'A' }}
 								</el-avatar>
 							</div>
 							<div class="activity-content">
 								<div class="activity-header">
-									<span class="user-name">{{ log.user?.name || 'Administrator' }}</span>
-									<span class="activity-date">{{ new Date(log.created_at).toLocaleString() }}</span>
+									<div class="activity-header__left">
+										<el-tag size="small" type="info" style="font-weight:700">v{{ log.version_number }}</el-tag>
+										<span class="user-name">{{ log.user?.name || 'Administrator' }}</span>
+										<el-tag v-if="idx === 0" size="small" type="success" style="font-size:9px">LATEST</el-tag>
+									</div>
+									<span class="activity-date">{{ formatDate(log.created_at) }}</span>
 								</div>
-								<div class="activity-desc">
-									Changed version to <el-tag size="small">v{{ log.version_number }}</el-tag>
-									<span v-if="log.comment" class="activity-comment">"{{ log.comment }}"</span>
-								</div>
+								<div v-if="log.comment" class="activity-comment">"{{ log.comment }}"</div>
 								<div class="activity-actions">
-									<el-button link size="small" type="primary">View Diff</el-button>
-									<el-button link size="small" type="warning" @click="onRollback(log.id)"
-										>Restore this version</el-button
-									>
+									<el-button link size="small" type="primary" @click="openDiff(log)">
+										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:3px" xmlns="http://www.w3.org/2000/svg"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h4M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M12 8v8M9 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+										View Diff
+									</el-button>
+									<el-button link size="small" type="warning" @click="onRollback(log.id)">
+										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:3px" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11A9 9 0 1 0 6.68 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+										Restore
+									</el-button>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div v-else class="empty-state">No activity recorded for this entry.</div>
+
+					<div v-else class="empty-state">
+						<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.3"><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
+						<p>No version history yet.<br><small>Versions are saved automatically on every update.</small></p>
+					</div>
 				</div>
 			</el-tab-pane>
+
+			<!-- Diff Drawer -->
+			<el-drawer
+				v-model="isDiffOpen"
+				:title="`Diff: v${diffVersion?.version_number} → Current`"
+				size="72%"
+				direction="rtl"
+				:destroy-on-close="false"
+			>
+				<template #header>
+					<div class="diff-drawer-header">
+						<span class="diff-drawer-title">Version Diff</span>
+						<el-tag size="small" type="info">v{{ diffVersion?.version_number }}</el-tag>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#64748b" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						<el-tag size="small" type="success">Current</el-tag>
+					</div>
+				</template>
+				<div class="diff-drawer-body">
+					<VersionDiffViewer
+						:version="diffVersion"
+						:current-data="modelValue"
+						:schema="schema"
+					/>
+					<div class="diff-drawer-footer">
+						<el-button @click="isDiffOpen = false">Close</el-button>
+						<el-button type="warning" @click="onRollback(diffVersion!.id); isDiffOpen = false">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11A9 9 0 1 0 6.68 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+							Restore v{{ diffVersion?.version_number }}
+						</el-button>
+					</div>
+				</div>
+			</el-drawer>
 		</el-tabs>
 	</div>
 </template>
@@ -135,6 +178,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { contentApi } from '#entities/content'
 
 import ContentFormGenerator from './components/ContentFormGenerator.vue'
+import VersionDiffViewer from './components/VersionDiffViewer.vue'
 
 interface Props {
 	schema: ContentSchema | null
@@ -159,12 +203,19 @@ const emit = defineEmits<{
 const { isDark } = useTheme()
 
 const activeTab = ref('content')
-const isPreviewing = ref(false)
-const previewDevice = ref('desktop')
-const previewIframe = ref<HTMLIFrameElement | null>(null)
+const isPreviewing = defineModel<boolean>('isPreviewing', { default: false })
 const seoData = ref<any>({})
 const history = ref<any[]>([])
 const isLoadingHistory = ref(false)
+
+// Diff drawer state
+const isDiffOpen = ref(false)
+const diffVersion = ref<any>(null)
+
+const openDiff = (version: any) => {
+	diffVersion.value = version
+	isDiffOpen.value = true
+}
 
 // Translation states
 const isTranslationMode = ref(false)
@@ -200,68 +251,6 @@ const targetData = computed({
 		if (!i18n.value) i18n.value = {}
 		i18n.value[targetLocale.value] = val
 	},
-})
-
-// In a real app, this would be a config-driven URL
-const previewUrl = computed(() => {
-	const baseUrl = import.meta.env.VITE_CLIENT_URL || 'http://localhost:3000'
-
-	return `${baseUrl}/preview?schema=${props.schema?.slug}&id=${props.entryId || 'new'}`
-})
-
-// Sync data with iframe
-const sendPreviewData = () => {
-	console.log('[CMS Editor] sendPreviewData triggered', {
-		isPreviewing: isPreviewing.value,
-		hasIframe: !!previewIframe.value,
-		hasWindow: !!previewIframe.value?.contentWindow,
-	})
-
-	if (isPreviewing.value && previewIframe.value && previewIframe.value.contentWindow) {
-		const targetOrigin = import.meta.env.VITE_CLIENT_URL || 'http://localhost:3000'
-		const payload = JSON.parse(
-			JSON.stringify({
-				data: modelValue.value,
-				seo: seoData.value,
-				schema: props.schema,
-			})
-		)
-
-		console.log('[CMS Editor] Posting serialized message to iframe:', payload, 'Target:', targetOrigin)
-
-		previewIframe.value.contentWindow.postMessage(
-			{
-				type: 'CMS_PREVIEW_DATA',
-				payload,
-			},
-			targetOrigin
-		)
-	}
-}
-
-watch(
-	[() => modelValue.value, isPreviewing],
-	() => {
-		sendPreviewData()
-	},
-	{ deep: true }
-)
-
-// Listen for PREVIEW_READY to send initial data
-const handlePreviewMessage = (event: MessageEvent) => {
-	if (event.data?.type === 'PREVIEW_READY') {
-		console.log('[CMS Editor] Received PREVIEW_READY from iframe')
-
-		sendPreviewData()
-	}
-}
-
-watch(isPreviewing, (val) => {
-	if (val) {
-		window.addEventListener('message', handlePreviewMessage)
-	} else {
-		window.removeEventListener('message', handlePreviewMessage)
-	}
 })
 
 // Sync SEO data from modelValue if present
@@ -321,6 +310,17 @@ watch(activeTab, (tab) => {
 		fetchHistory()
 	}
 })
+
+const formatDate = (iso: string) => {
+	try {
+		return new Date(iso).toLocaleString('ru-RU', {
+			day: '2-digit', month: 'short', year: 'numeric',
+			hour: '2-digit', minute: '2-digit',
+		})
+	} catch {
+		return iso
+	}
+}
 </script>
 
 <style scoped>
@@ -348,41 +348,7 @@ watch(activeTab, (tab) => {
 	gap: 12px;
 }
 
-.preview-container {
-	border: 1px solid var(--border-color);
-	border-radius: 12px;
-	background: #f1f5f9;
-	margin-top: 24px;
-	overflow: hidden;
-}
 
-.preview-toolbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	border-bottom: 1px solid var(--border-color);
-	font-weight: 600;
-	font-size: 13px;
-	background: var(--bg-card);
-	padding: 12px 20px;
-}
-
-.preview-iframe {
-	width: 100%;
-	height: 600px;
-	border: none;
-	background: var(--gp-white);
-	transition: all 0.3s ease;
-}
-
-.preview-iframe.is-mobile {
-	height: 667px;
-	max-width: 375px;
-	display: block;
-	border: 8px solid #334155;
-	border-radius: 32px;
-	margin: 20px auto;
-}
 
 .status-option {
 	height: 34px;
@@ -508,8 +474,88 @@ watch(activeTab, (tab) => {
 }
 
 .empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
 	text-align: center;
 	color: var(--gp-text-secondary);
 	padding: 40px;
+	font-size: 14px;
+
+	small { font-size: 12px; opacity: 0.7; }
+}
+
+/* History toolbar */
+.history-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.history-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--gp-glass-border, rgba(255,255,255,0.07));
+}
+
+.history-toolbar__title {
+	font-weight: 700;
+	font-size: 13px;
+	color: var(--gp-text-main);
+}
+
+/* History tab label with badge */
+.history-tab-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.history-badge :deep(.el-badge__content) {
+	font-size: 9px;
+	padding: 0 4px;
+	min-width: 16px;
+	height: 16px;
+	line-height: 16px;
+}
+
+/* Activity item updates */
+.activity-header__left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+/* Diff drawer */
+.diff-drawer-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.diff-drawer-title {
+	font-weight: 700;
+	font-size: 15px;
+	color: var(--gp-text-main);
+}
+
+.diff-drawer-body {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.diff-drawer-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	padding-top: 20px;
+	margin-top: 24px;
+	border-top: 1px solid var(--gp-glass-border, rgba(255,255,255,0.07));
+	flex-shrink: 0;
 }
 </style>

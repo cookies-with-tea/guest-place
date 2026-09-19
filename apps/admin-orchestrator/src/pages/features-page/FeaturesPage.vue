@@ -56,10 +56,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-import { useFeatureFlags } from '@admin-panel/lib'
+import { GP_EVENTS, useEvents, useFeatureFlags } from '@admin-panel/lib'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+const { dispatch } = useEvents()
 const { flags, loading, loadFlags, updateFlags } = useFeatureFlags()
 
 const showAddDialog = ref(false)
@@ -100,7 +101,9 @@ const handleSave = async () => {
 	try {
 		await updateFlags(flags.value)
 
-		ElMessage.success('Feature flags saved successfully')
+		dispatch(GP_EVENTS.UPDATED)
+
+		ElMessage.success('Feature flags saved successfully to PostgreSQL')
 	} catch {
 		ElMessage.error('Failed to save feature flags')
 	} finally {
