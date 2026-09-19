@@ -21,6 +21,7 @@ pub enum FieldType {
 pub struct FieldDefinition {
     pub name: String,
     pub label: String,
+    #[serde(alias = "fieldType")]
     pub field_type: FieldType,
     #[serde(default)]
     pub required: bool,

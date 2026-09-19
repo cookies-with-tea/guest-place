@@ -20,6 +20,7 @@ fn hash_password(password: &str) -> String {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv::from_path(std::path::Path::new("server/.env")).ok();
     dotenv::dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
@@ -36,6 +37,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max_connections(5)
         .connect(&database_url)
         .await?;
+
+    println!("⚡ Applying database migrations...");
+    sqlx::migrate!().run(&pool).await?;
 
     println!("🚀 Starting Guest Place Seed Generator...\n");
 
@@ -166,17 +170,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let faq_schema_id = Uuid::new_v4();
 
     let blog_fields = json!([
-        { "name": "title", "label": "Заголовок", "fieldType": "text", "required": true },
-        { "name": "summary", "label": "Краткое описание", "fieldType": "text", "required": false },
-        { "name": "content", "label": "Текст статьи", "fieldType": "rich_text", "required": true },
-        { "name": "featured", "label": "На главной", "fieldType": "boolean", "required": false },
-        { "name": "views", "label": "Просмотры", "fieldType": "number", "required": false }
+        { "name": "title", "label": "Заголовок", "field_type": "text", "required": true },
+        { "name": "summary", "label": "Краткое описание", "field_type": "text", "required": false },
+        { "name": "content", "label": "Текст статьи", "field_type": "rich_text", "required": true },
+        { "name": "featured", "label": "На главной", "field_type": "boolean", "required": false },
+        { "name": "views", "label": "Просмотры", "field_type": "number", "required": false }
     ]);
 
     let faq_fields = json!([
-        { "name": "question", "label": "Вопрос", "fieldType": "text", "required": true },
-        { "name": "answer", "label": "Ответ", "fieldType": "rich_text", "required": true },
-        { "name": "order", "label": "Порядок", "fieldType": "number", "required": false }
+        { "name": "question", "label": "Вопрос", "field_type": "text", "required": true },
+        { "name": "answer", "label": "Ответ", "field_type": "rich_text", "required": true },
+        { "name": "order", "label": "Порядок", "field_type": "number", "required": false }
     ]);
 
     let _ = sqlx::query(
