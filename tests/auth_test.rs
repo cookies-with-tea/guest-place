@@ -45,7 +45,7 @@ async fn setup_test_app() -> axum::Router {
         i18n: I18nService::new(pool.clone()),
         media_storage: Arc::new(StorageService::new("uploads")),
         redis: redis_service.clone(),
-        features: Arc::new(FeatureFlagService::new(redis_service.clone())),
+        features: Arc::new(FeatureFlagService::new(pool.clone(), redis_service.clone())),
         media_quota: Arc::new(guest_place::media::quota::QuotaService::new(pool.clone(), 1024 * 1024 * 1024)),
         media_optimizer,
         frontend_url: "http://localhost:3000".to_string(),

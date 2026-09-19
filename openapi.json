@@ -1398,6 +1398,144 @@
         }
       }
     },
+    "/api/v1/locks/{entity_type}/{entity_id}": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "get_lock_status",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "description": "Entity type e.g. schema, entry",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "path",
+            "description": "Entity UUID or slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "Current user UUID to check ownership",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current lock status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_LockStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "acquire_lock",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "description": "Entity type e.g. schema, entry",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "path",
+            "description": "Entity UUID or slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcquireLockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Lock acquired or refreshed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_LockStatusResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Entity is locked by another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_LockStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "release_lock",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "description": "Entity type e.g. schema, entry",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "path",
+            "description": "Entity UUID or slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lock released successfully"
+          }
+        }
+      }
+    },
     "/api/v1/media": {
       "get": {
         "tags": [
@@ -2084,6 +2222,29 @@
         }
       }
     },
+    "/api/v1/system/alert": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "send_system_alert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAlertDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Alert broadcasted"
+          }
+        }
+      }
+    },
     "/api/v1/system/health": {
       "get": {
         "tags": [
@@ -2487,6 +2648,27 @@
               "null"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "AcquireLockRequest": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "user_name"
+        ],
+        "properties": {
+          "force": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
           }
         }
       },
@@ -3536,6 +3718,60 @@
               "upload_id": {
                 "type": "string",
                 "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_LockStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "is_locked",
+              "is_own_lock"
+            ],
+            "properties": {
+              "is_locked": {
+                "type": "boolean"
+              },
+              "is_own_lock": {
+                "type": "boolean"
+              },
+              "lock_info": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LockInfo"
+                  }
+                ]
               }
             }
           },
@@ -5958,6 +6194,58 @@
           }
         }
       },
+      "LockInfo": {
+        "type": "object",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "user_id",
+          "user_name",
+          "locked_at"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "locked_at": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          }
+        }
+      },
+      "LockStatusResponse": {
+        "type": "object",
+        "required": [
+          "is_locked",
+          "is_own_lock"
+        ],
+        "properties": {
+          "is_locked": {
+            "type": "boolean"
+          },
+          "is_own_lock": {
+            "type": "boolean"
+          },
+          "lock_info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LockInfo"
+              }
+            ]
+          }
+        }
+      },
       "ManifestDto": {
         "type": "object",
         "required": [
@@ -6004,6 +6292,18 @@
               "null"
             ]
           },
+          "date_from": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date_to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "limit": {
             "type": [
               "integer",
@@ -6011,11 +6311,25 @@
             ],
             "format": "int32"
           },
+          "max_size_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
           "media_type": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "min_size_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
           },
           "page": {
             "type": [
@@ -6638,6 +6952,27 @@
         ],
         "properties": {
           "description": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "SendAlertDTO": {
+        "type": "object",
+        "required": [
+          "title",
+          "message"
+        ],
+        "properties": {
+          "level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
             "type": "string"
           },
           "title": {

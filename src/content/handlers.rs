@@ -76,6 +76,7 @@ pub async fn create_schema(
     for field in &mut fields {
         field.name = to_snake_case(&field.name);
     }
+    let slug = payload.slug.clone();
 
     let schema = sqlx::query_as::<_, ContentSchema>(
         "INSERT INTO content_schemas (name, slug, fields, is_singleton) VALUES ($1, $2, $3, $4) RETURNING *"
@@ -87,9 +88,15 @@ pub async fn create_schema(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
+        let err_str = e.to_string();
+        if err_str.contains("unique constraint") || err_str.contains("duplicate key") {
+            return (StatusCode::CONFLICT, Json(ApiResponse::<()> {
+                data: None, errors: None, messages: Some(vec![format!("Схема с идентификатором '{}' уже существует", slug)]),
+            }));
+        }
         eprintln!("Database error: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
-            data: None, errors: None, messages: Some(vec!["Database error".to_string()]),
+            data: None, errors: None, messages: Some(vec![format!("Database error: {}", e)]),
         }))
     })?;
 

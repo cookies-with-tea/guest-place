@@ -85,6 +85,10 @@ use utoipa::{
     guest_place::analytics::handlers::get_referral_stats,
     guest_place::analytics::handlers::get_funnel_stats,
     guest_place::analytics::handlers::get_retention_stats,
+    guest_place::monitoring::handlers::send_system_alert,
+    guest_place::core::lock::get_lock_status,
+    guest_place::core::lock::acquire_lock,
+    guest_place::core::lock::release_lock,
   ),
   modifiers(&SecurityAddon),
   tags(
@@ -153,6 +157,10 @@ use utoipa::{
         guest_place::analytics::dto::CohortRowDto,
         guest_place::analytics::dto::ReferralDto,
         guest_place::analytics::dto::AnalyticsSummaryDto,
+        guest_place::monitoring::handlers::SendAlertDTO,
+        guest_place::core::lock::LockInfo,
+        guest_place::core::lock::LockStatusResponse,
+        guest_place::core::lock::AcquireLockRequest,
     )
   )
 )]
@@ -225,7 +233,7 @@ async fn main() {
 
     let redis_pool = create_redis_pool(&config);
     let redis = Arc::new(RedisService::new(redis_pool));
-    let features = Arc::new(FeatureFlagService::new(redis.clone()));
+    let features = Arc::new(FeatureFlagService::new(pool.clone(), redis.clone()));
     let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
     let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(1024));
     let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
@@ -280,6 +288,7 @@ async fn main() {
                 axum::http::Method::GET,
                 axum::http::Method::POST,
                 axum::http::Method::PUT,
+                axum::http::Method::PATCH,
                 axum::http::Method::DELETE,
                 axum::http::Method::OPTIONS,
             ]))

@@ -130,6 +130,11 @@ pub async fn get_events(
                     crate::core::bus::SystemEvent::ContentUpdated { .. } => "content_updated",
                     crate::core::bus::SystemEvent::ContentLocked { .. } => "content_locked",
                     crate::core::bus::SystemEvent::ConfigChanged { .. } => "config_changed",
+                    crate::core::bus::SystemEvent::GuestRegistered { .. } => "guest_registered",
+                    crate::core::bus::SystemEvent::MediaUploaded { .. } => "media_uploaded",
+                    crate::core::bus::SystemEvent::EntityLocked { .. } => "entity_locked",
+                    crate::core::bus::SystemEvent::EntityUnlocked { .. } => "entity_unlocked",
+                    crate::core::bus::SystemEvent::SystemAlert { .. } => "system_alert",
                 };
                 Some(Ok(Event::default().event(event_name).data(json)))
             },
@@ -138,6 +143,37 @@ pub async fn get_events(
     });
 
     Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::default())
+}
+
+#[derive(Deserialize, utoipa::ToSchema)]
+pub struct SendAlertDTO {
+    pub level: Option<String>,
+    pub title: String,
+    pub message: String,
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/system/alert",
+    request_body = SendAlertDTO,
+    responses(
+        (status = 200, description = "Alert broadcasted")
+    ),
+    tag = "System"
+)]
+pub async fn send_system_alert(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<SendAlertDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let level = payload.level.unwrap_or_else(|| "info".to_string());
+    let now = chrono::Utc::now().to_rfc3339();
+    state.bus.publish(crate::core::bus::SystemEvent::SystemAlert {
+        level,
+        title: payload.title,
+        message: payload.message,
+        timestamp: now,
+    });
+    into_api_response(StatusCode::OK, None, None, Some(vec!["Alert broadcasted successfully".to_string()]))
 }
 
 #[utoipa::path(

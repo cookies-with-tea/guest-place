@@ -262,6 +262,13 @@ pub async fn create(
                             state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
                         }
 
+                        state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
+                            id: row.uuid.to_string(),
+                            name: row.name.clone().unwrap_or_else(|| "media".to_string()),
+                            path: relative_path.clone(),
+                            user: None,
+                        });
+
                         uploaded_items.push(row.into());
                     }
                 }
@@ -1304,8 +1311,14 @@ pub async fn complete_chunk_upload(
     match db_result {
         Ok(item) => {
             if media_type_str == "image" {
-                state.media_optimizer.process_image(media_uuid, relative_path).await;
+                state.media_optimizer.process_image(media_uuid, relative_path.clone()).await;
             }
+            state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
+                id: media_uuid.to_string(),
+                name: item.name.clone().unwrap_or_else(|| "media".to_string()),
+                path: relative_path,
+                user: None,
+            });
             let dto: MediaItemDTO = item.into();
             let msg = state.i18n.t("media.upload_success", &locale).await;
             into_api_response(StatusCode::CREATED, Some(dto), None, Some(vec![msg]))

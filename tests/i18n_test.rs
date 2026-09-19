@@ -21,6 +21,7 @@ async fn setup_test_server() -> TestServer {
         guest_place::core::db::create_redis_pool(&config),
     ));
     let features = Arc::new(guest_place::features::FeatureFlagService::new(
+        pool.clone(),
         redis.clone(),
     ));
 
