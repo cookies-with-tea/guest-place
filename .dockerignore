@@ -1,0 +1,8 @@
+node_modules/
+.pnpm-store/
+.nuxt/
+.output/
+dist/
+.git/
+*.log
+.DS_Store
