@@ -41,8 +41,21 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       env: {
-        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI,
+        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000',
       },
+    },
+  },
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api',
+        changeOrigin: true,
+      },
+    },
+  },
+  routeRules: {
+    '/api/**': {
+      proxy: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api/**',
     },
   },
   build: {
