@@ -35,8 +35,18 @@ export function useEvents() {
 		return useEventListener(window, eventName, handler)
 	}
 
+	/**
+	 * Remove a custom event listener
+	 */
+	const off = (eventName: AppEventName, handler: (event: any) => void) => {
+		if (!isBrowser) return
+
+		window.removeEventListener(eventName, handler)
+	}
+
 	return {
 		dispatch,
 		on,
+		off,
 	}
 }

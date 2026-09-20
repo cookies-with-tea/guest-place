@@ -19,6 +19,44 @@
 						<div class="status-option"><el-tag size="small" type="success">PUBLISHED</el-tag></div>
 					</el-option>
 				</el-select>
+				<el-button-group style="vertical-align: middle; margin-right: 8px">
+					<el-button
+						v-if="status === 'draft'"
+						size="default"
+						plain
+						type="warning"
+						@click="status = 'review'"
+					>
+						На ревью →
+					</el-button>
+					<el-button
+						v-if="status === 'review'"
+						size="default"
+						plain
+						type="info"
+						@click="status = 'draft'"
+					>
+						← В черновик
+					</el-button>
+					<el-button
+						v-if="status !== 'published'"
+						size="default"
+						plain
+						type="success"
+						@click="status = 'published'"
+					>
+						Опубликовать 🚀
+					</el-button>
+					<el-button
+						v-else
+						size="default"
+						plain
+						type="info"
+						@click="status = 'draft'"
+					>
+						Снять с публикации
+					</el-button>
+				</el-button-group>
 				<el-button :type="isTranslationMode ? 'warning' : 'default'" @click="isTranslationMode = !isTranslationMode">
 					{{ isTranslationMode ? 'Exit Translation' : 'Translation Mode' }}
 				</el-button>

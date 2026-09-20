@@ -12,6 +12,11 @@ export const routes: RouteRecordRaw[] = [
 		},
 	},
 	{
+		path: '/schemas',
+		name: 'Content',
+		redirect: '/',
+	},
+	{
 		path: '/content/:schemaIdentifier',
 		name: 'EntriesList',
 		component: () => import('#pages/content-page/ui/ContentPage.vue'),
@@ -28,6 +33,24 @@ export const routes: RouteRecordRaw[] = [
 		name: 'EntryEdit',
 		component: () => import('#pages/content-editor-page/ui/ContentEditorPage.vue'),
 		meta: { hideInSidebar: true },
+	},
+	{
+		path: '/pages',
+		name: 'PageList',
+		component: () => import('#pages/page-list/ui/PageListPage.vue'),
+		meta: { title: 'Страницы сайта' },
+	},
+	{
+		path: '/pages/create',
+		name: 'PageCreate',
+		component: () => import('#pages/page-constructor/ui/PageConstructorPage.vue'),
+		meta: { title: 'Создание страницы', hideInSidebar: true },
+	},
+	{
+		path: '/pages/:id/edit',
+		name: 'PageEdit',
+		component: () => import('#pages/page-constructor/ui/PageConstructorPage.vue'),
+		meta: { title: 'Редактор страницы', hideInSidebar: true },
 	},
 	{
 		path: '/docs',

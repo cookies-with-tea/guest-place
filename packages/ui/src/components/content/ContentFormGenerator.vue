@@ -38,6 +38,26 @@
 					<UiMediaPicker v-model="formData[field.name]" />
 				</template>
 
+				<template v-else-if="field.fieldType === FieldType.Color">
+					<input :id="field.name" v-model="formData[field.name]" type="color" style="height: 36px; width: 60px; padding: 2px; border-radius: 4px; border: 1px solid #d0d5dd; cursor: pointer" />
+				</template>
+
+				<template v-else-if="field.fieldType === FieldType.Json">
+					<textarea
+						:id="field.name"
+						v-model="formData[field.name]"
+						class="content-form-generator__textarea"
+						placeholder="JSON {}"
+					></textarea>
+				</template>
+
+				<template v-else-if="field.fieldType === FieldType.Link">
+					<div style="display: flex; gap: 8px; flex-direction: column">
+						<UiInput :id="`${field.name}_url`" v-model="formData[field.name].url" placeholder="URL (https://...)" />
+						<UiInput :id="`${field.name}_text`" v-model="formData[field.name].text" placeholder="Текст ссылки" />
+					</div>
+				</template>
+
 				<!-- Fallback for unsupported types -->
 				<template v-else>
 					<div class="content-form-generator__unsupported"> Unsupported field type: {{ field.fieldType }} </div>

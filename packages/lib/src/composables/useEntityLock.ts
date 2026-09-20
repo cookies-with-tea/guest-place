@@ -169,7 +169,8 @@ export function useEntityLock(
 		}
 	}
 
-	const handleEntityLocked = (payload: any) => {
+	const handleEntityLocked = (event: any) => {
+		const payload = event?.detail ?? event
 		if (payload?.entity_type === entityType && payload?.entity_id === currentEntityId.value) {
 			const isMine = payload.user_id === currentUserId.value
 			isLocked.value = true
@@ -182,7 +183,8 @@ export function useEntityLock(
 		}
 	}
 
-	const handleEntityUnlocked = (payload: any) => {
+	const handleEntityUnlocked = (event: any) => {
+		const payload = event?.detail ?? event
 		if (payload?.entity_type === entityType && payload?.entity_id === currentEntityId.value) {
 			isLocked.value = false
 			isOwnLock.value = false
@@ -204,8 +206,10 @@ export function useEntityLock(
 
 	if (getCurrentInstance()) {
 		onMounted(async () => {
-			on(GP_EVENTS.ENTITY_LOCKED, handleEntityLocked)
-			on(GP_EVENTS.ENTITY_UNLOCKED, handleEntityUnlocked)
+			if (typeof on === 'function') {
+				on(GP_EVENTS.ENTITY_LOCKED, handleEntityLocked)
+				on(GP_EVENTS.ENTITY_UNLOCKED, handleEntityUnlocked)
+			}
 
 			if (isBrowser) {
 				window.addEventListener('beforeunload', handleBeforeUnload)
@@ -217,8 +221,10 @@ export function useEntityLock(
 		})
 
 		onUnmounted(() => {
-			off(GP_EVENTS.ENTITY_LOCKED, handleEntityLocked)
-			off(GP_EVENTS.ENTITY_UNLOCKED, handleEntityUnlocked)
+			if (typeof off === 'function') {
+				off(GP_EVENTS.ENTITY_LOCKED, handleEntityLocked)
+				off(GP_EVENTS.ENTITY_UNLOCKED, handleEntityUnlocked)
+			}
 
 			if (isBrowser) {
 				window.removeEventListener('beforeunload', handleBeforeUnload)

@@ -1,5 +1,5 @@
 <template>
-	<div class="schema-builder-page" :class="{ 'is-dark': isDark }">
+	<div class="schema-builder-page">
 		<!-- ── Schemas list view ── -->
 		<div v-if="!builderOpen" class="schemas-view">
 			<div class="page-header">
@@ -8,6 +8,9 @@
 					<p class="page-subtitle">Define the structure of your content collections</p>
 				</div>
 				<div class="page-header__actions">
+					<el-button type="success" plain @click="router.push({ name: 'PageList' })">
+						🧱 Конструктор страниц
+					</el-button>
 					<el-button :icon="MagicStick" plain type="warning" :loading="isSeedingAbout" @click="seedAboutPage">
 						✨ Шаблон «О платформе»
 					</el-button>
@@ -383,7 +386,6 @@ interface FieldTypeInfo {
 // ── Setup ──────────────────────────────────────────────────────────────────
 const router = useRouter()
 const { fetchData: apiFetch } = createApi('content/schemas')
-const { isDark } = useTheme()
 
 // ── Schema list state ──────────────────────────────────────────────────────
 const schemas = ref<ContentSchema[]>([])
