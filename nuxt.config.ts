@@ -10,6 +10,7 @@ const typedIconPluginConfig = typedIconPlugin({
 })
 
 export default defineNuxtConfig({
+  ssr: false,
   srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
   dir: {
     plugins: 'app/plugins', // ← относительно srcDir
