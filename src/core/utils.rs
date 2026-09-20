@@ -14,3 +14,21 @@ pub fn format_number_with_spaces(input: &str) -> String {
 
     result.chars().rev().collect()
 }
+
+use serde::de::IntoDeserializer;
+use serde::{Deserialize, Deserializer};
+
+pub fn empty_string_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    let opt = Option::<serde_json::Value>::deserialize(deserializer)?;
+    match opt {
+        None => Ok(None),
+        Some(serde_json::Value::Null) => Ok(None),
+        Some(serde_json::Value::String(s)) if s.trim().is_empty() => Ok(None),
+        Some(v) => T::deserialize(v.into_deserializer()).map(Some).map_err(serde::de::Error::custom),
+    }
+}
+

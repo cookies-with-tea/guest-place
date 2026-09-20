@@ -545,6 +545,198 @@
         }
       }
     },
+    "/api/v1/block-types": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "get_block_types",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_BlockType"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "create_block_type",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlockTypeDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_BlockType"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/block-types/sync": {
+      "post": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "sync_block_types",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncBlockTypesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_BlockType"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/block-types/{id}": {
+      "delete": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "delete_block_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Block Type ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Block type not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "update_block_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Block Type ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBlockTypeDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_BlockType"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Block type not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/v1/content/entries": {
       "post": {
         "tags": [
@@ -2158,6 +2350,197 @@
         }
       }
     },
+    "/api/v1/pages": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "get_pages",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_Page"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "create_page",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePageDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Page"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/pages/{id}": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "get_page",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Page ID or slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Page"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "delete_page",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Page ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "update_page",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Page ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePageDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Page"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/api/v1/platforms": {
       "get": {
         "tags": [
@@ -3274,6 +3657,87 @@
           }
         }
       },
+      "ApiResponse_BlockType": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "slug",
+              "schema",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "category": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "icon": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "object"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_ChunkStatusResponse": {
         "type": "object",
         "properties": {
@@ -3937,6 +4401,77 @@
           }
         }
       },
+      "ApiResponse_Page": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "slug",
+              "blocks",
+              "status",
+              "seo",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "blocks": {
+                "type": "object"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "seo": {
+                "type": "object"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_PlatformsResponseDTO": {
         "type": "object",
         "properties": {
@@ -4262,6 +4797,90 @@
         "type": "object",
         "properties": {
           "data": {},
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_BlockType": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "slug",
+                "schema",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "category": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "icon": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "schema": {
+                  "type": "object"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
           "errors": {
             "type": [
               "object",
@@ -5033,6 +5652,80 @@
           }
         }
       },
+      "ApiResponse_Vec_Page": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "slug",
+                "blocks",
+                "status",
+                "seo",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "blocks": {
+                  "type": "object"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "seo": {
+                  "type": "object"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Vec_ReferralDto": {
         "type": "object",
         "properties": {
@@ -5134,6 +5827,58 @@
           },
           "refresh_token": {
             "type": "string"
+          }
+        }
+      },
+      "BlockType": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "schema",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "object"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -5406,6 +6151,41 @@
           }
         }
       },
+      "CreateBlockTypeDTO": {
+        "type": "object",
+        "required": [
+          "name",
+          "slug",
+          "schema"
+        ],
+        "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "schema": {},
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
       "CreateContentEntryDTO": {
         "type": "object",
         "required": [
@@ -5537,6 +6317,29 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "CreatePageDTO": {
+        "type": "object",
+        "required": [
+          "title",
+          "slug"
+        ],
+        "properties": {
+          "blocks": {},
+          "seo": {},
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
           }
         }
       },
@@ -6755,6 +7558,48 @@
           }
         }
       },
+      "Page": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "blocks",
+          "status",
+          "seo",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "blocks": {
+            "type": "object"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "seo": {
+            "type": "object"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "PaginationDTO": {
         "type": "object",
         "required": [
@@ -7023,6 +7868,55 @@
           }
         }
       },
+      "SyncBlockTypeItem": {
+        "type": "object",
+        "required": [
+          "name",
+          "slug",
+          "schema"
+        ],
+        "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "schema": {},
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "SyncBlockTypesDTO": {
+        "type": "object",
+        "required": [
+          "blocks"
+        ],
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncBlockTypeItem"
+            }
+          }
+        }
+      },
       "ToolItemDTO": {
         "type": "object",
         "required": [
@@ -7267,6 +8161,36 @@
             ],
             "format": "uuid"
           }
+        }
+      },
+      "UpdateBlockTypeDTO": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "icon": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "schema": {}
         }
       },
       "UpdateContentEntryDTO": {
@@ -7534,6 +8458,31 @@
           },
           "title": {
             "type": "string"
+          }
+        }
+      },
+      "UpdatePageDTO": {
+        "type": "object",
+        "properties": {
+          "blocks": {},
+          "seo": {},
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -7935,6 +8884,10 @@
     {
       "name": "Content",
       "description": "Dynamic Content Management"
+    },
+    {
+      "name": "Pages",
+      "description": "Page constructor and block types management"
     },
     {
       "name": "Platforms",

@@ -5,7 +5,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
 #[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
-#[sqlx(type_name = "content_field_type", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum FieldType {
     Text,
@@ -15,6 +15,11 @@ pub enum FieldType {
     Media,
     Date,
     Relation,
+    Repeater,
+    Group,
+    Json,
+    Color,
+    Link,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
@@ -29,6 +34,9 @@ pub struct FieldDefinition {
     pub multiple: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub relation_to: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schema(value_type = Option<Vec<Object>>)]
+    pub fields: Option<Vec<FieldDefinition>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
@@ -60,7 +68,7 @@ pub struct UpdateSchemaDTO {
     pub is_singleton: Option<bool>,
 }
 
-#[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
+#[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema, PartialEq, Eq)]
 #[sqlx(type_name = "text", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum ContentEntryStatus {
@@ -79,6 +87,8 @@ pub struct ContentEntry {
     pub status: ContentEntryStatus,
     #[schema(value_type = Object)]
     pub i18n: sqlx::types::Json<serde_json::Value>,
+    pub published_at: Option<DateTime<Utc>>,
+    pub published_by: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -90,6 +100,10 @@ pub struct CreateContentEntryDTO {
     pub data: serde_json::Value,
     pub status: Option<ContentEntryStatus>,
     pub i18n: Option<serde_json::Value>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub published_at: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub published_by: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -98,6 +112,10 @@ pub struct UpdateContentEntryDTO {
     pub data: Option<serde_json::Value>,
     pub status: Option<ContentEntryStatus>,
     pub i18n: Option<serde_json::Value>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub published_at: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub published_by: Option<Uuid>,
 }
 #[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct ContentEntryVersion {
