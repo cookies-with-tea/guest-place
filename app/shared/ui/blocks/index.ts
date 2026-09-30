@@ -141,6 +141,26 @@ registerCmsBlock({
 	component: InfoBannerBlock,
 })
 
+// 7. Video Embed Block
+import VideoBlock from './VideoBlock.vue'
+
+registerCmsBlock({
+	type: 'video_embed',
+	name: 'Видео блок',
+	description: 'Встраивание видео (MP4/WebM файлы или YouTube/Vimeo ссылки)',
+	icon: '🎬',
+	category: 'media',
+	schema: [
+		{ name: 'title', label: 'Заголовок блока', fieldType: 'Text' },
+		{ name: 'subtitle', label: 'Подзаголовок', fieldType: 'Text' },
+		{ name: 'video_url', label: 'Видео (файл или YouTube/Vimeo ссылка)', fieldType: 'Media', required: true },
+		{ name: 'poster_url', label: 'Обложка видео (Poster image)', fieldType: 'Media' },
+		{ name: 'caption', label: 'Подпись к видео', fieldType: 'Text' },
+		{ name: 'aspect_ratio', label: 'Соотношение сторон (16/9, 4/3, 1/1)', fieldType: 'Text' },
+	],
+	component: VideoBlock,
+})
+
 export {
 	registerCmsBlock,
 	getCmsBlock,
@@ -155,6 +175,7 @@ export {
 	CardGridBlock,
 	InfoBannerBlock,
 	WireframeBlock,
+	VideoBlock,
 }
 
 export type { CmsBlockDefinition, FieldDefinition }

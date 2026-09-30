@@ -16,7 +16,7 @@
 			</div>
 		</transition>
 
-		<!-- HEADER -->
+		<!-- HEADER (Stage 3.2 Dynamic Menus) -->
 		<header class="site-header">
 			<div class="header-top-bar">
 				<div class="header-container top-container">
@@ -54,10 +54,43 @@
 						<span class="logo-place">Place</span>
 					</NuxtLink>
 
+					<!-- Dynamic Header Links with Dropdowns -->
 					<nav class="nav-links">
-						<NuxtLink to="/about" class="nav-link">О платформе</NuxtLink>
-						<NuxtLink to="/platforms" class="nav-link">Площадкам</NuxtLink>
-						<NuxtLink to="/guests" class="nav-link">Гостям</NuxtLink>
+						<template v-if="headerItems && headerItems.length > 0">
+							<div
+								v-for="item in headerItems"
+								:key="item.id"
+								class="nav-item-wrapper"
+								:class="{ 'has-children': item.children && item.children.length > 0 }"
+							>
+								<NuxtLink
+									:to="item.url || '/'"
+									:target="item.target || '_self'"
+									class="nav-link"
+								>
+									{{ item.title }}
+									<span v-if="item.children && item.children.length > 0" class="nav-caret">▾</span>
+								</NuxtLink>
+
+								<!-- Dropdown for nested items (3.2) -->
+								<div v-if="item.children && item.children.length > 0" class="nav-dropdown">
+									<NuxtLink
+										v-for="sub in item.children"
+										:key="sub.id"
+										:to="sub.url || '/'"
+										:target="sub.target || '_self'"
+										class="dropdown-link"
+									>
+										{{ sub.title }}
+									</NuxtLink>
+								</div>
+							</div>
+						</template>
+						<template v-else>
+							<NuxtLink to="/about" class="nav-link">О платформе</NuxtLink>
+							<NuxtLink to="/platforms" class="nav-link">Площадкам</NuxtLink>
+							<NuxtLink to="/guests" class="nav-link">Гостям</NuxtLink>
+						</template>
 					</nav>
 
 					<div class="header-cta-group">
@@ -68,13 +101,22 @@
 			</div>
 		</header>
 
-		<!-- BREADCRUMBS -->
+		<!-- BREADCRUMBS (Stage 3.3 Dynamic Hierarchy) -->
 		<div class="breadcrumbs-section">
 			<div class="container">
-				<nav class="breadcrumbs">
+				<nav class="breadcrumbs" aria-label="Хлебные крошки">
 					<NuxtLink to="/" class="crumb-link">Главная</NuxtLink>
-					<span class="crumb-sep">/</span>
-					<span class="crumb-current">{{ page.title || 'Страница' }}</span>
+					<template v-for="(crumb, idx) in breadcrumbTrail" :key="crumb.id || idx">
+						<span class="crumb-sep">/</span>
+						<NuxtLink
+							v-if="idx < breadcrumbTrail.length - 1"
+							:to="`/p/${crumb.slug}`"
+							class="crumb-link"
+						>
+							{{ crumb.title }}
+						</NuxtLink>
+						<span v-else class="crumb-current">{{ crumb.title }}</span>
+					</template>
 				</nav>
 			</div>
 		</div>
@@ -106,7 +148,7 @@
 			</div>
 		</main>
 
-		<!-- FOOTER -->
+		<!-- FOOTER (Stage 3.2 Dynamic Footer Menu) -->
 		<footer class="site-footer">
 			<div class="container footer-container">
 				<div class="footer-brand">
@@ -119,9 +161,22 @@
 				</div>
 
 				<nav class="footer-nav">
-					<NuxtLink to="/about" class="footer-link">О проекте</NuxtLink>
-					<NuxtLink to="/platforms" class="footer-link">Площадкам</NuxtLink>
-					<NuxtLink to="/guests" class="footer-link">Гостям</NuxtLink>
+					<template v-if="footerItems && footerItems.length > 0">
+						<NuxtLink
+							v-for="item in footerItems"
+							:key="item.id"
+							:to="item.url || '/'"
+							:target="item.target || '_self'"
+							class="footer-link"
+						>
+							{{ item.title }}
+						</NuxtLink>
+					</template>
+					<template v-else>
+						<NuxtLink to="/about" class="footer-link">О проекте</NuxtLink>
+						<NuxtLink to="/platforms" class="footer-link">Площадкам</NuxtLink>
+						<NuxtLink to="/guests" class="footer-link">Гостям</NuxtLink>
+					</template>
 				</nav>
 			</div>
 		</footer>
@@ -129,31 +184,162 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
-import { useHead } from '#app'
+import { computed, ref, watch } from 'vue'
+import { useHead, useRoute } from '#app'
 import { useCmsBlocks } from '#shared/lib/composables'
 import { BlockRenderer } from '#shared/ui/blocks'
 
+interface MenuItem {
+	id: string
+	title: string
+	type: 'page' | 'url' | 'anchor'
+	url?: string
+	target?: '_self' | '_blank'
+	children?: MenuItem[]
+}
+
+interface BreadcrumbItem {
+	id: string
+	title: string
+	slug: string
+}
+
+const route = useRoute()
 const { page, pending, isPreview, isConnectedToCms } = useCmsBlocks()
 
-// Dynamic SEO
-watch(() => page.value, (curr) => {
-	if (curr) {
-		const seoTitle = curr.seo?.title || curr.title || 'Guest & Place'
-		const seoDesc = curr.seo?.description || ''
-		useHead({
-			title: `${seoTitle} | Guest & Place`,
-			meta: seoDesc ? [{ name: 'description', content: seoDesc }] : [],
-		})
+const headerItems = ref<MenuItem[]>([])
+const footerItems = ref<MenuItem[]>([])
+const breadcrumbs = ref<BreadcrumbItem[]>([])
+
+// Load menus from API (Stage 3.2)
+try {
+	const [headerRes, footerRes] = await Promise.allSettled([
+		$fetch<{ data?: { items?: MenuItem[] } }>('/api/v1/menus/header'),
+		$fetch<{ data?: { items?: MenuItem[] } }>('/api/v1/menus/footer'),
+	])
+
+	if (headerRes.status === 'fulfilled' && headerRes.value?.data?.items) {
+		headerItems.value = headerRes.value.data.items
 	}
-}, { immediate: true, deep: true })
+	if (footerRes.status === 'fulfilled' && footerRes.value?.data?.items) {
+		footerItems.value = footerRes.value.data.items
+	}
+} catch {
+	// Fallback to default static links in template
+}
+
+// Breadcrumb trail (Stage 3.3)
+const slugParam = computed(() => {
+	const s = route.params.slug
+	return Array.isArray(s) ? s.join('/') : (s || '')
+})
+
+watch(
+	() => slugParam.value,
+	async (newSlug) => {
+		if (!newSlug) return
+		try {
+			const res = await $fetch<{ data?: BreadcrumbItem[] }>(`/api/v1/pages/${encodeURIComponent(newSlug)}/breadcrumbs`)
+			if (res?.data && res.data.length > 0) {
+				breadcrumbs.value = res.data
+			}
+		} catch {
+			breadcrumbs.value = []
+		}
+	},
+	{ immediate: true },
+)
+
+const breadcrumbTrail = computed(() => {
+	if (breadcrumbs.value.length > 0) {
+		return breadcrumbs.value
+	}
+	return [
+		{
+			id: page.value?.id || 'current',
+			title: page.value?.title || 'Страница',
+			slug: page.value?.slug || slugParam.value,
+		},
+	]
+})
+
+// Dynamic SEO & Meta (Stage 3.1)
+watch(
+	() => page.value,
+	(curr) => {
+		if (curr) {
+			const seoTitle = curr.seo?.title || curr.title || 'Guest & Place'
+			const seoDesc = curr.seo?.description || ''
+			const ogImage = curr.seo?.og_image || ''
+			const canonical = curr.seo?.canonical || ''
+			const noIndex = curr.seo?.no_index
+
+			const metaList: any[] = [
+				{ property: 'og:title', content: seoTitle },
+				{ property: 'og:type', content: 'website' },
+			]
+
+			if (seoDesc) {
+				metaList.push({ name: 'description', content: seoDesc })
+				metaList.push({ property: 'og:description', content: seoDesc })
+			}
+
+			if (ogImage) {
+				metaList.push({ property: 'og:image', content: ogImage })
+			}
+
+			if (noIndex) {
+				metaList.push({ name: 'robots', content: 'noindex, nofollow' })
+			} else {
+				metaList.push({ name: 'robots', content: 'index, follow' })
+			}
+
+			const linkList: any[] = []
+			if (canonical) {
+				linkList.push({ rel: 'canonical', href: canonical })
+			}
+
+			const jsonLdBreadcrumb = {
+				'@context': 'https://schema.org',
+				'@type': 'BreadcrumbList',
+				itemListElement: [
+					{
+						'@type': 'ListItem',
+						position: 1,
+						name: 'Главная',
+						item: 'https://guestplace.ru/',
+					},
+					...breadcrumbTrail.value.map((crumb, idx) => ({
+						'@type': 'ListItem',
+						position: idx + 2,
+						name: crumb.title,
+						item: `https://guestplace.ru/p/${crumb.slug}`,
+					})),
+				],
+			}
+
+			useHead({
+				title: `${seoTitle} | Guest & Place`,
+				meta: metaList,
+				link: linkList,
+				script: [
+					{
+						type: 'application/ld+json',
+						innerHTML: JSON.stringify(jsonLdBreadcrumb),
+					},
+				],
+			})
+		}
+	},
+	{ immediate: true, deep: true },
+)
 </script>
 
 <style scoped>
 .cms-dynamic-page {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	color: #333333;
-	background-color: #FFFFFF;
+	background-color: #ffffff;
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
@@ -164,9 +350,9 @@ watch(() => page.value, (curr) => {
 	top: 0;
 	z-index: 1000;
 	background: #111827;
-	color: #FFFFFF;
+	color: #ffffff;
 	padding: 8px 16px;
-	border-bottom: 2px solid #0066CC;
+	border-bottom: 2px solid #0066cc;
 }
 
 .preview-banner-content {
@@ -182,11 +368,11 @@ watch(() => page.value, (curr) => {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: #F59E0B;
+	background: #f59e0b;
 }
 
 .preview-dot.is-connected {
-	background: #10B981;
+	background: #10b981;
 }
 
 .preview-status-pill {
@@ -218,7 +404,7 @@ watch(() => page.value, (curr) => {
 
 .preview-slug-badge {
 	margin-left: auto;
-	background: #1F2937;
+	background: #1f2937;
 	padding: 2px 8px;
 	border-radius: 4px;
 	font-family: monospace;
@@ -227,12 +413,12 @@ watch(() => page.value, (curr) => {
 
 /* Site Header */
 .site-header {
-	background: #FFFFFF;
-	border-bottom: 1px solid #EEEEEE;
+	background: #ffffff;
+	border-bottom: 1px solid #eeeeee;
 }
 
 .header-top-bar {
-	border-bottom: 1px solid #F5F5F5;
+	border-bottom: 1px solid #f5f5f5;
 	padding: 8px 0;
 	font-size: 13px;
 }
@@ -287,7 +473,7 @@ watch(() => page.value, (curr) => {
 }
 
 .logo-amp {
-	color: #0066CC;
+	color: #0066cc;
 	margin: 0 2px;
 }
 
@@ -298,6 +484,13 @@ watch(() => page.value, (curr) => {
 .nav-links {
 	display: flex;
 	gap: 28px;
+	align-items: center;
+}
+
+.nav-item-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
 }
 
 .nav-link {
@@ -306,10 +499,51 @@ watch(() => page.value, (curr) => {
 	font-size: 15px;
 	font-weight: 500;
 	transition: color 0.2s;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 0;
 }
 
 .nav-link:hover {
-	color: #0066CC;
+	color: #0066cc;
+}
+
+.nav-caret {
+	font-size: 11px;
+	color: #888888;
+}
+
+.nav-dropdown {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background: #ffffff;
+	border: 1px solid #eeeeee;
+	border-radius: 8px;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+	padding: 8px 0;
+	min-width: 190px;
+	z-index: 100;
+}
+
+.nav-item-wrapper:hover .nav-dropdown {
+	display: block;
+}
+
+.dropdown-link {
+	display: block;
+	padding: 8px 16px;
+	color: #4b5563;
+	font-size: 14px;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-link:hover {
+	background: #f0f6ff;
+	color: #0066cc;
 }
 
 .header-cta-group {
@@ -320,7 +554,7 @@ watch(() => page.value, (curr) => {
 .cta-link-btn {
 	background: none;
 	border: none;
-	color: #0066CC;
+	color: #0066cc;
 	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
@@ -330,13 +564,13 @@ watch(() => page.value, (curr) => {
 }
 
 .cta-link-btn:hover {
-	background: #F0F6FF;
+	background: #f0f6ff;
 }
 
 /* Breadcrumbs */
 .breadcrumbs-section {
 	padding: 16px 0;
-	background: #FAFAFA;
+	background: #fafafa;
 }
 
 .container {
@@ -357,8 +591,12 @@ watch(() => page.value, (curr) => {
 	text-decoration: none;
 }
 
+.crumb-link:hover {
+	color: #0066cc;
+}
+
 .crumb-sep {
-	color: #CCCCCC;
+	color: #cccccc;
 }
 
 .crumb-current {
@@ -402,20 +640,22 @@ watch(() => page.value, (curr) => {
 .spinner {
 	width: 36px;
 	height: 36px;
-	border: 3px solid #EEEEEE;
-	border-top-color: #0066CC;
+	border: 3px solid #eeeeee;
+	border-top-color: #0066cc;
 	border-radius: 50%;
 	animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-	to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* Footer */
 .site-footer {
-	background: #F9FAFB;
-	border-top: 1px solid #EEEEEE;
+	background: #f9fafb;
+	border-top: 1px solid #eeeeee;
 	padding: 40px 0;
 	margin-top: auto;
 }
@@ -444,11 +684,12 @@ watch(() => page.value, (curr) => {
 }
 
 .footer-link:hover {
-	color: #0066CC;
+	color: #0066cc;
 }
 
 @media (max-width: 768px) {
-	.nav-links, .header-cta-group {
+	.nav-links,
+	.header-cta-group {
 		display: none;
 	}
 	.footer-container {

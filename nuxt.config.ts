@@ -22,6 +22,9 @@ export default defineNuxtConfig({
     scan: false,
     autoImport: false,
   },
+  experimental: {
+    appManifest: false,
+  },
   svgo: {
     defaultImport: 'component',
     componentPrefix: 'ui',
@@ -52,11 +55,18 @@ export default defineNuxtConfig({
         target: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api',
         changeOrigin: true,
       },
+      '/sitemap.xml': {
+        target: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/sitemap.xml',
+        changeOrigin: true,
+      },
     },
   },
   routeRules: {
     '/api/**': {
       proxy: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api/**',
+    },
+    '/sitemap.xml': {
+      proxy: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/sitemap.xml',
     },
   },
   build: {
