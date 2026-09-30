@@ -275,6 +275,68 @@ export const useMedia = () => {
 		}
 	}
 
+	// === Folders & Tags & Config ===
+	const foldersQuery = useQuery({
+		queryKey: ['media-folders'],
+		queryFn: () => mediaApi.getFolders(),
+	})
+
+	const folders = computed(() => foldersQuery.data.value?.data || [])
+
+	const tagsQuery = useQuery({
+		queryKey: ['media-tags'],
+		queryFn: () => mediaApi.getTags(),
+	})
+
+	const mediaTags = computed(() => tagsQuery.data.value?.data || [])
+
+	const configQuery = useQuery({
+		queryKey: ['media-config'],
+		queryFn: () => mediaApi.getConfig(),
+	})
+
+	const mediaConfig = computed(() => configQuery.data.value?.data)
+
+	const createFolderMutation = useMutation({
+		mutationFn: (data: { name: string; parentId?: string | null; color?: string }) => mediaApi.createFolder(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+		},
+	})
+
+	const updateFolderMutation = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: { name?: string; parentId?: string | null; color?: string } }) =>
+			mediaApi.updateFolder(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+		},
+	})
+
+	const deleteFolderMutation = useMutation({
+		mutationFn: (id: string) => mediaApi.deleteFolder(id),
+		onSuccess: () => {
+			if (filters.value.folderId) {
+				filters.value.folderId = undefined
+			}
+			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		},
+	})
+
+	const batchMoveMutation = useMutation({
+		mutationFn: ({ uuids, folderId }: { uuids: string[]; folderId: string | null }) =>
+			mediaApi.batchMove(uuids, folderId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+		},
+	})
+
+	const selectFolder = (folderId?: string) => {
+		filters.value.folderId = folderId
+		pagination.value.page = 1
+	}
+
 	return {
 		// state
 		filters,
@@ -287,6 +349,9 @@ export const useMedia = () => {
 		// data
 		mediaItems,
 		currentMedia,
+		folders,
+		mediaTags,
+		mediaConfig,
 		isLoading: mediaQuery.isLoading,
 		isFetching: mediaQuery.isFetching,
 		isSubmitting: createMutation.isPending || updateMutation.isPending,
@@ -305,6 +370,11 @@ export const useMedia = () => {
 		handleOptimize,
 		createMedia: createMutation.mutateAsync,
 		updateMedia: updateMutation.mutate,
+		createFolder: createFolderMutation.mutateAsync,
+		updateFolder: updateFolderMutation.mutateAsync,
+		deleteFolder: deleteFolderMutation.mutateAsync,
+		batchMove: batchMoveMutation.mutateAsync,
+		selectFolder,
 		setPage,
 		setLimit,
 		setSort,
@@ -339,6 +409,14 @@ export const filterMediaItemLocally = (item: MediaItem, filterValues: MediaFilte
 
 	if (filterValues.tags && filterValues.tags.length > 0) {
 		if (!item.tags || !filterValues.tags.some((t) => item.tags?.includes(t))) return false
+	}
+
+	if (filterValues.folderId !== undefined && filterValues.folderId !== '') {
+		if (filterValues.folderId === 'root' || filterValues.folderId === 'none') {
+			if (item.folderId) return false
+		} else {
+			if (item.folderId !== filterValues.folderId) return false
+		}
 	}
 
 	if (filterValues.minSizeBytes !== undefined && item.sizeBytes < filterValues.minSizeBytes) {

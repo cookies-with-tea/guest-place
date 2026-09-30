@@ -41,6 +41,30 @@ export const routes: RouteRecordRaw[] = [
 		meta: { title: 'Страницы сайта' },
 	},
 	{
+		path: '/menus',
+		name: 'MenusPage',
+		component: () => import('#pages/menus-page/ui/MenusPage.vue'),
+		meta: { title: 'Меню и навигация' },
+	},
+	{
+		path: '/redirects',
+		name: 'RedirectsPage',
+		component: () => import('#pages/redirects-page/ui/RedirectsPage.vue'),
+		meta: { title: 'Редиректы 301/302' },
+	},
+	{
+		path: '/venues',
+		name: 'VenuesPage',
+		component: () => import('#pages/venues-page/ui/VenuesPage.vue'),
+		meta: { title: 'Площадки (Venues)' },
+	},
+	{
+		path: '/home',
+		name: 'HomePageEditor',
+		component: () => import('#pages/home-page/ui/HomePageEditor.vue'),
+		meta: { title: 'Главная страница (Home)' },
+	},
+	{
 		path: '/pages/create',
 		name: 'PageCreate',
 		component: () => import('#pages/page-constructor/ui/PageConstructorPage.vue'),

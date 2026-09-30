@@ -222,7 +222,23 @@
 
 			<!-- 2. CENTER COLUMN: Page Canvas (with optional Split Preview) -->
 			<main class="canvas-panel" :class="{ 'with-preview': isPreviewing }">
-				<div class="canvas-scroll-area">
+				<div
+					class="canvas-scroll-area"
+					:class="{ 'is-media-drag-active': isMediaDragActive }"
+					@dragenter.prevent="onMediaDragEnter"
+					@dragover.prevent="onMediaDragOver"
+					@dragleave="onMediaDragLeave"
+					@drop.prevent="onMediaCanvasDrop"
+				>
+					<!-- Drag & Drop overlay for direct media uploads (Stage 4.1) -->
+					<div v-if="isMediaDragActive" class="media-drag-overlay">
+						<div class="media-drag-hint">
+							<span class="media-drag-icon">📥</span>
+							<strong>Отпустите файл для мгновенной загрузки</strong>
+							<p>Изображения создадут Hero-блок, видео создадут Видео-блок</p>
+						</div>
+					</div>
+
 					<div class="canvas-header">
 						<div class="canvas-title">
 							<span>Структура страницы</span>
@@ -282,7 +298,7 @@
 							@dragstart="onDragStart(index, $event)"
 							@dragover="onDragOver(index, $event)"
 							@dragleave="onDragLeave(index)"
-							@drop.prevent="onDrop(index)"
+							@drop.prevent="onBlockCardDrop(index, $event)"
 							@dragend="onDragEnd"
 							@click="selectBlock(index)"
 						>
@@ -691,12 +707,28 @@
 
 							<div class="styling-section">
 								<label class="styling-label">Фоновое изображение (Background Image URL)</label>
-								<el-input
-									v-model="getBlockStyle().backgroundImage"
-									placeholder="https://images.unsplash.com/..."
-									size="small"
-									clearable
-								/>
+								<div class="bg-image-upload-row">
+									<el-input
+										v-model="getBlockStyle().backgroundImage"
+										placeholder="https://... или перетащите файл"
+										size="small"
+										clearable
+										@dragover.prevent
+										@drop.prevent="onBgImageDrop"
+									>
+										<template #append>
+											<el-upload
+												action="#"
+												:auto-upload="false"
+												:show-file-list="false"
+												accept="image/*"
+												:on-change="onBgImageSelected"
+											>
+												<el-button size="small">Файл</el-button>
+											</el-upload>
+										</template>
+									</el-input>
+								</div>
 							</div>
 
 							<div class="styling-section">
@@ -789,21 +821,140 @@
 								</div>
 							</el-form-item>
 
-							<el-divider style="margin: 16px 0" />
-							<el-form-item label="SEO Title (заголовок вкладки)">
+							<!-- Parent Page / Hierarchy (Stage 3.3) -->
+							<el-form-item label="Родительская страница (Иерархия & Хлебные крошки)">
+								<el-select
+									v-model="pageForm.parent_id"
+									clearable
+									placeholder="— Корневая страница (без родителя) —"
+									style="width: 100%"
+								>
+									<el-option label="— Корневая страница (без родителя) —" :value="null" />
+									<el-option
+										v-for="parent in availableParentPages"
+										:key="parent.id"
+										:label="`${parent.title} (/p/${parent.slug})`"
+										:value="parent.id"
+									/>
+								</el-select>
+								<div class="seo-field-hint">
+									Определяет цепочку Breadcrumbs на клиенте и структуру навигации сайта.
+								</div>
+							</el-form-item>
+
+							<el-divider style="margin: 20px 0 16px" content-position="left">
+								<span style="font-weight: 600; font-size: 13px">🔍 SEO & Поисковые сниппеты</span>
+							</el-divider>
+
+							<el-form-item>
+								<template #label>
+									<div class="seo-label-row">
+										<span>SEO Title (заголовок вкладки)</span>
+										<el-tag size="small" :type="seoTitleLengthStatus" effect="plain">
+											{{ effectiveSeoTitle.length }}/60 символов
+										</el-tag>
+									</div>
+								</template>
 								<el-input
 									v-model="pageForm.seo.title"
-									placeholder="О платформе | Guest & Place"
+									:placeholder="pageForm.title ? `${pageForm.title} | Guest & Place` : 'Заголовок страницы для поисковиков'"
 								/>
+								<div class="seo-field-hint">Оптимальная длина: 50–60 символов для отображения в Google без обрезки.</div>
 							</el-form-item>
-							<el-form-item label="SEO Description (описание страницы)">
+
+							<el-form-item>
+								<template #label>
+									<div class="seo-label-row">
+										<span>SEO Description (мета-описание)</span>
+										<el-tag size="small" :type="seoDescLengthStatus" effect="plain">
+											{{ (pageForm.seo.description || '').length }}/160 символов
+										</el-tag>
+									</div>
+								</template>
 								<el-input
 									v-model="pageForm.seo.description"
 									type="textarea"
 									:rows="3"
-									placeholder="Краткое описание для поисковиков"
+									placeholder="Краткое привлекательное описание страницы для выдачи поисковых систем"
+								/>
+								<div class="seo-field-hint">Оптимальная длина: 120–160 символов.</div>
+							</el-form-item>
+
+							<el-form-item label="OG Image (превью для соцсетей и мессенджеров)">
+								<el-input
+									v-model="pageForm.seo.og_image"
+									placeholder="https://... или /uploads/image.jpg"
+								>
+									<template #prefix>🖼️</template>
+								</el-input>
+							</el-form-item>
+
+							<el-form-item label="Canonical URL (канонический адрес)">
+								<el-input
+									v-model="pageForm.seo.canonical"
+									:placeholder="computedCanonicalUrl"
 								/>
 							</el-form-item>
+
+							<el-form-item>
+								<el-checkbox v-model="pageForm.seo.no_index">
+									Запретить индексацию роботами (noindex, nofollow)
+								</el-checkbox>
+							</el-form-item>
+
+							<!-- SERP / SOCIAL PREVIEW COMPONENT -->
+							<div class="serp-preview-section">
+								<div class="serp-preview-header">
+									<div class="serp-preview-title">
+										<span>Предпросмотр сниппета</span>
+									</div>
+									<el-radio-group v-model="serpPreviewTab" size="small">
+										<el-radio-button label="google">Google</el-radio-button>
+										<el-radio-button label="social">Соцсети</el-radio-button>
+									</el-radio-group>
+								</div>
+
+								<!-- Google SERP Card -->
+								<div v-if="serpPreviewTab === 'google'" class="google-snippet-card">
+									<div class="google-snippet-topbar">
+										<div class="google-favicon">G</div>
+										<div class="google-site-info">
+											<span class="google-site-name">Guest & Place</span>
+											<span class="google-snippet-url">https://guestplace.ru › p › {{ breadcrumbSlugDisplay }}</span>
+										</div>
+									</div>
+									<div class="google-snippet-title">
+										{{ effectiveSeoTitle }}
+									</div>
+									<div class="google-snippet-desc">
+										{{ effectiveSeoDesc }}
+									</div>
+								</div>
+
+								<!-- Social OpenGraph Card -->
+								<div v-else class="social-snippet-card">
+									<div class="social-snippet-thumb" :style="ogImageStyle">
+										<span v-if="!pageForm.seo.og_image" class="social-thumb-placeholder">🖼️ Превью по умолчанию</span>
+									</div>
+									<div class="social-snippet-body">
+										<div class="social-snippet-domain">GUESTPLACE.RU</div>
+										<div class="social-snippet-title">{{ effectiveSeoTitle }}</div>
+										<div class="social-snippet-desc">{{ effectiveSeoDesc }}</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Sitemap Info Card -->
+							<div class="sitemap-info-box">
+								<div class="sitemap-info-icon">🗺️</div>
+								<div class="sitemap-info-text">
+									<strong>Sitemap XML генерация:</strong>
+									<p>Страница автоматически попадает в <code>sitemap.xml</code> при публикации (статус PUBLISHED).</p>
+								</div>
+								<el-button size="small" plain @click="openSitemapXml">
+									Открыть sitemap.xml
+								</el-button>
+							</div>
 						</el-form>
 					</div>
 				</div>
@@ -837,6 +988,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { uploadMedia } from '@admin-panel/lib'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { pagesApi, type BlockStyle, type BlockTypeItem, type PageBlock } from '#entities/pages'
 import ContentFormGenerator from '#features/content-editor/ui/components/ContentFormGenerator.vue'
@@ -895,14 +1047,86 @@ const pageForm = reactive({
 	status: 'draft',
 	published_at: '',
 	published_by: '',
+	parent_id: null as string | null,
 	blocks: [] as PageBlock[],
 	seo: {
 		title: '',
 		description: '',
+		og_image: '',
+		canonical: '',
+		no_index: false,
 	},
 })
 
+const availableParentPages = ref<PageItem[]>([])
+const serpPreviewTab = ref<'google' | 'social'>('google')
+
+const effectiveSeoTitle = computed(() => {
+	if (pageForm.seo?.title && pageForm.seo.title.trim()) {
+		return pageForm.seo.title
+	}
+	return pageForm.title ? `${pageForm.title} | Guest & Place` : 'Guest & Place — Каталог площадок и мероприятий'
+})
+
+const effectiveSeoDesc = computed(() => {
+	if (pageForm.seo?.description && pageForm.seo.description.trim()) {
+		return pageForm.seo.description
+	}
+	return 'Интерактивная платформа для поиска и бронирования залов, площадок для корпоративов, свадеб и деловых событий.'
+})
+
+const breadcrumbSlugDisplay = computed(() => {
+	const current = pageForm.slug ? pageForm.slug.replace(/^\/+/, '') : 'page'
+	if (pageForm.parent_id) {
+		const parent = availableParentPages.value.find((p) => p.id === pageForm.parent_id)
+		if (parent) {
+			return `${parent.slug} › ${current}`
+		}
+	}
+	return current
+})
+
+const seoTitleLengthStatus = computed(() => {
+	const l = effectiveSeoTitle.value.length
+	if (l >= 30 && l <= 60) return 'success'
+	if (l > 60) return 'danger'
+	return 'warning'
+})
+
+const seoDescLengthStatus = computed(() => {
+	const l = (pageForm.seo?.description || '').length
+	if (l >= 100 && l <= 160) return 'success'
+	if (l > 160) return 'danger'
+	return 'info'
+})
+
 const clientBaseUrl = computed(() => import.meta.env.VITE_CLIENT_URL || 'http://localhost:3000')
+
+const computedCanonicalUrl = computed(() => {
+	const base = clientBaseUrl.value.replace(/\/$/, '')
+	const cleanSlug = pageForm.slug ? pageForm.slug.replace(/^\/+/, '') : 'page'
+	return `${base}/p/${cleanSlug}`
+})
+
+const sitemapUrl = computed(() => {
+	const base = clientBaseUrl.value.replace(/\/$/, '')
+	return `${base}/sitemap.xml`
+})
+
+function openSitemapXml() {
+	window.open(sitemapUrl.value, '_blank')
+}
+
+const ogImageStyle = computed(() => {
+	if (pageForm.seo?.og_image) {
+		return {
+			backgroundImage: `url(${pageForm.seo.og_image})`,
+			backgroundSize: 'cover',
+			backgroundPosition: 'center',
+		}
+	}
+	return {}
+})
 
 const previewDevice = ref<'desktop' | 'tablet' | 'mobile'>('desktop')
 
@@ -1025,6 +1249,24 @@ const WIREFRAME_TYPE: BlockTypeItem = {
 	],
 }
 
+// Built-in Video block (Stage 4.3)
+const VIDEO_TYPE: BlockTypeItem = {
+	id: 'builtin-video-embed',
+	name: 'Видео блок',
+	slug: 'video_embed',
+	description: 'Встраивание видео (MP4/WebM файлы или YouTube/Vimeo ссылки)',
+	icon: '🎬',
+	category: 'media',
+	schema: [
+		{ name: 'title', label: 'Заголовок блока', fieldType: 'Text' },
+		{ name: 'subtitle', label: 'Подзаголовок', fieldType: 'Text' },
+		{ name: 'video_url', label: 'Видео (файл или YouTube/Vimeo ссылка)', fieldType: 'Media', required: true },
+		{ name: 'poster_url', label: 'Обложка видео (Poster image)', fieldType: 'Media' },
+		{ name: 'caption', label: 'Подпись к видео', fieldType: 'Text' },
+		{ name: 'aspect_ratio', label: 'Соотношение сторон (16/9, 4/3, 1/1)', fieldType: 'Text' },
+	],
+}
+
 // Data fetching
 const fetchBlockTypes = async () => {
 	try {
@@ -1033,10 +1275,13 @@ const fetchBlockTypes = async () => {
 		if (!list.some((b) => b.slug === 'wireframe')) {
 			list.unshift(WIREFRAME_TYPE)
 		}
+		if (!list.some((b) => b.slug === 'video_embed')) {
+			list.push(VIDEO_TYPE)
+		}
 		blockTypes.value = list
 	} catch (err: any) {
 		console.warn('Failed to load block types:', err)
-		blockTypes.value = [WIREFRAME_TYPE]
+		blockTypes.value = [WIREFRAME_TYPE, VIDEO_TYPE]
 	}
 }
 
@@ -1050,8 +1295,15 @@ const fetchPage = async () => {
 			pageForm.status = res.data.status || 'draft'
 			pageForm.published_at = res.data.published_at || ''
 			pageForm.published_by = res.data.published_by || ''
+			pageForm.parent_id = res.data.parent_id || null
 			pageForm.blocks = Array.isArray(res.data.blocks) ? res.data.blocks : []
-			pageForm.seo = res.data.seo || { title: '', description: '' }
+			pageForm.seo = {
+				title: res.data.seo?.title || '',
+				description: res.data.seo?.description || '',
+				og_image: res.data.seo?.og_image || '',
+				canonical: res.data.seo?.canonical || '',
+				no_index: !!res.data.seo?.no_index,
+			}
 
 			if (pageForm.blocks.length > 0) {
 				selectedBlockIndex.value = 0
@@ -1181,6 +1433,14 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(async () => {
 	loadSavedPresets()
 	await fetchBlockTypes()
+	try {
+		const pagesRes = await pagesApi.getPages()
+		if (pagesRes.data) {
+			availableParentPages.value = pagesRes.data.filter((p) => p.id !== pageId.value)
+		}
+	} catch (e) {
+		console.warn('Failed to load parent pages:', e)
+	}
 	if (isEdit.value) {
 		await fetchPage()
 	}
@@ -1346,6 +1606,18 @@ function onDragLeave(index: number) {
 	}
 }
 
+function onBlockCardDrop(targetIndex: number, event: DragEvent) {
+	if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+		event.preventDefault()
+		event.stopPropagation()
+		handleDirectMediaUpload(event.dataTransfer.files[0], targetIndex)
+		draggingIndex.value = null
+		dragOverIndex.value = null
+		return
+	}
+	onDrop(targetIndex)
+}
+
 function onDrop(targetIndex: number) {
 	if (draggingIndex.value === null || draggingIndex.value === targetIndex) {
 		draggingIndex.value = null
@@ -1437,6 +1709,8 @@ async function handleSave() {
 			title: pageForm.title,
 			slug: pageForm.slug,
 			status: pageForm.status,
+			parent_id: pageForm.parent_id || null,
+			clear_parent: !pageForm.parent_id,
 			published_at: pageForm.status === 'published' ? (pageForm.published_at || new Date().toISOString()) : (pageForm.published_at || undefined),
 			published_by: pageForm.published_by || undefined,
 			blocks: pageForm.blocks,
@@ -1470,12 +1744,181 @@ function formatDate(dateStr?: string): string {
 	}
 }
 
+// Drag-and-drop direct media upload (Stage 4.1)
+const isMediaDragActive = ref(false)
+const isUploadingMedia = ref(false)
+
+function onMediaDragEnter(e: DragEvent) {
+	if (e.dataTransfer?.types.includes('Files')) {
+		isMediaDragActive.value = true
+	}
+}
+
+function onMediaDragOver(e: DragEvent) {
+	if (e.dataTransfer?.types.includes('Files')) {
+		e.dataTransfer.dropEffect = 'copy'
+		isMediaDragActive.value = true
+	}
+}
+
+function onMediaDragLeave(e: DragEvent) {
+	const rect = (e.currentTarget as HTMLElement)?.getBoundingClientRect?.()
+	if (!rect) {
+		isMediaDragActive.value = false
+		return
+	}
+	if (
+		e.clientX <= rect.left ||
+		e.clientX >= rect.right ||
+		e.clientY <= rect.top ||
+		e.clientY >= rect.bottom
+	) {
+		isMediaDragActive.value = false
+	}
+}
+
+async function onMediaCanvasDrop(e: DragEvent) {
+	isMediaDragActive.value = false
+	const files = e.dataTransfer?.files
+	if (!files || files.length === 0) return
+
+	for (let i = 0; i < files.length; i++) {
+		await handleDirectMediaUpload(files[i])
+	}
+}
+
+async function handleDirectMediaUpload(file: File, targetBlockIndex?: number) {
+	isUploadingMedia.value = true
+	const loadingMsg = ElMessage.info({
+		message: `Загрузка медиа «${file.name}»...`,
+		duration: 0,
+	})
+
+	try {
+		const result = await uploadMedia(file)
+		if (!result || !result.url) {
+			throw new Error('Не удалось получить URL загруженного файла')
+		}
+
+		const isVideo = file.type.startsWith('video/') || /\.(mp4|webm|ogg|mov)$/i.test(file.name)
+
+		if (targetBlockIndex !== undefined && targetBlockIndex !== null && pageForm.blocks[targetBlockIndex]) {
+			const b = pageForm.blocks[targetBlockIndex]
+			if (isVideo) {
+				b.data.video_url = result.url
+			} else {
+				if ('image' in b.data) b.data.image = result.url
+				else if ('poster_url' in b.data) b.data.poster_url = result.url
+				else {
+					if (!b.style) b.style = {}
+					b.style.backgroundImage = result.url
+				}
+			}
+			ElMessage.success(`Медиа «${file.name}» успешно обновлено в блоке!`)
+		} else {
+			if (isVideo) {
+				const newBlock: PageBlock = {
+					id: `video-${Date.now()}`,
+					type: 'video_embed',
+					data: {
+						title: file.name.replace(/\.[^/.]+$/, ''),
+						video_url: result.url,
+						aspect_ratio: '16/9',
+					},
+					style: { theme: 'light', padding: 'md', margin: 'none' },
+				}
+				pageForm.blocks.push(newBlock)
+				selectedBlockIndex.value = pageForm.blocks.length - 1
+			} else {
+				const newBlock: PageBlock = {
+					id: `hero-${Date.now()}`,
+					type: 'hero',
+					data: {
+						title: file.name.replace(/\.[^/.]+$/, ''),
+						subtitle: 'Блок с загруженным изображением',
+						image: result.url,
+					},
+					style: { theme: 'light', padding: 'md', margin: 'none' },
+				}
+				pageForm.blocks.push(newBlock)
+				selectedBlockIndex.value = pageForm.blocks.length - 1
+			}
+			activeInspectorTab.value = 'block'
+			ElMessage.success(`Медиа «${file.name}» загружено и добавлен новый блок!`)
+		}
+	} catch (err: any) {
+		ElMessage.error(`Ошибка загрузки: ${err?.message || err}`)
+	} finally {
+		loadingMsg.close()
+		isUploadingMedia.value = false
+	}
+}
+
+async function onBgImageDrop(e: DragEvent) {
+	const files = e.dataTransfer?.files
+	if (files && files.length > 0) {
+		await handleDirectMediaUpload(files[0], selectedBlockIndex.value ?? undefined)
+	}
+}
+
+async function onBgImageSelected(file: any) {
+	if (file.raw) {
+		await handleDirectMediaUpload(file.raw, selectedBlockIndex.value ?? undefined)
+	}
+}
+
 function goBack() {
 	router.push({ name: 'PageList' })
 }
 </script>
 
 <style scoped>
+.canvas-scroll-area {
+	position: relative;
+}
+
+.is-media-drag-active {
+	outline: 2px dashed var(--color-primary, #3b82f6);
+	outline-offset: -2px;
+}
+
+.media-drag-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(59, 130, 246, 0.12);
+	backdrop-filter: blur(4px);
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	pointer-events: none;
+}
+
+.media-drag-hint {
+	background: var(--bg-surface, #ffffff);
+	padding: 24px 32px;
+	border-radius: 16px;
+	border: 1px solid var(--border-color, #e2e8f0);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.media-drag-icon {
+	font-size: 36px;
+}
+
+.bg-image-upload-row {
+	width: 100%;
+}
+
 .page-constructor {
 	display: flex;
 	flex-direction: column;
@@ -2485,5 +2928,186 @@ function goBack() {
 
 .inspector-page-settings {
 	padding: 16px;
+}
+
+.seo-label-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.seo-field-hint {
+	font-size: 11px;
+	color: #6b7280;
+	margin-top: 4px;
+	line-height: 1.4;
+}
+
+.serp-preview-section {
+	background: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 16px;
+	margin: 16px 0;
+}
+
+.serp-preview-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.serp-preview-title {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #6b7280;
+}
+
+.google-snippet-card {
+	background: #ffffff;
+	border: 1px solid #dfe1e5;
+	border-radius: 10px;
+	padding: 14px 16px;
+	font-family: Arial, sans-serif;
+	text-align: left;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.google-snippet-topbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 6px;
+}
+
+.google-favicon {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: #4285f4;
+	color: #ffffff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.google-site-info {
+	display: flex;
+	flex-direction: column;
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.google-site-name {
+	color: #202124;
+	font-weight: 500;
+}
+
+.google-snippet-url {
+	color: #4d5156;
+	font-size: 11px;
+}
+
+.google-snippet-title {
+	color: #1a0dab;
+	font-size: 18px;
+	line-height: 1.3;
+	font-weight: 400;
+	cursor: pointer;
+	margin-bottom: 4px;
+	word-break: break-word;
+}
+
+.google-snippet-title:hover {
+	text-decoration: underline;
+}
+
+.google-snippet-desc {
+	color: #4d5156;
+	font-size: 13px;
+	line-height: 1.5;
+	word-break: break-word;
+}
+
+.social-snippet-card {
+	background: #ffffff;
+	border: 1px solid #dfe1e5;
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.social-snippet-thumb {
+	height: 130px;
+	background: #f3f4f6;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #9ca3af;
+	font-size: 13px;
+}
+
+.social-snippet-body {
+	padding: 12px 14px;
+}
+
+.social-snippet-domain {
+	font-size: 10px;
+	font-weight: 700;
+	color: #9ca3af;
+	letter-spacing: 0.5px;
+	margin-bottom: 4px;
+}
+
+.social-snippet-title {
+	font-size: 15px;
+	font-weight: 700;
+	color: #111827;
+	margin-bottom: 4px;
+	line-height: 1.3;
+}
+
+.social-snippet-desc {
+	font-size: 12px;
+	color: #4b5563;
+	line-height: 1.4;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.sitemap-info-box {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: rgba(16, 185, 129, 0.06);
+	border: 1px solid rgba(16, 185, 129, 0.25);
+	border-radius: 8px;
+	padding: 12px 14px;
+	margin-top: 14px;
+}
+
+.sitemap-info-icon {
+	font-size: 24px;
+	flex-shrink: 0;
+}
+
+.sitemap-info-text {
+	flex: 1;
+	font-size: 12px;
+	line-height: 1.4;
+	color: #111827;
+}
+
+.sitemap-info-text p {
+	margin: 2px 0 0;
+	color: #6b7280;
 }
 </style>

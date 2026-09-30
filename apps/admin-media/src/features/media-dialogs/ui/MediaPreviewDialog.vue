@@ -17,6 +17,12 @@
 						playsinline
 						:src="currentMedia.data.url"
 					/>
+					<iframe
+						v-else-if="isPdf(currentMedia.data)"
+						class="preview-pdf"
+						:src="currentMedia.data.url"
+						title="PDF Preview"
+					/>
 					<div v-else class="file-placeholder">
 						<el-icon :size="64"><Document /></el-icon>
 						<span class="name">{{ currentMedia.data.name }}</span>
@@ -85,6 +91,20 @@
 							<span class="color-dot" :style="{ backgroundColor: currentMedia.data.dominantColor }" />
 							<span class="color-hex">{{ currentMedia.data.dominantColor }}</span>
 						</div>
+					</el-descriptions-item>
+					<el-descriptions-item v-if="currentMedia.data.folderId" label="Folder">
+						<el-tag size="small" type="primary">📁 {{ folderName || 'Folder' }}</el-tag>
+					</el-descriptions-item>
+					<el-descriptions-item v-if="currentMedia.data.cdnUrl" label="CDN URL">
+						<div class="cdn-row">
+							<el-link type="primary" :href="currentMedia.data.cdnUrl" target="_blank" :underline="false">
+								{{ currentMedia.data.cdnUrl }}
+							</el-link>
+							<el-button size="small" text @click="copyUrl(currentMedia.data.cdnUrl)">Copy</el-button>
+						</div>
+					</el-descriptions-item>
+					<el-descriptions-item v-if="currentMedia.data.contentHash" label="Content Hash">
+						<el-tag size="small" type="info">{{ currentMedia.data.contentHash.substring(0, 16) }}...</el-tag>
 					</el-descriptions-item>
 					<el-descriptions-item label="Size">
 						{{ formatFileSize(currentMedia.data.sizeBytes) }}
@@ -221,11 +241,26 @@ import { ElMessage } from 'element-plus'
 import { useMedia } from '#entities/media'
 import { mediaUtils } from '#entities/media/utils/media.utils'
 
-const { currentMedia, isPreviewDialogOpen, closePreviewDialog, currentMediaUuid, handleOptimize } = useMedia()
+const { currentMedia, isPreviewDialogOpen, closePreviewDialog, currentMediaUuid, handleOptimize, folders } = useMedia()
 
 const previewBg = ref('checkered')
 const selectedVariantKey = ref<string>('original')
 const isOptimizing = ref(false)
+
+const folderName = computed(() => {
+	const folderId = currentMedia.value?.data?.folderId
+	if (!folderId || !folders.value) return ''
+	return folders.value.find((f: any) => f.id === folderId)?.name || ''
+})
+
+const isPdf = (data: any) => {
+	if (!data) return false
+	return (
+		data.mediaType === 'document' ||
+		data.name?.toLowerCase().endsWith('.pdf') ||
+		data.url?.toLowerCase().endsWith('.pdf')
+	)
+}
 
 const activeVariantUrl = computed(() => {
 	if (!currentMedia.value?.data) return ''
@@ -578,5 +613,20 @@ const formatDate = (date: Date | string) => mediaUtils.formatDate(date)
 
 .download-link {
 	text-decoration: none;
+}
+
+.preview-pdf {
+	width: 100%;
+	height: 100%;
+	min-height: 420px;
+	border: none;
+	background: #ffffff;
+}
+
+.cdn-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
 }
 </style>

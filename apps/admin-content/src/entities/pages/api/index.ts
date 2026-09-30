@@ -29,13 +29,27 @@ export interface PageBlock {
 	style?: BlockStyle
 }
 
+export interface BreadcrumbItem {
+	id: string
+	title: string
+	slug: string
+}
+
 export interface PageItem {
 	id: string
 	title: string
 	slug: string
 	blocks: PageBlock[]
 	status: 'draft' | 'review' | 'published' | string
-	seo?: Record<string, any>
+	seo?: {
+		title?: string
+		description?: string
+		og_image?: string
+		canonical?: string
+		no_index?: boolean
+		[key: string]: any
+	}
+	parent_id?: string | null
 	published_at?: string
 	published_by?: string
 	created_at?: string
@@ -61,13 +75,16 @@ export const pagesApi = {
 		return fetchPages<PageItem>(`/${slug}${query}`)
 	},
 
-	createPage: (payload: { title: string; slug: string; blocks?: any[]; status?: string; seo?: any; published_at?: string; published_by?: string }) =>
+	getPageBreadcrumbs: (idOrSlug: string) =>
+		fetchPages<BreadcrumbItem[]>(`/${idOrSlug}/breadcrumbs`),
+
+	createPage: (payload: { title: string; slug: string; blocks?: any[]; status?: string; seo?: any; parent_id?: string | null; published_at?: string; published_by?: string }) =>
 		fetchPages<PageItem>('', {
 			method: 'POST',
 			body: payload,
 		}),
 
-	updatePage: (id: string, payload: { title?: string; slug?: string; blocks?: any[]; status?: string; seo?: any; published_at?: string; published_by?: string }) =>
+	updatePage: (id: string, payload: { title?: string; slug?: string; blocks?: any[]; status?: string; seo?: any; parent_id?: string | null; clear_parent?: boolean; published_at?: string; published_by?: string }) =>
 		fetchPages<PageItem>(`/${id}`, {
 			method: 'PATCH',
 			body: payload,

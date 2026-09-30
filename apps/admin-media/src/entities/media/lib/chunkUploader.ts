@@ -18,6 +18,7 @@ export interface ChunkUploadOptions {
 	tags?: string[]
 	source?: string
 	convertToWebp?: boolean
+	folderId?: string | null
 	signal?: AbortSignal
 	onProgress?: (progress: ChunkUploadProgress) => void
 }
@@ -53,6 +54,7 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 		tags,
 		source = 'cms',
 		convertToWebp = true,
+		folderId,
 		signal,
 		onProgress,
 	} = options
@@ -102,6 +104,7 @@ export async function uploadFileInChunks(options: ChunkUploadOptions): Promise<M
 		tags,
 		source,
 		convertToWebp,
+		folderId,
 	})
 
 	const uploadId = initRes.data.uploadId || (initRes.data as any).upload_id

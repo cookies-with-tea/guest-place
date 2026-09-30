@@ -9,7 +9,19 @@
 		</div>
 
 		<div v-else-if="currentMediaUrl" class="media-preview">
-			<el-image class="preview-image" fit="cover" :preview-src-list="[currentMediaUrl]" :src="currentMediaUrl" />
+			<video
+				v-if="isVideo(currentMediaUrl)"
+				class="preview-image preview-video"
+				controls
+				playsinline
+				:src="currentMediaUrl"
+			/>
+			<div v-else-if="isPdf(currentMediaUrl)" class="preview-image preview-pdf-box">
+				<el-icon :size="40" color="#ef4444"><Document /></el-icon>
+				<span class="pdf-label">PDF Document</span>
+			</div>
+			<el-image v-else class="preview-image" fit="cover" :preview-src-list="[currentMediaUrl]" :src="currentMediaUrl" />
+
 			<div class="media-actions">
 				<el-button circle :icon="Delete" type="danger" @click="handleRemove" />
 				<el-upload
@@ -41,7 +53,7 @@
 				<div class="el-upload__text">
 					Drop file here, <em>click to upload</em> or <strong>paste from clipboard</strong>
 					<div v-if="hint" class="upload-hint">{{ hint }}</div>
-					<div v-else class="upload-hint">Supported formats: Images (JPG, PNG, WEBP, SVG)</div>
+					<div v-else class="upload-hint">Supported formats: Images, Videos (MP4, WebM), Documents (PDF)</div>
 				</div>
 			</el-upload>
 		</div>
@@ -56,7 +68,7 @@
 import { onMounted, ref, watch } from 'vue'
 
 import { createApi, uploadMedia } from '@admin-panel/lib'
-import { Delete, Refresh, UploadFilled } from '@element-plus/icons-vue'
+import { Delete, Document, Refresh, UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 interface Props {
@@ -68,11 +80,14 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
 	modelValue: null,
-	accept: 'image/*',
+	accept: 'image/*,video/*,application/pdf',
 	hint: '',
 	disabled: false,
 })
 const emit = defineEmits(['update:modelValue'])
+
+const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)(\?.*)?$/i.test(url)
+const isPdf = (url: string) => /\.(pdf)(\?.*)?$/i.test(url)
 
 const { fetchData: apiFetch } = createApi('media')
 const currentMediaUrl = ref('')
@@ -215,6 +230,28 @@ onMounted(() => {
 	.preview-image {
 		width: 100%;
 		height: 100%;
+	}
+
+	.preview-video {
+		object-fit: cover;
+		background: #000;
+	}
+
+	.preview-pdf-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background: rgba(239, 68, 68, 0.08);
+		border: 1px dashed rgba(239, 68, 68, 0.3);
+		border-radius: 8px;
+		gap: 8px;
+
+		.pdf-label {
+			font-size: 13px;
+			font-weight: 500;
+			color: var(--gp-text-secondary);
+		}
 	}
 
 	.media-actions {

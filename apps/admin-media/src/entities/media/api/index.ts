@@ -5,8 +5,11 @@ import type {
 	ChunkUploadResultDTO,
 	InitChunkUploadDTO,
 	InitChunkUploadResponse,
+	MediaConfig,
 	MediaFilters,
+	MediaFolder,
 	MediaItem,
+	MediaTagCount,
 } from '../model'
 
 const { fetchData } = createApi('media')
@@ -28,6 +31,7 @@ export const getAll = (params?: MediaFilters) => {
 		if (params.mediaTypes && params.mediaTypes.length > 0) query.media_type = params.mediaTypes.join(',')
 		if (params.category && params.category.length > 0) query.category = params.category.join(',')
 		if (params.tags && params.tags.length > 0) query.tags = params.tags.join(',')
+		if (params.folderId !== undefined && params.folderId !== '') query.folder_id = params.folderId
 		if (params.source && params.source.length > 0) query.source = params.source.join(',')
 		if (params.minSizeBytes !== undefined) query.min_size_bytes = params.minSizeBytes
 		if (params.maxSizeBytes !== undefined) query.max_size_bytes = params.maxSizeBytes
@@ -111,6 +115,51 @@ export const optimizeBulk = (uuids: string[]) => {
 	})
 }
 
+export const getFolders = () => {
+	return fetchData<MediaFolder[]>('/folders', {
+		method: 'GET',
+	})
+}
+
+export const createFolder = (data: { name: string; parentId?: string | null; color?: string }) => {
+	return fetchData<MediaFolder>('/folders', {
+		method: 'POST',
+		body: data,
+	})
+}
+
+export const updateFolder = (id: string, data: { name?: string; parentId?: string | null; color?: string }) => {
+	return fetchData<MediaFolder>(`/folders/${id}`, {
+		method: 'PUT',
+		body: data,
+	})
+}
+
+export const deleteFolder = (id: string) => {
+	return fetchData(`/folders/${id}`, {
+		method: 'DELETE',
+	})
+}
+
+export const batchMove = (uuids: string[], folderId: string | null) => {
+	return fetchData('/batch/move', {
+		method: 'POST',
+		body: { uuids, folderId },
+	})
+}
+
+export const getTags = () => {
+	return fetchData<MediaTagCount[]>('/tags', {
+		method: 'GET',
+	})
+}
+
+export const getConfig = () => {
+	return fetchData<MediaConfig>('/config', {
+		method: 'GET',
+	})
+}
+
 export const mediaApi = {
 	create,
 	getAll,
@@ -124,4 +173,11 @@ export const mediaApi = {
 	completeChunkUpload,
 	optimize,
 	optimizeBulk,
+	getFolders,
+	createFolder,
+	updateFolder,
+	deleteFolder,
+	batchMove,
+	getTags,
+	getConfig,
 }

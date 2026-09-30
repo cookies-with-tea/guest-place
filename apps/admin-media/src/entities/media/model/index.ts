@@ -16,6 +16,26 @@ export interface MediaVariants {
 	original?: MediaVariant
 }
 
+export interface MediaFolder {
+	id: string
+	name: string
+	parentId?: string | null
+	color?: string
+	createdAt: string
+	itemCount?: number
+}
+
+export interface MediaTagCount {
+	tag: string
+	count: number
+}
+
+export interface MediaConfig {
+	cdnUrl?: string | null
+	publicUrl: string
+	maxQuota: number
+}
+
 export interface MediaItem {
 	uuid: string
 	title?: string
@@ -37,6 +57,9 @@ export interface MediaItem {
 	dominantColor?: string
 	palette?: string[]
 	exif?: Record<string, any>
+	folderId?: string
+	contentHash?: string
+	cdnUrl?: string
 }
 
 export interface MediaFilters {
@@ -46,6 +69,7 @@ export interface MediaFilters {
 	mediaTypes?: string[]
 	category?: string[]
 	tags?: string[]
+	folderId?: string
 	source?: string[]
 	minSizeBytes?: number
 	maxSizeBytes?: number
@@ -108,6 +132,7 @@ export interface InitChunkUploadDTO {
 	tags?: string[]
 	source?: string
 	convertToWebp?: boolean
+	folderId?: string | null
 }
 
 export interface InitChunkUploadResponse {

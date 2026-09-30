@@ -12,6 +12,21 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
+				<el-button plain @click="router.push('/home')">
+					🏠 Главная
+				</el-button>
+				<el-button plain @click="router.push('/venues')">
+					🏰 Площадки
+				</el-button>
+				<el-button plain @click="router.push('/menus')">
+					🧭 Меню сайта
+				</el-button>
+				<el-button plain @click="router.push('/redirects')">
+					🔀 Редиректы (301/302)
+				</el-button>
+				<el-button plain @click="openSitemap">
+					🗺️ Sitemap.xml
+				</el-button>
 				<el-button plain @click="router.push({ name: ROUTES.content.name })">
 					🗂️ Конструктор схем
 				</el-button>
@@ -120,6 +135,12 @@
 						<div class="page-card__slug-wrapper">
 							<span class="slug-prefix">Путь:</span>
 							<code class="page-card__slug">{{ item.path }}</code>
+						</div>
+
+						<div v-if="item.parentTitle" class="page-card__parent-badge">
+							<span>↳ Родитель:</span>
+							<strong>{{ item.parentTitle }}</strong>
+							<span class="parent-slug">(/p/{{ item.parentSlug }})</span>
 						</div>
 
 						<div v-if="item.published_at" class="page-card__published-date">
@@ -235,6 +256,13 @@ const statusFilter = ref<'all' | 'published' | 'review' | 'draft'>('all')
 // Pre-defined known fixed schema pages on client
 const fixedSchemaDefinitions = [
 	{
+		title: 'Главная страница (Home)',
+		slug: 'page_home',
+		path: '/',
+		icon: '🏠',
+		description: 'Индивидуальная вёрстка: Hero, Места по категориям, Последние добавленные, Самые популярные, Варианты взаимодействия',
+	},
+	{
 		title: 'О платформе (About)',
 		slug: 'page_about',
 		path: '/about',
@@ -303,21 +331,32 @@ const schemaPages = computed(() => {
 })
 
 const blockItems = computed(() => {
-	return pages.value.map((p) => ({
-		key: `block-${p.id}`,
-		isSchema: false,
-		id: p.id,
-		title: p.title,
-		slug: p.slug,
-		path: `/p/${p.slug}`,
-		icon: '📦',
-		description: 'Динамическая страница из реестра переиспользуемых блоков',
-		status: p.status || 'draft',
-		blocks: p.blocks,
-		published_at: p.published_at,
-		published_by: p.published_by,
-	}))
+	return pages.value.map((p) => {
+		const parent = p.parent_id ? pages.value.find((item) => item.id === p.parent_id) : null
+		return {
+			key: `block-${p.id}`,
+			isSchema: false,
+			id: p.id,
+			title: p.title,
+			slug: p.slug,
+			path: `/p/${p.slug}`,
+			icon: '📦',
+			description: 'Динамическая страница из реестра переиспользуемых блоков',
+			status: p.status || 'draft',
+			parent_id: p.parent_id,
+			parentTitle: parent?.title,
+			parentSlug: parent?.slug,
+			blocks: p.blocks,
+			published_at: p.published_at,
+			published_by: p.published_by,
+		}
+	})
 })
+
+function openSitemap() {
+	const base = (import.meta.env.VITE_CLIENT_URL || 'http://localhost:3000').replace(/\/$/, '')
+	window.open(`${base}/sitemap.xml`, '_blank')
+}
 
 const totalItemsCount = computed(() => pages.value.length + schemaPages.value.length)
 
@@ -533,6 +572,11 @@ async function seedPlatformsSchema() {
 }
 
 const handleEditSchemaPage = async (item: any) => {
+	if (item.slug === 'page_home') {
+		router.push('/home')
+		return
+	}
+
 	if (item.hasSchema) {
 		router.push({ name: 'EntriesList', params: { schemaIdentifier: item.slug } })
 		return
@@ -712,11 +756,11 @@ const handleCreateAboutTemplate = async () => {
 	align-items: center;
 	gap: 24px;
 	padding: 14px 20px;
-	background: var(--bg-card, #ffffff);
-	border: 1px solid var(--border-color);
+	background: var(--gp-bg-surface, var(--bg-card, rgba(30, 41, 59, 0.5)));
+	border: 1px solid var(--gp-glass-border, var(--border-color, rgba(255, 255, 255, 0.1)));
 	border-radius: 12px;
 	margin-bottom: 24px;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	box-shadow: var(--gp-glass-shadow, 0 1px 3px rgba(0, 0, 0, 0.05));
 }
 
 .arch-item {
@@ -771,8 +815,8 @@ const handleCreateAboutTemplate = async () => {
 	gap: 16px;
 	margin-bottom: 24px;
 	padding: 12px 16px;
-	background: var(--bg-card, #ffffff);
-	border: 1px solid var(--border-color);
+	background: var(--gp-bg-surface, var(--bg-card, rgba(30, 41, 59, 0.5)));
+	border: 1px solid var(--gp-glass-border, var(--border-color, rgba(255, 255, 255, 0.1)));
 	border-radius: 10px;
 }
 
@@ -893,6 +937,25 @@ const handleCreateAboutTemplate = async () => {
 	color: var(--accent-primary, #38bdf8);
 	font-family: monospace;
 	font-size: 12px;
+}
+
+.page-card__parent-badge {
+	font-size: 11px;
+	color: #6366f1;
+	background: rgba(99, 102, 241, 0.08);
+	border: 1px dashed rgba(99, 102, 241, 0.3);
+	border-radius: 6px;
+	padding: 4px 8px;
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.page-card__parent-badge .parent-slug {
+	color: var(--text-muted);
+	font-family: monospace;
+	font-size: 10px;
 }
 
 .page-card__published-date {

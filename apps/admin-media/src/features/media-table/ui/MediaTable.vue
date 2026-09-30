@@ -8,6 +8,7 @@
 				</el-button>
 				<template #dropdown>
 					<el-dropdown-menu>
+						<el-dropdown-item :icon="FolderOpened" command="moveToFolder">Переместить в папку</el-dropdown-item>
 						<el-dropdown-item :icon="PriceTag" command="addTags">Добавить теги</el-dropdown-item>
 						<el-dropdown-item :icon="FolderOpened" command="changeCategory">Сменить категорию</el-dropdown-item>
 						<el-dropdown-item :icon="Refresh" command="convertToWebP">Конвертировать в WebP</el-dropdown-item>
@@ -156,8 +157,19 @@
 				</template>
 			</UiTableColumn>
 
+			<!-- Folder Column -->
+			<el-table-column label="Folder" width="140">
+				<template #default="{ row }">
+					<div v-if="getFolderById(row.folderId)" class="table-folder-badge">
+						<span class="folder-dot" :style="{ backgroundColor: getFolderById(row.folderId)?.color || '#409EFF' }" />
+						<span class="folder-name">{{ getFolderById(row.folderId)?.name }}</span>
+					</div>
+					<span v-else class="text-muted">—</span>
+				</template>
+			</el-table-column>
+
 			<!-- Preview Column -->
-			<el-table-column label="Preview" width="100">
+			<el-table-column label="Preview" width="105">
 				<template #default="{ row }">
 					<div class="media-preview-cell">
 						<span
@@ -173,15 +185,21 @@
 							lazy
 							:src="row.variants?.thumbnail?.url || row.optimizedPath || row.url"
 						/>
-						<video
-							v-else-if="row.mediaType === 'video'"
-							class="preview-img"
-							muted
-							loop
-							autoplay
-							playsinline
-							:src="row.url"
-						/>
+						<div v-else-if="row.mediaType === 'video'" class="video-preview-thumb">
+							<video
+								class="preview-img"
+								muted
+								loop
+								autoplay
+								playsinline
+								:src="row.url"
+							/>
+							<span class="video-play-indicator">▶</span>
+						</div>
+						<div v-else-if="row.extension?.toLowerCase() === 'pdf' || row.mediaType === 'document'" class="doc-preview-cell">
+							<span class="doc-badge">PDF</span>
+							<el-icon :size="20"><Document /></el-icon>
+						</div>
 						<el-icon v-else :size="24"><Document /></el-icon>
 					</div>
 				</template>
@@ -269,6 +287,30 @@
 		<MediaPreviewDialog />
 		<MediaUpdateModal />
 		<MediaUploadDialog />
+
+		<!-- Move to Folder Dialog -->
+		<el-dialog v-model="isMoveFolderDialogOpen" title="Move to Folder" width="400px">
+			<el-form label-position="top">
+				<el-form-item label="Target Folder">
+					<el-select v-model="targetFolderId" placeholder="Select destination folder" style="width: 100%">
+						<el-option label="📁 Unorganized (Root)" value="root" />
+						<el-option
+							v-for="folder in folders"
+							:key="folder.id"
+							:label="folder.name"
+							:value="folder.id"
+						>
+							<span class="folder-dot" :style="{ backgroundColor: folder.color || '#409EFF', marginRight: '8px' }" />
+							<span>{{ folder.name }}</span>
+						</el-option>
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<el-button @click="isMoveFolderDialogOpen = false">Cancel</el-button>
+				<el-button type="primary" :loading="isMoving" @click="confirmMoveToFolder">Move Items</el-button>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
@@ -291,6 +333,8 @@ const {
 	pagination,
 	isLoading,
 	isFetching,
+	folders,
+	batchMove,
 	setPage,
 	setLimit,
 	setSort,
@@ -305,6 +349,35 @@ const {
 const { isDark } = useTheme()
 
 const selectedItems = ref<MediaItem[]>([])
+const isMoveFolderDialogOpen = ref(false)
+const targetFolderId = ref('root')
+const isMoving = ref(false)
+
+const getFolderById = (folderId?: string) => {
+	if (!folderId) return null
+	return folders.value.find((f) => f.id === folderId)
+}
+
+const handleMoveToFolder = () => {
+	targetFolderId.value = 'root'
+	isMoveFolderDialogOpen.value = true
+}
+
+const confirmMoveToFolder = async () => {
+	isMoving.value = true
+	try {
+		const uuids = selectedItems.value.map((i) => i.uuid)
+		const fId = targetFolderId.value === 'root' ? null : targetFolderId.value
+		await batchMove({ uuids, folderId: fId })
+		ElMessage.success('Files moved successfully')
+		isMoveFolderDialogOpen.value = false
+		selectedItems.value = []
+	} catch (e: any) {
+		ElMessage.error(e?.message || 'Failed to move files')
+	} finally {
+		isMoving.value = false
+	}
+}
 
 const handleSelectionChange = (val: MediaItem[]) => {
 	selectedItems.value = val
@@ -342,6 +415,9 @@ const handleBulkCommand = (command: string) => {
 	const uuids = selectedItems.value.map((i) => i.uuid)
 
 	switch (command) {
+		case 'moveToFolder':
+			handleMoveToFolder()
+			break
 		case 'delete':
 			confirmMultipleDelete()
 
@@ -477,5 +553,77 @@ const handleBulkCommand = (command: string) => {
 	display: flex;
 	justify-content: center;
 	gap: 8px;
+}
+
+.table-folder-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	background: var(--bg-surface-secondary, rgba(255, 255, 255, 0.05));
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.folder-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.folder-name {
+	max-width: 95px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.video-preview-thumb {
+	position: relative;
+	width: 48px;
+	height: 48px;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.video-play-indicator {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 9px;
+}
+
+.doc-preview-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: 48px;
+	height: 48px;
+	border-radius: 8px;
+	background: rgba(230, 162, 60, 0.1);
+	border: 1px dashed rgba(230, 162, 60, 0.4);
+	color: #e6a23c;
+}
+
+.doc-badge {
+	font-size: 9px;
+	font-weight: 700;
+	background: #e6a23c;
+	color: #fff;
+	border-radius: 3px;
+	padding: 1px 3px;
 }
 </style>

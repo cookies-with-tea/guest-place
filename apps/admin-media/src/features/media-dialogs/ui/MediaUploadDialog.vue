@@ -3,7 +3,7 @@
 		v-model="isUploadModalOpen"
 		class="media-upload-dialog"
 		title="Bulk Media Upload"
-		:width="700"
+		:width="760"
 		@close="closeAndReset"
 	>
 		<div
@@ -16,7 +16,7 @@
 			<el-card class="global-settings-card" shadow="never">
 				<template #header>
 					<div class="card-header">
-						<span class="header-title">Global Metadata</span>
+						<span class="header-title">Global Metadata & Destination</span>
 						<div class="header-actions">
 							<el-checkbox v-model="useChunkedUpload">Resumable Chunked</el-checkbox>
 							<el-checkbox v-model="convertToWebP">Auto-convert to WebP</el-checkbox>
@@ -35,6 +35,25 @@
 					</div>
 					<div class="input-row">
 						<el-select
+							v-model="globalFolderId"
+							clearable
+							placeholder="Target Folder (Root)"
+							:disabled="!isApplyToAll"
+						>
+							<el-option :value="null" label="📁 Root (No folder)" />
+							<el-option
+								v-for="folder in folders || []"
+								:key="folder.id"
+								:value="folder.id"
+								:label="`📁 ${folder.name}`"
+							>
+								<div class="folder-option">
+									<span class="folder-dot" :style="{ backgroundColor: folder.color || '#3b82f6' }" />
+									<span>{{ folder.name }}</span>
+								</div>
+							</el-option>
+						</el-select>
+						<el-select
 							v-model="globalCategory"
 							clearable
 							filterable
@@ -44,6 +63,8 @@
 							<el-option label="Marketing" value="Marketing" />
 							<el-option label="UI/UX" value="UI/UX" />
 							<el-option label="Content" value="Content" />
+							<el-option label="Documentation" value="Documentation" />
+							<el-option label="Media" value="Media" />
 						</el-select>
 						<el-select
 							v-model="globalTags"
@@ -59,6 +80,8 @@
 							<el-option label="Product" value="Product" />
 							<el-option label="UI/UX" value="UI/UX" />
 							<el-option label="Hero" value="Hero" />
+							<el-option label="Video" value="Video" />
+							<el-option label="Doc" value="Doc" />
 						</el-select>
 					</div>
 				</div>
@@ -72,20 +95,29 @@
 				:on-change="handleFileChange"
 				:on-remove="handleFileRemove"
 				:show-file-list="false"
+				accept="image/*,video/*,application/pdf"
 				class="bulk-uploader"
 			>
 				<el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-				<div class="el-upload__text"> Drop multiple files here or <em>click to upload</em> </div>
+				<div class="el-upload__text">
+					Drop multiple images, videos, or PDF documents here or <em>click to upload</em>
+				</div>
 			</el-upload>
 
 			<!-- Files List -->
 			<div v-if="filesToUpload.length > 0" class="files-grid">
 				<div v-for="(file, index) in filesToUpload" :key="index" class="compact-file-item">
 					<div class="item-main">
-						<div v-if="file.preview" class="file-thumb" @click="openFilePreview(file)">
-							<img :src="file.preview" />
+						<div class="file-thumb" @click="openFilePreview(file)">
+							<img v-if="file.preview && isImageFile(file.file)" :src="file.preview" />
+							<div v-else-if="isVideoFile(file.file)" class="thumb-badge video">
+								<el-icon><VideoCamera /></el-icon>
+							</div>
+							<div v-else class="thumb-badge pdf">
+								<el-icon><Document /></el-icon>
+							</div>
 						</div>
-						<span class="file-name">{{ file.file.name.substring(0, 20) }}...</span>
+						<span class="file-name" :title="file.file.name">{{ file.file.name }}</span>
 						<el-tag size="small" type="info">{{ (file.file.size / 1024 / 1024).toFixed(2) }}MB</el-tag>
 						<el-tag
 							v-if="file.status && file.status !== 'idle'"
@@ -94,13 +126,27 @@
 						>
 							{{ file.status }}
 						</el-tag>
-						<el-button
-							circle
-							size="small"
-							:type="file.isCustom ? 'warning' : 'default'"
-							:icon="Edit"
-							@click="toggleCustom(index)"
-						/>
+
+						<div class="item-actions">
+							<!-- Crop button for images -->
+							<el-tooltip v-if="isImageFile(file.file)" content="Crop & Resize before upload" placement="top">
+								<el-button
+									circle
+									size="small"
+									type="primary"
+									plain
+									:icon="Crop"
+									@click="startCropping(index)"
+								/>
+							</el-tooltip>
+							<el-button
+								circle
+								size="small"
+								:type="file.isCustom ? 'warning' : 'default'"
+								:icon="Edit"
+								@click="toggleCustom(index)"
+							/>
+						</div>
 					</div>
 
 					<div v-if="file.status && file.status !== 'idle'" class="item-upload-progress">
@@ -116,10 +162,26 @@
 						<div v-if="file.isCustom" class="item-custom-fields">
 							<el-input v-model="file.title" placeholder="Custom Title" size="small" />
 							<el-input v-model="file.alt" placeholder="Custom Alt" size="small" />
+							<el-select
+								v-model="file.folderId"
+								clearable
+								placeholder="Target Folder"
+								size="small"
+							>
+								<el-option :value="null" label="📁 Root (No folder)" />
+								<el-option
+									v-for="folder in folders || []"
+									:key="folder.id"
+									:value="folder.id"
+									:label="`📁 ${folder.name}`"
+								/>
+							</el-select>
 							<el-select v-model="file.category" clearable filterable placeholder="Category" size="small">
 								<el-option label="Marketing" value="Marketing" />
 								<el-option label="UI/UX" value="UI/UX" />
 								<el-option label="Content" value="Content" />
+								<el-option label="Documentation" value="Documentation" />
+								<el-option label="Media" value="Media" />
 							</el-select>
 							<el-select
 								v-model="file.tags"
@@ -134,6 +196,7 @@
 								<el-option label="Logo" value="Logo" />
 								<el-option label="Social" value="Social" />
 								<el-option label="Document" value="Document" />
+								<el-option label="Video" value="Video" />
 							</el-select>
 						</div>
 					</el-collapse-transition>
@@ -154,10 +217,27 @@
 	</UiModal>
 
 	<!-- Inner Preview for Uploading Files -->
-	<el-dialog v-model="isPreviewOpen" append-to-body title="File Preview" width="600px">
+	<el-dialog v-model="isPreviewOpen" append-to-body title="File Preview" width="650px">
 		<div v-if="activePreviewFile" class="upload-preview-container" :class="previewBg">
-			<img :src="activePreviewFile.preview" class="upload-preview-img" />
-			<div class="bg-toggle">
+			<img
+				v-if="isImageFile(activePreviewFile.file)"
+				:src="activePreviewFile.preview"
+				class="upload-preview-img"
+			/>
+			<video
+				v-else-if="isVideoFile(activePreviewFile.file)"
+				:src="activePreviewFile.preview"
+				controls
+				autoplay
+				class="upload-preview-video"
+			/>
+			<iframe
+				v-else
+				:src="activePreviewFile.preview"
+				class="upload-preview-pdf"
+			/>
+
+			<div v-if="isImageFile(activePreviewFile.file)" class="bg-toggle">
 				<el-radio-group v-model="previewBg" size="small">
 					<el-radio-button label="Transparent" value="checkered" />
 					<el-radio-button label="White" value="white" />
@@ -172,25 +252,76 @@
 			</div>
 		</template>
 	</el-dialog>
+
+	<!-- In-browser Image Crop & Resize Modal -->
+	<el-dialog
+		v-model="isCropDialogOpen"
+		append-to-body
+		title="Crop & Resize Image Before Upload"
+		width="800px"
+		:before-close="closeCropDialog"
+	>
+		<div class="crop-modal-body">
+			<div class="crop-cropper-area">
+				<VueCropper
+					v-if="isCropDialogOpen && croppingImageUrl"
+					ref="cropperRef"
+					:img="croppingImageUrl"
+					:auto-crop="true"
+					:center-box="true"
+					:fixed="cropFixed"
+					:fixed-number="cropFixedNumber"
+					:output-size="1"
+					output-type="webp"
+				/>
+			</div>
+			<div class="crop-modal-controls">
+				<div class="crop-control-group">
+					<span class="control-label">Aspect Ratio</span>
+					<el-radio-group v-model="cropAspectRatio" size="small" @change="handleCropRatioChange">
+						<el-radio-button label="free" value="free">Free</el-radio-button>
+						<el-radio-button label="1:1" value="1:1">1:1</el-radio-button>
+						<el-radio-button label="4:3" value="4:3">4:3</el-radio-button>
+						<el-radio-button label="16:9" value="16:9">16:9</el-radio-button>
+					</el-radio-group>
+				</div>
+				<div class="crop-control-group">
+					<span class="control-label">Rotate</span>
+					<el-button-group>
+						<el-button size="small" :icon="RefreshLeft" @click="cropperRef?.rotateLeft()" />
+						<el-button size="small" :icon="RefreshRight" @click="cropperRef?.rotateRight()" />
+					</el-button-group>
+				</div>
+			</div>
+		</div>
+		<template #footer>
+			<el-button @click="closeCropDialog">Cancel</el-button>
+			<el-button type="primary" @click="applyCrop">Apply Crop & Resize</el-button>
+		</template>
+	</el-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { VueCropper } from 'vue-cropper/dist/vue-cropper.es.js'
 import { useQueryClient } from '@tanstack/vue-query'
 
 import { UiModal } from '@admin-panel/ui'
-import { Edit, UploadFilled } from '@element-plus/icons-vue'
+import { Crop, Document, Edit, RefreshLeft, RefreshRight, UploadFilled, VideoCamera } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 import { MEDIA_QUERY_KEY, uploadFileInChunks, useMedia } from '#entities/media'
 
+import 'vue-cropper/dist/index.css'
+
 const queryClient = useQueryClient()
-const { isUploadModalOpen, closeUploadModal, createMedia, isSubmitting } = useMedia()
+const { isUploadModalOpen, closeUploadModal, createMedia, isSubmitting, folders } = useMedia()
 
 const globalTitle = ref('')
 const globalAlt = ref('')
 const globalCategory = ref('')
 const globalTags = ref<string[]>([])
+const globalFolderId = ref<string | null>(null)
 const isApplyToAll = ref(true)
 const convertToWebP = ref(true)
 const useChunkedUpload = ref(true)
@@ -204,6 +335,7 @@ interface FileWithMeta {
 	alt: string
 	category: string
 	tags: string[]
+	folderId?: string | null
 	isCustom: boolean
 	preview?: string
 	progress?: number
@@ -217,21 +349,38 @@ const isPreviewOpen = ref(false)
 const activePreviewFile = ref<FileWithMeta | null>(null)
 const previewBg = ref('checkered')
 
+// In-browser crop state
+const isCropDialogOpen = ref(false)
+const croppingIndex = ref<number | null>(null)
+const croppingImageUrl = ref('')
+const cropperRef = ref<any>(null)
+const cropAspectRatio = ref('free')
+const cropFixed = ref(false)
+const cropFixedNumber = ref([1, 1])
+
+const isImageFile = (file: File) => file.type.startsWith('image/')
+const isVideoFile = (file: File) => file.type.startsWith('video/')
+
 const openFilePreview = (file: FileWithMeta) => {
 	activePreviewFile.value = file
-
 	isPreviewOpen.value = true
 }
 
 const handleFileChange = (file: any) => {
-	const preview = file.raw.type.startsWith('image/') ? URL.createObjectURL(file.raw) : undefined
+	const rawFile = file.raw as File
+	let preview: string | undefined
+
+	if (isImageFile(rawFile) || isVideoFile(rawFile) || rawFile.type === 'application/pdf' || rawFile.name.toLowerCase().endsWith('.pdf')) {
+		preview = URL.createObjectURL(rawFile)
+	}
 
 	filesToUpload.value.push({
-		file: file.raw,
+		file: rawFile,
 		title: '',
 		alt: '',
 		category: '',
 		tags: [],
+		folderId: null,
 		isCustom: false,
 		preview,
 		progress: 0,
@@ -256,6 +405,56 @@ const toggleCustom = (index: number) => {
 	filesToUpload.value[index].isCustom = !filesToUpload.value[index].isCustom
 }
 
+const startCropping = (index: number) => {
+	const item = filesToUpload.value[index]
+	if (!item || !isImageFile(item.file)) return
+
+	croppingIndex.value = index
+	croppingImageUrl.value = item.preview || URL.createObjectURL(item.file)
+	cropAspectRatio.value = 'free'
+	cropFixed.value = false
+	isCropDialogOpen.value = true
+}
+
+const handleCropRatioChange = (val: string) => {
+	if (val === 'free') {
+		cropFixed.value = false
+	} else {
+		cropFixed.value = true
+		const [w, h] = val.split(':').map(Number)
+		cropFixedNumber.value = [w, h]
+	}
+}
+
+const closeCropDialog = () => {
+	isCropDialogOpen.value = false
+	croppingIndex.value = null
+	croppingImageUrl.value = ''
+}
+
+const applyCrop = () => {
+	if (!cropperRef.value || croppingIndex.value === null) return
+	const index = croppingIndex.value
+	const item = filesToUpload.value[index]
+	if (!item) return
+
+	cropperRef.value.getCropBlob((blob: Blob) => {
+		if (!blob) return
+
+		const originalName = item.file.name.replace(/\.[^/.]+$/, '')
+		const newFile = new File([blob], `${originalName}.webp`, { type: 'image/webp' })
+
+		if (item.preview) {
+			URL.revokeObjectURL(item.preview)
+		}
+
+		item.file = newFile
+		item.preview = URL.createObjectURL(blob)
+		closeCropDialog()
+		ElMessage.success('Image cropped & resized successfully')
+	})
+}
+
 const handleUpload = async () => {
 	if (filesToUpload.value.length === 0) return
 
@@ -268,6 +467,7 @@ const handleUpload = async () => {
 				const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
 				const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
 				const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
+				const finalFolderId = (isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ?? globalFolderId.value ?? undefined
 
 				await uploadFileInChunks({
 					file: item.file,
@@ -275,21 +475,18 @@ const handleUpload = async () => {
 					alt: finalAlt,
 					category: finalCategory,
 					tags: finalTags,
+					folderId: finalFolderId,
 					convertToWebp: convertToWebP.value,
 					onProgress: (p) => {
 						item.progress = p.percent
-
 						item.status = p.stage
-
 						item.statusMessage = p.message
 					},
 				})
 			}
 
 			await queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
-
 			ElMessage.success('Files uploaded successfully')
-
 			closeAndReset()
 		} catch (err: any) {
 			ElMessage.error(err?.message || 'Chunked upload failed')
@@ -302,36 +499,33 @@ const handleUpload = async () => {
 
 	try {
 		const formData = new FormData()
-
 		formData.append('source', 'cms')
-
 		formData.append('convert_to_webp', String(convertToWebP.value))
+
+		if (globalFolderId.value) {
+			formData.append('folder_id', globalFolderId.value)
+		}
 
 		filesToUpload.value.forEach((item, index) => {
 			formData.append('file', item.file)
 
 			const finalTitle = isApplyToAll.value && !item.isCustom ? globalTitle.value : item.title
-
 			const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
-
 			const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
-
 			const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
+			const finalFolderId = (isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ?? globalFolderId.value
 
-			// Using indexed keys for better reliability as suggested by user
 			formData.append(`title_${index}`, finalTitle || '')
-
 			formData.append(`alt_${index}`, finalAlt || '')
-
 			formData.append(`category_${index}`, finalCategory || '')
-
 			formData.append(`tags_${index}`, (finalTags || []).join(','))
+			if (finalFolderId) {
+				formData.append(`folder_id_${index}`, finalFolderId)
+			}
 		})
 
 		await createMedia(formData as any)
-
 		ElMessage.success('Files uploaded successfully')
-
 		closeAndReset()
 	} catch {
 		ElMessage.error('Failed to upload files')
@@ -344,17 +538,12 @@ const closeAndReset = () => {
 	})
 
 	filesToUpload.value = []
-
 	globalTitle.value = ''
-
 	globalAlt.value = ''
-
 	globalCategory.value = ''
-
 	globalTags.value = []
-
+	globalFolderId.value = null
 	isApplyToAll.value = true
-
 	convertToWebP.value = true
 
 	closeUploadModal()
@@ -405,6 +594,18 @@ const closeAndReset = () => {
 	flex: 1;
 }
 
+.folder-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.folder-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+}
+
 :deep(.el-input-group__prepend) {
 	min-width: 60px;
 	font-weight: 600;
@@ -420,7 +621,7 @@ const closeAndReset = () => {
 .files-grid {
 	max-height: 250px;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 	padding: 4px;
 	overflow-y: auto;
 	gap: 12px;
@@ -446,7 +647,13 @@ const closeAndReset = () => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
+	gap: 8px;
+}
+
+.item-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .item-upload-progress {
@@ -466,25 +673,48 @@ const closeAndReset = () => {
 }
 
 .file-thumb {
-	width: 32px;
-	height: 32px;
+	width: 36px;
+	height: 36px;
 	flex-shrink: 0;
 	border: 1px solid var(--border-color);
-	border-radius: 4px;
+	border-radius: 6px;
 	transition: transform 0.2s;
 	cursor: pointer;
 	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--bg-header);
 }
 
 .file-thumb:hover {
 	border-color: var(--color-primary);
-	transform: scale(1.1);
+	transform: scale(1.08);
 }
 
 .file-thumb img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+
+.thumb-badge {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 18px;
+}
+
+.thumb-badge.video {
+	background: rgba(168, 85, 247, 0.15);
+	color: #a855f7;
+}
+
+.thumb-badge.pdf {
+	background: rgba(239, 68, 68, 0.15);
+	color: #ef4444;
 }
 
 .file-name {
@@ -514,7 +744,7 @@ const closeAndReset = () => {
 
 .upload-preview-container {
 	width: 100%;
-	height: 400px;
+	height: 420px;
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -552,6 +782,18 @@ const closeAndReset = () => {
 	object-fit: contain;
 }
 
+.upload-preview-video {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.upload-preview-pdf {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
 .bg-toggle {
 	top: 12px;
 	right: 12px;
@@ -564,6 +806,39 @@ const closeAndReset = () => {
 	display: flex;
 	justify-content: space-between;
 	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.crop-modal-body {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.crop-cropper-area {
+	width: 100%;
+	height: 400px;
+	border-radius: 8px;
+	overflow: hidden;
+	border: 1px solid var(--border-color);
+}
+
+.crop-modal-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.crop-control-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.control-label {
+	font-size: 13px;
 	color: var(--text-muted);
 }
 </style>
