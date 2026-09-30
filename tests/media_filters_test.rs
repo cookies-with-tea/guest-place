@@ -156,6 +156,7 @@ fn test_smart_search_includes_category_extension_and_tags() {
         source: None,
         media_type: None,
         tags: None,
+        folder_id: None,
         min_size_bytes: None,
         max_size_bytes: None,
         date_from: None,
@@ -189,6 +190,7 @@ fn test_size_range_query_generation() {
         source: None,
         media_type: None,
         tags: None,
+        folder_id: None,
         min_size_bytes: Some(1048576), // 1MB
         max_size_bytes: Some(10485760), // 10MB
         date_from: None,
@@ -217,6 +219,7 @@ fn test_date_range_query_generation() {
         source: None,
         media_type: None,
         tags: None,
+        folder_id: None,
         min_size_bytes: None,
         max_size_bytes: None,
         date_from: Some("2026-05-01".to_string()),
@@ -245,6 +248,7 @@ fn test_combined_filters_query_generation() {
         source: Some("cms".to_string()),
         media_type: Some("image".to_string()),
         tags: Some("luxury,ocean".to_string()),
+        folder_id: None,
         min_size_bytes: Some(500000),
         max_size_bytes: Some(2000000),
         date_from: Some("2026-01-01T00:00:00Z".to_string()),

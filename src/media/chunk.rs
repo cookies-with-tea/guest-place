@@ -24,6 +24,8 @@ pub struct InitChunkUploadDTO {
     pub source: Option<String>,
     #[serde(alias = "convertToWebp")]
     pub convert_to_webp: Option<bool>,
+    #[serde(alias = "folderId")]
+    pub folder_id: Option<Uuid>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -279,6 +281,7 @@ mod tests {
             tags: Some(vec!["chunk".to_string(), "resumable".to_string()]),
             source: Some("test".to_string()),
             convert_to_webp: Some(false),
+            folder_id: None,
         };
 
         // 1. Init
@@ -329,6 +332,7 @@ mod tests {
             tags: None,
             source: None,
             convert_to_webp: None,
+            folder_id: None,
         };
 
         let init_resp = manager.init_session(init_dto).await.expect("init failed");
@@ -359,6 +363,7 @@ mod tests {
             tags: None,
             source: None,
             convert_to_webp: None,
+            folder_id: None,
         };
 
         let init_resp = manager.init_session(init_dto).await.expect("init failed");

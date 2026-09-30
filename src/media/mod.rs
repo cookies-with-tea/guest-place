@@ -6,3 +6,4 @@ pub mod optimizer;
 pub mod chunk;
 pub mod palette;
 pub mod sanitizer;
+pub mod folders;

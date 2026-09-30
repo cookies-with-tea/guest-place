@@ -11,8 +11,8 @@ use crate::core::dto::ApiResponse;
 use crate::AppState;
 
 use super::model::{
-    BlockType, CreateBlockTypeDTO, CreatePageDTO, GetPageQuery, GetPagesQuery, Page,
-    SyncBlockTypesDTO, UpdateBlockTypeDTO, UpdatePageDTO,
+    BlockType, BreadcrumbItem, CreateBlockTypeDTO, CreatePageDTO, GetPageQuery, GetPagesQuery,
+    Page, SyncBlockTypesDTO, UpdateBlockTypeDTO, UpdatePageDTO,
 };
 
 #[utoipa::path(
@@ -33,14 +33,14 @@ pub async fn get_pages(
 ) -> Result<Json<ApiResponse<Vec<Page>>>, (StatusCode, Json<ApiResponse<()>>)> {
     let pages_res = if let Some(ref status) = query.status {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC",
         )
         .bind(status)
         .fetch_all(&state.pool)
         .await
     } else {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at FROM pages ORDER BY updated_at DESC",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages ORDER BY updated_at DESC",
         )
         .fetch_all(&state.pool)
         .await
@@ -89,7 +89,7 @@ pub async fn get_page(
     let (page_res, is_slug_lookup) = if let Ok(uuid) = Uuid::parse_str(&clean) {
         (
             sqlx::query_as::<_, Page>(
-                "SELECT id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at FROM pages WHERE id = $1 OR slug = $2",
+                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE id = $1 OR slug = $2",
             )
             .bind(uuid)
             .bind(&clean)
@@ -100,7 +100,7 @@ pub async fn get_page(
     } else {
         (
             sqlx::query_as::<_, Page>(
-                "SELECT id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at FROM pages WHERE slug = $1",
+                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE slug = $1",
             )
             .bind(&clean)
             .fetch_optional(&state.pool)
@@ -152,6 +152,165 @@ pub async fn get_page(
 }
 
 #[utoipa::path(
+    get,
+    path = "/api/v1/pages/{id}/breadcrumbs",
+    params(
+        ("id" = String, Path, description = "Page ID or slug")
+    ),
+    responses(
+        (status = 200, body = ApiResponse<Vec<BreadcrumbItem>>),
+        (status = 404, description = "Page not found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Pages"
+)]
+pub async fn get_page_breadcrumbs(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<String>,
+) -> Result<Json<ApiResponse<Vec<BreadcrumbItem>>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let clean = id.trim_start_matches('/').to_string();
+
+    let query_res = if let Ok(uuid) = Uuid::parse_str(&clean) {
+        sqlx::query_as::<_, (Uuid, String, String)>(
+            r#"
+            WITH RECURSIVE page_tree AS (
+                SELECT id, title, slug, parent_id, 1 as depth
+                FROM pages
+                WHERE id = $1 OR slug = $2
+                UNION ALL
+                SELECT p.id, p.title, p.slug, p.parent_id, pt.depth + 1
+                FROM pages p
+                JOIN page_tree pt ON p.id = pt.parent_id
+            )
+            SELECT id, title, slug
+            FROM page_tree
+            ORDER BY depth DESC
+            "#,
+        )
+        .bind(uuid)
+        .bind(&clean)
+        .fetch_all(&state.pool)
+        .await
+    } else {
+        sqlx::query_as::<_, (Uuid, String, String)>(
+            r#"
+            WITH RECURSIVE page_tree AS (
+                SELECT id, title, slug, parent_id, 1 as depth
+                FROM pages
+                WHERE slug = $1
+                UNION ALL
+                SELECT p.id, p.title, p.slug, p.parent_id, pt.depth + 1
+                FROM pages p
+                JOIN page_tree pt ON p.id = pt.parent_id
+            )
+            SELECT id, title, slug
+            FROM page_tree
+            ORDER BY depth DESC
+            "#,
+        )
+        .bind(&clean)
+        .fetch_all(&state.pool)
+        .await
+    };
+
+    let rows = query_res.map_err(|e| {
+        eprintln!("Database error fetching breadcrumbs: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Failed to fetch breadcrumbs".to_string()]),
+            }),
+        )
+    })?;
+
+    if rows.is_empty() {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Page not found".to_string()]),
+            }),
+        ));
+    }
+
+    let items = rows
+        .into_iter()
+        .map(|(id, title, slug)| BreadcrumbItem { id, title, slug })
+        .collect();
+
+    Ok(Json(ApiResponse {
+        data: Some(items),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/pages/sitemap.xml",
+    responses(
+        (status = 200, description = "Sitemap XML", content_type = "application/xml")
+    ),
+    tag = "Pages"
+)]
+pub async fn get_sitemap_xml(
+    State(state): State<Arc<AppState>>,
+) -> impl axum::response::IntoResponse {
+    let pages_res = sqlx::query_as::<_, (String, chrono::DateTime<chrono::Utc>)>(
+        "SELECT slug, updated_at FROM pages WHERE status = 'published' ORDER BY updated_at DESC",
+    )
+    .fetch_all(&state.pool)
+    .await;
+
+    let base_url = state.frontend_url.trim_end_matches('/');
+
+    let mut xml = String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    xml.push_str("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
+
+    let static_routes = [
+        ("", "1.0", "daily"),
+        ("about", "0.8", "weekly"),
+        ("platforms", "0.8", "weekly"),
+        ("guests", "0.8", "weekly"),
+    ];
+
+    let now_date = chrono::Utc::now().format("%Y-%m-%d").to_string();
+
+    for (route, priority, freq) in static_routes {
+        let loc = if route.is_empty() {
+            format!("{}/", base_url)
+        } else {
+            format!("{}/{}", base_url, route)
+        };
+        xml.push_str(&format!(
+            "  <url>\n    <loc>{}</loc>\n    <lastmod>{}</lastmod>\n    <changefreq>{}</changefreq>\n    <priority>{}</priority>\n  </url>\n",
+            loc, now_date, freq, priority
+        ));
+    }
+
+    if let Ok(pages) = pages_res {
+        for (slug, updated_at) in pages {
+            let lastmod = updated_at.format("%Y-%m-%d").to_string();
+            let loc = format!("{}/p/{}", base_url, slug.trim_start_matches('/'));
+            xml.push_str(&format!(
+                "  <url>\n    <loc>{}</loc>\n    <lastmod>{}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n",
+                loc, lastmod
+            ));
+        }
+    }
+
+    xml.push_str("</urlset>\n");
+
+    axum::response::Response::builder()
+        .header(axum::http::header::CONTENT_TYPE, "application/xml; charset=utf-8")
+        .body(axum::body::Body::from(xml))
+        .unwrap()
+}
+
+#[utoipa::path(
     post,
     path = "/api/v1/pages",
     request_body = CreatePageDTO,
@@ -180,9 +339,9 @@ pub async fn create_page(
 
     let page = sqlx::query_as::<_, Page>(
         r#"
-        INSERT INTO pages (title, slug, blocks, status, seo, published_at, published_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at
+        INSERT INTO pages (title, slug, blocks, status, seo, parent_id, published_at, published_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at
         "#,
     )
     .bind(payload.title)
@@ -190,6 +349,7 @@ pub async fn create_page(
     .bind(blocks)
     .bind(status)
     .bind(seo)
+    .bind(payload.parent_id)
     .bind(published_at)
     .bind(payload.published_by)
     .fetch_one(&state.pool)
@@ -237,6 +397,12 @@ pub async fn update_page(
     Json(payload): Json<UpdatePageDTO>,
 ) -> Result<Json<ApiResponse<Page>>, (StatusCode, Json<ApiResponse<()>>)> {
     let clean_slug = payload.slug.map(|s| s.trim_start_matches('/').to_string());
+    let update_parent = payload.clear_parent == Some(true) || payload.parent_id.is_some();
+    let new_parent_id = if payload.clear_parent == Some(true) {
+        None
+    } else {
+        payload.parent_id
+    };
 
     let page = sqlx::query_as::<_, Page>(
         r#"
@@ -247,15 +413,16 @@ pub async fn update_page(
             blocks = COALESCE($3, blocks),
             status = COALESCE($4, status),
             seo = COALESCE($5, seo),
+            parent_id = CASE WHEN $6 THEN $7 ELSE parent_id END,
             published_at = CASE 
                 WHEN $4 = 'published' AND published_at IS NULL THEN NOW()
-                WHEN $6::timestamptz IS NOT NULL THEN $6
+                WHEN $8::timestamptz IS NOT NULL THEN $8
                 ELSE published_at
             END,
-            published_by = COALESCE($7, published_by),
+            published_by = COALESCE($9, published_by),
             updated_at = NOW()
-        WHERE id = $8
-        RETURNING id, title, slug, blocks, status, seo, published_at, published_by, created_at, updated_at
+        WHERE id = $10
+        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at
         "#,
     )
     .bind(payload.title)
@@ -263,6 +430,8 @@ pub async fn update_page(
     .bind(payload.blocks)
     .bind(payload.status)
     .bind(payload.seo)
+    .bind(update_parent)
+    .bind(new_parent_id)
     .bind(payload.published_at)
     .bind(payload.published_by)
     .bind(id)

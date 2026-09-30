@@ -62,10 +62,18 @@ pub struct Page {
     pub status: String,
     #[schema(value_type = Object)]
     pub seo: sqlx::types::Json<serde_json::Value>,
+    pub parent_id: Option<Uuid>,
     pub published_at: Option<DateTime<Utc>>,
     pub published_by: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
+pub struct BreadcrumbItem {
+    pub id: Uuid,
+    pub title: String,
+    pub slug: String,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -75,6 +83,8 @@ pub struct CreatePageDTO {
     pub blocks: Option<serde_json::Value>,
     pub status: Option<String>,
     pub seo: Option<serde_json::Value>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub parent_id: Option<Uuid>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
     pub published_at: Option<DateTime<Utc>>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
@@ -88,6 +98,9 @@ pub struct UpdatePageDTO {
     pub blocks: Option<serde_json::Value>,
     pub status: Option<String>,
     pub seo: Option<serde_json::Value>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub parent_id: Option<Uuid>,
+    pub clear_parent: Option<bool>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
     pub published_at: Option<DateTime<Utc>>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
@@ -126,6 +139,35 @@ mod tests {
         assert!(dto.is_ok());
         let dto = dto.unwrap();
         assert!(dto.published_at.is_some());
+    }
+
+    #[test]
+    fn test_deserialize_create_page_with_parent_id() {
+        let parent_uuid = Uuid::new_v4();
+        let json_data = format!(
+            r#"{{"title":"Sub Page","slug":"sub","parent_id":"{}"}}"#,
+            parent_uuid
+        );
+        let dto: Result<CreatePageDTO, _> = serde_json::from_str(&json_data);
+        assert!(dto.is_ok());
+        let dto = dto.unwrap();
+        assert_eq!(dto.parent_id, Some(parent_uuid));
+
+        // Empty string should deserialize to None
+        let json_empty = r#"{"title":"Root Page","slug":"root","parent_id":""}"#;
+        let dto_empty: Result<CreatePageDTO, _> = serde_json::from_str(json_empty);
+        assert!(dto_empty.is_ok());
+        assert_eq!(dto_empty.unwrap().parent_id, None);
+    }
+
+    #[test]
+    fn test_deserialize_update_page_with_clear_parent() {
+        let json_data = r#"{"title":"Updated","clear_parent":true}"#;
+        let dto: Result<UpdatePageDTO, _> = serde_json::from_str(json_data);
+        assert!(dto.is_ok());
+        let dto = dto.unwrap();
+        assert_eq!(dto.clear_parent, Some(true));
+        assert_eq!(dto.parent_id, None);
     }
 }
 

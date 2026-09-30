@@ -9,7 +9,9 @@ use crate::AppState;
 pub fn pages_public_router() -> AxRouter<Arc<AppState>> {
     AxRouter::new()
         .route("/", get(handlers::get_pages))
+        .route("/sitemap.xml", get(handlers::get_sitemap_xml))
         .route("/{id}", get(handlers::get_page))
+        .route("/{id}/breadcrumbs", get(handlers::get_page_breadcrumbs))
 }
 
 pub fn pages_protected_router() -> AxRouter<Arc<AppState>> {

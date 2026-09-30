@@ -9,6 +9,7 @@ pub struct CreateMediaDTO {
     pub category: Option<String>,
     pub source: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub folder_id: Option<uuid::Uuid>,
     #[schema(format = Binary, content_media_type = "application/octet-stream")]
     pub file: String,
 }
@@ -33,7 +34,7 @@ pub struct MediaVariantsDTO {
     pub original: Option<MediaVariantDTO>,
 }
 
-#[derive(Serialize, Deserialize, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaItemDTO {
     pub uuid: String,
@@ -56,6 +57,9 @@ pub struct MediaItemDTO {
     pub dominant_color: Option<String>,
     pub palette: Option<serde_json::Value>,
     pub exif: Option<serde_json::Value>,
+    pub folder_id: Option<uuid::Uuid>,
+    pub content_hash: Option<String>,
+    pub cdn_url: Option<String>,
 }
 
 impl From<MediaItemFromDb> for MediaItemDTO {
@@ -81,11 +85,14 @@ impl From<MediaItemFromDb> for MediaItemDTO {
             dominant_color: row.dominant_color,
             palette: row.palette,
             exif: row.exif,
+            folder_id: row.folder_id,
+            content_hash: row.content_hash,
+            cdn_url: None,
         }
     }
 }
 
-#[derive(Deserialize, Debug, ToSchema)]
+#[derive(Deserialize, Debug, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateMediaDTO {
     pub name: Option<String>,
@@ -94,6 +101,7 @@ pub struct UpdateMediaDTO {
     pub alt: Option<String>,
     pub category: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub folder_id: Option<uuid::Uuid>,
 }
 
 #[derive(Deserialize, Debug, ToSchema)]
@@ -109,7 +117,7 @@ pub struct BulkOptimizeMediaDTO {
     pub uuids: Vec<uuid::Uuid>,
 }
 
-#[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
+#[derive(Deserialize, Debug, ToSchema, IntoParams, Clone, Default)]
 pub struct MediaFilterQuery {
     pub page: Option<i32>,
     pub limit: Option<i32>,
@@ -120,13 +128,14 @@ pub struct MediaFilterQuery {
     pub source: Option<String>,
     pub media_type: Option<String>,
     pub tags: Option<String>,
+    pub folder_id: Option<String>,
     pub min_size_bytes: Option<i64>,
     pub max_size_bytes: Option<i64>,
     pub date_from: Option<String>,
     pub date_to: Option<String>,
 }
 
-#[derive(sqlx::FromRow, Debug)]
+#[derive(sqlx::FromRow, Debug, Clone)]
 pub struct MediaItemFromDb {
     pub uuid: uuid::Uuid,
     pub url: String,
@@ -148,9 +157,11 @@ pub struct MediaItemFromDb {
     pub dominant_color: Option<String>,
     pub palette: Option<serde_json::Value>,
     pub exif: Option<serde_json::Value>,
+    pub folder_id: Option<uuid::Uuid>,
+    pub content_hash: Option<String>,
 }
 
-#[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema, Clone, Copy)]
+#[derive(sqlx::Type, Debug, Serialize, Deserialize, ToSchema, Clone, Copy, PartialEq, Eq)]
 #[sqlx(type_name = "media_type", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum MediaType {
@@ -160,4 +171,54 @@ pub enum MediaType {
     Document,
     Archive,
     Other,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaFolderDTO {
+    pub id: uuid::Uuid,
+    pub name: String,
+    pub parent_id: Option<uuid::Uuid>,
+    pub color: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    #[sqlx(default)]
+    pub item_count: Option<i64>,
+}
+
+#[derive(Deserialize, Debug, ToSchema, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateFolderDTO {
+    pub name: String,
+    pub parent_id: Option<uuid::Uuid>,
+    pub color: Option<String>,
+}
+
+#[derive(Deserialize, Debug, ToSchema, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateFolderDTO {
+    pub name: Option<String>,
+    pub parent_id: Option<uuid::Uuid>,
+    pub color: Option<String>,
+}
+
+#[derive(Deserialize, Debug, ToSchema, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchMoveMediaDTO {
+    pub uuids: Vec<uuid::Uuid>,
+    pub folder_id: Option<uuid::Uuid>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaTagCountDTO {
+    pub tag: String,
+    pub count: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaConfigDTO {
+    pub cdn_url: Option<String>,
+    pub public_url: String,
+    pub max_quota: i64,
 }

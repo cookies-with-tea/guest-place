@@ -12,6 +12,7 @@ pub struct AppConfig {
     pub redis_port: u16,
     pub redis_password: Option<String>,
     pub media_quota_limit: i64,
+    pub cdn_url: Option<String>,
 }
 
 impl AppConfig {
@@ -43,6 +44,11 @@ impl AppConfig {
             .parse()
             .expect("MEDIA_QUOTA_LIMIT is not a valid number");
 
+        let cdn_url = env::var("CDN_URL")
+            .ok()
+            .map(|s| s.trim().trim_end_matches('/').to_string())
+            .filter(|s| !s.is_empty());
+
         AppConfig {
             app_host,
             app_port,
@@ -52,6 +58,7 @@ impl AppConfig {
             redis_port,
             redis_password,
             media_quota_limit,
+            cdn_url,
         }
     }
 }

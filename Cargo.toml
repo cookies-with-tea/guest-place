@@ -8,7 +8,7 @@ default-run = "guest-place"
 axum = { version = "0.8.1", features = ["multipart", "macros"] }
 tower = { version = "0.5", features = ["util"] }
 dotenv = "0.15.0"
-tower-http = { version = "0.6.2", features = ["cors", "fs"] }
+tower-http = { version = "0.6.2", features = ["cors", "fs", "set-header"] }
 serde = "1.0.197"
 anyhow = "1.0.81"
 serde_derive = "1.0.197"

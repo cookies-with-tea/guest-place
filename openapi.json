@@ -1841,6 +1841,198 @@
         }
       }
     },
+    "/api/v1/media/batch/move": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "batch_move_media",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchMoveMediaDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Media items moved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_u64"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/config": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "get_media_config",
+        "responses": {
+          "200": {
+            "description": "Media service configuration including CDN prefix",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MediaConfigDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/media/folders": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "get_media_folders",
+        "responses": {
+          "200": {
+            "description": "List of media folders with item counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_MediaFolderDTO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "create_media_folder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFolderDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Folder created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MediaFolderDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid folder payload"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/folders/{id}": {
+      "put": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "update_media_folder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFolderDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Folder updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MediaFolderDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Folder not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "delete_media_folder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Folder deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_bool"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Folder not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/api/v1/media/optimize/bulk": {
       "post": {
         "tags": [
@@ -1870,6 +2062,29 @@
           },
           "500": {
             "description": "Optimization error"
+          }
+        }
+      }
+    },
+    "/api/v1/media/tags": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "get_media_tags",
+        "responses": {
+          "200": {
+            "description": "List of all media tags with usage count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_MediaTagCountDTO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -2207,6 +2422,247 @@
         }
       }
     },
+    "/api/v1/media/{uuid}/variants/{size}": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "operationId": "get_media_variant",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Media UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "path",
+            "description": "Variant size: thumbnail, medium, large, original",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to variant URL"
+          },
+          "400": {
+            "description": "Invalid variant size"
+          },
+          "404": {
+            "description": "Media not found"
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
+      }
+    },
+    "/api/v1/menus": {
+      "get": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "get_menus",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_Menu"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "create_menu",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMenuDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Menu"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/menus/{id}": {
+      "delete": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "delete_menu",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Menu ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Menu not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "update_menu",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Menu ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMenuDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Menu"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Menu not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/menus/{location}": {
+      "get": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "get_menu_by_location",
+        "parameters": [
+          {
+            "name": "location",
+            "in": "path",
+            "description": "Menu location identifier (header, footer, sidebar)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Menu"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Menu not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/v1/mfe": {
       "get": {
         "tags": [
@@ -2356,6 +2812,19 @@
           "Pages"
         ],
         "operationId": "get_pages",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -2426,6 +2895,17 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "preview",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
             }
           }
         ],
@@ -2541,6 +3021,43 @@
         ]
       }
     },
+    "/api/v1/pages/{id}/breadcrumbs": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "operationId": "get_page_breadcrumbs",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Page ID or slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_BreadcrumbItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/v1/platforms": {
       "get": {
         "tags": [
@@ -2603,6 +3120,200 @@
             "description": "Database error"
           }
         }
+      }
+    },
+    "/api/v1/redirects": {
+      "get": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "get_redirects",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_Redirect"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "create_redirect",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRedirectDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/redirects/check": {
+      "get": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "check_redirect",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CheckRedirectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/redirects/{id}": {
+      "delete": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "delete_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "update_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRedirectDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
       }
     },
     "/api/v1/system/alert": {
@@ -3168,6 +3879,18 @@
                     "null"
                   ]
                 },
+                "cdnUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "contentHash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -3184,6 +3907,13 @@
                     "string",
                     "null"
                   ]
+                },
+                "folderId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
                 },
                 "height": {
                   "type": [
@@ -3738,6 +4468,59 @@
           }
         }
       },
+      "ApiResponse_CheckRedirectResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "matched"
+            ],
+            "properties": {
+              "matched": {
+                "type": "boolean"
+              },
+              "status_code": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "target_path": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_ChunkStatusResponse": {
         "type": "object",
         "properties": {
@@ -3888,6 +4671,20 @@
               },
               "id": {
                 "type": "string",
+                "format": "uuid"
+              },
+              "published_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "published_by": {
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "format": "uuid"
               },
               "schema_id": {
@@ -4265,6 +5062,127 @@
           }
         }
       },
+      "ApiResponse_MediaConfigDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "publicUrl",
+              "maxQuota"
+            ],
+            "properties": {
+              "cdnUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "maxQuota": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "publicUrl": {
+                "type": "string"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_MediaFolderDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "createdAt"
+            ],
+            "properties": {
+              "color": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "itemCount": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              },
+              "parentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_MediaItemDTO": {
         "type": "object",
         "properties": {
@@ -4297,6 +5215,18 @@
                   "null"
                 ]
               },
+              "cdnUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "contentHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "createdAt": {
                 "type": "string",
                 "format": "date-time"
@@ -4313,6 +5243,13 @@
                   "string",
                   "null"
                 ]
+              },
+              "folderId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid"
               },
               "height": {
                 "type": [
@@ -4401,6 +5338,69 @@
           }
         }
       },
+      "ApiResponse_Menu": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "location",
+              "items",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "items": {
+                "type": "object"
+              },
+              "location": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Page": {
         "type": "object",
         "properties": {
@@ -4426,6 +5426,27 @@
               },
               "id": {
                 "type": "string",
+                "format": "uuid"
+              },
+              "parent_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid"
+              },
+              "published_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "published_by": {
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "format": "uuid"
               },
               "seo": {
@@ -4546,6 +5567,79 @@
                   "null"
                 ],
                 "format": "uuid"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Redirect": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "source_path",
+              "target_path",
+              "status_code",
+              "is_active",
+              "hits",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hits": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "is_active": {
+                "type": "boolean"
+              },
+              "source_path": {
+                "type": "string"
+              },
+              "status_code": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "target_path": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
               }
             }
           },
@@ -4907,6 +6001,58 @@
           }
         }
       },
+      "ApiResponse_Vec_BreadcrumbItem": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "slug"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Vec_CohortRowDto": {
         "type": "object",
         "properties": {
@@ -4993,6 +6139,20 @@
                 },
                 "id": {
                   "type": "string",
+                  "format": "uuid"
+                },
+                "published_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "published_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "format": "uuid"
                 },
                 "schema_id": {
@@ -5344,6 +6504,79 @@
           }
         }
       },
+      "ApiResponse_Vec_MediaFolderDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "createdAt"
+              ],
+              "properties": {
+                "color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "itemCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parentId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_Vec_MediaItemDTO": {
         "type": "object",
         "properties": {
@@ -5378,6 +6611,18 @@
                     "null"
                   ]
                 },
+                "cdnUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "contentHash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -5394,6 +6639,13 @@
                     "string",
                     "null"
                   ]
+                },
+                "folderId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
                 },
                 "height": {
                   "type": [
@@ -5453,6 +6705,120 @@
                     "null"
                   ],
                   "format": "int32"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_MediaTagCountDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "tag",
+                "count"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_Menu": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "location",
+                "items",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "items": {
+                  "type": "object"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               }
             }
@@ -5681,6 +7047,27 @@
                   "type": "string",
                   "format": "uuid"
                 },
+                "parent_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
+                },
+                "published_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "published_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid"
+                },
                 "seo": {
                   "type": "object"
                 },
@@ -5691,6 +7078,82 @@
                   "type": "string"
                 },
                 "title": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Vec_Redirect": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "source_path",
+                "target_path",
+                "status_code",
+                "is_active",
+                "hits",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "hits": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "source_path": {
+                  "type": "string"
+                },
+                "status_code": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "target_path": {
                   "type": "string"
                 },
                 "updated_at": {
@@ -5779,6 +7242,72 @@
           }
         }
       },
+      "ApiResponse_bool": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_u64": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AuthRefreshTokenDTO": {
         "type": "object",
         "required": [
@@ -5827,6 +7356,28 @@
           },
           "refresh_token": {
             "type": "string"
+          }
+        }
+      },
+      "BatchMoveMediaDTO": {
+        "type": "object",
+        "required": [
+          "uuids"
+        ],
+        "properties": {
+          "folderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "uuids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -5882,6 +7433,26 @@
           }
         }
       },
+      "BreadcrumbItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "slug"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
       "BulkOptimizeMediaDTO": {
         "type": "object",
         "required": [
@@ -5920,6 +7491,30 @@
         "properties": {
           "key": {
             "type": "string"
+          }
+        }
+      },
+      "CheckRedirectResponse": {
+        "type": "object",
+        "required": [
+          "matched"
+        ],
+        "properties": {
+          "matched": {
+            "type": "boolean"
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "target_path": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -6036,6 +7631,20 @@
           },
           "id": {
             "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "schema_id": {
@@ -6196,6 +7805,20 @@
         "properties": {
           "data": {},
           "i18n": {},
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "schema_id": {
             "type": "string",
             "format": "uuid"
@@ -6212,6 +7835,30 @@
                 "$ref": "#/components/schemas/ContentEntryStatus"
               }
             ]
+          }
+        }
+      },
+      "CreateFolderDTO": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -6237,6 +7884,13 @@
             "type": "string",
             "format": "binary",
             "contentMediaType": "application/octet-stream"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           },
           "name": {
             "type": [
@@ -6264,6 +7918,22 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "CreateMenuDTO": {
+        "type": "object",
+        "required": [
+          "name",
+          "location"
+        ],
+        "properties": {
+          "items": {},
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -6328,6 +7998,27 @@
         ],
         "properties": {
           "blocks": {},
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "seo": {},
           "slug": {
             "type": "string"
@@ -6339,6 +8030,34 @@
             ]
           },
           "title": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateRedirectDTO": {
+        "type": "object",
+        "required": [
+          "source_path",
+          "target_path"
+        ],
+        "properties": {
+          "is_active": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "target_path": {
             "type": "string"
           }
         }
@@ -6564,6 +8283,15 @@
           "field_type": {
             "$ref": "#/components/schemas/FieldType"
           },
+          "fields": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object"
+            }
+          },
           "label": {
             "type": "string"
           },
@@ -6593,7 +8321,12 @@
           "boolean",
           "media",
           "date",
-          "relation"
+          "relation",
+          "repeater",
+          "group",
+          "json",
+          "color",
+          "link"
         ]
       },
       "FunnelStepDto": {
@@ -6840,6 +8573,13 @@
           "filename": {
             "type": "string"
           },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "source": {
             "type": [
               "string",
@@ -7063,6 +8803,28 @@
           }
         }
       },
+      "MediaConfigDTO": {
+        "type": "object",
+        "required": [
+          "publicUrl",
+          "maxQuota"
+        ],
+        "properties": {
+          "cdnUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "maxQuota": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "publicUrl": {
+            "type": "string"
+          }
+        }
+      },
       "MediaDTO": {
         "type": "object",
         "required": [
@@ -7102,6 +8864,12 @@
             ]
           },
           "date_to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folder_id": {
             "type": [
               "string",
               "null"
@@ -7173,6 +8941,47 @@
           }
         }
       },
+      "MediaFolderDTO": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "createdAt"
+        ],
+        "properties": {
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "MediaItemDTO": {
         "type": "object",
         "required": [
@@ -7202,6 +9011,18 @@
               "null"
             ]
           },
+          "cdnUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contentHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -7218,6 +9039,13 @@
               "string",
               "null"
             ]
+          },
+          "folderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           },
           "height": {
             "type": [
@@ -7277,6 +9105,22 @@
               "null"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "MediaTagCountDTO": {
+        "type": "object",
+        "required": [
+          "tag",
+          "count"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tag": {
+            "type": "string"
           }
         }
       },
@@ -7369,6 +9213,40 @@
                 "$ref": "#/components/schemas/MediaVariantDTO"
               }
             ]
+          }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "location",
+          "items",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "object"
+          },
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -7582,6 +9460,27 @@
             "type": "string",
             "format": "uuid"
           },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "seo": {
             "type": "object"
           },
@@ -7704,6 +9603,50 @@
               "null"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "Redirect": {
+        "type": "object",
+        "required": [
+          "id",
+          "source_path",
+          "target_path",
+          "status_code",
+          "is_active",
+          "hits",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "status_code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "target_path": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -8198,6 +10141,20 @@
         "properties": {
           "data": {},
           "i18n": {},
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "slug": {
             "type": [
               "string",
@@ -8213,6 +10170,30 @@
                 "$ref": "#/components/schemas/ContentEntryStatus"
               }
             ]
+          }
+        }
+      },
+      "UpdateFolderDTO": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -8326,6 +10307,13 @@
               "null"
             ]
           },
+          "folderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "name": {
             "type": [
               "string",
@@ -8342,6 +10330,24 @@
             }
           },
           "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateMenuDTO": {
+        "type": "object",
+        "properties": {
+          "items": {},
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
             "type": [
               "string",
               "null"
@@ -8465,6 +10471,33 @@
         "type": "object",
         "properties": {
           "blocks": {},
+          "clear_parent": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "seo": {},
           "slug": {
             "type": [
@@ -8544,6 +10577,36 @@
           },
           "tools_title": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateRedirectDTO": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "source_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "target_path": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -8888,6 +10951,14 @@
     {
       "name": "Pages",
       "description": "Page constructor and block types management"
+    },
+    {
+      "name": "Menus",
+      "description": "Site Navigation Menus management"
+    },
+    {
+      "name": "Redirects",
+      "description": "URL Redirects (301/302) management"
     },
     {
       "name": "Platforms",
