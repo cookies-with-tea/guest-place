@@ -3,7 +3,6 @@ export function getTsConfig() {
 	"extends": "@admin-panel/typescript-config",
 	"compilerOptions": {
 		"composite": true,
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"#app/*": ["./src/app/*"],

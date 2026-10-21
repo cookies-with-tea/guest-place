@@ -3,9 +3,7 @@
 		<!-- Header -->
 		<div class="docs-header glass-card">
 			<div class="docs-header__left">
-				<el-button :icon="Back" plain size="small" @click="goBack">
-					Назад к схемам
-				</el-button>
+				<el-button :icon="Back" plain size="small" @click="goBack"> Назад к схемам </el-button>
 				<div class="docs-header__title-block">
 					<div class="badge-row">
 						<el-tag effect="dark" size="small" type="primary">ARCHITECTURE & GUIDE</el-tag>
@@ -18,9 +16,7 @@
 				</div>
 			</div>
 			<div class="docs-header__right">
-				<el-button :icon="Plus" type="primary" @click="goToCreateSchema">
-					Создать новую схему
-				</el-button>
+				<el-button :icon="Plus" type="primary" @click="goToCreateSchema"> Создать новую схему </el-button>
 			</div>
 		</div>
 
@@ -33,8 +29,8 @@
 						<div class="section-intro">
 							<h2>Концепция динамических схем (Headless Schema Model)</h2>
 							<p>
-								Схема контента в Guest Place — это декларативная модель структуры данных, определяющая форму,
-								типы полей, правила валидации и способ отображения сущностей без необходимости писать миграции БД на бэкенде.
+								Схема контента в Guest Place — это декларативная модель структуры данных, определяющая форму, типы
+								полей, правила валидации и способ отображения сущностей без необходимости писать миграции БД на бэкенде.
 							</p>
 						</div>
 
@@ -42,14 +38,17 @@
 							<div class="info-card glass-panel">
 								<div class="card-icon">🏗️</div>
 								<h3>Как хранятся схемы в PostgreSQL</h3>
-								<p>
-									Каждая схема сохраняется в таблице <code>content_schemas</code>:
-								</p>
+								<p> Каждая схема сохраняется в таблице <code>content_schemas</code>: </p>
 								<ul class="styled-list">
 									<li><code>id (UUID)</code> — уникальный идентификатор схемы.</li>
 									<li><code>name (TEXT)</code> — человекочитаемое имя (например, «Статьи блога»).</li>
-									<li><code>slug (TEXT UNIQUE)</code> — программный идентификатор (например, <code>articles</code>).</li>
-									<li><code>is_singleton (BOOLEAN)</code> — флаг одиночной страницы (один экземпляр, напр. «Главная страница»).</li>
+									<li
+										><code>slug (TEXT UNIQUE)</code> — программный идентификатор (например, <code>articles</code>).</li
+									>
+									<li
+										><code>is_singleton (BOOLEAN)</code> — флаг одиночной страницы (один экземпляр, напр. «Главная
+										страница»).</li
+									>
 									<li><code>fields (JSONB)</code> — массив определений полей схемы.</li>
 								</ul>
 							</div>
@@ -68,8 +67,8 @@
 									<el-tag color="#14b8a6" effect="dark">Select</el-tag>
 								</div>
 								<p class="mt-3 text-secondary text-sm">
-									Каждое поле имеет <code>name</code> (snake_case ключ), <code>label</code> (для UI),
-									флаг <code>required</code> и специфичные опции (напр., выбор коллекции для <code>Relation</code>).
+									Каждое поле имеет <code>name</code> (snake_case ключ), <code>label</code> (для UI), флаг
+									<code>required</code> и специфичные опции (напр., выбор коллекции для <code>Relation</code>).
 								</p>
 							</div>
 						</div>
@@ -102,8 +101,8 @@
 						<div class="section-intro">
 							<h2>Двухуровневый Split-View подход</h2>
 							<p>
-								В системе используются два разных независимых сплит-интерфейса: один для конструирования структуры схемы,
-								а второй — для визуального наполнения контентом.
+								В системе используются два разных независимых сплит-интерфейса: один для конструирования структуры
+								схемы, а второй — для визуального наполнения контентом.
 							</p>
 						</div>
 
@@ -112,9 +111,7 @@
 							<div class="split-card glass-panel">
 								<div class="split-badge">УРОВЕНЬ 1</div>
 								<h3>Split View в Конструкторе схем (Schema Builder)</h3>
-								<p class="split-desc">
-									Трехпанельный макет для сборки структуры данных без модальных окон:
-								</p>
+								<p class="split-desc"> Трехпанельный макет для сборки структуры данных без модальных окон: </p>
 								<div class="split-visual-schema">
 									<div class="col-visual col-palette">
 										<strong>Палитра типов</strong>
@@ -158,7 +155,10 @@
 								</div>
 								<ul class="styled-list mt-3">
 									<li>Кнопка <strong>«Live Preview»</strong> делит экран ровно пополам (50% / 50%).</li>
-									<li>Переключатель устройств: <strong>Desktop</strong>, <strong>Tablet</strong> (768px), <strong>Mobile</strong> (375px).</li>
+									<li
+										>Переключатель устройств: <strong>Desktop</strong>, <strong>Tablet</strong> (768px),
+										<strong>Mobile</strong> (375px).</li
+									>
 									<li>Кнопка открытия превью в отдельной вкладке без потери связи.</li>
 								</ul>
 							</div>
@@ -172,8 +172,9 @@
 						<div class="section-intro">
 							<h2>Как устроен Live Preview мост</h2>
 							<p>
-								Превью работает на изолированном клиентском приложении (Nuxt / Vite на порту 3000) без сохранения черновиков в базу данных.
-								Обмен данными происходит через безопасный протокол HTML5 <code>postMessage</code> в оперативной памяти браузера.
+								Превью работает на изолированном клиентском приложении (Nuxt / Vite на порту 3000) без сохранения
+								черновиков в базу данных. Обмен данными происходит через безопасный протокол HTML5
+								<code>postMessage</code> в оперативной памяти браузера.
 							</p>
 						</div>
 
@@ -186,8 +187,9 @@
 								<div class="step-body">
 									<h4>Загрузка Iframe и сигнал готовности</h4>
 									<p>
-										При включении сплита монтируется <code>&lt;iframe src="http://localhost:3000/preview?schema=...&id=..."&gt;</code>.
-										После инициализации страницы клиент отправляет родительскому окну сигнал:
+										При включении сплита монтируется
+										<code>&lt;iframe src="http://localhost:3000/preview?schema=...&id=..."&gt;</code>. После
+										инициализации страницы клиент отправляет родительскому окну сигнал:
 									</p>
 									<code class="code-inline">window.parent.postMessage({ type: 'PREVIEW_READY' }, '*')</code>
 								</div>
@@ -197,10 +199,11 @@
 								<div class="step-num">2</div>
 								<div class="step-body">
 									<h4>Передача первого слепка данных</h4>
-									<p>
-										Админ-панель слушает событие <code>PREVIEW_READY</code> и высылает полный текущий черновик:
-									</p>
-									<code class="code-inline">iframe.contentWindow.postMessage({ type: 'CMS_PREVIEW_DATA', payload: { data, schema, seo } }, '*')</code>
+									<p> Админ-панель слушает событие <code>PREVIEW_READY</code> и высылает полный текущий черновик: </p>
+									<code class="code-inline"
+										>iframe.contentWindow.postMessage({ type: 'CMS_PREVIEW_DATA', payload: { data, schema, seo } },
+										'*')</code
+									>
 								</div>
 							</div>
 
@@ -209,8 +212,9 @@
 								<div class="step-body">
 									<h4>Реактивная трансляция на лету</h4>
 									<p>
-										Каждое нажатие клавиши в форме отслеживается через <code>watch(() => ({ ...formData }), ..., { deep: true })</code>.
-										Измененные значения мгновенно пушатся в iframe. На клиенте загорается индикатор <em>«Updated HH:MM:SS»</em>.
+										Каждое нажатие клавиши в форме отслеживается через
+										<code>watch(() => ({ ...formData }), ..., { deep: true })</code>. Измененные значения мгновенно
+										пушатся в iframe. На клиенте загорается индикатор <em>«Updated HH:MM:SS»</em>.
 									</p>
 								</div>
 							</div>
@@ -220,8 +224,10 @@
 								<div class="step-body">
 									<h4>Автономный Fallback для новой вкладки</h4>
 									<p>
-										Если пользователь открывает превью в отдельной вкладке без opener, клиент через 1.2 сек автоматически делает fallback-запрос к API
-										<code>/api/v1/content/schemas/{slug}</code> и <code>/api/v1/content/entries/{id}</code>, чтобы страница не висела вечно.
+										Если пользователь открывает превью в отдельной вкладке без opener, клиент через 1.2 сек
+										автоматически делает fallback-запрос к API
+										<code>/api/v1/content/schemas/{slug}</code> и <code>/api/v1/content/entries/{id}</code>, чтобы
+										страница не висела вечно.
 									</p>
 								</div>
 							</div>
@@ -241,33 +247,59 @@
 							<el-collapse accordion>
 								<el-collapse-item name="1" title="1. В превью висит «Waiting for preview data» бесконечно">
 									<div class="faq-answer">
-										<p><strong>Причина:</strong> Несовпадение origin при <code>postMessage</code> (например, <code>localhost</code> vs <code>127.0.0.1</code>) или окно открыто в новой вкладке без родительского окна (<code>window.opener</code> отсутствует).</p>
+										<p
+											><strong>Причина:</strong> Несовпадение origin при <code>postMessage</code> (например,
+											<code>localhost</code> vs <code>127.0.0.1</code>) или окно открыто в новой вкладке без
+											родительского окна (<code>window.opener</code> отсутствует).</p
+										>
 										<p><strong>Исправление:</strong></p>
 										<ul>
 											<li>Использован безопасный широковещательный таргет <code>'*'</code> для превью-сообщений.</li>
-											<li>Добавлен fallback: клиент ожидает сообщение, и если его нет, подгружает сохраненные данные напрямую из бэкенда через <code>/api/v1/content</code>.</li>
+											<li
+												>Добавлен fallback: клиент ожидает сообщение, и если его нет, подгружает сохраненные данные
+												напрямую из бэкенда через <code>/api/v1/content</code>.</li
+											>
 										</ul>
 									</div>
 								</el-collapse-item>
 
 								<el-collapse-item name="2" title="2. После docker-compose down -v пропали все схемы и записи">
 									<div class="faq-answer">
-										<p><strong>Причина:</strong> Команда <code>docker-compose down -v</code> удаляет volume базы данных PostgreSQL. Таблицы пересоздаются миграциями, но без начального наполнения они пустые.</p>
-										<p><strong>Решение:</strong> Создайте новую схему через кнопку <strong>«Create Schema»</strong> на главной странице контента, либо воспользуйтесь сидером тестовых данных.</p>
+										<p
+											><strong>Причина:</strong> Команда <code>docker-compose down -v</code> удаляет volume базы данных
+											PostgreSQL. Таблицы пересоздаются миграциями, но без начального наполнения они пустые.</p
+										>
+										<p
+											><strong>Решение:</strong> Создайте новую схему через кнопку <strong>«Create Schema»</strong> на
+											главной странице контента, либо воспользуйтесь сидером тестовых данных.</p
+										>
 									</div>
 								</el-collapse-item>
 
 								<el-collapse-item name="3" title="3. Iframe не загружается (Connection Refused на порту 3000)">
 									<div class="faq-answer">
-										<p><strong>Причина:</strong> Клиентское приложение гостевого сайта (Nuxt в папке <code>client</code>) не запущено.</p>
-										<p><strong>Решение:</strong> Запустите клиент командой <code>pnpm dev</code> в папке <code>client</code>. Сервер запустится на <code>http://localhost:3000</code>.</p>
+										<p
+											><strong>Причина:</strong> Клиентское приложение гостевого сайта (Nuxt в папке
+											<code>client</code>) не запущено.</p
+										>
+										<p
+											><strong>Решение:</strong> Запустите клиент командой <code>pnpm dev</code> в папке
+											<code>client</code>. Сервер запустится на <code>http://localhost:3000</code>.</p
+										>
 									</div>
 								</el-collapse-item>
 
 								<el-collapse-item name="4" title="4. Поле RichText или Media не рендерится в превью">
 									<div class="faq-answer">
-										<p><strong>Причина:</strong> RichText сохраняет HTML, а Media сохраняет путь к файлу. Если клиентский код ожидал обычный текст, он экранировался.</p>
-										<p><strong>Решение:</strong> В превью используется <code>v-html</code> для полей с <code>fieldType === 'RichText'</code> и компонент <code>img</code> с резолвером медиа-URL для <code>fieldType === 'Media'</code>.</p>
+										<p
+											><strong>Причина:</strong> RichText сохраняет HTML, а Media сохраняет путь к файлу. Если
+											клиентский код ожидал обычный текст, он экранировался.</p
+										>
+										<p
+											><strong>Решение:</strong> В превью используется <code>v-html</code> для полей с
+											<code>fieldType === 'RichText'</code> и компонент <code>img</code> с резолвером медиа-URL для
+											<code>fieldType === 'Media'</code>.</p
+										>
 									</div>
 								</el-collapse-item>
 							</el-collapse>

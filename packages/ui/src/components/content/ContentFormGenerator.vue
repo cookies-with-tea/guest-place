@@ -39,7 +39,19 @@
 				</template>
 
 				<template v-else-if="field.fieldType === FieldType.Color">
-					<input :id="field.name" v-model="formData[field.name]" type="color" style="height: 36px; width: 60px; padding: 2px; border-radius: 4px; border: 1px solid #d0d5dd; cursor: pointer" />
+					<input
+						:id="field.name"
+						v-model="formData[field.name]"
+						type="color"
+						style="
+							height: 36px;
+							width: 60px;
+							padding: 2px;
+							border-radius: 4px;
+							border: 1px solid #d0d5dd;
+							cursor: pointer;
+						"
+					/>
 				</template>
 
 				<template v-else-if="field.fieldType === FieldType.Json">

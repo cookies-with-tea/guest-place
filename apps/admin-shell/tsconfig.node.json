@@ -1,12 +1,12 @@
 {
 	"extends": "../../packages/typescript-config/node.json",
 	"include": [
+		"env.d.ts",
 		"vite.config.*",
 		"vitest.config.*",
 		"cypress.config.*",
 		"nightwatch.conf.*",
-		"playwright.config.*",
-		"eslint.config.*"
+		"playwright.config.*"
 	],
 	"compilerOptions": {
 		"noEmit": true,

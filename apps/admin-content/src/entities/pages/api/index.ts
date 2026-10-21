@@ -75,16 +75,37 @@ export const pagesApi = {
 		return fetchPages<PageItem>(`/${slug}${query}`)
 	},
 
-	getPageBreadcrumbs: (idOrSlug: string) =>
-		fetchPages<BreadcrumbItem[]>(`/${idOrSlug}/breadcrumbs`),
+	getPageBreadcrumbs: (idOrSlug: string) => fetchPages<BreadcrumbItem[]>(`/${idOrSlug}/breadcrumbs`),
 
-	createPage: (payload: { title: string; slug: string; blocks?: any[]; status?: string; seo?: any; parent_id?: string | null; published_at?: string; published_by?: string }) =>
+	createPage: (payload: {
+		title: string
+		slug: string
+		blocks?: any[]
+		status?: string
+		seo?: any
+		parent_id?: string | null
+		published_at?: string
+		published_by?: string
+	}) =>
 		fetchPages<PageItem>('', {
 			method: 'POST',
 			body: payload,
 		}),
 
-	updatePage: (id: string, payload: { title?: string; slug?: string; blocks?: any[]; status?: string; seo?: any; parent_id?: string | null; clear_parent?: boolean; published_at?: string; published_by?: string }) =>
+	updatePage: (
+		id: string,
+		payload: {
+			title?: string
+			slug?: string
+			blocks?: any[]
+			status?: string
+			seo?: any
+			parent_id?: string | null
+			clear_parent?: boolean
+			published_at?: string
+			published_by?: string
+		}
+	) =>
 		fetchPages<PageItem>(`/${id}`, {
 			method: 'PATCH',
 			body: payload,

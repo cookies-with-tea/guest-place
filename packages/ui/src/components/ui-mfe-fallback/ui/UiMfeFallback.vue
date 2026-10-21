@@ -13,9 +13,7 @@
 			<div class="badge-row">
 				<el-tag effect="dark" size="small" type="danger">503 Service Unavailable</el-tag>
 				<el-tag v-if="remoteName" effect="plain" size="small" type="info">MFE: {{ remoteName }}</el-tag>
-				<el-tag v-if="retryCount > 0" effect="plain" size="small" type="warning">
-					Попыток: {{ retryCount }}
-				</el-tag>
+				<el-tag v-if="retryCount > 0" effect="plain" size="small" type="warning"> Попыток: {{ retryCount }} </el-tag>
 			</div>
 
 			<!-- Heading -->
@@ -25,8 +23,8 @@
 			<p class="fallback-desc">
 				Не удалось подключиться к микрофронтенду
 				<strong v-if="displayName">{{ displayName }}</strong>
-				<span v-else>{{ remoteName || 'модулю' }}</span>.
-				Локальный dev-сервер может быть остановлен или не отвечает на запросы.
+				<span v-else>{{ remoteName || 'модулю' }}</span
+				>. Локальный dev-сервер может быть остановлен или не отвечает на запросы.
 			</p>
 
 			<!-- Endpoint Card -->
@@ -55,33 +53,15 @@
 
 			<!-- Actions -->
 			<div class="fallback-actions">
-				<el-button
-					:icon="RefreshRight"
-					:loading="isRetrying"
-					size="large"
-					type="primary"
-					@click="handleRetry"
-				>
+				<el-button :icon="RefreshRight" :loading="isRetrying" size="large" type="primary" @click="handleRetry">
 					Повторить попытку
 				</el-button>
 
-				<el-button
-					v-if="showHomeButton"
-					:icon="HomeFilled"
-					plain
-					size="large"
-					@click="navigateHome"
-				>
+				<el-button v-if="showHomeButton" :icon="HomeFilled" plain size="large" @click="navigateHome">
 					На главную
 				</el-button>
 
-				<el-button
-					v-if="showDiagnosticsButton"
-					:icon="Monitor"
-					plain
-					size="large"
-					@click="navigateOrchestrator"
-				>
+				<el-button v-if="showDiagnosticsButton" :icon="Monitor" plain size="large" @click="navigateOrchestrator">
 					Оркестратор
 				</el-button>
 			</div>
@@ -237,7 +217,9 @@ const navigateOrchestrator = () => {
 	border: 1px solid rgba(255, 95, 95, 0.2);
 	background: linear-gradient(145deg, rgba(30, 20, 20, 0.6) 0%, rgba(15, 15, 15, 0.9) 100%);
 	backdrop-filter: blur(20px);
-	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 24px rgba(255, 95, 95, 0.08) inset;
+	box-shadow:
+		0 12px 36px rgba(0, 0, 0, 0.4),
+		0 0 24px rgba(255, 95, 95, 0.08) inset;
 	overflow: hidden;
 }
 

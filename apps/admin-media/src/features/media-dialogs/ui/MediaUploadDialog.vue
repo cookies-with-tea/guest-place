@@ -34,12 +34,7 @@
 						</el-input>
 					</div>
 					<div class="input-row">
-						<el-select
-							v-model="globalFolderId"
-							clearable
-							placeholder="Target Folder (Root)"
-							:disabled="!isApplyToAll"
-						>
+						<el-select v-model="globalFolderId" clearable placeholder="Target Folder (Root)" :disabled="!isApplyToAll">
 							<el-option :value="null" label="📁 Root (No folder)" />
 							<el-option
 								v-for="folder in folders || []"
@@ -130,14 +125,7 @@
 						<div class="item-actions">
 							<!-- Crop button for images -->
 							<el-tooltip v-if="isImageFile(file.file)" content="Crop & Resize before upload" placement="top">
-								<el-button
-									circle
-									size="small"
-									type="primary"
-									plain
-									:icon="Crop"
-									@click="startCropping(index)"
-								/>
+								<el-button circle size="small" type="primary" plain :icon="Crop" @click="startCropping(index)" />
 							</el-tooltip>
 							<el-button
 								circle
@@ -162,12 +150,7 @@
 						<div v-if="file.isCustom" class="item-custom-fields">
 							<el-input v-model="file.title" placeholder="Custom Title" size="small" />
 							<el-input v-model="file.alt" placeholder="Custom Alt" size="small" />
-							<el-select
-								v-model="file.folderId"
-								clearable
-								placeholder="Target Folder"
-								size="small"
-							>
+							<el-select v-model="file.folderId" clearable placeholder="Target Folder" size="small">
 								<el-option :value="null" label="📁 Root (No folder)" />
 								<el-option
 									v-for="folder in folders || []"
@@ -219,11 +202,7 @@
 	<!-- Inner Preview for Uploading Files -->
 	<el-dialog v-model="isPreviewOpen" append-to-body title="File Preview" width="650px">
 		<div v-if="activePreviewFile" class="upload-preview-container" :class="previewBg">
-			<img
-				v-if="isImageFile(activePreviewFile.file)"
-				:src="activePreviewFile.preview"
-				class="upload-preview-img"
-			/>
+			<img v-if="isImageFile(activePreviewFile.file)" :src="activePreviewFile.preview" class="upload-preview-img" />
 			<video
 				v-else-if="isVideoFile(activePreviewFile.file)"
 				:src="activePreviewFile.preview"
@@ -231,11 +210,7 @@
 				autoplay
 				class="upload-preview-video"
 			/>
-			<iframe
-				v-else
-				:src="activePreviewFile.preview"
-				class="upload-preview-pdf"
-			/>
+			<iframe v-else :src="activePreviewFile.preview" class="upload-preview-pdf" />
 
 			<div v-if="isImageFile(activePreviewFile.file)" class="bg-toggle">
 				<el-radio-group v-model="previewBg" size="small">
@@ -370,7 +345,12 @@ const handleFileChange = (file: any) => {
 	const rawFile = file.raw as File
 	let preview: string | undefined
 
-	if (isImageFile(rawFile) || isVideoFile(rawFile) || rawFile.type === 'application/pdf' || rawFile.name.toLowerCase().endsWith('.pdf')) {
+	if (
+		isImageFile(rawFile) ||
+		isVideoFile(rawFile) ||
+		rawFile.type === 'application/pdf' ||
+		rawFile.name.toLowerCase().endsWith('.pdf')
+	) {
 		preview = URL.createObjectURL(rawFile)
 	}
 
@@ -467,7 +447,10 @@ const handleUpload = async () => {
 				const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
 				const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
 				const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
-				const finalFolderId = (isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ?? globalFolderId.value ?? undefined
+				const finalFolderId =
+					(isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ??
+					globalFolderId.value ??
+					undefined
 
 				await uploadFileInChunks({
 					file: item.file,
@@ -513,7 +496,8 @@ const handleUpload = async () => {
 			const finalAlt = isApplyToAll.value && !item.isCustom ? globalAlt.value : item.alt
 			const finalCategory = isApplyToAll.value && !item.isCustom ? globalCategory.value : item.category
 			const finalTags = isApplyToAll.value && !item.isCustom ? globalTags.value : item.tags
-			const finalFolderId = (isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ?? globalFolderId.value
+			const finalFolderId =
+				(isApplyToAll.value && !item.isCustom ? globalFolderId.value : item.folderId) ?? globalFolderId.value
 
 			formData.append(`title_${index}`, finalTitle || '')
 			formData.append(`alt_${index}`, finalAlt || '')

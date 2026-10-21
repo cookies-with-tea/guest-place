@@ -9,23 +9,18 @@
 				<div class="header-titles">
 					<div class="title-row">
 						<h1>Глобальные настройки</h1>
-						<el-tag effect="plain" round size="small" type="primary">
-							Singleton Configuration
-						</el-tag>
+						<el-tag effect="plain" round size="small" type="primary"> Singleton Configuration </el-tag>
 					</div>
 					<p class="subtitle">
-						Централизованное управление параметрами сайта: метаданные, SEO по умолчанию, контакты и статус режима техобслуживания.
+						Централизованное управление параметрами сайта: метаданные, SEO по умолчанию, контакты и статус режима
+						техобслуживания.
 					</p>
 				</div>
 			</div>
 
 			<div class="header-actions">
-				<el-button :icon="Operation" plain @click="goToSchemas">
-					Конструктор схем
-				</el-button>
-				<el-button :icon="Reading" plain @click="goToDocs">
-					Документация подхода
-				</el-button>
+				<el-button :icon="Operation" plain @click="goToSchemas"> Конструктор схем </el-button>
+				<el-button :icon="Reading" plain @click="goToDocs"> Документация подхода </el-button>
 				<el-button :icon="Refresh" circle :loading="isLoading" @click="fetchData" />
 			</div>
 		</div>
@@ -71,9 +66,7 @@
 						<el-icon class="hero-icon"><Tools /></el-icon>
 					</div>
 
-					<el-tag effect="dark" size="small" type="info" class="hero-badge">
-						Схема не инициализирована (404)
-					</el-tag>
+					<el-tag effect="dark" size="small" type="info" class="hero-badge"> Схема не инициализирована (404) </el-tag>
 
 					<h2 class="hero-title">Для чего эта страница и как её настроить</h2>
 
@@ -89,7 +82,8 @@
 						<div class="feature-num">01</div>
 						<h4>Что такое синглтон?</h4>
 						<p>
-							В отличие от коллекций (статьи, страницы), синглтон существует в единственном экземпляре и предназначен для общесайтовых констант.
+							В отличие от коллекций (статьи, страницы), синглтон существует в единственном экземпляре и предназначен
+							для общесайтовых констант.
 						</p>
 					</div>
 
@@ -97,7 +91,8 @@
 						<div class="feature-num">02</div>
 						<h4>Как это связано с Live Preview?</h4>
 						<p>
-							Название сайта, слоган и баннер техобслуживания сразу транслируются на клиентский сайт через реактивный мост postMessage.
+							Название сайта, слоган и баннер техобслуживания сразу транслируются на клиентский сайт через реактивный
+							мост postMessage.
 						</p>
 					</div>
 
@@ -105,7 +100,8 @@
 						<div class="feature-num">03</div>
 						<h4>Гибкая кастомизация</h4>
 						<p>
-							Вы можете добавить любые свои поля (логотип, соцсети, аналитика) в любой момент через визуальный Конструктор схем.
+							Вы можете добавить любые свои поля (логотип, соцсети, аналитика) в любой момент через визуальный
+							Конструктор схем.
 						</p>
 					</div>
 				</div>
@@ -138,13 +134,9 @@
 						✨ Инициализировать схему в 1 клик
 					</el-button>
 
-					<el-button size="large" :icon="Operation" @click="goToSchemas">
-						Создать вручную в Конструкторе
-					</el-button>
+					<el-button size="large" :icon="Operation" @click="goToSchemas"> Создать вручную в Конструкторе </el-button>
 
-					<el-button size="large" text :icon="Reading" @click="goToDocs">
-						Документация подхода
-					</el-button>
+					<el-button size="large" text :icon="Reading" @click="goToDocs"> Документация подхода </el-button>
 				</div>
 			</div>
 		</div>
@@ -158,15 +150,7 @@ import { useRouter } from 'vue-router'
 import type { ContentSchema } from '@admin-panel/lib'
 import { FieldType } from '@admin-panel/lib'
 import { useTheme } from '@admin-panel/ui'
-import {
-	Check,
-	InfoFilled,
-	Operation,
-	Reading,
-	Refresh,
-	Setting,
-	Tools,
-} from '@element-plus/icons-vue'
+import { Check, InfoFilled, Operation, Reading, Refresh, Setting, Tools } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 import { ContentEditor } from '#features/content-editor'

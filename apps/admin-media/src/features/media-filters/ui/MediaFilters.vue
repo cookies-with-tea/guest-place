@@ -40,11 +40,7 @@
 						<span class="folder-pill-icon">📁</span>
 						<span class="folder-pill-name">Unorganized</span>
 					</button>
-					<div
-						v-for="folder in folders"
-						:key="folder.id"
-						class="folder-pill-group"
-					>
+					<div v-for="folder in folders" :key="folder.id" class="folder-pill-group">
 						<button
 							class="folder-pill"
 							:class="{ 'is-active': filters.folderId === folder.id }"
@@ -60,7 +56,9 @@
 							<template #dropdown>
 								<el-dropdown-menu>
 									<el-dropdown-item command="edit">Edit Folder</el-dropdown-item>
-									<el-dropdown-item command="delete" divided style="color: var(--el-color-danger)">Delete Folder</el-dropdown-item>
+									<el-dropdown-item command="delete" divided style="color: var(--el-color-danger)"
+										>Delete Folder</el-dropdown-item
+									>
 								</el-dropdown-menu>
 							</template>
 						</el-dropdown>
@@ -218,7 +216,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import { FolderAdd as FolderAddIcon, Plus as PlusIcon, RefreshRight as RefreshRightIcon, Search as SearchIcon } from '@element-plus/icons-vue'
+import {
+	FolderAdd as FolderAddIcon,
+	Plus as PlusIcon,
+	RefreshRight as RefreshRightIcon,
+	Search as SearchIcon,
+} from '@element-plus/icons-vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 import { useMedia, type MediaFolder } from '#entities/media'

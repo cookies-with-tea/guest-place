@@ -3,9 +3,7 @@
 		<!-- Top Navigation Bar -->
 		<header class="editor-topbar">
 			<div class="editor-topbar__left">
-				<el-button plain @click="$router.push('/pages')">
-					← К страницам
-				</el-button>
+				<el-button plain @click="$router.push('/pages')"> ← К страницам </el-button>
 				<span class="live-pill">⚡ LIVE РЕДАКТОР</span>
 				<h1 class="editor-title">Главная страница</h1>
 				<span class="preview-route-pill">/ (Home)</span>
@@ -43,13 +41,9 @@
 					</button>
 				</div>
 
-				<el-button plain :icon="Refresh" title="Перезагрузить данные из БД" @click="fetchData">
-					Обновить
-				</el-button>
+				<el-button plain :icon="Refresh" title="Перезагрузить данные из БД" @click="fetchData"> Обновить </el-button>
 
-				<el-button type="success" plain @click="openClientPreview">
-					🌐 На сайт ↗
-				</el-button>
+				<el-button type="success" plain @click="openClientPreview"> 🌐 На сайт ↗ </el-button>
 
 				<el-button type="primary" :icon="Check" :loading="saving" @click="handleSave">
 					💾 Сохранить изменения
@@ -208,57 +202,31 @@
 
 							<el-form label-position="top">
 								<el-form-item label="Заголовок секции">
-									<el-input
-										v-model="form.categoriesTitle"
-										placeholder="Места по категориям"
-										@input="syncLivePreview"
-									/>
+									<el-input v-model="form.categoriesTitle" placeholder="Места по категориям" @input="syncLivePreview" />
 								</el-form-item>
 							</el-form>
 
 							<div class="categories-grid">
-								<div
-									v-for="(cat, idx) in form.categories"
-									:key="cat.id || idx"
-									class="item-glass-card"
-								>
+								<div v-for="(cat, idx) in form.categories" :key="cat.id || idx" class="item-glass-card">
 									<div class="item-glass-card__head">
 										<span class="item-num">#{{ idx + 1 }}</span>
-										<el-button
-											type="danger"
-											link
-											size="small"
-											:icon="Delete"
-											@click="removeCategory(idx)"
-										>
+										<el-button type="danger" link size="small" :icon="Delete" @click="removeCategory(idx)">
 											Удалить
 										</el-button>
 									</div>
 									<el-form label-position="top" size="small">
 										<el-form-item label="Название категории">
-											<el-input
-												v-model="cat.title"
-												placeholder="Банкетные залы"
-												@input="syncLivePreview"
-											/>
+											<el-input v-model="cat.title" placeholder="Банкетные залы" @input="syncLivePreview" />
 										</el-form-item>
 										<el-row :gutter="12">
 											<el-col :span="12">
 												<el-form-item label="Слаг">
-													<el-input
-														v-model="cat.slug"
-														placeholder="banquet-halls"
-														@input="syncLivePreview"
-													/>
+													<el-input v-model="cat.slug" placeholder="banquet-halls" @input="syncLivePreview" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
 												<el-form-item label="Ссылка">
-													<el-input
-														v-model="cat.link"
-														placeholder="/venues?type=..."
-														@input="syncLivePreview"
-													/>
+													<el-input v-model="cat.link" placeholder="/venues?type=..." @input="syncLivePreview" />
 												</el-form-item>
 											</el-col>
 										</el-row>
@@ -298,18 +266,15 @@
 									</el-col>
 									<el-col :span="12">
 										<el-form-item label="Ссылка кнопки">
-											<el-input
-												v-model="form.latestSectionButtonLink"
-												placeholder="/venues"
-												@input="syncLivePreview"
-											/>
+											<el-input v-model="form.latestSectionButtonLink" placeholder="/venues" @input="syncLivePreview" />
 										</el-form-item>
 									</el-col>
 								</el-row>
 							</el-form>
 
 							<div class="info-callout">
-								💡 Карточки площадок формируются автоматически из базы данных по дате добавления (4 последних активных площадки).
+								💡 Карточки площадок формируются автоматически из базы данных по дате добавления (4 последних активных
+								площадки).
 							</div>
 						</div>
 					</div>
@@ -369,9 +334,7 @@
 									<h3>Варианты взаимодействия с платформой</h3>
 									<p>Шаги 1-4: Самостоятельный поиск, Интерактивная карта, Помощь эксперта, Подбор в чате</p>
 								</div>
-								<el-button type="primary" size="small" :icon="Plus" @click="addInteraction">
-									Добавить шаг
-								</el-button>
+								<el-button type="primary" size="small" :icon="Plus" @click="addInteraction"> Добавить шаг </el-button>
 							</div>
 
 							<el-form label-position="top">
@@ -385,26 +348,11 @@
 							</el-form>
 
 							<div class="interactions-grid">
-								<div
-									v-for="(item, idx) in form.interactions"
-									:key="item.id || idx"
-									class="item-glass-card"
-								>
+								<div v-for="(item, idx) in form.interactions" :key="item.id || idx" class="item-glass-card">
 									<div class="item-glass-card__head">
 										<span class="step-badge">Шаг {{ item.stepNumber }}</span>
-										<el-switch
-											v-model="item.isAccent"
-											active-text="Акцент"
-											size="small"
-											@change="syncLivePreview"
-										/>
-										<el-button
-											type="danger"
-											link
-											size="small"
-											:icon="Delete"
-											@click="removeInteraction(idx)"
-										>
+										<el-switch v-model="item.isAccent" active-text="Акцент" size="small" @change="syncLivePreview" />
+										<el-button type="danger" link size="small" :icon="Delete" @click="removeInteraction(idx)">
 											✕
 										</el-button>
 									</div>
@@ -429,20 +377,12 @@
 										<el-row :gutter="12">
 											<el-col :span="12">
 												<el-form-item label="Текст кнопки">
-													<el-input
-														v-model="item.buttonText"
-														placeholder="Каталог поиска"
-														@input="syncLivePreview"
-													/>
+													<el-input v-model="item.buttonText" placeholder="Каталог поиска" @input="syncLivePreview" />
 												</el-form-item>
 											</el-col>
 											<el-col :span="12">
 												<el-form-item label="Ссылка">
-													<el-input
-														v-model="item.link"
-														placeholder="/venues"
-														@input="syncLivePreview"
-													/>
+													<el-input v-model="item.link" placeholder="/venues" @input="syncLivePreview" />
 												</el-form-item>
 											</el-col>
 										</el-row>
@@ -508,15 +448,8 @@
 					</div>
 
 					<div class="bottom-buttons">
-						<el-button plain @click="$router.push('/pages')">
-							✕ Отмена
-						</el-button>
-						<el-button
-							type="primary"
-							size="large"
-							:loading="saving"
-							@click="handleSave"
-						>
+						<el-button plain @click="$router.push('/pages')"> ✕ Отмена </el-button>
+						<el-button type="primary" size="large" :loading="saving" @click="handleSave">
 							💾 Сохранить изменения
 						</el-button>
 					</div>
@@ -581,12 +514,7 @@
 
 				<!-- Preview Iframe Viewport Frame -->
 				<div class="preview-viewport-shell" :class="`device-${previewDevice}`">
-					<iframe
-						ref="previewIframeRef"
-						:src="previewUrl"
-						class="preview-iframe"
-						@load="onIframeLoad"
-					/>
+					<iframe ref="previewIframeRef" :src="previewUrl" class="preview-iframe" @load="onIframeLoad" />
 				</div>
 			</div>
 		</div>

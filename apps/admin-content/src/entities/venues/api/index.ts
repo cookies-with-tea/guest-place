@@ -209,4 +209,3 @@ export const venuesApi = {
 			method: 'DELETE',
 		}),
 }
-

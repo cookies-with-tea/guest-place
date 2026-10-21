@@ -138,12 +138,7 @@
 				<!-- 8. Color Picker -->
 				<template v-else-if="getFieldType(field) === 'color'">
 					<div class="color-picker-wrapper">
-						<el-color-picker
-							v-model="modelValue[field.name]"
-							:disabled="readonly"
-							show-alpha
-							size="default"
-						/>
+						<el-color-picker v-model="modelValue[field.name]" :disabled="readonly" show-alpha size="default" />
 						<el-input
 							v-model="modelValue[field.name]"
 							:disabled="readonly"
@@ -187,11 +182,7 @@
 							</el-input>
 						</div>
 						<div class="link-target-toggle">
-							<el-radio-group
-								v-model="getLinkField(field.name).target"
-								size="small"
-								:disabled="readonly"
-							>
+							<el-radio-group v-model="getLinkField(field.name).target" size="small" :disabled="readonly">
 								<el-radio-button label="_self">Текущая вкладка</el-radio-button>
 								<el-radio-button label="_blank">Новая вкладка ↗</el-radio-button>
 							</el-radio-group>
@@ -206,9 +197,7 @@
 							<el-button size="small" link type="primary" @click="formatJson(field.name)">
 								Форматировать (Beautify)
 							</el-button>
-							<span v-if="jsonErrors[field.name]" class="json-error-badge">
-								⚠️ Ошибка синтаксиса
-							</span>
+							<span v-if="jsonErrors[field.name]" class="json-error-badge"> ⚠️ Ошибка синтаксиса </span>
 						</div>
 						<el-input
 							:model-value="getJsonString(field.name)"
@@ -244,11 +233,7 @@
 				<template v-else-if="getFieldType(field) === 'repeater'">
 					<div class="repeater-field-container">
 						<div class="repeater-items-list">
-							<div
-								v-for="(item, index) in getRepeaterList(field.name)"
-								:key="index"
-								class="repeater-item-card"
-							>
+							<div v-for="(item, index) in getRepeaterList(field.name)" :key="index" class="repeater-item-card">
 								<div class="repeater-item-header">
 									<div class="repeater-item-title">
 										<span class="item-badge">#{{ index + 1 }}</span>
@@ -327,9 +312,7 @@
 				<template v-else>
 					<div class="unsupported-type">
 						Unsupported type: {{ field.fieldType || (field as any).field_type }}
-						<span style="font-size: 10px; opacity: 0.5">
-							(Name: {{ field.name }})
-						</span>
+						<span style="font-size: 10px; opacity: 0.5"> (Name: {{ field.name }}) </span>
 					</div>
 				</template>
 
@@ -411,7 +394,12 @@ function toggleWrapTranslationKey(fieldName: string) {
 		modelValue.value[fieldName] = extractTranslationKey(current)
 	} else {
 		const key = current
-			? (current.includes(' ') ? current.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '_').slice(0, 30) : current)
+			? current.includes(' ')
+				? current
+						.toLowerCase()
+						.replace(/[^a-z0-9а-яё]/gi, '_')
+						.slice(0, 30)
+				: current
 			: `page.${fieldName}`
 		modelValue.value[fieldName] = `$t('${key}')`
 	}
@@ -428,7 +416,9 @@ function insertSubstitution(fieldName: string, tag: string) {
 }
 
 function getFieldType(field: any): string {
-	const raw = String(field?.fieldType || field?.field_type || '').toLowerCase().replace(/_/g, '')
+	const raw = String(field?.fieldType || field?.field_type || '')
+		.toLowerCase()
+		.replace(/_/g, '')
 	if (raw === 'text') return 'text'
 	if (raw === 'richtext') return 'rich_text'
 	if (raw === 'number') return 'number'
@@ -519,7 +509,7 @@ function addRepeaterItem(name: string, subfields?: FieldDefinition[]) {
 	const list = getRepeaterList(name)
 	const newItem: Record<string, any> = {}
 	if (subfields && Array.isArray(subfields)) {
-		subfields.forEach(f => {
+		subfields.forEach((f) => {
 			newItem[f.name] = f.defaultValue !== undefined ? f.defaultValue : ''
 		})
 	}
@@ -651,7 +641,7 @@ function getItemPreviewTitle(item: any): string {
 }
 
 .code-input :deep(textarea) {
-	font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	font-family: Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 	font-size: 12px;
 }
 

@@ -20,48 +20,38 @@
 					</el-option>
 				</el-select>
 				<el-button-group style="vertical-align: middle; margin-right: 8px">
-					<el-button
-						v-if="status === 'draft'"
-						size="default"
-						plain
-						type="warning"
-						@click="status = 'review'"
-					>
+					<el-button v-if="status === 'draft'" size="default" plain type="warning" @click="status = 'review'">
 						На ревью →
 					</el-button>
-					<el-button
-						v-if="status === 'review'"
-						size="default"
-						plain
-						type="info"
-						@click="status = 'draft'"
-					>
+					<el-button v-if="status === 'review'" size="default" plain type="info" @click="status = 'draft'">
 						← В черновик
 					</el-button>
-					<el-button
-						v-if="status !== 'published'"
-						size="default"
-						plain
-						type="success"
-						@click="status = 'published'"
-					>
+					<el-button v-if="status !== 'published'" size="default" plain type="success" @click="status = 'published'">
 						Опубликовать 🚀
 					</el-button>
-					<el-button
-						v-else
-						size="default"
-						plain
-						type="info"
-						@click="status = 'draft'"
-					>
-						Снять с публикации
-					</el-button>
+					<el-button v-else size="default" plain type="info" @click="status = 'draft'"> Снять с публикации </el-button>
 				</el-button-group>
 				<el-button :type="isTranslationMode ? 'warning' : 'default'" @click="isTranslationMode = !isTranslationMode">
 					{{ isTranslationMode ? 'Exit Translation' : 'Translation Mode' }}
 				</el-button>
 				<el-button :type="isPreviewing ? 'primary' : 'default'" @click="isPreviewing = !isPreviewing">
-					<svg v-if="isPreviewing" width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right:4px;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><path d="M11 19H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 19h6M19 16v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					<svg
+						v-if="isPreviewing"
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						style="margin-right: 4px; vertical-align: middle"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M11 19H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v5"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+						/>
+						<path d="M16 19h6M19 16v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
 					{{ isPreviewing ? 'Split Preview' : 'Live Preview' }}
 				</el-button>
 				<el-button @click="emit('cancel')">Cancel</el-button>
@@ -124,7 +114,23 @@
 					<div class="history-toolbar">
 						<span class="history-toolbar__title">Version History</span>
 						<el-button size="small" :loading="isLoadingHistory" @click="fetchHistory">
-							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M3 12A9 9 0 1 0 6 5.68" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 5v4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+							<svg
+								width="13"
+								height="13"
+								viewBox="0 0 24 24"
+								fill="none"
+								style="margin-right: 4px"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path d="M3 12A9 9 0 1 0 6 5.68" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+								<path
+									d="M3 5v4h4"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
 							Refresh
 						</el-button>
 					</div>
@@ -143,20 +149,56 @@
 							<div class="activity-content">
 								<div class="activity-header">
 									<div class="activity-header__left">
-										<el-tag size="small" type="info" style="font-weight:700">v{{ log.version_number }}</el-tag>
+										<el-tag size="small" type="info" style="font-weight: 700">v{{ log.version_number }}</el-tag>
 										<span class="user-name">{{ log.user?.name || 'Administrator' }}</span>
-										<el-tag v-if="idx === 0" size="small" type="success" style="font-size:9px">LATEST</el-tag>
+										<el-tag v-if="idx === 0" size="small" type="success" style="font-size: 9px">LATEST</el-tag>
 									</div>
 									<span class="activity-date">{{ formatDate(log.created_at) }}</span>
 								</div>
 								<div v-if="log.comment" class="activity-comment">"{{ log.comment }}"</div>
 								<div class="activity-actions">
 									<el-button link size="small" type="primary" @click="openDiff(log)">
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:3px" xmlns="http://www.w3.org/2000/svg"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h4M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M12 8v8M9 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+										<svg
+											width="12"
+											height="12"
+											viewBox="0 0 24 24"
+											fill="none"
+											style="margin-right: 3px"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h4M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M12 8v8M9 11l3-3 3 3"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											/>
+										</svg>
 										View Diff
 									</el-button>
 									<el-button link size="small" type="warning" @click="onRollback(log.id)">
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:3px" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11A9 9 0 1 0 6.68 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+										<svg
+											width="12"
+											height="12"
+											viewBox="0 0 24 24"
+											fill="none"
+											style="margin-right: 3px"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												d="M3 7v4h4"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											/>
+											<path
+												d="M3 11A9 9 0 1 0 6.68 5"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+											/>
+										</svg>
 										Restore
 									</el-button>
 								</div>
@@ -165,8 +207,18 @@
 					</div>
 
 					<div v-else class="empty-state">
-						<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.3"><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
-						<p>No version history yet.<br><small>Versions are saved automatically on every update.</small></p>
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							style="opacity: 0.3"
+						>
+							<path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+							<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+						</svg>
+						<p>No version history yet.<br /><small>Versions are saved automatically on every update.</small></p>
 					</div>
 				</div>
 			</el-tab-pane>
@@ -183,20 +235,47 @@
 					<div class="diff-drawer-header">
 						<span class="diff-drawer-title">Version Diff</span>
 						<el-tag size="small" type="info">v{{ diffVersion?.version_number }}</el-tag>
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#64748b" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M12 5L19 12L12 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							style="color: #64748b"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M5 12H19M12 5L19 12L12 19"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
 						<el-tag size="small" type="success">Current</el-tag>
 					</div>
 				</template>
 				<div class="diff-drawer-body">
-					<VersionDiffViewer
-						:version="diffVersion"
-						:current-data="modelValue"
-						:schema="schema"
-					/>
+					<VersionDiffViewer :version="diffVersion" :current-data="modelValue" :schema="schema" />
 					<div class="diff-drawer-footer">
 						<el-button @click="isDiffOpen = false">Close</el-button>
-						<el-button type="warning" @click="onRollback(diffVersion!.id); isDiffOpen = false">
-							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11A9 9 0 1 0 6.68 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+						<el-button type="warning" @click="handleRollbackDiff">
+							<svg
+								width="13"
+								height="13"
+								viewBox="0 0 24 24"
+								fill="none"
+								style="margin-right: 4px"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M3 7v4h4"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+								<path d="M3 11A9 9 0 1 0 6.68 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+							</svg>
 							Restore v{{ diffVersion?.version_number }}
 						</el-button>
 					</div>
@@ -343,6 +422,13 @@ const onRollback = (versionId: string) => {
 	})
 }
 
+const handleRollbackDiff = () => {
+	if (diffVersion.value) {
+		onRollback(diffVersion.value.id)
+		isDiffOpen.value = false
+	}
+}
+
 watch(activeTab, (tab) => {
 	if (tab === 'history' && history.value.length === 0) {
 		fetchHistory()
@@ -352,8 +438,11 @@ watch(activeTab, (tab) => {
 const formatDate = (iso: string) => {
 	try {
 		return new Date(iso).toLocaleString('ru-RU', {
-			day: '2-digit', month: 'short', year: 'numeric',
-			hour: '2-digit', minute: '2-digit',
+			day: '2-digit',
+			month: 'short',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
 		})
 	} catch {
 		return iso
@@ -385,8 +474,6 @@ const formatDate = (iso: string) => {
 	display: flex;
 	gap: 12px;
 }
-
-
 
 .status-option {
 	height: 34px;
@@ -521,7 +608,10 @@ const formatDate = (iso: string) => {
 	padding: 40px;
 	font-size: 14px;
 
-	small { font-size: 12px; opacity: 0.7; }
+	small {
+		font-size: 12px;
+		opacity: 0.7;
+	}
 }
 
 /* History toolbar */
@@ -536,7 +626,7 @@ const formatDate = (iso: string) => {
 	align-items: center;
 	justify-content: space-between;
 	padding-bottom: 12px;
-	border-bottom: 1px solid var(--gp-glass-border, rgba(255,255,255,0.07));
+	border-bottom: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.07));
 }
 
 .history-toolbar__title {
@@ -593,7 +683,7 @@ const formatDate = (iso: string) => {
 	gap: 12px;
 	padding-top: 20px;
 	margin-top: 24px;
-	border-top: 1px solid var(--gp-glass-border, rgba(255,255,255,0.07));
+	border-top: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.07));
 	flex-shrink: 0;
 }
 </style>

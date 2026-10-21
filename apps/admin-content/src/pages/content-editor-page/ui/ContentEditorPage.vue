@@ -8,13 +8,12 @@
 					<div class="lock-banner__content">
 						<span class="lock-banner__icon">⚠️</span>
 						<span class="lock-banner__text">
-							<strong>Режим только для чтения:</strong> Запись сейчас редактирует <u>{{ lockedByName || 'другой администратор' }}</u>.
-							Одновременное сохранение заблокировано через Redis во избежание конфликтов.
+							<strong>Режим только для чтения:</strong> Запись сейчас редактирует
+							<u>{{ lockedByName || 'другой администратор' }}</u
+							>. Одновременное сохранение заблокировано через Redis во избежание конфликтов.
 						</span>
 					</div>
-					<el-button size="small" type="warning" plain @click="forceUnlock">
-						Принудительно разблокировать
-					</el-button>
+					<el-button size="small" type="warning" plain @click="forceUnlock"> Принудительно разблокировать </el-button>
 				</div>
 
 				<ContentEditor
@@ -79,9 +78,23 @@
 									@keydown.enter="applyCustomPath"
 									@blur="applyCustomPath"
 								/>
-								<button type="button" class="urlbar-btn" title="Обновить iframe (проверка сохранения)" @click="reloadIframe">
-									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+								<button
+									type="button"
+									class="urlbar-btn"
+									title="Обновить iframe (проверка сохранения)"
+									@click="reloadIframe"
+								>
+									<svg
+										width="13"
+										height="13"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2.2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
 									</svg>
 								</button>
 							</div>
@@ -94,8 +107,8 @@
 								@click="previewDevice = 'desktop'"
 							>
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-									<path d="M8 21H16M12 17V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+									<rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+									<path d="M8 21H16M12 17V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 								</svg>
 							</button>
 							<button
@@ -104,8 +117,8 @@
 								@click="previewDevice = 'tablet'"
 							>
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
-									<circle cx="12" cy="18" r="1" fill="currentColor"/>
+									<rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5" />
+									<circle cx="12" cy="18" r="1" fill="currentColor" />
 								</svg>
 							</button>
 							<button
@@ -114,26 +127,32 @@
 								@click="previewDevice = 'mobile'"
 							>
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
-									<circle cx="12" cy="18" r="1" fill="currentColor"/>
-									<path d="M9 5H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+									<rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.5" />
+									<circle cx="12" cy="18" r="1" fill="currentColor" />
+									<path d="M9 5H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 								</svg>
 							</button>
 							<button class="device-btn" title="Open in new tab" @click="openInNewTab">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M18 13V19C18 19.5523 17.5523 20 17 20H5C4.44772 20 4 19.5523 4 19V7C4 6.44772 4.44772 6 5 6H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-									<path d="M15 4H20M20 4V9M20 4L10 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									<path
+										d="M18 13V19C18 19.5523 17.5523 20 17 20H5C4.44772 20 4 19.5523 4 19V7C4 6.44772 4.44772 6 5 6H11"
+										stroke="currentColor"
+										stroke-width="1.5"
+										stroke-linecap="round"
+									/>
+									<path
+										d="M15 4H20M20 4V9M20 4L10 14"
+										stroke="currentColor"
+										stroke-width="1.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									/>
 								</svg>
 							</button>
 						</div>
 					</div>
 					<div class="preview-panel__viewport" :class="`is-${previewDevice}`">
-						<iframe
-							ref="splitIframeRef"
-							:src="previewUrl"
-							class="preview-panel__iframe"
-							@load="onIframeLoad"
-						/>
+						<iframe ref="splitIframeRef" :src="previewUrl" class="preview-panel__iframe" @load="onIframeLoad" />
 					</div>
 				</div>
 			</transition>
@@ -241,10 +260,12 @@ const openInNewTab = () => {
 
 // Send draft data to iframe and opened tab
 const sendPreviewData = () => {
-	const payload = JSON.parse(JSON.stringify({
-		data: formData,
-		schema: schema.value,
-	}))
+	const payload = JSON.parse(
+		JSON.stringify({
+			data: formData,
+			schema: schema.value,
+		})
+	)
 
 	const iframe = splitIframeRef.value
 	if (isSplitPreview.value && iframe?.contentWindow) {
@@ -432,9 +453,9 @@ onMounted(fetchData)
 /* Split preview panel */
 .preview-panel {
 	border-radius: 12px;
-	border: 1px solid var(--gp-glass-border, rgba(255,255,255,0.08));
+	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.08));
 	background: var(--gp-surface-card, #161b26);
-	box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
@@ -446,8 +467,8 @@ onMounted(fetchData)
 	align-items: center;
 	justify-content: space-between;
 	padding: 10px 14px;
-	border-bottom: 1px solid var(--gp-glass-border, rgba(255,255,255,0.06));
-	background: rgba(255,255,255,0.03);
+	border-bottom: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.06));
+	background: rgba(255, 255, 255, 0.03);
 	flex-shrink: 0;
 	gap: 12px;
 }
@@ -629,7 +650,7 @@ onMounted(fetchData)
 	max-width: 768px;
 	border-radius: 16px;
 	border: 6px solid #334155;
-	box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 	min-height: 600px;
 }
 
@@ -637,7 +658,7 @@ onMounted(fetchData)
 	max-width: 390px;
 	border-radius: 32px;
 	border: 8px solid #334155;
-	box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 	min-height: 667px;
 }
 

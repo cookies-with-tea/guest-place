@@ -1,10 +1,6 @@
 <template>
 	<!-- MFE Loading Failure (503) -->
-	<UiMfeFallback
-		v-if="error && isMfeLoadError"
-		:error="error"
-		:on-retry="retry"
-	/>
+	<UiMfeFallback v-if="error && isMfeLoadError" :error="error" :on-retry="retry" />
 
 	<!-- Generic Component Runtime Error (500) -->
 	<div v-else-if="error" class="error-boundary-container glass-card">
@@ -22,7 +18,8 @@
 			<h2 class="error-title">Ошибка при отображении компонента</h2>
 
 			<p class="error-desc">
-				В работе этого раздела интерфейса произошла ошибка. Вы можете повторить попытку или вернуться на главную страницу.
+				В работе этого раздела интерфейса произошла ошибка. Вы можете повторить попытку или вернуться на главную
+				страницу.
 			</p>
 
 			<div v-if="errorDetails" class="error-accordion">
@@ -38,12 +35,8 @@
 			</div>
 
 			<div class="error-actions">
-				<el-button :icon="RefreshRight" size="large" type="primary" @click="retry">
-					Повторить попытку
-				</el-button>
-				<el-button :icon="HomeFilled" size="large" @click="goHome">
-					На главную
-				</el-button>
+				<el-button :icon="RefreshRight" size="large" type="primary" @click="retry"> Повторить попытку </el-button>
+				<el-button :icon="HomeFilled" size="large" @click="goHome"> На главную </el-button>
 			</div>
 		</div>
 	</div>
@@ -54,13 +47,7 @@
 <script setup lang="ts">
 import { computed, onErrorCaptured, ref } from 'vue'
 
-import {
-	ArrowDown,
-	ArrowRight,
-	HomeFilled,
-	RefreshRight,
-	WarningFilled,
-} from '@element-plus/icons-vue'
+import { ArrowDown, ArrowRight, HomeFilled, RefreshRight, WarningFilled } from '@element-plus/icons-vue'
 
 import UiMfeFallback from '../../ui-mfe-fallback/ui/UiMfeFallback.vue'
 

@@ -9,8 +9,6 @@
 		"vue-router": "^4.5.1"
 	},
 	"devDependencies": {
-		"@admin-panel/eslint-config": "workspace:*",
-		"@admin-panel/prettier-config": "workspace:*",
 		"@admin-panel/stylelint-config": "workspace:*",
 		"@admin-panel/typescript-config": "workspace:*",
 		"@originjs/vite-plugin-federation": "^1.4.1",
@@ -21,37 +19,34 @@
 		"cypress": "^15.3.0",
 		"dependency-cruiser": "^15.0.0",
 		"enquirer": "^2.4.1",
-		"eslint": "^9.38.0",
-		"eslint-plugin-security": "^3.0.1",
-		"eslint-plugin-simple-import-sort": "^13.0.0",
 		"husky": "^9.1.7",
 		"jiti": "^2.5.1",
 		"jsdom": "^27.0.0",
 		"lint-staged": "^16.2.5",
 		"npm-run-all2": "^8.0.4",
-		"prettier": "3.6.2",
+		"oxfmt": "^0.72.0",
+		"oxlint": "^1.87.0",
 		"sass": "^1.93.2",
 		"start-server-and-test": "^2.1.2",
 		"stylelint": "^16.25.0",
 		"syncpack": "^14.3.0",
 		"turbo": "latest",
-		"typescript": "^5.9.3",
+		"typescript": "^7.0.2",
 		"vite": "^7.1.7",
 		"vite-plugin-vue-devtools": "^8.0.2",
 		"vitest": "^3.2.4",
-		"vue-tsc": "^3.1.0"
+		"vue-tsc": "^3.3.12"
 	},
 	"keywords": [],
 	"lint-staged": {
 		"*.{js,ts,vue}": [
-			"eslint --fix",
-			"vitest related --run --passWithNoTests"
+			"oxlint --fix"
 		],
 		"*.{css,scss,postcss,vue}": [
 			"stylelint --fix"
 		],
 		"*": [
-			"prettier --write --ignore-unknown"
+			"oxfmt"
 		]
 	},
 	"packageManager": "pnpm@9.0.6",
@@ -62,31 +57,34 @@
 		"build:mf": "turbo run build --filter=\"admin-*\" --filter=\"@admin-panel/ui\"",
 		"build:packages": "turbo run build --filter=\"@admin-panel/*\"",
 		"build:project": "node scripts/choose-project.js build",
+		"check-size": "node scripts/check-bundle-size.mjs",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"clean:project": "node scripts/choose-project.js clean",
 		"create:mf": "node scripts/create-mf/index.js",
-		"check-size": "node scripts/check-bundle-size.mjs",
 		"dev": "pnpm build:packages && turbo run dev --parallel --filter=\"admin-*\" --filter=\"@admin-panel/*\"",
 		"dev:all": "pnpm build && run-p \"preview:mf\" \"dev:shell\"",
 		"dev:fast": "turbo run dev --parallel --filter=\"admin-*\" --filter=\"@admin-panel/*\" --filter=!admin-docs",
 		"dev:project": "pnpm build:packages && node scripts/choose-project.js dev",
 		"dev:shell": "turbo run dev --filter=\"admin-shell\"",
-		"eslint": "eslint . --cache",
-		"eslint:fix": "eslint . --fix --cache",
-		"format": "prettier --write src/",
+		"format": "oxfmt",
+		"format:check": "oxfmt --check",
 		"generate:api": "pnpm --filter @admin-panel/lib generate:api",
-		"lint": "turbo run lint",
-		"lint:fix": "turbo run lint:fix",
+		"lint": "oxlint",
+		"lint:all": "turbo run lint",
+		"lint:all:fix": "turbo run lint:fix",
 		"lint:changes": "node scripts/lint-changed.mjs",
+		"lint:fix": "oxlint --fix",
 		"lint:project": "node scripts/choose-project.js lint",
+		"oxfmt": "oxfmt",
+		"oxfmt:check": "oxfmt --check",
+		"oxlint": "oxlint",
+		"oxlint:fix": "oxlint --fix",
 		"prebuild": "turbo run build --filter=@admin-panel/lib",
 		"prepare": "husky",
-		"prettier": "prettier --check .",
-		"prettier:fix": "prettier --write .",
 		"preview": "turbo run preview --parallel --filter=\"admin-*\" --filter=!admin-docs",
-		"preview:project": "pnpm build:packages && node scripts/choose-project.js preview",
 		"preview-storybook": "turbo run preview-storybook",
 		"preview:mf": "turbo run preview --parallel --filter=\"admin-*\" --filter=!admin-shell --filter=!admin-docs",
+		"preview:project": "pnpm build:packages && node scripts/choose-project.js preview",
 		"storybook": "turbo run storybook --filter=admin-docs",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
 		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
@@ -97,7 +95,7 @@
 		"test:coverage": "turbo run test:coverage --parallel",
 		"test:e2e": "pnpm --filter admin-shell test:e2e:pw",
 		"test:unit": "turbo run test:unit --parallel",
-		"type-check": "vue-tsc --build"
+		"type-check": "tsc --build"
 	},
 	"type": "module"
 }

@@ -186,17 +186,13 @@
 							:src="row.variants?.thumbnail?.url || row.optimizedPath || row.url"
 						/>
 						<div v-else-if="row.mediaType === 'video'" class="video-preview-thumb">
-							<video
-								class="preview-img"
-								muted
-								loop
-								autoplay
-								playsinline
-								:src="row.url"
-							/>
+							<video class="preview-img" muted loop autoplay playsinline :src="row.url" />
 							<span class="video-play-indicator">▶</span>
 						</div>
-						<div v-else-if="row.extension?.toLowerCase() === 'pdf' || row.mediaType === 'document'" class="doc-preview-cell">
+						<div
+							v-else-if="row.extension?.toLowerCase() === 'pdf' || row.mediaType === 'document'"
+							class="doc-preview-cell"
+						>
 							<span class="doc-badge">PDF</span>
 							<el-icon :size="20"><Document /></el-icon>
 						</div>
@@ -294,12 +290,7 @@
 				<el-form-item label="Target Folder">
 					<el-select v-model="targetFolderId" placeholder="Select destination folder" style="width: 100%">
 						<el-option label="📁 Unorganized (Root)" value="root" />
-						<el-option
-							v-for="folder in folders"
-							:key="folder.id"
-							:label="folder.name"
-							:value="folder.id"
-						>
+						<el-option v-for="folder in folders" :key="folder.id" :label="folder.name" :value="folder.id">
 							<span class="folder-dot" :style="{ backgroundColor: folder.color || '#409EFF', marginRight: '8px' }" />
 							<span>{{ folder.name }}</span>
 						</el-option>

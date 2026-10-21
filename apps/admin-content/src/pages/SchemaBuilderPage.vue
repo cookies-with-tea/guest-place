@@ -14,12 +14,8 @@
 					<el-button :icon="MagicStick" plain type="warning" :loading="isSeedingAbout" @click="seedAboutPage">
 						✨ Шаблон «О платформе»
 					</el-button>
-					<el-button :icon="Notebook" plain @click="goToDocs">
-						Документация подхода
-					</el-button>
-					<el-button :icon="Plus" type="primary" @click="handleAddSchema">
-						Create Schema
-					</el-button>
+					<el-button :icon="Notebook" plain @click="goToDocs"> Документация подхода </el-button>
+					<el-button :icon="Plus" type="primary" @click="handleAddSchema"> Create Schema </el-button>
 				</div>
 			</div>
 
@@ -38,12 +34,7 @@
 				</div>
 
 				<div v-else class="schemas-grid">
-					<div
-						v-for="schema in schemas"
-						:key="schema.id"
-						class="schema-card"
-						@click="handleEditSchema(schema)"
-					>
+					<div v-for="schema in schemas" :key="schema.id" class="schema-card" @click="handleEditSchema(schema)">
 						<div class="schema-card__header">
 							<div class="schema-card__icon">
 								<span>{{ schema.isSingleton ? '📄' : '📚' }}</span>
@@ -81,7 +72,17 @@
 			<div class="builder-header">
 				<div class="builder-header__left">
 					<button class="back-btn" @click="closeBuilder">
-						<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+						<svg
+							fill="none"
+							height="16"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+							width="16"
+							xmlns="http://www.w3.org/2000/svg"
+						>
 							<path d="M19 12H5M12 5l-7 7 7 7" />
 						</svg>
 						Back
@@ -131,13 +132,12 @@
 				<div class="lock-banner__content">
 					<span class="lock-banner__icon">⚠️</span>
 					<span class="lock-banner__text">
-						<strong>Режим только для чтения:</strong> Схему сейчас редактирует <u>{{ lockedByName || 'другой администратор' }}</u>.
-						Одновременное редактирование заблокировано через Redis во избежание конфликтов.
+						<strong>Режим только для чтения:</strong> Схему сейчас редактирует
+						<u>{{ lockedByName || 'другой администратор' }}</u
+						>. Одновременное редактирование заблокировано через Redis во избежание конфликтов.
 					</span>
 				</div>
-				<el-button size="small" type="warning" plain @click="forceUnlock">
-					Принудительно разблокировать
-				</el-button>
+				<el-button size="small" type="warning" plain @click="forceUnlock"> Принудительно разблокировать </el-button>
 			</div>
 
 			<!-- Builder Body: palette | canvas | config -->
@@ -158,7 +158,18 @@
 								<span class="palette-item__label">{{ ft.label }}</span>
 								<span class="palette-item__desc">{{ ft.description }}</span>
 							</div>
-							<svg class="palette-item__add" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+							<svg
+								class="palette-item__add"
+								fill="none"
+								height="14"
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2.5"
+								viewBox="0 0 24 24"
+								width="14"
+								xmlns="http://www.w3.org/2000/svg"
+							>
 								<path d="M12 5v14M5 12h14" />
 							</svg>
 						</button>
@@ -209,7 +220,8 @@
 							<div class="field-card__icon">{{ getFieldTypeInfo(field.fieldType).icon }}</div>
 							<div class="field-card__meta">
 								<div class="field-card__label">
-									<span v-if="field.label">{{ field.label }}</span><span v-else class="placeholder-text">Untitled field</span>
+									<span v-if="field.label">{{ field.label }}</span
+									><span v-else class="placeholder-text">Untitled field</span>
 									<span v-if="field.required" class="required-badge" title="Required">*</span>
 								</div>
 								<div class="field-card__name">{{ field.name || '—' }}</div>
@@ -220,7 +232,10 @@
 								class="field-card__type"
 								:color="getFieldTypeInfo(field.fieldType).color + '22'"
 								size="small"
-								:style="{ color: getFieldTypeInfo(field.fieldType).color, borderColor: getFieldTypeInfo(field.fieldType).color + '44' }"
+								:style="{
+									color: getFieldTypeInfo(field.fieldType).color,
+									borderColor: getFieldTypeInfo(field.fieldType).color + '44',
+								}"
 							>
 								{{ getFieldTypeInfo(field.fieldType).label }}
 							</el-tag>
@@ -232,7 +247,17 @@
 									title="Delete field"
 									@click="removeField(field._id)"
 								>
-									<svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+									<svg
+										fill="none"
+										height="13"
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										viewBox="0 0 24 24"
+										width="13"
+										xmlns="http://www.w3.org/2000/svg"
+									>
 										<polyline points="3 6 5 6 21 6" />
 										<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
 										<path d="M10 11v6M14 11v6" />
@@ -327,15 +352,13 @@
 						</template>
 
 						<!-- Default value (text/number) -->
-						<template v-if="selectedField.fieldType === FieldType.Text || selectedField.fieldType === FieldType.RichText">
+						<template
+							v-if="selectedField.fieldType === FieldType.Text || selectedField.fieldType === FieldType.RichText"
+						>
 							<div class="config-divider">Advanced</div>
 							<div class="config-field">
 								<label class="config-label">Default Value</label>
-								<input
-									v-model="selectedField.defaultValue"
-									class="config-input"
-									placeholder="Optional default value"
-								/>
+								<input v-model="selectedField.defaultValue" class="config-input" placeholder="Optional default value" />
 							</div>
 						</template>
 
@@ -343,12 +366,7 @@
 							<div class="config-divider">Advanced</div>
 							<div class="config-field">
 								<label class="config-label">Default Value</label>
-								<input
-									v-model.number="selectedField.defaultValue"
-									class="config-input"
-									placeholder="0"
-									type="number"
-								/>
+								<input v-model.number="selectedField.defaultValue" class="config-input" placeholder="0" type="number" />
 							</div>
 						</template>
 					</div>
@@ -402,11 +420,23 @@ const { isLocked, isLockedByOther, lockedByName, forceUnlock } = useEntityLock('
 // ── Field palette config ───────────────────────────────────────────────────
 const fieldTypePalette: FieldTypeInfo[] = [
 	{ value: FieldType.Text, label: 'Text', icon: '📝', description: 'Short text, single line', color: '#6366f1' },
-	{ value: FieldType.RichText, label: 'Rich Text', icon: '📄', description: 'Formatted content (Tiptap editor)', color: '#8b5cf6' },
+	{
+		value: FieldType.RichText,
+		label: 'Rich Text',
+		icon: '📄',
+		description: 'Formatted content (Tiptap editor)',
+		color: '#8b5cf6',
+	},
 	{ value: FieldType.Number, label: 'Number', icon: '🔢', description: 'Integer or decimal number', color: '#0ea5e9' },
 	{ value: FieldType.Boolean, label: 'Boolean', icon: '☑️', description: 'True / false toggle', color: '#10b981' },
 	{ value: FieldType.Date, label: 'Date', icon: '📅', description: 'Date or datetime picker', color: '#f59e0b' },
-	{ value: FieldType.Media, label: 'Media', icon: '🖼️', description: 'Image, video or file reference', color: '#ef4444' },
+	{
+		value: FieldType.Media,
+		label: 'Media',
+		icon: '🖼️',
+		description: 'Image, video or file reference',
+		color: '#ef4444',
+	},
 	{ value: FieldType.Relation, label: 'Relation', icon: '🔗', description: 'Link to another schema', color: '#f97316' },
 ]
 
@@ -428,7 +458,7 @@ const draggingId = ref<string | null>(null)
 const dragOverIndex = ref<number | null>(null)
 
 const selectedField = computed(() =>
-	selectedFieldId.value ? form.fields.find((f) => f._id === selectedFieldId.value) ?? null : null
+	selectedFieldId.value ? (form.fields.find((f) => f._id === selectedFieldId.value) ?? null) : null
 )
 
 // ── Unique ID helper ───────────────────────────────────────────────────────
@@ -678,21 +708,56 @@ const seedAboutPage = async () => {
 					fields: [
 						{ name: 'city', label: 'Город по умолчанию', field_type: FieldType.Text, required: false },
 						{ name: 'hero_title', label: 'Главный заголовок (Hero Title)', field_type: FieldType.Text, required: true },
-						{ name: 'hero_subtitle', label: 'Подзаголовок Hero (многострочный)', field_type: FieldType.Text, required: false },
+						{
+							name: 'hero_subtitle',
+							label: 'Подзаголовок Hero (многострочный)',
+							field_type: FieldType.Text,
+							required: false,
+						},
 						{ name: 'guest_title', label: 'Название карточки 1 (Guest)', field_type: FieldType.Text, required: true },
-						{ name: 'guest_features', label: 'Пункты возможностей Guest (через новую строку)', field_type: FieldType.Text, required: false },
+						{
+							name: 'guest_features',
+							label: 'Пункты возможностей Guest (через новую строку)',
+							field_type: FieldType.Text,
+							required: false,
+						},
 						{ name: 'guest_button_text', label: 'Текст кнопки Guest', field_type: FieldType.Text, required: false },
 						{ name: 'place_title', label: 'Название карточки 2 (Place)', field_type: FieldType.Text, required: true },
-						{ name: 'place_features', label: 'Пункты возможностей Place (через новую строку)', field_type: FieldType.Text, required: false },
+						{
+							name: 'place_features',
+							label: 'Пункты возможностей Place (через новую строку)',
+							field_type: FieldType.Text,
+							required: false,
+						},
 						{ name: 'place_button_text', label: 'Текст кнопки Place', field_type: FieldType.Text, required: false },
-						{ name: 'quote_title', label: 'Заголовок блока цитаты / ценностей', field_type: FieldType.Text, required: false },
+						{
+							name: 'quote_title',
+							label: 'Заголовок блока цитаты / ценностей',
+							field_type: FieldType.Text,
+							required: false,
+						},
 						{ name: 'quote_description', label: 'Текст блока ценностей', field_type: FieldType.Text, required: false },
 						{ name: 'quote_val_1', label: 'Ценность 1 (Технологии)', field_type: FieldType.Text, required: false },
 						{ name: 'quote_val_2', label: 'Ценность 2 (Ожидания)', field_type: FieldType.Text, required: false },
-						{ name: 'mission_title_accent', label: 'Акцентное слово Миссии (МИССИЯ)', field_type: FieldType.Text, required: false },
-						{ name: 'mission_text', label: 'Текст Миссии (RichText / HTML)', field_type: FieldType.RichText, required: false },
+						{
+							name: 'mission_title_accent',
+							label: 'Акцентное слово Миссии (МИССИЯ)',
+							field_type: FieldType.Text,
+							required: false,
+						},
+						{
+							name: 'mission_text',
+							label: 'Текст Миссии (RichText / HTML)',
+							field_type: FieldType.RichText,
+							required: false,
+						},
 						{ name: 'mission_image', label: 'URL изображения Миссии', field_type: FieldType.Text, required: false },
-						{ name: 'history_title_accent', label: 'Акцентное слово Истории (СОЗДАНИЯ)', field_type: FieldType.Text, required: false },
+						{
+							name: 'history_title_accent',
+							label: 'Акцентное слово Истории (СОЗДАНИЯ)',
+							field_type: FieldType.Text,
+							required: false,
+						},
 						{ name: 'history_text', label: 'Текст Истории создания', field_type: FieldType.RichText, required: false },
 						{ name: 'history_image', label: 'URL изображения Истории', field_type: FieldType.Text, required: false },
 					],
@@ -714,23 +779,30 @@ const seedAboutPage = async () => {
 					data: {
 						city: 'Москва',
 						hero_title: 'О платформе Guest & Place',
-						hero_subtitle: 'Платформа, позволяющая общаться напрямую!\nПомогаем каждому Гостю найти “свое” место.\nМы за «прозрачные отношения»!',
+						hero_subtitle:
+							'Платформа, позволяющая общаться напрямую!\nПомогаем каждому Гостю найти “свое” место.\nМы за «прозрачные отношения»!',
 						guest_title: 'Guest',
-						guest_features: 'Прямая связь с площадкой в режиме реального времени\nАктуальная информация, меню, цены, свободные даты\nПрямое онлайн бронирование и оплата\nЗаказ столика, банкета, доставка еды, аренда помещения под мероприятия — все в одном месте\nОнлайн просмотр\nОбщение в чатах, видео-встречи, консультации менеджеров площадок\nЛичный кабинет и вся информация в одном месте',
+						guest_features:
+							'Прямая связь с площадкой в режиме реального времени\nАктуальная информация, меню, цены, свободные даты\nПрямое онлайн бронирование и оплата\nЗаказ столика, банкета, доставка еды, аренда помещения под мероприятия — все в одном месте\nОнлайн просмотр\nОбщение в чатах, видео-встречи, консультации менеджеров площадок\nЛичный кабинет и вся информация в одном месте',
 						guest_button_text: 'Зарегистрироваться',
 						place_title: 'Place',
-						place_features: 'Чаты, видео-встречи\nОнлайн-показ площадки\nПрямые трансляции, новости, лента событий\nПрямое онлайн-бронирование и оплата\nКалендарь бронирования в режиме реального времени\nПростое приложение в системе Учета (все в одном месте)',
+						place_features:
+							'Чаты, видео-встречи\nОнлайн-показ площадки\nПрямые трансляции, новости, лента событий\nПрямое онлайн-бронирование и оплата\nКалендарь бронирования в режиме реального времени\nПростое приложение в системе Учета (все в одном месте)',
 						place_button_text: 'Добавить место',
 						quote_title: ' - проект от души :)',
 						quote_description: 'Лидерство на рынке обеспечивается нашей талантливой командой, экспертами своего дела',
 						quote_val_1: 'постоянный поиск новых решений и внедрение новых технологий',
 						quote_val_2: 'мы хотим превзойти ожидания пользователей и свои тоже :)',
 						mission_title_accent: 'МИССИЯ',
-						mission_text: '<p>Соединяем гостей (людей) и места, создавая простоту и прозрачность в “отношениях”. Предоставляем самые современные технологии и инструменты для простого и легкого общения.</p><p>Наши эксперты помогают Гостям найти <strong><span style="color:#0066CC">«то самое»</span></strong> место.</p>',
-						mission_image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80',
+						mission_text:
+							'<p>Соединяем гостей (людей) и места, создавая простоту и прозрачность в “отношениях”. Предоставляем самые современные технологии и инструменты для простого и легкого общения.</p><p>Наши эксперты помогают Гостям найти <strong><span style="color:#0066CC">«то самое»</span></strong> место.</p>',
+						mission_image:
+							'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80',
 						history_title_accent: 'СОЗДАНИЯ',
-						history_text: '<p>Соединяем гостей (людей) и места, создавая простоту и прозрачность в “отношениях”. Предоставляем самые современные технологии и инструменты для простого и легкого общения.</p><p>Наши эксперты помогают Гостям найти <strong><span style="color:#0066CC">“то самое”</span></strong> место.</p>',
-						history_image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80',
+						history_text:
+							'<p>Соединяем гостей (людей) и места, создавая простоту и прозрачность в “отношениях”. Предоставляем самые современные технологии и инструменты для простого и легкого общения.</p><p>Наши эксперты помогают Гостям найти <strong><span style="color:#0066CC">“то самое”</span></strong> место.</p>',
+						history_image:
+							'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80',
 					},
 				})
 				entry = createEntryRes.data

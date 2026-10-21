@@ -32,7 +32,8 @@ export const createApi = (entityName: string) => {
 				if (
 					options.body instanceof FormData ||
 					(typeof Blob !== 'undefined' && options.body instanceof Blob) ||
-					(typeof ArrayBuffer !== 'undefined' && (options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)))
+					(typeof ArrayBuffer !== 'undefined' &&
+						(options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)))
 				) {
 					body = options.body
 				} else {

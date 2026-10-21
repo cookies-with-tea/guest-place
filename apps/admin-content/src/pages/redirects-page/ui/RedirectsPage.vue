@@ -8,19 +8,14 @@
 					<el-tag size="small" type="primary" effect="plain" class="version-tag">Stage 3.4</el-tag>
 				</div>
 				<p class="page-subtitle">
-					Таблица правил перенаправления (301 Permanent / 302 Temporary) для сохранения SEO-позиций и удобной маршрутизации
+					Таблица правил перенаправления (301 Permanent / 302 Temporary) для сохранения SEO-позиций и удобной
+					маршрутизации
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain @click="router.push('/pages')">
-					🧱 Страницы сайта
-				</el-button>
-				<el-button plain @click="router.push('/menus')">
-					🧭 Меню сайта
-				</el-button>
-				<el-button type="primary" @click="openCreateDialog">
-					+ Создать редирект
-				</el-button>
+				<el-button plain @click="router.push('/pages')"> 🧱 Страницы сайта </el-button>
+				<el-button plain @click="router.push('/menus')"> 🧭 Меню сайта </el-button>
+				<el-button type="primary" @click="openCreateDialog"> + Создать редирект </el-button>
 			</div>
 		</div>
 
@@ -30,7 +25,10 @@
 				<span class="info-icon">🎯</span>
 				<div>
 					<strong>301 Moved Permanently</strong>
-					<span>Передаёт 95–99% ссылочного веса поисковых систем (Google, Яндекс). Используется при постоянной смене URL.</span>
+					<span
+						>Передаёт 95–99% ссылочного веса поисковых систем (Google, Яндекс). Используется при постоянной смене
+						URL.</span
+					>
 				</div>
 			</div>
 			<div class="info-sep"></div>
@@ -116,24 +114,15 @@
 
 				<el-table-column label="Активен" width="100" align="center">
 					<template #default="{ row }">
-						<el-switch
-							v-model="row.is_active"
-							@change="(val: boolean) => toggleActive(row, val)"
-						/>
+						<el-switch v-model="row.is_active" @change="(val: boolean) => toggleActive(row, val)" />
 					</template>
 				</el-table-column>
 
 				<el-table-column label="Действия" width="220" align="right">
 					<template #default="{ row }">
-						<el-button size="small" plain type="info" @click="testRedirect(row)">
-							⚡ Проверить
-						</el-button>
-						<el-button size="small" plain @click="openEditDialog(row)">
-							Изменить
-						</el-button>
-						<el-button size="small" plain type="danger" @click="confirmDelete(row)">
-							✕
-						</el-button>
+						<el-button size="small" plain type="info" @click="testRedirect(row)"> ⚡ Проверить </el-button>
+						<el-button size="small" plain @click="openEditDialog(row)"> Изменить </el-button>
+						<el-button size="small" plain type="danger" @click="confirmDelete(row)"> ✕ </el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -147,11 +136,7 @@
 		>
 			<el-form label-position="top">
 				<el-form-item label="Исходный путь (Source Path)">
-					<el-input
-						v-model="form.source_path"
-						placeholder="/old-catalog, /about-us..."
-						@blur="normalizeSourcePath"
-					>
+					<el-input v-model="form.source_path" placeholder="/old-catalog, /about-us..." @blur="normalizeSourcePath">
 						<template #prepend>/</template>
 					</el-input>
 					<div class="field-hint">Старый URL адрес на сайте, с которого будет происходить перенаправление.</div>
@@ -160,17 +145,8 @@
 				<el-form-item label="Целевой путь (Target Path)">
 					<el-input v-model="form.target_path" placeholder="/platforms, /p/about или https://...">
 						<template #append>
-							<el-select
-								placeholder="Выбрать из CMS"
-								style="width: 140px"
-								@change="onSelectPageTarget"
-							>
-								<el-option
-									v-for="p in pages"
-									:key="p.id"
-									:label="p.title"
-									:value="`/p/${p.slug}`"
-								/>
+							<el-select placeholder="Выбрать из CMS" style="width: 140px" @change="onSelectPageTarget">
+								<el-option v-for="p in pages" :key="p.id" :label="p.title" :value="`/p/${p.slug}`" />
 							</el-select>
 						</template>
 					</el-input>
@@ -179,29 +155,19 @@
 
 				<el-form-item label="Тип перенаправления (HTTP Code)">
 					<el-radio-group v-model="form.status_code">
-						<el-radio :label="301">
-							<strong>301 Moved Permanently</strong> (Постоянный, передаёт вес)
-						</el-radio>
-						<el-radio :label="302">
-							<strong>302 Temporary</strong> (Временный, для акций и тестов)
-						</el-radio>
+						<el-radio :label="301"> <strong>301 Moved Permanently</strong> (Постоянный, передаёт вес) </el-radio>
+						<el-radio :label="302"> <strong>302 Temporary</strong> (Временный, для акций и тестов) </el-radio>
 					</el-radio-group>
 				</el-form-item>
 
 				<el-form-item>
-					<el-checkbox v-model="form.is_active">
-						Правило активно (включено)
-					</el-checkbox>
+					<el-checkbox v-model="form.is_active"> Правило активно (включено) </el-checkbox>
 				</el-form-item>
 			</el-form>
 
 			<template #footer>
 				<el-button @click="isDialogOpen = false">Отмена</el-button>
-				<el-button
-					type="primary"
-					:disabled="!form.source_path.trim() || !form.target_path.trim()"
-					@click="confirmSave"
-				>
+				<el-button type="primary" :disabled="!form.source_path.trim() || !form.target_path.trim()" @click="confirmSave">
 					{{ editingId ? 'Сохранить изменения' : 'Создать редирект' }}
 				</el-button>
 			</template>
@@ -266,11 +232,7 @@ const filteredRedirects = computed(() => {
 
 	if (searchQuery.value.trim()) {
 		const q = searchQuery.value.trim().toLowerCase()
-		list = list.filter(
-			(r) =>
-				r.source_path.toLowerCase().includes(q) ||
-				r.target_path.toLowerCase().includes(q),
-		)
+		list = list.filter((r) => r.source_path.toLowerCase().includes(q) || r.target_path.toLowerCase().includes(q))
 	}
 
 	if (codeFilter.value !== 'all') {

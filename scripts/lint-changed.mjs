@@ -45,10 +45,10 @@ async function lintChanged() {
 		const BATCH_SIZE = 40
 
 		if (scriptFiles.length > 0) {
-			console.log(`Running ESLint on ${scriptFiles.length} files...`)
+			console.log(`Running Oxlint on ${scriptFiles.length} files...`)
 			for (let i = 0; i < scriptFiles.length; i += BATCH_SIZE) {
 				const batch = scriptFiles.slice(i, i + BATCH_SIZE)
-				execSync(`pnpm exec eslint --fix ${batch.join(' ')}`, { stdio: 'inherit' })
+				execSync(`pnpm exec oxlint --fix ${batch.join(' ')}`, { stdio: 'inherit' })
 			}
 		}
 

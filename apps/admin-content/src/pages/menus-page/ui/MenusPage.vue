@@ -8,25 +8,16 @@
 					<el-tag size="small" type="success" effect="plain" class="version-tag">Stage 3.2</el-tag>
 				</div>
 				<p class="page-subtitle">
-					Настройка структур навигации для шапки (header), подвала (footer) и мобильного/бокового меню с поддержкой вложенности и ссылок
+					Настройка структур навигации для шапки (header), подвала (footer) и мобильного/бокового меню с поддержкой
+					вложенности и ссылок
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain @click="router.push('/venues')">
-					🏰 Площадки
-				</el-button>
-				<el-button plain @click="router.push('/pages')">
-					🧱 Страницы сайта
-				</el-button>
-				<el-button plain @click="router.push('/redirects')">
-					🔀 Редиректы (301/302)
-				</el-button>
-				<el-button plain @click="openCreateMenuDialog">
-					+ Новое меню
-				</el-button>
-				<el-button type="primary" :loading="saving" @click="saveCurrentMenu">
-					💾 Сохранить изменения
-				</el-button>
+				<el-button plain @click="router.push('/venues')"> 🏰 Площадки </el-button>
+				<el-button plain @click="router.push('/pages')"> 🧱 Страницы сайта </el-button>
+				<el-button plain @click="router.push('/redirects')"> 🔀 Редиректы (301/302) </el-button>
+				<el-button plain @click="openCreateMenuDialog"> + Новое меню </el-button>
+				<el-button type="primary" :loading="saving" @click="saveCurrentMenu"> 💾 Сохранить изменения </el-button>
 			</div>
 		</div>
 
@@ -90,9 +81,7 @@
 							</div>
 						</div>
 						<div class="editor-header-actions">
-							<el-button type="success" plain @click="openAddItemDialog(null)">
-								+ Добавить пункт меню
-							</el-button>
+							<el-button type="success" plain @click="openAddItemDialog(null)"> + Добавить пункт меню </el-button>
 							<el-button
 								v-if="!isSystemLocation(currentMenu.location)"
 								type="danger"
@@ -150,12 +139,7 @@
 								<div class="tree-item root-item">
 									<div class="item-main-row">
 										<div class="item-reorder-btns">
-											<el-button
-												size="small"
-												circle
-												:disabled="idx === 0"
-												@click="moveItemUp(currentMenu.items, idx)"
-											>
+											<el-button size="small" circle :disabled="idx === 0" @click="moveItemUp(currentMenu.items, idx)">
 												▲
 											</el-button>
 											<el-button
@@ -198,11 +182,7 @@
 
 									<!-- Nested Children Items -->
 									<div v-if="item.children && item.children.length > 0" class="sub-items-container">
-										<div
-											v-for="(sub, subIdx) in item.children"
-											:key="sub.id"
-											class="tree-item sub-item"
-										>
+										<div v-for="(sub, subIdx) in item.children" :key="sub.id" class="tree-item sub-item">
 											<div class="item-main-row">
 												<div class="sub-tree-indent">↳</div>
 
@@ -262,7 +242,13 @@
 		<!-- Dialog: Add / Edit Item -->
 		<el-dialog
 			v-model="isItemDialogOpen"
-			:title="editingItem ? 'Редактировать пункт меню' : parentItemForAdd ? `Добавить подпункт для «${parentItemForAdd.title}»` : 'Добавить пункт меню'"
+			:title="
+				editingItem
+					? 'Редактировать пункт меню'
+					: parentItemForAdd
+						? `Добавить подпункт для «${parentItemForAdd.title}»`
+						: 'Добавить пункт меню'
+			"
 			width="520px"
 		>
 			<el-form label-position="top">
@@ -280,13 +266,13 @@
 
 				<!-- If type === 'page' -->
 				<el-form-item v-if="itemForm.type === 'page'" label="Выберите страницу">
-					<el-select v-model="itemForm.page_id" placeholder="Выберите опубликованную страницу" style="width: 100%" @change="onPageSelected">
-						<el-option
-							v-for="p in availablePages"
-							:key="p.id"
-							:label="`${p.title} (/p/${p.slug})`"
-							:value="p.id"
-						/>
+					<el-select
+						v-model="itemForm.page_id"
+						placeholder="Выберите опубликованную страницу"
+						style="width: 100%"
+						@change="onPageSelected"
+					>
+						<el-option v-for="p in availablePages" :key="p.id" :label="`${p.title} (/p/${p.slug})`" :value="p.id" />
 					</el-select>
 				</el-form-item>
 
@@ -328,7 +314,11 @@
 			</el-form>
 			<template #footer>
 				<el-button @click="isCreateMenuDialogOpen = false">Отмена</el-button>
-				<el-button type="primary" :disabled="!newMenuForm.name.trim() || !newMenuForm.location.trim()" @click="confirmCreateMenu">
+				<el-button
+					type="primary"
+					:disabled="!newMenuForm.name.trim() || !newMenuForm.location.trim()"
+					@click="confirmCreateMenu"
+				>
 					Создать меню
 				</el-button>
 			</template>

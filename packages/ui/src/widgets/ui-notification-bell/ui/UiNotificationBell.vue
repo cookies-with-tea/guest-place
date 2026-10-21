@@ -14,11 +14,7 @@
 							<el-icon><Bell /></el-icon>
 						</el-button>
 					</el-badge>
-					<span
-						class="connection-dot"
-						:class="connectionStatus"
-						:title="connectionStatusText"
-					></span>
+					<span class="connection-dot" :class="connectionStatus" :title="connectionStatusText"></span>
 				</div>
 			</template>
 
@@ -32,23 +28,10 @@
 						</span>
 					</div>
 					<div class="panel-header__actions">
-						<el-button
-							v-if="unreadCount > 0"
-							link
-							type="primary"
-							size="small"
-							@click="markAllAsRead"
-						>
+						<el-button v-if="unreadCount > 0" link type="primary" size="small" @click="markAllAsRead">
 							Прочитать все
 						</el-button>
-						<el-button
-							v-if="notifications.length > 0"
-							link
-							size="small"
-							@click="clearAll"
-						>
-							Очистить
-						</el-button>
+						<el-button v-if="notifications.length > 0" link size="small" @click="clearAll"> Очистить </el-button>
 					</div>
 				</div>
 

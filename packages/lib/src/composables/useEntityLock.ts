@@ -24,11 +24,7 @@ export interface IUseEntityLockOptions {
 	heartbeatIntervalMs?: number
 }
 
-export function useEntityLock(
-	entityType: string,
-	entityId: Ref<string> | string,
-	options: IUseEntityLockOptions = {},
-) {
+export function useEntityLock(entityType: string, entityId: Ref<string> | string, options: IUseEntityLockOptions = {}) {
 	const { autoAcquire = true, heartbeatIntervalMs = 15000 } = options
 
 	const { user } = useAuth()
@@ -247,7 +243,7 @@ export function useEntityLock(
 			if (newId && autoAcquire) {
 				await acquire(false)
 			}
-		},
+		}
 	)
 
 	return {

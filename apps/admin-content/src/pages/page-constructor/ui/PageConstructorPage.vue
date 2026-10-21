@@ -5,7 +5,7 @@
 			<div class="header-left">
 				<el-button link @click="goBack">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" />
 					</svg>
 					Назад к списку
 				</el-button>
@@ -17,12 +17,7 @@
 					/>
 					<div class="slug-input-wrapper">
 						<span class="slug-prefix">/p/</span>
-						<el-input
-							v-model="pageForm.slug"
-							placeholder="slug"
-							class="slug-input"
-							@input="onSlugInput"
-						/>
+						<el-input v-model="pageForm.slug" placeholder="slug" class="slug-input" @input="onSlugInput" />
 					</div>
 				</div>
 			</div>
@@ -42,9 +37,7 @@
 					</el-tag>
 
 					<el-dropdown trigger="click" @command="handleStatusTransition">
-						<el-button size="default" plain>
-							Статус: {{ getStatusLabel(pageForm.status) }} ▾
-						</el-button>
+						<el-button size="default" plain> Статус: {{ getStatusLabel(pageForm.status) }} ▾ </el-button>
 						<template #dropdown>
 							<el-dropdown-menu>
 								<el-dropdown-item command="draft" :disabled="pageForm.status === 'draft'">
@@ -61,23 +54,32 @@
 					</el-dropdown>
 				</div>
 
-				<el-button
-					:type="isPreviewing ? 'primary' : 'default'"
-					@click="togglePreview"
-				>
-					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
-						<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-						<circle cx="12" cy="12" r="3"/>
+				<el-button :type="isPreviewing ? 'primary' : 'default'" @click="togglePreview">
+					<svg
+						width="15"
+						height="15"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						style="margin-right: 4px"
+					>
+						<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+						<circle cx="12" cy="12" r="3" />
 					</svg>
 					{{ isPreviewing ? 'Скрыть превью' : 'Live Preview' }}
 				</el-button>
 
-				<el-button
-					plain
-					title="Открыть страницу во фронтенде в новой вкладке"
-					@click="openInNewTab"
-				>
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+				<el-button plain title="Открыть страницу во фронтенде в новой вкладке" @click="openInNewTab">
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						style="margin-right: 4px"
+					>
 						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
 						<polyline points="15 3 21 3 21 9"></polyline>
 						<line x1="10" y1="14" x2="21" y2="3"></line>
@@ -85,9 +87,7 @@
 					На сайт
 				</el-button>
 
-				<el-button type="primary" :loading="saving" @click="handleSave">
-					Сохранить страницу
-				</el-button>
+				<el-button type="primary" :loading="saving" @click="handleSave"> Сохранить страницу </el-button>
 			</div>
 		</header>
 
@@ -129,21 +129,11 @@
 					</div>
 
 					<div class="palette-search">
-						<el-input
-							v-model="paletteSearch"
-							placeholder="Поиск блоков..."
-							clearable
-							size="small"
-						/>
+						<el-input v-model="paletteSearch" placeholder="Поиск блоков..." clearable size="small" />
 					</div>
 
 					<div class="palette-list">
-						<div
-							v-for="bt in filteredBlockTypes"
-							:key="bt.slug"
-							class="palette-item"
-							@click="addBlock(bt)"
-						>
+						<div v-for="bt in filteredBlockTypes" :key="bt.slug" class="palette-item" @click="addBlock(bt)">
 							<div class="palette-item__icon">{{ bt.icon || '📦' }}</div>
 							<div class="palette-item__info">
 								<div class="palette-item__name">{{ bt.name }}</div>
@@ -210,9 +200,7 @@
 								</div>
 								<div class="preset-card__footer">
 									<span class="preset-date">{{ formatDate(preset.createdAt) }}</span>
-									<el-button size="small" type="primary" plain class="preset-add-btn">
-										+ Добавить
-									</el-button>
+									<el-button size="small" type="primary" plain class="preset-add-btn"> + Добавить </el-button>
 								</div>
 							</div>
 						</div>
@@ -257,9 +245,7 @@
 								📋 Вставить блок ({{ getBlockType(clipboardBlock.type)?.name || clipboardBlock.type }})
 							</el-button>
 
-							<el-button size="small" link type="danger" @click="clearAllBlocks">
-								Очистить всё
-							</el-button>
+							<el-button size="small" link type="danger" @click="clearAllBlocks"> Очистить всё </el-button>
 						</div>
 					</div>
 
@@ -269,15 +255,8 @@
 						<h4>Канвас страницы пуст</h4>
 						<p>Создайте структуру страницы из прямоугольников-макетов или готовых компонентов.</p>
 						<div class="canvas-empty__btns">
-							<el-button type="primary" @click="addWireframeBlock">
-								📐 Добавить первый макет-прямоугольник
-							</el-button>
-							<el-button
-								v-if="clipboardBlock"
-								type="success"
-								plain
-								@click="pasteBlock"
-							>
+							<el-button type="primary" @click="addWireframeBlock"> 📐 Добавить первый макет-прямоугольник </el-button>
+							<el-button v-if="clipboardBlock" type="success" plain @click="pasteBlock">
 								📋 Вставить из буфера
 							</el-button>
 						</div>
@@ -302,9 +281,7 @@
 							@dragend="onDragEnd"
 							@click="selectBlock(index)"
 						>
-							<div class="block-card__handle" title="Перетащить блок">
-								⠿
-							</div>
+							<div class="block-card__handle" title="Перетащить блок"> ⠿ </div>
 
 							<div class="block-card__icon">
 								{{ getBlockType(block.type)?.icon || '📦' }}
@@ -326,9 +303,7 @@
 							<div class="block-card__controls" @click.stop>
 								<!-- Change Type dropdown -->
 								<el-dropdown trigger="click" @command="(cmd: string) => changeBlockType(index, cmd)">
-									<el-button size="small" circle title="Заменить на реальный компонент">
-										⇄
-									</el-button>
+									<el-button size="small" circle title="Заменить на реальный компонент"> ⇄ </el-button>
 									<template #dropdown>
 										<el-dropdown-menu>
 											<el-dropdown-item disabled>Заменить на компонент:</el-dropdown-item>
@@ -345,22 +320,12 @@
 								</el-dropdown>
 
 								<!-- Copy block to clipboard (Stage 2.4) -->
-								<el-button
-									size="small"
-									circle
-									title="Скопировать в буфер (Ctrl+C)"
-									@click="copyBlock(index)"
-								>
+								<el-button size="small" circle title="Скопировать в буфер (Ctrl+C)" @click="copyBlock(index)">
 									📋
 								</el-button>
 
 								<!-- Save as preset (Stage 2.4) -->
-								<el-button
-									size="small"
-									circle
-									title="Сохранить как пресет"
-									@click="openSavePresetDialog(index)"
-								>
+								<el-button size="small" circle title="Сохранить как пресет" @click="openSavePresetDialog(index)">
 									⭐
 								</el-button>
 
@@ -382,21 +347,8 @@
 								>
 									↓
 								</el-button>
-								<el-button
-									size="small"
-									circle
-									title="Дублировать блок"
-									@click="duplicateBlock(index)"
-								>
-									⎘
-								</el-button>
-								<el-button
-									size="small"
-									circle
-									type="danger"
-									title="Удалить блок"
-									@click="removeBlock(index)"
-								>
+								<el-button size="small" circle title="Дублировать блок" @click="duplicateBlock(index)"> ⎘ </el-button>
+								<el-button size="small" circle type="danger" title="Удалить блок" @click="removeBlock(index)">
 									✕
 								</el-button>
 							</div>
@@ -421,8 +373,8 @@
 								@click="previewDevice = 'desktop'"
 							>
 								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="2" y="3" width="20" height="14" rx="2"/>
-									<path d="M8 21h8M12 17v4"/>
+									<rect x="2" y="3" width="20" height="14" rx="2" />
+									<path d="M8 21h8M12 17v4" />
 								</svg>
 								<span>Desktop</span>
 							</button>
@@ -433,8 +385,8 @@
 								@click="previewDevice = 'tablet'"
 							>
 								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="4" y="2" width="16" height="20" rx="2"/>
-									<circle cx="12" cy="18" r="1" fill="currentColor"/>
+									<rect x="4" y="2" width="16" height="20" rx="2" />
+									<circle cx="12" cy="18" r="1" fill="currentColor" />
 								</svg>
 								<span>Tablet (768px)</span>
 							</button>
@@ -445,9 +397,9 @@
 								@click="previewDevice = 'mobile'"
 							>
 								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="5" y="2" width="14" height="20" rx="2"/>
-									<circle cx="12" cy="18" r="1" fill="currentColor"/>
-									<path d="M9 5h6"/>
+									<rect x="5" y="2" width="14" height="20" rx="2" />
+									<circle cx="12" cy="18" r="1" fill="currentColor" />
+									<path d="M9 5h6" />
 								</svg>
 								<span>Mobile (375px)</span>
 							</button>
@@ -460,11 +412,7 @@
 
 					<!-- Viewport wrapper with responsive device framing -->
 					<div class="preview-panel__viewport" :class="`is-${previewDevice}`">
-						<iframe
-							ref="previewIframe"
-							:src="previewUrl"
-							class="preview-iframe"
-						/>
+						<iframe ref="previewIframe" :src="previewUrl" class="preview-iframe" />
 					</div>
 				</div>
 			</main>
@@ -505,14 +453,7 @@
 									<span v-if="selectedBlock.type === 'wireframe'" class="wireframe-pill">📐 Макет</span>
 								</div>
 							</div>
-							<el-button
-								size="small"
-								circle
-								title="Снять выбор"
-								@click="selectedBlockIndex = null"
-							>
-								✕
-							</el-button>
+							<el-button size="small" circle title="Снять выбор" @click="selectedBlockIndex = null"> ✕ </el-button>
 						</div>
 
 						<!-- Quick swap to real component -->
@@ -535,7 +476,9 @@
 									:value="bt.slug"
 								>
 									<span style="float: left">{{ bt.icon || '📦' }} {{ bt.name }}</span>
-									<span style="float: right; color: var(--text-muted); font-size: 11px"><code>{{ bt.slug }}</code></span>
+									<span style="float: right; color: var(--text-muted); font-size: 11px"
+										><code>{{ bt.slug }}</code></span
+									>
 								</el-option>
 							</el-select>
 						</div>
@@ -562,9 +505,7 @@
 
 						<!-- SUB-PANE 1: CONTENT FIELDS -->
 						<div v-if="activeBlockSubTab === 'content'" class="sub-tab-pane">
-							<div class="inspector-notice">
-								✏️ Заполните поля блока. Изменения видны в Live Preview:
-							</div>
+							<div class="inspector-notice"> ✏️ Заполните поля блока. Изменения видны в Live Preview: </div>
 
 							<div class="inspector-form">
 								<!-- ContentFormGenerator dynamically renders inputs based on block_type.schema -->
@@ -630,11 +571,7 @@
 
 							<div class="styling-section">
 								<label class="styling-label">Внутренний отступ (Padding)</label>
-								<el-radio-group
-									v-model="getBlockStyle().padding"
-									size="small"
-									class="spacing-radio-group"
-								>
+								<el-radio-group v-model="getBlockStyle().padding" size="small" class="spacing-radio-group">
 									<el-radio-button label="none">0</el-radio-button>
 									<el-radio-button label="sm">SM</el-radio-button>
 									<el-radio-button label="md">MD</el-radio-button>
@@ -645,11 +582,7 @@
 
 							<div class="styling-section">
 								<label class="styling-label">Внешний отступ (Margin)</label>
-								<el-radio-group
-									v-model="getBlockStyle().margin"
-									size="small"
-									class="spacing-radio-group"
-								>
+								<el-radio-group v-model="getBlockStyle().margin" size="small" class="spacing-radio-group">
 									<el-radio-button label="none">0</el-radio-button>
 									<el-radio-button label="sm">SM</el-radio-button>
 									<el-radio-button label="md">MD</el-radio-button>
@@ -660,11 +593,7 @@
 							<div class="styling-section">
 								<label class="styling-label">Цвет фона (Background Color)</label>
 								<div class="color-picker-row">
-									<el-color-picker
-										v-model="getBlockStyle().backgroundColor"
-										show-alpha
-										size="default"
-									/>
+									<el-color-picker v-model="getBlockStyle().backgroundColor" show-alpha size="default" />
 									<el-input
 										v-model="getBlockStyle().backgroundColor"
 										placeholder="#ffffff или rgba(...)"
@@ -732,12 +661,7 @@
 							</div>
 
 							<div class="styling-section">
-								<el-button
-									type="primary"
-									plain
-									style="width: 100%"
-									@click="openSavePresetDialog(selectedBlockIndex!)"
-								>
+								<el-button type="primary" plain style="width: 100%" @click="openSavePresetDialog(selectedBlockIndex!)">
 									⭐ Сохранить блок и стиль как пресет
 								</el-button>
 							</div>
@@ -749,27 +673,22 @@
 						<div class="guide-icon">👈</div>
 						<h3>Как заполнять контент:</h3>
 						<p class="guide-desc">
-							Страница собирается из блоков. Кликните на любой блок в канвасе по центру, чтобы открыть его поля для редактирования.
+							Страница собирается из блоков. Кликните на любой блок в канвасе по центру, чтобы открыть его поля для
+							редактирования.
 						</p>
 
 						<div class="guide-steps-list">
 							<div class="guide-step-item">
 								<span class="step-num">1</span>
-								<div class="step-text">
-									<strong>Выберите блок</strong> в левой палитре (нажмите «+»)
-								</div>
+								<div class="step-text"> <strong>Выберите блок</strong> в левой палитре (нажмите «+») </div>
 							</div>
 							<div class="guide-step-item">
 								<span class="step-num">2</span>
-								<div class="step-text">
-									<strong>Нажмите на карточку блока</strong> в центральном канвасе
-								</div>
+								<div class="step-text"> <strong>Нажмите на карточку блока</strong> в центральном канвасе </div>
 							</div>
 							<div class="guide-step-item">
 								<span class="step-num">3</span>
-								<div class="step-text">
-									<strong>Заполните тексты, медиа и стиль</strong> в этой правой панели
-								</div>
+								<div class="step-text"> <strong>Заполните тексты, медиа и стиль</strong> в этой правой панели </div>
 							</div>
 						</div>
 
@@ -794,17 +713,10 @@
 					<div class="inspector-form">
 						<el-form label-position="top">
 							<el-form-item label="Название страницы">
-								<el-input
-									v-model="pageForm.title"
-									placeholder="О платформе"
-								/>
+								<el-input v-model="pageForm.title" placeholder="О платформе" />
 							</el-form-item>
 							<el-form-item label="URL страницы (slug)">
-								<el-input
-									v-model="pageForm.slug"
-									placeholder="about"
-									@input="onSlugInput"
-								>
+								<el-input v-model="pageForm.slug" placeholder="about" @input="onSlugInput">
 									<template #prepend>/p/</template>
 								</el-input>
 							</el-form-item>
@@ -857,9 +769,13 @@
 								</template>
 								<el-input
 									v-model="pageForm.seo.title"
-									:placeholder="pageForm.title ? `${pageForm.title} | Guest & Place` : 'Заголовок страницы для поисковиков'"
+									:placeholder="
+										pageForm.title ? `${pageForm.title} | Guest & Place` : 'Заголовок страницы для поисковиков'
+									"
 								/>
-								<div class="seo-field-hint">Оптимальная длина: 50–60 символов для отображения в Google без обрезки.</div>
+								<div class="seo-field-hint"
+									>Оптимальная длина: 50–60 символов для отображения в Google без обрезки.</div
+								>
 							</el-form-item>
 
 							<el-form-item>
@@ -881,19 +797,13 @@
 							</el-form-item>
 
 							<el-form-item label="OG Image (превью для соцсетей и мессенджеров)">
-								<el-input
-									v-model="pageForm.seo.og_image"
-									placeholder="https://... или /uploads/image.jpg"
-								>
+								<el-input v-model="pageForm.seo.og_image" placeholder="https://... или /uploads/image.jpg">
 									<template #prefix>🖼️</template>
 								</el-input>
 							</el-form-item>
 
 							<el-form-item label="Canonical URL (канонический адрес)">
-								<el-input
-									v-model="pageForm.seo.canonical"
-									:placeholder="computedCanonicalUrl"
-								/>
+								<el-input v-model="pageForm.seo.canonical" :placeholder="computedCanonicalUrl" />
 							</el-form-item>
 
 							<el-form-item>
@@ -951,9 +861,7 @@
 									<strong>Sitemap XML генерация:</strong>
 									<p>Страница автоматически попадает в <code>sitemap.xml</code> при публикации (статус PUBLISHED).</p>
 								</div>
-								<el-button size="small" plain @click="openSitemapXml">
-									Открыть sitemap.xml
-								</el-button>
+								<el-button size="small" plain @click="openSitemapXml"> Открыть sitemap.xml </el-button>
 							</div>
 						</el-form>
 					</div>
@@ -962,13 +870,12 @@
 		</div>
 
 		<!-- Dialog: Save Block as Preset (Stage 2.4) -->
-		<el-dialog
-			v-model="isPresetDialogOpen"
-			title="⭐ Сохранить блок как пресет"
-			width="420px"
-		>
+		<el-dialog v-model="isPresetDialogOpen" title="⭐ Сохранить блок как пресет" width="420px">
 			<div class="preset-dialog-content">
-				<p>Сохраните текущую конфигурацию контента и стиля блока как шаблон для повторного использования на других страницах:</p>
+				<p
+					>Сохраните текущую конфигурацию контента и стиля блока как шаблон для повторного использования на других
+					страницах:</p
+				>
 				<el-input
 					v-model="presetFormName"
 					placeholder="Название пресета (например: Hero с синим градиентом)"
@@ -1176,9 +1083,7 @@ const selectedBlockType = computed(() => {
 const filteredBlockTypes = computed(() => {
 	if (!paletteSearch.value) return blockTypes.value
 	const q = paletteSearch.value.toLowerCase()
-	return blockTypes.value.filter(
-		(b) => b.name.toLowerCase().includes(q) || b.slug.toLowerCase().includes(q)
-	)
+	return blockTypes.value.filter((b) => b.name.toLowerCase().includes(q) || b.slug.toLowerCase().includes(q))
 })
 
 function getBlockType(slug: string): BlockTypeItem | undefined {
@@ -1338,7 +1243,9 @@ function openSavePresetDialog(index: number) {
 	presetTargetIndex.value = index
 	const block = pageForm.blocks[index]
 	const summary = block ? getBlockSummary(block) : ''
-	presetFormName.value = summary ? `${getBlockType(block.type)?.name || block.type}: ${summary}` : `${getBlockType(block.type)?.name || block.type} (Пресет)`
+	presetFormName.value = summary
+		? `${getBlockType(block.type)?.name || block.type}: ${summary}`
+		: `${getBlockType(block.type)?.name || block.type} (Пресет)`
 	isPresetDialogOpen.value = true
 }
 
@@ -1363,7 +1270,7 @@ function confirmSavePreset() {
 }
 
 function deletePreset(id: string) {
-	savedPresets.value = savedPresets.value.filter(p => p.id !== id)
+	savedPresets.value = savedPresets.value.filter((p) => p.id !== id)
 	persistPresets()
 	ElMessage.info('Пресет удалён')
 }
@@ -1711,7 +1618,10 @@ async function handleSave() {
 			status: pageForm.status,
 			parent_id: pageForm.parent_id || null,
 			clear_parent: !pageForm.parent_id,
-			published_at: pageForm.status === 'published' ? (pageForm.published_at || new Date().toISOString()) : (pageForm.published_at || undefined),
+			published_at:
+				pageForm.status === 'published'
+					? pageForm.published_at || new Date().toISOString()
+					: pageForm.published_at || undefined,
 			published_by: pageForm.published_by || undefined,
 			blocks: pageForm.blocks,
 			seo: pageForm.seo,
@@ -1767,12 +1677,7 @@ function onMediaDragLeave(e: DragEvent) {
 		isMediaDragActive.value = false
 		return
 	}
-	if (
-		e.clientX <= rect.left ||
-		e.clientX >= rect.right ||
-		e.clientY <= rect.top ||
-		e.clientY >= rect.bottom
-	) {
+	if (e.clientX <= rect.left || e.clientX >= rect.right || e.clientY <= rect.top || e.clientY >= rect.bottom) {
 		isMediaDragActive.value = false
 	}
 }

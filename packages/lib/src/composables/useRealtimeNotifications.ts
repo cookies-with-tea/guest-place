@@ -6,7 +6,14 @@ import { useEvents } from './useEvents'
 
 export interface IRealtimeNotification {
 	id: string
-	type: 'guest_registered' | 'media_uploaded' | 'entity_locked' | 'entity_unlocked' | 'system_alert' | 'content_updated' | 'info'
+	type:
+		| 'guest_registered'
+		| 'media_uploaded'
+		| 'entity_locked'
+		| 'entity_unlocked'
+		| 'system_alert'
+		| 'content_updated'
+		| 'info'
 	title: string
 	message: string
 	timestamp: string

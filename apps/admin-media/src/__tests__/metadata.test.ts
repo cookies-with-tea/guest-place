@@ -51,13 +51,13 @@ describe('Media Metadata, Palette, and EXIF Handling', () => {
 
 			return Boolean(
 				exif.make ||
-					exif.model ||
-					exif.dateTime ||
-					exif.iso ||
-					exif.fNumber ||
-					exif.exposureTime ||
-					exif.sanitized ||
-					exif.gpsStripped
+				exif.model ||
+				exif.dateTime ||
+				exif.iso ||
+				exif.fNumber ||
+				exif.exposureTime ||
+				exif.sanitized ||
+				exif.gpsStripped
 			)
 		}
 

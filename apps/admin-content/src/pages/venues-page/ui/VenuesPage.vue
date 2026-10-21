@@ -19,9 +19,7 @@
 					<el-button plain @click="router.push('/pages')">🧱 Страницы сайта</el-button>
 					<el-button plain @click="router.push('/menus')">🧭 Меню и навигация</el-button>
 					<el-button plain @click="router.push('/redirects')">🔀 Редиректы</el-button>
-					<el-button type="primary" :icon="Plus" @click="openCreate">
-						+ Добавить площадку
-					</el-button>
+					<el-button type="primary" :icon="Plus" @click="openCreate"> + Добавить площадку </el-button>
 				</div>
 			</div>
 
@@ -50,28 +48,20 @@
 					</el-select>
 
 					<div class="filter-stats">
-						<span>Всего площадок: <strong>{{ totalVenues }}</strong></span>
+						<span
+							>Всего площадок: <strong>{{ totalVenues }}</strong></span
+						>
 					</div>
 				</div>
 			</el-card>
 
 			<!-- Venues Table -->
 			<el-card class="table-card" shadow="never">
-				<el-table
-					v-loading="loading"
-					:data="venues"
-					stripe
-					style="width: 100%"
-					empty-text="Площадки не найдены"
-				>
+				<el-table v-loading="loading" :data="venues" stripe style="width: 100%" empty-text="Площадки не найдены">
 					<el-table-column label="Фото" width="100">
 						<template #default="{ row }">
 							<div class="venue-thumb-wrap">
-								<img
-									:src="getVenueThumb(row)"
-									alt="Превью"
-									class="venue-thumb"
-								/>
+								<img :src="getVenueThumb(row)" alt="Превью" class="venue-thumb" />
 							</div>
 						</template>
 					</el-table-column>
@@ -92,25 +82,34 @@
 									<el-tag size="small" type="info">{{ row.slug }}</el-tag>
 									<span v-if="row.phone" class="venue-phone-text">📞 {{ row.phone }}</span>
 								</div>
-								<a
-									:href="getLandingUrl(row.slug)"
-									target="_blank"
-									class="landing-pill-btn"
-								>
-									🌐 Открыть лендинг ↗
-								</a>
+								<a :href="getLandingUrl(row.slug)" target="_blank" class="landing-pill-btn"> 🌐 Открыть лендинг ↗ </a>
 							</div>
 						</template>
 					</el-table-column>
 
-					<el-table-column label="Локация" min-width="200">
+					<el-table-column label="Локация" min-width="220">
 						<template #default="{ row }">
 							<div class="venue-loc-cell">
 								<span class="venue-address-text">📍 {{ row.address }}</span>
 								<span v-if="row.metro_station || row.metroStation" class="venue-metro-text">
 									🚇 {{ row.metro_station || row.metroStation }}
-									<small v-if="row.metro_distance_text || row.metroDistanceText">({{ row.metro_distance_text || row.metroDistanceText }})</small>
+									<small v-if="row.metro_distance_text || row.metroDistanceText"
+										>({{ row.metro_distance_text || row.metroDistanceText }})</small
+									>
 								</span>
+								<div class="venue-map-coords-badge">
+									<el-tag
+										v-if="(row.coordinates_lat || row.coordinatesLat) && (row.coordinates_lng || row.coordinatesLng)"
+										size="small"
+										type="success"
+										effect="light"
+									>
+										🗺️ {{ Number(row.coordinates_lat || row.coordinatesLat).toFixed(4) }}, {{ Number(row.coordinates_lng || row.coordinatesLng).toFixed(4) }}
+									</el-tag>
+									<el-tag v-else size="small" type="info" effect="plain">
+										⚠️ Без точки на карте
+									</el-tag>
+								</div>
 							</div>
 						</template>
 					</el-table-column>
@@ -118,9 +117,15 @@
 					<el-table-column label="Цены" width="180">
 						<template #default="{ row }">
 							<div class="venue-prices-cell">
-								<span v-if="row.average_check || row.averageCheck">Чек: {{ formatPrice(row.average_check || row.averageCheck) }} ₽</span>
-								<span v-if="row.banquet_price_from || row.banquetPriceFrom">Банкет: от {{ formatPrice(row.banquet_price_from || row.banquetPriceFrom) }} ₽</span>
-								<span v-if="row.rent_price_hour || row.rentPriceHour">Аренда: {{ formatPrice(row.rent_price_hour || row.rentPriceHour) }} ₽/ч</span>
+								<span v-if="row.average_check || row.averageCheck"
+									>Чек: {{ formatPrice(row.average_check || row.averageCheck) }} ₽</span
+								>
+								<span v-if="row.banquet_price_from || row.banquetPriceFrom"
+									>Банкет: от {{ formatPrice(row.banquet_price_from || row.banquetPriceFrom) }} ₽</span
+								>
+								<span v-if="row.rent_price_hour || row.rentPriceHour"
+									>Аренда: {{ formatPrice(row.rent_price_hour || row.rentPriceHour) }} ₽/ч</span
+								>
 							</div>
 						</template>
 					</el-table-column>
@@ -129,9 +134,15 @@
 						<template #default="{ row }">
 							<div class="venue-tabs-badges">
 								<el-tag size="small" :type="row.pricing_table ? 'success' : 'info'" effect="plain">💰 Цены</el-tag>
-								<el-tag size="small" :type="row.menu_photos?.length ? 'success' : 'info'" effect="plain">🍽️ Меню ({{ row.menu_photos?.length || 0 }})</el-tag>
-								<el-tag size="small" :type="row.feed?.length ? 'success' : 'info'" effect="plain">📰 Лента ({{ row.feed?.length || 0 }})</el-tag>
-								<el-tag size="small" :type="row.reviews?.length ? 'success' : 'info'" effect="plain">💬 Чат ({{ row.reviews?.length || 0 }})</el-tag>
+								<el-tag size="small" :type="row.menu_photos?.length ? 'success' : 'info'" effect="plain"
+									>🍽️ Меню ({{ row.menu_photos?.length || 0 }})</el-tag
+								>
+								<el-tag size="small" :type="row.feed?.length ? 'success' : 'info'" effect="plain"
+									>📰 Лента ({{ row.feed?.length || 0 }})</el-tag
+								>
+								<el-tag size="small" :type="row.reviews?.length ? 'success' : 'info'" effect="plain"
+									>💬 Чат ({{ row.reviews?.length || 0 }})</el-tag
+								>
 							</div>
 						</template>
 					</el-table-column>
@@ -156,12 +167,7 @@
 								>
 									Сайт ↗
 								</el-button>
-								<el-button
-									size="small"
-									type="primary"
-									@click="openEdit(row)"
-									title="Редактировать в Live формате"
-								>
+								<el-button size="small" type="primary" @click="openEdit(row)" title="Редактировать в Live формате">
 									⚡ Live редактор
 								</el-button>
 								<el-popconfirm
@@ -171,9 +177,7 @@
 									@confirm="handleDelete(row)"
 								>
 									<template #reference>
-										<el-button size="small" type="danger" plain>
-											✕
-										</el-button>
+										<el-button size="small" type="danger" plain> ✕ </el-button>
 									</template>
 								</el-popconfirm>
 							</div>
@@ -181,7 +185,7 @@
 					</el-table-column>
 				</el-table>
 
-				<div class="table-pagination-row" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+				<div class="table-pagination-row" style="margin-top: 20px; display: flex; justify-content: flex-end">
 					<el-pagination
 						v-model:current-page="currentPage"
 						v-model:page-size="pageSize"
@@ -202,9 +206,7 @@
 			<!-- Live Editor Top Navigation Bar -->
 			<div class="editor-topbar">
 				<div class="editor-topbar__left">
-					<el-button plain @click="closeEditor">
-						← К списку
-					</el-button>
+					<el-button plain @click="closeEditor"> ← К списку </el-button>
 					<span class="live-pill">⚡ LIVE РЕДАКТОР</span>
 					<h2 class="editor-title">{{ isEditing ? form.title : 'Новая площадка' }}</h2>
 					<a
@@ -250,26 +252,14 @@
 						</button>
 					</div>
 
-					<el-button
-						type="success"
-						plain
-						@click="openLanding(form.slug)"
-					>
-						🌐 На сайт ↗
-					</el-button>
+					<el-button type="success" plain @click="openLanding(form.slug)"> 🌐 На сайт ↗ </el-button>
 
-					<el-button
-						type="primary"
-						:loading="saving"
-						@click="handleSave"
-					>
-						💾 Сохранить
-					</el-button>
+					<el-button type="primary" :loading="saving" @click="handleSave"> 💾 Сохранить </el-button>
 				</div>
 			</div>
 
 			<!-- Live Editor Main Container -->
-						<!-- Live Editor Main Container -->
+			<!-- Live Editor Main Container -->
 			<div class="editor-content-container" :class="[`split-${splitRatio}`]">
 				<!-- LEFT PANE: Full Tabbed Form -->
 				<div class="editor-form-pane">
@@ -316,11 +306,7 @@
 									<el-form-item label="Слаг (URL-идентификатор) *" required>
 										<div class="slug-input-group">
 											<div class="slug-prefix">/venues/</div>
-											<el-input
-												v-model="form.slug"
-												placeholder="rooftop-neglinnaya"
-												@input="syncLivePreview"
-											/>
+											<el-input v-model="form.slug" placeholder="rooftop-neglinnaya" @input="syncLivePreview" />
 											<el-button
 												type="primary"
 												plain
@@ -367,11 +353,7 @@
 										</el-col>
 										<el-col :span="8">
 											<el-form-item label="Город">
-												<el-input
-													v-model="form.city"
-													placeholder="Москва"
-													@input="syncLivePreview"
-												/>
+												<el-input v-model="form.city" placeholder="Москва" @input="syncLivePreview" />
 											</el-form-item>
 										</el-col>
 									</el-row>
@@ -379,11 +361,7 @@
 									<el-row :gutter="16">
 										<el-col :span="12">
 											<el-form-item label="Ближайшее метро">
-												<el-input
-													v-model="form.metro_station"
-													placeholder="Трубная"
-													@input="syncLivePreview"
-												>
+												<el-input v-model="form.metro_station" placeholder="Трубная" @input="syncLivePreview">
 													<template #prefix>🚇</template>
 												</el-input>
 											</el-form-item>
@@ -400,6 +378,79 @@
 											</el-form-item>
 										</el-col>
 									</el-row>
+
+									<!-- Координаты для карты (Figma 1199:52354) -->
+									<div class="map-coordinates-box">
+										<div class="map-coords-header">
+											<div class="map-coords-title">
+												<span>🗺️ Точка на карте (геолокация)</span>
+												<small>Необходимо для отображения места в каталоге на карте</small>
+											</div>
+											<el-tag
+												v-if="form.coordinates_lat && form.coordinates_lng"
+												type="success"
+												size="small"
+												effect="dark"
+											>
+												📍 Размещено на карте
+											</el-tag>
+											<el-tag v-else type="warning" size="small" effect="plain">
+												⚠️ Точка не задана
+											</el-tag>
+										</div>
+
+										<el-row :gutter="16">
+											<el-col :span="12">
+												<el-form-item label="Широта (Latitude, WGS84)">
+													<el-input-number
+														v-model="form.coordinates_lat"
+														:precision="6"
+														:step="0.001"
+														:min="55.0"
+														:max="56.5"
+														style="width: 100%"
+														placeholder="55.7558"
+														@change="syncLivePreview"
+													/>
+												</el-form-item>
+											</el-col>
+											<el-col :span="12">
+												<el-form-item label="Долгота (Longitude, WGS84)">
+													<el-input-number
+														v-model="form.coordinates_lng"
+														:precision="6"
+														:step="0.001"
+														:min="36.5"
+														:max="38.5"
+														style="width: 100%"
+														placeholder="37.6173"
+														@change="syncLivePreview"
+													/>
+												</el-form-item>
+											</el-col>
+										</el-row>
+
+										<div class="map-presets-row">
+											<span class="map-presets-label">Быстрый выбор района:</span>
+											<div class="map-presets-buttons">
+												<el-button size="small" text bg @click="setCoordsPreset('center')">
+													Охотный ряд (Центр)
+												</el-button>
+												<el-button size="small" text bg @click="setCoordsPreset('tverskaya')">
+													Тверская
+												</el-button>
+												<el-button size="small" text bg @click="setCoordsPreset('city')">
+													Москва-Сити
+												</el-button>
+												<el-button size="small" text bg @click="setCoordsPreset('arbat')">
+													Арбат
+												</el-button>
+												<el-button size="small" text bg @click="setCoordsPreset('sokolniki')">
+													Сокольники
+												</el-button>
+											</div>
+										</div>
+									</div>
 								</el-form>
 							</div>
 
@@ -417,11 +468,7 @@
 									<el-row :gutter="16">
 										<el-col :span="12">
 											<el-form-item label="Контактный телефон">
-												<el-input
-													v-model="form.phone"
-													placeholder="+7 (495) 123 78 90"
-													@input="syncLivePreview"
-												>
+												<el-input v-model="form.phone" placeholder="+7 (495) 123 78 90" @input="syncLivePreview">
 													<template #prefix>📞</template>
 												</el-input>
 											</el-form-item>
@@ -532,9 +579,7 @@
 										<h3>Залы площадки</h3>
 										<p>Вместимость банкетом, фуршетом, рассадкой театр и площадь каждого зала</p>
 									</div>
-									<el-button size="small" type="primary" :icon="Plus" @click="addHall">
-										Добавить зал
-									</el-button>
+									<el-button size="small" type="primary" :icon="Plus" @click="addHall"> Добавить зал </el-button>
 								</div>
 
 								<el-table :data="formHalls" border class="styled-content-table" style="width: 100%">
@@ -545,22 +590,46 @@
 									</el-table-column>
 									<el-table-column label="Площадь м²" width="105">
 										<template #default="{ row }">
-											<el-input-number v-model="row.areaSqm" :min="1" controls-position="right" style="width: 100%" @change="syncLivePreview" />
+											<el-input-number
+												v-model="row.areaSqm"
+												:min="1"
+												controls-position="right"
+												style="width: 100%"
+												@change="syncLivePreview"
+											/>
 										</template>
 									</el-table-column>
 									<el-table-column label="Банкет" width="95">
 										<template #default="{ row }">
-											<el-input-number v-model="row.capacityBanquet" :min="0" controls-position="right" style="width: 100%" @change="syncLivePreview" />
+											<el-input-number
+												v-model="row.capacityBanquet"
+												:min="0"
+												controls-position="right"
+												style="width: 100%"
+												@change="syncLivePreview"
+											/>
 										</template>
 									</el-table-column>
 									<el-table-column label="Фуршет" width="95">
 										<template #default="{ row }">
-											<el-input-number v-model="row.capacityBuffet" :min="0" controls-position="right" style="width: 100%" @change="syncLivePreview" />
+											<el-input-number
+												v-model="row.capacityBuffet"
+												:min="0"
+												controls-position="right"
+												style="width: 100%"
+												@change="syncLivePreview"
+											/>
 										</template>
 									</el-table-column>
 									<el-table-column label="Театр" width="95">
 										<template #default="{ row }">
-											<el-input-number v-model="row.capacityTheater" :min="0" controls-position="right" style="width: 100%" @change="syncLivePreview" />
+											<el-input-number
+												v-model="row.capacityTheater"
+												:min="0"
+												controls-position="right"
+												style="width: 100%"
+												@change="syncLivePreview"
+											/>
 										</template>
 									</el-table-column>
 									<el-table-column label="Особенности" min-width="140">
@@ -584,9 +653,7 @@
 										<h3>Номерной фонд отеля</h3>
 										<p>Категории номеров, тип размещения и стоимость проживания гостей</p>
 									</div>
-									<el-button size="small" type="primary" :icon="Plus" @click="addRoom">
-										Добавить номер
-									</el-button>
+									<el-button size="small" type="primary" :icon="Plus" @click="addRoom"> Добавить номер </el-button>
 								</div>
 
 								<el-table :data="formRooms" border class="styled-content-table" style="width: 100%">
@@ -602,7 +669,14 @@
 									</el-table-column>
 									<el-table-column label="Цена (руб)" width="130">
 										<template #default="{ row }">
-											<el-input-number v-model="row.priceRub" :min="0" :step="500" controls-position="right" style="width: 100%" @change="syncLivePreview" />
+											<el-input-number
+												v-model="row.priceRub"
+												:min="0"
+												:step="500"
+												controls-position="right"
+												style="width: 100%"
+												@change="syncLivePreview"
+											/>
 										</template>
 									</el-table-column>
 									<el-table-column label="Дополнительно" min-width="160">
@@ -635,17 +709,35 @@
 									<el-row :gutter="16">
 										<el-col :span="8">
 											<el-form-item label="Средний чек (руб)">
-												<el-input-number v-model="form.average_check" :min="0" :step="100" style="width: 100%" @change="syncLivePreview" />
+												<el-input-number
+													v-model="form.average_check"
+													:min="0"
+													:step="100"
+													style="width: 100%"
+													@change="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="8">
 											<el-form-item label="Банкетное меню от (руб)">
-												<el-input-number v-model="form.banquet_price_from" :min="0" :step="100" style="width: 100%" @change="syncLivePreview" />
+												<el-input-number
+													v-model="form.banquet_price_from"
+													:min="0"
+													:step="100"
+													style="width: 100%"
+													@change="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="8">
 											<el-form-item label="Аренда от (руб/час)">
-												<el-input-number v-model="form.rent_price_hour" :min="0" :step="100" style="width: 100%" @change="syncLivePreview" />
+												<el-input-number
+													v-model="form.rent_price_hour"
+													:min="0"
+													:step="100"
+													style="width: 100%"
+													@change="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 									</el-row>
@@ -684,7 +776,11 @@
 									<el-row :gutter="16">
 										<el-col :span="12">
 											<el-form-item label="Что входит в депозит">
-												<el-input v-model="depositIncludes" placeholder="Еда, часть напитков" @input="syncLivePreview" />
+												<el-input
+													v-model="depositIncludes"
+													placeholder="Еда, часть напитков"
+													@input="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="12">
@@ -697,12 +793,21 @@
 									<el-row :gutter="16">
 										<el-col :span="8">
 											<el-form-item label="Пробковый сбор">
-												<el-switch v-model="form.corkage_fee_has" active-text="Есть" inactive-text="Нет" @change="syncLivePreview" />
+												<el-switch
+													v-model="form.corkage_fee_has"
+													active-text="Есть"
+													inactive-text="Нет"
+													@change="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="16">
 											<el-form-item label="Условия пробкового сбора">
-												<el-input v-model="form.corkage_fee_desc" placeholder="есть / от 300 р. за бутылку" @input="syncLivePreview" />
+												<el-input
+													v-model="form.corkage_fee_desc"
+													placeholder="есть / от 300 р. за бутылку"
+													@input="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 									</el-row>
@@ -723,12 +828,20 @@
 									<el-row :gutter="16">
 										<el-col :span="12">
 											<el-form-item label="URL файла банкетного меню (PDF)">
-												<el-input v-model="form.menu_url" placeholder="https://example.com/menu.pdf" @input="syncLivePreview" />
+												<el-input
+													v-model="form.menu_url"
+													placeholder="https://example.com/menu.pdf"
+													@input="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 										<el-col :span="12">
 											<el-form-item label="URL технического райдера (PDF)">
-												<el-input v-model="form.rider_url" placeholder="https://example.com/rider.pdf" @input="syncLivePreview" />
+												<el-input
+													v-model="form.rider_url"
+													placeholder="https://example.com/rider.pdf"
+													@input="syncLivePreview"
+												/>
 											</el-form-item>
 										</el-col>
 									</el-row>
@@ -764,28 +877,15 @@
 										style="flex: 1"
 										clearable
 									/>
-									<el-button type="primary" :icon="Plus" @click="addMenuPhoto">
-										Добавить
-									</el-button>
-									<el-button plain @click="addPresetMenuPhotos">
-										✨ Демо-блюда
-									</el-button>
+									<el-button type="primary" :icon="Plus" @click="addMenuPhoto"> Добавить </el-button>
+									<el-button plain @click="addPresetMenuPhotos"> ✨ Демо-блюда </el-button>
 								</div>
 
 								<div class="photos-grid">
-									<div
-										v-for="(photo, index) in formMenuPhotos"
-										:key="index"
-										class="photo-card"
-									>
+									<div v-for="(photo, index) in formMenuPhotos" :key="index" class="photo-card">
 										<img :src="photo" alt="Блюдо" class="photo-card__img" />
 										<div class="photo-card__badge">#{{ index + 1 }}</div>
-										<button
-											type="button"
-											class="photo-card__del"
-											title="Удалить фото"
-											@click="removeMenuPhoto(index)"
-										>
+										<button type="button" class="photo-card__del" title="Удалить фото" @click="removeMenuPhoto(index)">
 											✕
 										</button>
 									</div>
@@ -811,17 +911,23 @@
 								</div>
 
 								<div class="feed-items-list">
-									<div
-										v-for="(item, idx) in formFeed"
-										:key="item.id"
-										class="feed-item-card"
-									>
+									<div v-for="(item, idx) in formFeed" :key="item.id" class="feed-item-card">
 										<div class="feed-item-top">
 											<div class="feed-avatar-preview">
 												<img :src="item.authorAvatar || defaultAvatar" alt="Аватар" />
 											</div>
-											<el-input v-model="item.author" placeholder="Автор публикации" style="flex: 1" @input="syncLivePreview" />
-											<el-input v-model="item.publishedAgo" placeholder="Дата (4 дня назад)" style="width: 140px" @input="syncLivePreview" />
+											<el-input
+												v-model="item.author"
+												placeholder="Автор публикации"
+												style="flex: 1"
+												@input="syncLivePreview"
+											/>
+											<el-input
+												v-model="item.publishedAgo"
+												placeholder="Дата (4 дня назад)"
+												style="width: 140px"
+												@input="syncLivePreview"
+											/>
 											<el-button type="danger" link @click="removeFeedItem(idx)">✕</el-button>
 										</div>
 
@@ -842,7 +948,14 @@
 												<el-input v-model="item.videoUrl" placeholder="URL видео (YouTube)" @input="syncLivePreview" />
 											</el-col>
 											<el-col :span="4">
-												<el-input-number v-model="item.likesCount" :min="0" controls-position="right" style="width: 100%" placeholder="Лайки" @change="syncLivePreview" />
+												<el-input-number
+													v-model="item.likesCount"
+													:min="0"
+													controls-position="right"
+													style="width: 100%"
+													placeholder="Лайки"
+													@change="syncLivePreview"
+												/>
 											</el-col>
 										</el-row>
 									</div>
@@ -863,23 +976,27 @@
 										<h3>Отзывы гостей площадки</h3>
 										<p>Реальные отзывы гостей с оценкой и аватаром</p>
 									</div>
-									<el-button size="small" type="primary" :icon="Plus" @click="addReview">
-										Добавить отзыв
-									</el-button>
+									<el-button size="small" type="primary" :icon="Plus" @click="addReview"> Добавить отзыв </el-button>
 								</div>
 
 								<div class="reviews-list">
-									<div
-										v-for="(rev, idx) in formReviews"
-										:key="rev.id"
-										class="review-item-card"
-									>
+									<div v-for="(rev, idx) in formReviews" :key="rev.id" class="review-item-card">
 										<div class="review-item-top">
 											<div class="review-avatar-preview">
 												<img :src="rev.avatar || defaultAvatar" alt="Аватар" />
 											</div>
-											<el-input v-model="rev.author" placeholder="Имя гостя" style="width: 160px" @input="syncLivePreview" />
-											<el-input v-model="rev.date" placeholder="Дата (20.03.2024)" style="width: 130px" @input="syncLivePreview" />
+											<el-input
+												v-model="rev.author"
+												placeholder="Имя гостя"
+												style="width: 160px"
+												@input="syncLivePreview"
+											/>
+											<el-input
+												v-model="rev.date"
+												placeholder="Дата (20.03.2024)"
+												style="width: 130px"
+												@input="syncLivePreview"
+											/>
 											<el-rate v-model="rev.rating" :max="5" style="margin-left: 8px" @change="syncLivePreview" />
 											<el-button type="danger" link style="margin-left: auto" @click="removeReview(idx)">✕</el-button>
 										</div>
@@ -898,9 +1015,7 @@
 										/>
 									</div>
 								</div>
-								<div v-if="!formReviews.length" class="empty-list-notice">
-									Нет отзывов. Нажмите «Добавить отзыв».
-								</div>
+								<div v-if="!formReviews.length" class="empty-list-notice"> Нет отзывов. Нажмите «Добавить отзыв». </div>
 							</div>
 
 							<!-- FAQ Card -->
@@ -911,19 +1026,18 @@
 										<h3>Вопросы и ответы (FAQ)</h3>
 										<p>Часто задаваемые вопросы по бронированию и сервису</p>
 									</div>
-									<el-button size="small" type="primary" :icon="Plus" @click="addFaq">
-										Добавить вопрос
-									</el-button>
+									<el-button size="small" type="primary" :icon="Plus" @click="addFaq"> Добавить вопрос </el-button>
 								</div>
 
 								<div class="faq-list">
-									<div
-										v-for="(item, idx) in formFaq"
-										:key="item.id"
-										class="faq-item-card"
-									>
+									<div v-for="(item, idx) in formFaq" :key="item.id" class="faq-item-card">
 										<div class="faq-item-header">
-											<el-input v-model="item.question" placeholder="Вопрос (Каков процент за обслуживание?)" style="flex: 1" @input="syncLivePreview" />
+											<el-input
+												v-model="item.question"
+												placeholder="Вопрос (Каков процент за обслуживание?)"
+												style="flex: 1"
+												@input="syncLivePreview"
+											/>
 											<el-button type="danger" link @click="removeFaq(idx)">✕</el-button>
 										</div>
 										<el-input
@@ -935,9 +1049,7 @@
 										/>
 									</div>
 								</div>
-								<div v-if="!formFaq.length" class="empty-list-notice">
-									FAQ пуст. Нажмите «Добавить вопрос».
-								</div>
+								<div v-if="!formFaq.length" class="empty-list-notice"> FAQ пуст. Нажмите «Добавить вопрос». </div>
 							</div>
 						</div>
 
@@ -954,15 +1066,27 @@
 
 								<el-form label-position="top">
 									<el-form-item label="Типы площадки (через запятую)">
-										<el-input v-model="typesString" placeholder="Банкетный зал, Загородный ресторан, Ресторан для Банкета" @input="syncLivePreview" />
+										<el-input
+											v-model="typesString"
+											placeholder="Банкетный зал, Загородный ресторан, Ресторан для Банкета"
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 
 									<el-form-item label="Особенности (через запятую)">
-										<el-input v-model="featuresString" placeholder="Летняя веранда, Парковая зона, удобный подъезд" @input="syncLivePreview" />
+										<el-input
+											v-model="featuresString"
+											placeholder="Летняя веранда, Парковая зона, удобный подъезд"
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 
 									<el-form-item label="Кухня (через запятую)">
-										<el-input v-model="cuisinesString" placeholder="Европейская, Русская, Авторская" @input="syncLivePreview" />
+										<el-input
+											v-model="cuisinesString"
+											placeholder="Европейская, Русская, Авторская"
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 								</el-form>
 							</div>
@@ -978,11 +1102,19 @@
 
 								<el-form label-position="top">
 									<el-form-item label="Услуги">
-										<el-input v-model="servicesString" placeholder="Wi-Fi, Бизнес-ланч, Банкеты, Номерной фонд, Детская комната" @input="syncLivePreview" />
+										<el-input
+											v-model="servicesString"
+											placeholder="Wi-Fi, Бизнес-ланч, Банкеты, Номерной фонд, Детская комната"
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 
 									<el-form-item label="Оборудование">
-										<el-input v-model="equipmentString" placeholder="Свет, Звук, микрофон, колонки, проектор" @input="syncLivePreview" />
+										<el-input
+											v-model="equipmentString"
+											placeholder="Свет, Звук, микрофон, колонки, проектор"
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 
 									<el-form-item label="Парковка">
@@ -1015,11 +1147,17 @@
 									</el-form-item>
 
 									<el-form-item label="Ссылка на видео / 3D-тур (YouTube)">
-										<el-input v-model="form.video_tour_url" placeholder="https://www.youtube.com/watch?v=..." @input="syncLivePreview" />
+										<el-input
+											v-model="form.video_tour_url"
+											placeholder="https://www.youtube.com/watch?v=..."
+											@input="syncLivePreview"
+										/>
 									</el-form-item>
 
 									<el-form-item>
-										<el-checkbox v-model="form.has_online_tour" @change="syncLivePreview">Доступен онлайн-показ площадки</el-checkbox>
+										<el-checkbox v-model="form.has_online_tour" @change="syncLivePreview"
+											>Доступен онлайн-показ площадки</el-checkbox
+										>
 									</el-form-item>
 								</el-form>
 							</div>
@@ -1059,15 +1197,8 @@
 						</div>
 
 						<div class="bottom-buttons">
-							<el-button plain @click="closeEditor">
-								✕ Закрыть
-							</el-button>
-							<el-button
-								type="primary"
-								size="large"
-								:loading="saving"
-								@click="handleSave"
-							>
+							<el-button plain @click="closeEditor"> ✕ Закрыть </el-button>
+							<el-button type="primary" size="large" :loading="saving" @click="handleSave">
 								💾 Сохранить площадку
 							</el-button>
 						</div>
@@ -1114,12 +1245,7 @@
 							>
 								📱 Mobile
 							</button>
-							<button
-								type="button"
-								class="device-btn"
-								title="Открыть в новой вкладке"
-								@click="openLanding(form.slug)"
-							>
+							<button type="button" class="device-btn" title="Открыть в новой вкладке" @click="openLanding(form.slug)">
 								↗ Вкладка
 							</button>
 						</div>
@@ -1127,16 +1253,10 @@
 
 					<!-- Iframe Container -->
 					<div class="preview-viewport-wrapper" :class="`device-${previewDevice}`">
-						<iframe
-							ref="previewIframeRef"
-							:src="previewIframeUrl"
-							class="preview-iframe"
-							@load="onIframeLoad"
-						/>
+						<iframe ref="previewIframeRef" :src="previewIframeUrl" class="preview-iframe" @load="onIframeLoad" />
 					</div>
 				</div>
 			</div>
-		
 		</div>
 	</div>
 </template>
@@ -1195,6 +1315,8 @@ const defaultForm: CreateVenueDTO = {
 	city: 'Москва',
 	metro_station: '',
 	metro_distance_text: '',
+	coordinates_lat: 55.7558,
+	coordinates_lng: 37.6173,
 	average_check: 2500,
 	banquet_price_from: 4000,
 	rent_price_hour: 3000,
@@ -1218,6 +1340,19 @@ const defaultForm: CreateVenueDTO = {
 	rider_url: 'https://example.com/rider.pdf',
 }
 
+const setCoordsPreset = (preset: 'center' | 'tverskaya' | 'city' | 'sokolniki' | 'arbat') => {
+	const presets = {
+		center: { lat: 55.7558, lng: 37.6173 },
+		tverskaya: { lat: 55.768, lng: 37.601 },
+		city: { lat: 55.749, lng: 37.537 },
+		sokolniki: { lat: 55.7898, lng: 37.6798 },
+		arbat: { lat: 55.7485, lng: 37.593 },
+	}
+	form.value.coordinates_lat = presets[preset].lat
+	form.value.coordinates_lng = presets[preset].lng
+	syncLivePreview()
+}
+
 const form = ref<CreateVenueDTO>({ ...defaultForm })
 const formHalls = ref<VenueHall[]>([])
 const formRooms = ref<VenueRoom[]>([])
@@ -1232,7 +1367,9 @@ const depositSmall = ref('120 000 р.')
 const depositAll = ref('300 000 р.')
 const depositIncludes = ref('Еда, часть напитков')
 const alcoholAllowed = ref('да')
-const pricingNotesString = ref('Стоимость аренды может меняться в зависимости от сезона и дня недели.\nВ декабре действуют специальные праздничные тарифы на закрытие зала.\nБронирование даты подтверждается внесением задатка в размере 30%.')
+const pricingNotesString = ref(
+	'Стоимость аренды может меняться в зависимости от сезона и дня недели.\nВ декабре действуют специальные праздничные тарифы на закрытие зала.\nБронирование даты подтверждается внесением задатка в размере 30%.'
+)
 
 const typesString = ref('')
 const featuresString = ref('')
@@ -1318,11 +1455,22 @@ const openCreate = () => {
 		{ id: '2', roomType: 'Двухместный', placement: 'Двухместное', priceRub: 5000 },
 	]
 	formFaq.value = [
-		{ id: '1', question: 'Каков процент за обслуживание банкета?', answer: 'Сервисный сбор составляет 10% от суммы заказа.' },
-		{ id: '2', question: 'Можно ли привезти свой алкоголь?', answer: 'Да, действует пробковый сбор.' }
+		{
+			id: '1',
+			question: 'Каков процент за обслуживание банкета?',
+			answer: 'Сервисный сбор составляет 10% от суммы заказа.',
+		},
+		{ id: '2', question: 'Можно ли привезти свой алкоголь?', answer: 'Да, действует пробковый сбор.' },
 	]
 	formReviews.value = [
-		{ id: '1', author: 'Юлия', date: '20.03.2022', rating: 5, text: 'Очень красивое и стильное место! Сервис на высшем уровне.', avatar: defaultAvatar }
+		{
+			id: '1',
+			author: 'Юлия',
+			date: '20.03.2022',
+			rating: 5,
+			text: 'Очень красивое и стильное место! Сервис на высшем уровне.',
+			avatar: defaultAvatar,
+		},
 	]
 	formFeed.value = [
 		{
@@ -1333,7 +1481,7 @@ const openCreate = () => {
 			text: 'Зимняя свадьба похожа на сказку. Приглашаем на просмотр!',
 			imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80',
 			likesCount: 18,
-		}
+		},
 	]
 	formMenuPhotos.value = [
 		'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
@@ -1369,6 +1517,8 @@ const openEdit = (row: any) => {
 		city: row.city || 'Москва',
 		metro_station: row.metro_station || row.metroStation || '',
 		metro_distance_text: row.metro_distance_text || row.metroDistanceText || '',
+		coordinates_lat: row.coordinates_lat ?? row.coordinatesLat ?? 55.7558,
+		coordinates_lng: row.coordinates_lng ?? row.coordinatesLng ?? 37.6173,
 		average_check: row.average_check ?? row.averageCheck ?? 2500,
 		banquet_price_from: row.banquet_price_from ?? row.banquetPriceFrom ?? 4000,
 		rent_price_hour: row.rent_price_hour ?? row.rentPriceHour ?? 3000,
@@ -1397,7 +1547,9 @@ const openEdit = (row: any) => {
 	formFaq.value = Array.isArray(row.faq) ? [...(row.faq as VenueFaq[])] : []
 	formReviews.value = Array.isArray(row.reviews) ? JSON.parse(JSON.stringify(row.reviews)) : []
 	formFeed.value = Array.isArray(row.feed) ? JSON.parse(JSON.stringify(row.feed)) : []
-	formMenuPhotos.value = Array.isArray(row.menu_photos || row.menuPhotos) ? [...(row.menu_photos || row.menuPhotos)] : []
+	formMenuPhotos.value = Array.isArray(row.menu_photos || row.menuPhotos)
+		? [...(row.menu_photos || row.menuPhotos)]
+		: []
 
 	// Parse pricing table
 	const pt = row.pricing_table || row.pricingTable
@@ -1471,10 +1623,12 @@ const syncLivePreview = () => {
 			location: {
 				address: form.value.address,
 				city: form.value.city,
-				metro: form.value.metro_station ? {
-					station: form.value.metro_station,
-					distanceText: form.value.metro_distance_text || '5 мин пешком',
-				} : undefined,
+				metro: form.value.metro_station
+					? {
+							station: form.value.metro_station,
+							distanceText: form.value.metro_distance_text || '5 мин пешком',
+						}
+					: undefined,
 			},
 			workingHours: {
 				weekdays: form.value.working_hours_weekdays,
@@ -1497,17 +1651,39 @@ const syncLivePreview = () => {
 				areaSqm: form.value.area_sqm,
 			},
 			gallery: {
-				mainPhoto: photosString.value.split('\n').map(s => s.trim()).filter(Boolean)[0] || '',
-				photos: photosString.value.split('\n').map(s => s.trim()).filter(Boolean),
+				mainPhoto:
+					photosString.value
+						.split('\n')
+						.map((s) => s.trim())
+						.filter(Boolean)[0] || '',
+				photos: photosString.value
+					.split('\n')
+					.map((s) => s.trim())
+					.filter(Boolean),
 				videoTourUrl: form.value.video_tour_url,
 				hasOnlineTour: form.value.has_online_tour,
 			},
 			details: {
-				venueTypes: typesString.value.split(',').map(s => s.trim()).filter(Boolean),
-				features: featuresString.value.split(',').map(s => s.trim()).filter(Boolean),
-				cuisines: cuisinesString.value.split(',').map(s => s.trim()).filter(Boolean),
-				services: servicesString.value.split(',').map(s => s.trim()).filter(Boolean),
-				equipment: equipmentString.value.split(',').map(s => s.trim()).filter(Boolean),
+				venueTypes: typesString.value
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean),
+				features: featuresString.value
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean),
+				cuisines: cuisinesString.value
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean),
+				services: servicesString.value
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean),
+				equipment: equipmentString.value
+					.split(',')
+					.map((s) => s.trim())
+					.filter(Boolean),
 				parking: form.value.parking,
 				halls: formHalls.value,
 				rooms: formRooms.value,
@@ -1520,10 +1696,13 @@ const syncLivePreview = () => {
 			riderUrl: form.value.rider_url,
 		}
 
-		iframe.contentWindow.postMessage({
-			type: 'VENUE_PREVIEW_DATA',
-			payload,
-		}, '*')
+		iframe.contentWindow.postMessage(
+			{
+				type: 'VENUE_PREVIEW_DATA',
+				payload,
+			},
+			'*'
+		)
 	}, 120)
 }
 
@@ -1644,7 +1823,11 @@ const handleSave = async () => {
 	const pricingTableData = {
 		categories: [
 			{ label: 'Средний чек', value: `${formatPrice(form.value.average_check)} р.`, type: 'merged' },
-			{ label: 'Стоимость банкетного меню от:', value: `${formatPrice(form.value.banquet_price_from)} р.`, type: 'merged' },
+			{
+				label: 'Стоимость банкетного меню от:',
+				value: `${formatPrice(form.value.banquet_price_from)} р.`,
+				type: 'merged',
+			},
 			{ label: 'Аренда / час. от:', value: `${formatPrice(form.value.rent_price_hour)} р.`, type: 'merged' },
 			{
 				label: 'Депозит (минимальная стоимость закрытия):',
@@ -1655,9 +1838,16 @@ const handleSave = async () => {
 			},
 			{ label: 'Что входит в депозит:', value: depositIncludes.value || 'Еда, часть напитков', type: 'merged' },
 			{ label: 'Возможность своего алкоголя:', value: alcoholAllowed.value || 'да', type: 'merged' },
-			{ label: 'Пробковый сбор:', value: form.value.corkage_fee_desc || (form.value.corkage_fee_has ? 'есть' : 'нет'), type: 'merged' },
+			{
+				label: 'Пробковый сбор:',
+				value: form.value.corkage_fee_desc || (form.value.corkage_fee_has ? 'есть' : 'нет'),
+				type: 'merged',
+			},
 		],
-		notes: pricingNotesString.value.split('\n').map((s) => s.trim()).filter(Boolean),
+		notes: pricingNotesString.value
+			.split('\n')
+			.map((s) => s.trim())
+			.filter(Boolean),
 	}
 
 	const payload: CreateVenueDTO = {
@@ -1669,12 +1859,30 @@ const handleSave = async () => {
 		feed: formFeed.value as any,
 		menu_photos: formMenuPhotos.value,
 		pricing_table: pricingTableData as any,
-		venue_types: typesString.value.split(',').map((s) => s.trim()).filter(Boolean),
-		features: featuresString.value.split(',').map((s) => s.trim()).filter(Boolean),
-		cuisines: cuisinesString.value.split(',').map((s) => s.trim()).filter(Boolean),
-		services: servicesString.value.split(',').map((s) => s.trim()).filter(Boolean),
-		equipment: equipmentString.value.split(',').map((s) => s.trim()).filter(Boolean),
-		gallery_photos: photosString.value.split('\n').map((s) => s.trim()).filter(Boolean),
+		venue_types: typesString.value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean),
+		features: featuresString.value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean),
+		cuisines: cuisinesString.value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean),
+		services: servicesString.value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean),
+		equipment: equipmentString.value
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean),
+		gallery_photos: photosString.value
+			.split('\n')
+			.map((s) => s.trim())
+			.filter(Boolean),
 	}
 
 	saving.value = true
@@ -1908,6 +2116,62 @@ onMounted(() => {
 .venue-metro-text {
 	color: var(--text-muted);
 	font-size: 12px;
+}
+
+.venue-map-coords-badge {
+	margin-top: 2px;
+}
+
+.map-coordinates-box {
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+	border-radius: 8px;
+	padding: 16px;
+	margin-top: 16px;
+	margin-bottom: 8px;
+}
+
+.map-coords-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+}
+
+.map-coords-title {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-primary);
+
+	small {
+		font-size: 11px;
+		color: var(--text-muted);
+		font-weight: normal;
+	}
+}
+
+.map-presets-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px dashed var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.map-presets-label {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.map-presets-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
 }
 
 .venue-prices-cell {
@@ -2638,5 +2902,4 @@ onMounted(() => {
 	align-items: center;
 	gap: 10px;
 }
-
 </style>

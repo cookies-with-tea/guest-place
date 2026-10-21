@@ -12,27 +12,13 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain @click="router.push('/home')">
-					🏠 Главная
-				</el-button>
-				<el-button plain @click="router.push('/venues')">
-					🏰 Площадки
-				</el-button>
-				<el-button plain @click="router.push('/menus')">
-					🧭 Меню сайта
-				</el-button>
-				<el-button plain @click="router.push('/redirects')">
-					🔀 Редиректы (301/302)
-				</el-button>
-				<el-button plain @click="openSitemap">
-					🗺️ Sitemap.xml
-				</el-button>
-				<el-button plain @click="router.push({ name: ROUTES.content.name })">
-					🗂️ Конструктор схем
-				</el-button>
-				<el-button type="primary" @click="goToCreate">
-					+ Создать блочную страницу
-				</el-button>
+				<el-button plain @click="router.push('/home')"> 🏠 Главная </el-button>
+				<el-button plain @click="router.push('/venues')"> 🏰 Площадки </el-button>
+				<el-button plain @click="router.push('/menus')"> 🧭 Меню сайта </el-button>
+				<el-button plain @click="router.push('/redirects')"> 🔀 Редиректы (301/302) </el-button>
+				<el-button plain @click="openSitemap"> 🗺️ Sitemap.xml </el-button>
+				<el-button plain @click="router.push({ name: ROUTES.content.name })"> 🗂️ Конструктор схем </el-button>
+				<el-button type="primary" @click="goToCreate"> + Создать блочную страницу </el-button>
 			</div>
 		</div>
 
@@ -42,7 +28,10 @@
 				<span class="arch-icon">📦</span>
 				<div class="arch-info">
 					<strong>Блочные страницы (Block-based)</strong>
-					<span>Собираются из палитры переиспользуемых компонентов (Hero, Features, CTA, Quotes...) через визуальный конструктор. Роуты: <code>/p/*</code></span>
+					<span
+						>Собираются из палитры переиспользуемых компонентов (Hero, Features, CTA, Quotes...) через визуальный
+						конструктор. Роуты: <code>/p/*</code></span
+					>
 				</div>
 			</div>
 			<div class="arch-sep"></div>
@@ -50,7 +39,10 @@
 				<span class="arch-icon">📋</span>
 				<div class="arch-info">
 					<strong>Схемные страницы (Schema-driven)</strong>
-					<span>Индивидуальная уникальная вёрстка фронтенда (About, Guests, Platforms). CMS хранит схему полей, наполняет контент и переводы. Роуты: <code>/*</code></span>
+					<span
+						>Индивидуальная уникальная вёрстка фронтенда (About, Guests, Platforms). CMS хранит схему полей, наполняет
+						контент и переводы. Роуты: <code>/*</code></span
+					>
 				</div>
 			</div>
 		</div>
@@ -162,9 +154,7 @@
 							<!-- Actions for BLOCK page -->
 							<template v-if="!item.isSchema">
 								<el-dropdown trigger="click" @command="(cmd: string) => quickSetStatus(item, cmd)">
-									<el-button size="small" plain title="Сменить статус">
-										{{ getStatusShort(item.status) }} ▾
-									</el-button>
+									<el-button size="small" plain title="Сменить статус"> {{ getStatusShort(item.status) }} ▾ </el-button>
 									<template #dropdown>
 										<el-dropdown-menu>
 											<el-dropdown-item command="draft" :disabled="item.status === 'draft'">
@@ -180,49 +170,18 @@
 									</template>
 								</el-dropdown>
 
-								<el-button
-									size="small"
-									plain
-									@click="openClientPreview(item.slug)"
-								>
-									👁️ Просмотр
-								</el-button>
+								<el-button size="small" plain @click="openClientPreview(item.slug)"> 👁️ Просмотр </el-button>
 
-								<el-button
-									size="small"
-									type="primary"
-									plain
-									@click="goToEdit(item.id)"
-								>
-									Конструктор
-								</el-button>
+								<el-button size="small" type="primary" plain @click="goToEdit(item.id)"> Конструктор </el-button>
 
-								<el-button
-									size="small"
-									type="danger"
-									plain
-									@click="handleDelete(item)"
-								>
-									✕
-								</el-button>
+								<el-button size="small" type="danger" plain @click="handleDelete(item)"> ✕ </el-button>
 							</template>
 
 							<!-- Actions for SCHEMA page -->
 							<template v-else>
-								<el-button
-									size="small"
-									plain
-									@click="openWebsitePath(item.path)"
-								>
-									👁️ На сайт
-								</el-button>
+								<el-button size="small" plain @click="openWebsitePath(item.path)"> 👁️ На сайт </el-button>
 
-								<el-button
-									size="small"
-									type="primary"
-									plain
-									@click="handleEditSchemaPage(item)"
-								>
+								<el-button size="small" type="primary" plain @click="handleEditSchemaPage(item)">
 									{{ item.hasSchema ? 'Редактор контента' : 'Инициализировать' }}
 								</el-button>
 							</template>
@@ -260,7 +219,8 @@ const fixedSchemaDefinitions = [
 		slug: 'page_home',
 		path: '/',
 		icon: '🏠',
-		description: 'Индивидуальная вёрстка: Hero, Места по категориям, Последние добавленные, Самые популярные, Варианты взаимодействия',
+		description:
+			'Индивидуальная вёрстка: Hero, Места по категориям, Последние добавленные, Самые популярные, Варианты взаимодействия',
 	},
 	{
 		title: 'О платформе (About)',
@@ -408,7 +368,7 @@ async function quickSetStatus(item: any, newStatus: string) {
 	try {
 		await pagesApi.updatePage(item.id, {
 			status: newStatus,
-			published_at: newStatus === 'published' ? new Date().toISOString() : (item.published_at || undefined),
+			published_at: newStatus === 'published' ? new Date().toISOString() : item.published_at || undefined,
 		})
 		item.status = newStatus
 		if (newStatus === 'published' && !item.published_at) {
@@ -493,7 +453,8 @@ async function seedAboutSchema() {
 				hero_title: 'О платформе Guest & Place',
 				hero_subtitle: 'Платформа, позволяющая общаться напрямую!\nПомогаем каждому Гостю найти “свое” место.',
 				guest_title: 'Guest',
-				guest_features: 'Прямая связь с площадкой в режиме реального времени\nАктуальная информация, меню, цены, свободные даты\nПрямое онлайн бронирование и оплата',
+				guest_features:
+					'Прямая связь с площадкой в режиме реального времени\nАктуальная информация, меню, цены, свободные даты\nПрямое онлайн бронирование и оплата',
 				guest_button_text: 'Зарегистрироваться',
 				place_title: 'Place',
 				place_features: 'Чаты, видео-встречи\nОнлайн-показ площадки\nПрямые трансляции, новости, лента событий',
@@ -648,7 +609,8 @@ const handleCreateAboutTemplate = async () => {
 					type: 'hero',
 					data: {
 						title: 'О платформе Guest & Place',
-						subtitle: 'Платформа, позволяющая общаться напрямую!\nПомогаем каждому Гостю найти “свое” место.\nМы за «прозрачные отношения»!',
+						subtitle:
+							'Платформа, позволяющая общаться напрямую!\nПомогаем каждому Гостю найти “свое” место.\nМы за «прозрачные отношения»!',
 					},
 				},
 				{

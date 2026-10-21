@@ -87,7 +87,7 @@ const loadRemoteRoutes = async (app: any) => {
 	const res = await mfeApi.getManifest()
 
 	if (res.data) {
-		const manifest: RemoteManifest = res.data
+		const manifest = res.data as unknown as RemoteManifest
 		const remotes = (manifest.remotes || []).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
 		const loadPromises = remotes.map(async (remote: any) => {
@@ -156,10 +156,7 @@ const routesToSidebar = (groups: any[]) => {
 		if (Array.isArray(route.children)) {
 			const visibleChildren = route.children
 				.filter(
-					(child: any) =>
-						!child.meta?.hideInSidebar &&
-						!child.path.includes(':') &&
-						!disabledList.includes(child.path)
+					(child: any) => !child.meta?.hideInSidebar && !child.path.includes(':') && !disabledList.includes(child.path)
 				)
 				.map((child: any) => processRoute(child, groupConfig))
 
@@ -174,10 +171,7 @@ const routesToSidebar = (groups: any[]) => {
 	return groups.map((group: any) => {
 		const disabledList = (group.config?.disabledRoutes || group.config?.disabled_routes || []) as string[]
 		const visibleRoutes = group.routes.filter(
-			(route: any) =>
-				!route.meta?.hideInSidebar &&
-				!route.path.includes(':') &&
-				!disabledList.includes(route.path)
+			(route: any) => !route.meta?.hideInSidebar && !route.path.includes(':') && !disabledList.includes(route.path)
 		)
 
 		// If there is only one route and it's the root of the MFE
@@ -206,9 +200,7 @@ export const initRouter = async (app: any) => {
 	const { setData } = useSidebar()
 
 	const updateSidebar = (groups: any[]) => {
-		const systemGroups = groups.filter(
-			(g) => !g.category || g.category === 'system' || g.name === 'orchestrator'
-		)
+		const systemGroups = groups.filter((g) => !g.category || g.category === 'system' || g.name === 'orchestrator')
 		const websiteGroups = groups.filter((g) => g.category === 'website')
 
 		setData('system', routesToSidebar(systemGroups))

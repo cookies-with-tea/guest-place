@@ -319,13 +319,13 @@ const copyHex = async (hex: string) => {
 const hasExifData = (exif: Record<string, any>) => {
 	return Boolean(
 		exif.make ||
-			exif.model ||
-			exif.dateTime ||
-			exif.iso ||
-			exif.fNumber ||
-			exif.exposureTime ||
-			exif.sanitized ||
-			exif.gpsStripped
+		exif.model ||
+		exif.dateTime ||
+		exif.iso ||
+		exif.fNumber ||
+		exif.exposureTime ||
+		exif.sanitized ||
+		exif.gpsStripped
 	)
 }
 

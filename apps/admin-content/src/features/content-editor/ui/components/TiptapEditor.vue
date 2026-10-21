@@ -671,9 +671,7 @@
 
 			<!-- Character count -->
 			<div class="toolbar-spacer" />
-			<div class="char-count">
-				{{ editor?.storage.characterCount.characters() ?? 0 }} chars
-			</div>
+			<div class="char-count"> {{ editor?.storage.characterCount.characters() ?? 0 }} chars </div>
 		</div>
 
 		<!-- Link input dialog -->

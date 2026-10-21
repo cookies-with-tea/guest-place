@@ -72,14 +72,7 @@
 							</div>
 						</el-tooltip>
 
-						<el-button
-							:icon="Refresh"
-							:loading="isCheckingAll"
-							size="small"
-							type="info"
-							plain
-							@click="checkAllHealth"
-						>
+						<el-button :icon="Refresh" :loading="isCheckingAll" size="small" type="info" plain @click="checkAllHealth">
 							Пинговать все
 						</el-button>
 
@@ -209,10 +202,7 @@
 				<!-- Feature Flag / Enabled Switch -->
 				<el-table-column label="MFE Активен" width="120">
 					<template #default="scope">
-						<el-tooltip
-							:content="scope.row.enabled ? 'Отключить MFE в Shell' : 'Включить MFE в Shell'"
-							placement="top"
-						>
+						<el-tooltip :content="scope.row.enabled ? 'Отключить MFE в Shell' : 'Включить MFE в Shell'" placement="top">
 							<el-switch
 								:disabled="scope.row.name === 'orchestrator'"
 								:model-value="scope.row.enabled"
@@ -296,12 +286,8 @@
 				</div>
 
 				<div class="routes-actions-bar">
-					<el-button size="small" type="success" plain @click="enableAllRoutes">
-						Включить все
-					</el-button>
-					<el-button size="small" type="danger" plain @click="disableAllRoutes">
-						Отключить все
-					</el-button>
+					<el-button size="small" type="success" plain @click="enableAllRoutes"> Включить все </el-button>
+					<el-button size="small" type="danger" plain @click="disableAllRoutes"> Отключить все </el-button>
 				</div>
 
 				<div class="routes-list">
@@ -326,14 +312,8 @@
 				<div class="custom-route-box mt-4">
 					<span class="custom-route-label">Добавить пользовательский путь роута:</span>
 					<div class="custom-route-input-row">
-						<el-input
-							v-model="customRoutePath"
-							:placeholder="`/${activeMfe.name}/custom`"
-							size="small"
-						/>
-						<el-button :icon="Plus" size="small" type="primary" @click="addCustomRoute">
-							Добавить
-						</el-button>
+						<el-input v-model="customRoutePath" :placeholder="`/${activeMfe.name}/custom`" size="small" />
+						<el-button :icon="Plus" size="small" type="primary" @click="addCustomRoute"> Добавить </el-button>
 					</div>
 				</div>
 			</div>
@@ -483,30 +463,14 @@ const KNOWN_MFE_ROUTES: Record<string, { path: string; title: string }[]> = {
 		{ path: '/users', title: 'Список пользователей' },
 		{ path: '/users/rights', title: 'Права и роли' },
 	],
-	content: [
-		{ path: '/content', title: 'Схемы контента' },
-	],
-	translations: [
-		{ path: '/translations', title: 'Переводы интерфейса' },
-	],
-	media: [
-		{ path: '/media', title: 'Медиабиблиотека' },
-	],
-	about: [
-		{ path: '/about', title: 'О нас' },
-	],
-	guests: [
-		{ path: '/guests', title: 'Гости и предложения' },
-	],
-	platforms: [
-		{ path: '/platforms', title: 'Платформы и интеграции' },
-	],
-	profile: [
-		{ path: '/profile', title: 'Профиль' },
-	],
-	statistics: [
-		{ path: '/statistics', title: 'Аналитика и статистика' },
-	],
+	content: [{ path: '/content', title: 'Схемы контента' }],
+	translations: [{ path: '/translations', title: 'Переводы интерфейса' }],
+	media: [{ path: '/media', title: 'Медиабиблиотека' }],
+	about: [{ path: '/about', title: 'О нас' }],
+	guests: [{ path: '/guests', title: 'Гости и предложения' }],
+	platforms: [{ path: '/platforms', title: 'Платформы и интеграции' }],
+	profile: [{ path: '/profile', title: 'Профиль' }],
+	statistics: [{ path: '/statistics', title: 'Аналитика и статистика' }],
 }
 
 // --- Health Checking Logic ---
@@ -843,7 +807,9 @@ const getIcon = (name: string) => {
 	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.08));
 	background: var(--gp-bg-glass, rgba(20, 20, 20, 0.6));
 	gap: 16px;
-	transition: transform 0.2s, box-shadow 0.2s;
+	transition:
+		transform 0.2s,
+		box-shadow 0.2s;
 
 	&:hover {
 		transform: translateY(-2px);

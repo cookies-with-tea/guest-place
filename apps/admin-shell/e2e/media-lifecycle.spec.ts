@@ -49,7 +49,7 @@ test.describe('Media Lifecycle', () => {
 			{
 				name: 'test-image.png',
 				mimeType: 'image/png',
-				buffer: new TextEncoder().encode('fake-image-content'),
+				buffer: Buffer.from(new TextEncoder().encode('fake-image-content')),
 			},
 		])
 
