@@ -10,6 +10,7 @@ pub fn public_router() -> AxRouter<Arc<AppState>> {
     AxRouter::new()
         .route("/", get(handlers::get_venues))
         .route("/{id}", get(handlers::get_venue_by_id_or_slug))
+        .route("/{id}/favorite", axum::routing::post(handlers::toggle_favorite))
 }
 
 pub fn protected_router() -> AxRouter<Arc<AppState>> {

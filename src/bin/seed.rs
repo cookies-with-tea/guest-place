@@ -18,6 +18,36 @@ fn hash_password(password: &str) -> String {
         .to_string()
 }
 
+fn get_venue_coordinates(slug: &str) -> (f64, f64) {
+    match slug {
+        "loft-forest-hall" => (55.8080, 37.4980),
+        "the-led" => (55.7925, 37.6760),
+        "loft-river-side" => (55.7410, 37.6030),
+        "crystal-ballroom" => (55.7490, 37.5370),
+        "manor-kuskovo-park" => (55.7350, 37.8050),
+        "rooftop-skylight" => (55.7680, 37.6010),
+        "veranda-silver-bor" => (55.7790, 37.4420),
+        "loft-mansion-art" => (55.7430, 37.6490),
+        "grand-hotel-hall" => (55.7820, 37.5580),
+        "white-loft-flacon" => (55.8050, 37.5850),
+        "palace-tsaritsyno" => (55.6150, 37.6820),
+        "chalet-krylatskoe" => (55.7610, 37.4320),
+        "panoramic-lounge-77" => (55.7510, 37.5340),
+        "country-estate-borodino" => (55.7200, 37.4100),
+        "loft-mansarda-arbat" => (55.7485, 37.5930),
+        "villa-barvikha-club" => (55.7280, 37.2800),
+        "orangerie-botanika" => (55.8340, 37.5950),
+        "marina-yacht-resort" => (55.8360, 37.4780),
+        "cube-flacon-space" => (55.8055, 37.5855),
+        "palace-tsaritsyno-hall" => (55.6155, 37.6825),
+        "river-lounge-terrace" => (55.7360, 37.5610),
+        "loft-fabric-baumanskaya" => (55.7710, 37.6770),
+        "chalet-polyana-resort" => (55.7190, 37.1950),
+        "rooftop-neglinnaya" => (55.7628, 37.6208),
+        _ => (55.7558, 37.6173),
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::from_path(std::path::Path::new("server/.env")).ok();
@@ -495,6 +525,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         INSERT INTO venues (
             slug, title, subtitle, description_html, phone, address, city,
             metro_station, metro_distance_minutes, metro_distance_text,
+            coordinates_lat, coordinates_lng,
             average_check, banquet_price_from, rent_price_hour,
             corkage_fee_has, corkage_fee_desc, price_level, halls_count,
             capacity_banquet, capacity_buffet, capacity_theater, area_sqm,
@@ -508,6 +539,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             '<p>У Вас намечается банкет? Отлично! Приглашаем отметить ваше торжество в нашем загородном клубе на берегу Москва-реки.</p>',
             '+7 (495) 125 25 25', 'г. Москва Волоколамское шоссе, д.13', 'Москва',
             'Сокольники', 5, '5 мин пешком',
+            55.8080, 37.4980,
             2500, 4000, 3000, true, 'есть', '$$$', 3,
             '20/40/60', '40/80/120', '60/100/140', '50/100/120',
             'Пн - Чт: с 12:00 до 22:00', 'Пт - Вс: с 10:00 до 24:00', 5.0, 4,
@@ -519,6 +551,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             title = EXCLUDED.title,
             subtitle = EXCLUDED.subtitle,
             description_html = EXCLUDED.description_html,
+            coordinates_lat = EXCLUDED.coordinates_lat,
+            coordinates_lng = EXCLUDED.coordinates_lng,
             halls = EXCLUDED.halls,
             rooms = EXCLUDED.rooms,
             gallery_photos = EXCLUDED.gallery_photos,
@@ -553,6 +587,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         INSERT INTO venues (
             slug, title, subtitle, description_html, phone, address, city,
             metro_station, metro_distance_minutes, metro_distance_text,
+            coordinates_lat, coordinates_lng,
             average_check, banquet_price_from, rent_price_hour,
             corkage_fee_has, corkage_fee_desc, price_level, halls_count,
             capacity_banquet, capacity_buffet, capacity_theater, area_sqm,
@@ -565,13 +600,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             '<p>Ресторан «The Лед» в Сокольниках — изысканная атмосфера и панорамные виды.</p>',
             '+7 (495) 987 65 43', 'г. Москва Сокольнический вал, д.1Б', 'Москва',
             'Сокольники', 5, '5 мин пешком',
+            55.7925, 37.6760,
             3000, 4500, 3500, true, 'есть', '$$$', 2,
             '35/100/150', '50/120/180', '60/120/200', '80/150',
             'Ежедневно с 11:00 до 23:00', 'Ежедневно с 11:00 до 23:00', 3.0, 23,
             $1, $2, $3, $4, 'Собственная парковка', $5,
             $6, $7, $8, 'published'
         )
-        ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, updated_at = NOW()
+        ON CONFLICT (slug) DO UPDATE SET
+            title = EXCLUDED.title,
+            coordinates_lat = EXCLUDED.coordinates_lat,
+            coordinates_lng = EXCLUDED.coordinates_lng,
+            updated_at = NOW()
         "#
     )
     .bind(&forest_venue_types)
@@ -965,11 +1005,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     for v in &mock_venues_list {
+        let coords = get_venue_coordinates(v.0);
         let _ = sqlx::query(
             r#"
             INSERT INTO venues (
                 slug, title, subtitle, description_html, phone, address, city,
                 metro_station, metro_distance_minutes, metro_distance_text,
+                coordinates_lat, coordinates_lng,
                 average_check, banquet_price_from, rent_price_hour,
                 corkage_fee_has, corkage_fee_desc, price_level, halls_count,
                 capacity_banquet, capacity_buffet, capacity_theater, area_sqm,
@@ -980,18 +1022,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7,
                 $8, $9, $10,
-                $11, $12, $13,
-                $14, $15, $16, $17,
-                $18, $19, $20, $21,
-                $22, $23,
-                $24, $25, $26, $27,
-                $28, $29, 'published',
-                $30, $31, $32, $33, $34, $35, $36
+                $11, $12,
+                $13, $14, $15,
+                $16, $17, $18, $19,
+                $20, $21, $22, $23,
+                $24, $25,
+                $26, $27, $28, $29,
+                $30, $31, 'published',
+                $32, $33, $34, $35, $36, $37, $38
             )
             ON CONFLICT (slug) DO UPDATE SET
                 title = EXCLUDED.title,
                 subtitle = EXCLUDED.subtitle,
                 description_html = EXCLUDED.description_html,
+                coordinates_lat = EXCLUDED.coordinates_lat,
+                coordinates_lng = EXCLUDED.coordinates_lng,
                 average_check = EXCLUDED.average_check,
                 banquet_price_from = EXCLUDED.banquet_price_from,
                 rent_price_hour = EXCLUDED.rent_price_hour,
@@ -1015,6 +1060,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .bind(v.7)
         .bind(v.8)
         .bind(v.9)
+        .bind(coords.0)
+        .bind(coords.1)
         .bind(v.10)
         .bind(v.11)
         .bind(v.12)

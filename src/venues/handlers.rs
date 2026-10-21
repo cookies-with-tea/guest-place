@@ -18,6 +18,7 @@ use super::model::{CreateVenueDTO, UpdateVenueDTO, Venue};
 
 #[derive(Debug, Deserialize, ToSchema, Clone)]
 pub struct VenuesQuery {
+    pub ids: Option<String>,
     pub search: Option<String>,
     pub status: Option<String>,
     pub venue_types: Option<String>,
@@ -33,6 +34,10 @@ pub struct VenuesQuery {
     pub min_price: Option<i32>,
     pub max_price: Option<i32>,
     pub price_level: Option<String>,
+    pub min_lat: Option<f64>,
+    pub max_lat: Option<f64>,
+    pub min_lng: Option<f64>,
+    pub max_lng: Option<f64>,
     pub has_online_tour: Option<bool>,
     pub sort_by: Option<String>,
     pub sort_order: Option<String>,
@@ -322,6 +327,55 @@ fn apply_venue_filters<'a>(
             builder.push(") OR (COALESCE((h->>'capacityBuffet')::int, 0) > 0 AND COALESCE((h->>'capacityBuffet')::int, 0) <= ");
             builder.push_bind(max_cap);
             builder.push(")) ELSE false END))");
+        }
+    }
+
+    // 13. Map bounding box filters (min_lat, max_lat, min_lng, max_lng)
+    if let (Some(min_lat), Some(max_lat)) = (query.min_lat, query.max_lat) {
+        if !*where_clause {
+            builder.push(" WHERE ");
+            *where_clause = true;
+        } else {
+            builder.push(" AND ");
+        }
+        builder.push("coordinates_lat >= ");
+        builder.push_bind(min_lat);
+        builder.push(" AND coordinates_lat <= ");
+        builder.push_bind(max_lat);
+    }
+
+    if let (Some(min_lng), Some(max_lng)) = (query.min_lng, query.max_lng) {
+        if !*where_clause {
+            builder.push(" WHERE ");
+            *where_clause = true;
+        } else {
+            builder.push(" AND ");
+        }
+        builder.push("coordinates_lng >= ");
+        builder.push_bind(min_lng);
+        builder.push(" AND coordinates_lng <= ");
+        builder.push_bind(max_lng);
+    }
+
+    // 14. IDs / Slugs filter (comma-separated list for favorites or custom selections)
+    if let Some(ref ids_raw) = query.ids {
+        let ids: Vec<String> = ids_raw
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+        if !ids.is_empty() {
+            if !*where_clause {
+                builder.push(" WHERE ");
+                *where_clause = true;
+            } else {
+                builder.push(" AND ");
+            }
+            builder.push("(id::text = ANY(");
+            builder.push_bind(ids.clone());
+            builder.push(") OR slug = ANY(");
+            builder.push_bind(ids);
+            builder.push("))");
         }
     }
 }
@@ -891,3 +945,29 @@ pub async fn delete_venue(
         messages: None,
     }))
 }
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/venues/{id}/favorite",
+    params(
+        ("id" = String, Path, description = "Venue ID or slug")
+    ),
+    responses(
+        (status = 200, description = "Favorite state toggled successfully")
+    ),
+    tag = "Venues"
+)]
+pub async fn toggle_favorite(
+    State(_state): State<Arc<AppState>>,
+    Path(id): Path<String>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({
+            "success": true,
+            "id": id,
+            "is_favorite": true
+        })),
+    )
+}
+

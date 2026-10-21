@@ -20,7 +20,14 @@ struct ApiDoc;
 async fn setup_test_app() -> axum::Router {
     dotenv().ok();
     
-    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://admin:admin@localhost:5432/admin".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        let user = std::env::var("POSTGRES_USER").unwrap_or_else(|_| "guest-place".to_string());
+        let pass = std::env::var("POSTGRES_PASSWORD").unwrap_or_else(|_| "guest-place".to_string());
+        let host = std::env::var("POSTGRES_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+        let port = std::env::var("POSTGRES_PORT").unwrap_or_else(|_| "5432".to_string());
+        let db = std::env::var("POSTGRES_DB").unwrap_or_else(|_| "guest-place".to_string());
+        format!("postgres://{}:{}@{}:{}/{}", user, pass, host, port, db)
+    });
     
     // Use a real pool if possible, otherwise lazy
     let pool = PgPoolOptions::new()
