@@ -6,6 +6,11 @@ export enum FieldType {
 	Date = 'date',
 	Media = 'media',
 	Relation = 'relation',
+	Repeater = 'repeater',
+	Group = 'group',
+	Json = 'json',
+	Color = 'color',
+	Link = 'link',
 }
 
 export interface FieldDefinition {
@@ -15,6 +20,7 @@ export interface FieldDefinition {
 	required: boolean
 	multiple?: boolean
 	relationTo?: string
+	fields?: FieldDefinition[] // nested fields for repeater and group
 	defaultValue?: any
 }
 
@@ -35,6 +41,8 @@ export interface ContentEntry {
 	data: Record<string, any>
 	status: 'draft' | 'review' | 'published'
 	i18n?: Record<string, any>
+	publishedAt?: string
+	publishedBy?: string
 	createdAt: string
 	updatedAt: string
 }

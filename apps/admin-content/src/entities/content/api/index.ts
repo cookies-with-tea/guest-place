@@ -5,7 +5,8 @@ const { fetchData } = createApi('content')
 
 export const getSchemas = () => fetchData<ContentSchema[]>('/schemas')
 
-export const getSchemaByIdentifier = (slug: string) => fetchData<ContentSchema>(`/schemas/by-identifier/${slug}`)
+export const getSchemaByIdentifier = (slug: string, options?: any) =>
+	fetchData<ContentSchema>(`/schemas/by-identifier/${slug}`, options)
 
 export const createSchema = (data: any) =>
 	fetchData<ContentSchema>('/schemas', {

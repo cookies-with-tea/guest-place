@@ -14,8 +14,19 @@ export const SYSTEM_EVENTS = {
 	STORAGE: 'storage',
 } as const
 
+export const REALTIME_EVENTS = {
+	GUEST_REGISTERED: 'guest_registered',
+	MEDIA_UPLOADED: 'media_uploaded',
+	ENTITY_LOCKED: 'entity_locked',
+	ENTITY_UNLOCKED: 'entity_unlocked',
+	SYSTEM_ALERT: 'system_alert',
+	CONTENT_UPDATED: 'content_updated',
+	FILE_PROCESSED: 'file_processed',
+} as const
+
 export const GP_EVENTS = {
 	...MFE_EVENTS,
 	...AUTH_EVENTS,
 	...SYSTEM_EVENTS,
+	...REALTIME_EVENTS,
 } as const

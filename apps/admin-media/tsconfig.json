@@ -3,7 +3,6 @@
 	"compilerOptions": {
 		"composite": true,
 		"skipLibCheck": true,
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"#app/*": ["./src/app/*"],

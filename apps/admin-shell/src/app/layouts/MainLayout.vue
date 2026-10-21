@@ -15,6 +15,7 @@
 				<div class="header-right">
 					<UiLanguageSwitcher />
 					<UiThemeSwitcher />
+					<UiNotificationBell />
 
 					<el-tooltip content="Theme Settings" placement="bottom">
 						<el-button circle class="header-theme-btn" @click="themeBuilderVisible = true">
@@ -85,6 +86,7 @@ import {
 	UiAuthWidget,
 	UiErrorBoundary,
 	UiLanguageSwitcher,
+	UiNotificationBell,
 	UiSidebar,
 	UiThemeBuilder,
 	UiThemeSwitcher,

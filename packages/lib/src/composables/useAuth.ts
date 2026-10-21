@@ -20,7 +20,17 @@ export interface IAuthTokens {
 	refreshToken: string
 }
 
-const user = ref<IAuthUser | null>(null)
+function getStoredUser(): IAuthUser | null {
+	if (!isBrowser) return null
+	try {
+		const raw = localStorage.getItem('gp_user')
+		return raw ? JSON.parse(raw) : null
+	} catch {
+		return null
+	}
+}
+
+const user = ref<IAuthUser | null>(getStoredUser())
 const accessToken = ref<string | null>(isBrowser ? localStorage.getItem('gp_access_token') : null)
 const refreshToken = ref<string | null>(isBrowser ? localStorage.getItem('gp_refresh_token') : null)
 

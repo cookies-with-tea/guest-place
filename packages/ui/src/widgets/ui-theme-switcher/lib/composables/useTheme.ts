@@ -13,7 +13,7 @@ const getInitialTheme = () => {
 
 	if (saved) return saved === 'dark'
 
-	return window.matchMedia('(prefers-color-scheme: dark)').matches
+	return typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-color-scheme: dark)').matches : true
 }
 
 const isDark = ref(getInitialTheme())

@@ -1,36 +1,23 @@
 # Общие конфигурации проекта
 
-Этот проект использует централизованные конфигурации для ESLint, TypeScript, Stylelint и Prettier, расположенные в папке `/packages`.
+Этот проект использует централизованные конфигурации для TypeScript и Stylelint, расположенные в папке `/packages`, а также общие конфигурации Oxlint (`.oxlintrc.json`) и Oxfmt (`.oxfmtrc.json`) в корне проекта.
 
 ## Структура конфигураций
 
 ```
 packages/
-├── eslint-config/          # Общая конфигурация ESLint
-├── prettier-config/        # Общая конфигурация Prettier
 ├── stylelint-config/       # Общая конфигурация Stylelint
 └── typescript-config/      # Общие конфигурации TypeScript
 ```
 
 ## Использование
 
-### ESLint
+### Oxlint & Oxfmt
 
-В каждом приложении/пакете создайте файл `eslint.config.mjs`:
+Линтинг и форматирование кода используют [Oxlint](https://oxc.rs/docs/learn/how-to-use/linter.html) и [Oxfmt](https://oxc.rs/). Конфигурации задаются в корне репозитория:
 
-```javascript
-import config from '@admin-panel/eslint-config'
-
-export default config
-```
-
-### Prettier
-
-В каждом приложении/пакете создайте файл `.prettierrc`:
-
-```
-"@admin-panel/prettier-config"
-```
+- `.oxlintrc.json`
+- `.oxfmtrc.json`
 
 ### Stylelint
 
@@ -71,11 +58,3 @@ export default config
 1. Внесите изменения в соответствующий пакет в `/packages`
 2. Запустите `pnpm install` для обновления зависимостей
 3. Все проекты автоматически получат новые правила
-
-## Тестирование
-
-Для проверки работы конфигураций:
-
-```bash
-pnpm pint
-```

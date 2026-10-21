@@ -1,0 +1,30 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "vue", "vitest"],
+	"categories": {
+		"correctness": "error"
+	},
+	"rules": {
+		"no-unused-vars": "warn",
+		"no-console": "warn",
+		"@typescript-eslint/no-explicit-any": "off",
+		"unicorn/no-empty-file": "off",
+		"unicorn/no-useless-fallback-in-spread": "off",
+		"unicorn/prefer-string-starts-ends-with": "off",
+		"vitest/require-mock-type-parameters": "off"
+	},
+	"ignorePatterns": [
+		"**/dist/**",
+		"**/dist-ssr/**",
+		"**/coverage/**",
+		"**/storybook-static/**",
+		"**/playwright-report/**",
+		"**/test-results/**",
+		"**/cypress/**"
+	],
+	"env": {
+		"builtin": true,
+		"browser": true,
+		"node": true
+	}
+}

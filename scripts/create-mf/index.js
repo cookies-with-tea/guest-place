@@ -81,14 +81,9 @@ async function main() {
 			'.editorconfig',
 			'root = true\n\n[*]\nindent_style = space\nindent_size = 2\nend_of_line = lf\ncharset = utf-8\ntrim_trailing_whitespace = true\ninsert_final_newline = true\n'
 		)
-		writeFile('.prettierrc', { extends: '@admin-panel/prettier-config' })
 		writeFile(
 			'env.d.ts',
 			`/// <reference types="vite/client" />\n\ndeclare module '*.vue' {\n  import type { DefineComponent } from 'vue'\n  export default DefineComponent\n}\n`
-		)
-		writeFile(
-			'eslint.config.mjs',
-			`import { createConfig } from '@admin-panel/eslint-config'\n\nexport default createConfig()\n`
 		)
 		writeFile(
 			'stylelint.config.mjs',

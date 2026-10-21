@@ -11,6 +11,7 @@ const { dispatch } = useEvents()
 type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 	body?: Record<string, any>
+	silent?: boolean
 }
 
 const PREFIX = '/api/v1'
@@ -28,7 +29,12 @@ export const createApi = (entityName: string) => {
 			}
 
 			if (options?.body) {
-				if (options.body instanceof FormData) {
+				if (
+					options.body instanceof FormData ||
+					(typeof Blob !== 'undefined' && options.body instanceof Blob) ||
+					(typeof ArrayBuffer !== 'undefined' &&
+						(options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)))
+				) {
 					body = options.body
 				} else {
 					body = camelToSnake(options.body as Record<string, any>)
@@ -80,7 +86,7 @@ export const createApi = (entityName: string) => {
 				}
 			}
 
-			if (error.statusCode !== 401 && error.statusCode !== 403) {
+			if (!options?.silent && error.statusCode !== 401 && error.statusCode !== 403) {
 				const message = messages[0] || error.message || 'Network error'
 
 				ElMessage.error(message)

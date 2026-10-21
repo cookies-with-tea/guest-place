@@ -1,7 +1,6 @@
 {
 	"extends": "../../packages/typescript-config/base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"#app/*": ["./src/app/*"],
@@ -11,5 +10,5 @@
 			"#entities/*": ["./src/entities/*"]
 		}
 	},
-	"include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "vite.config.ts"]
+	"include": ["env.d.ts", "src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "vite.config.ts"]
 }

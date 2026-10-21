@@ -21,3 +21,6 @@ public/dist
 .stylelintcache
 .eslintcache
 .prettiercache
+playwright-report
+test-results
+*.tsbuildinfo

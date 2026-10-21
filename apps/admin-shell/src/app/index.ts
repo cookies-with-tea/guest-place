@@ -4,6 +4,7 @@ if (typeof window !== 'undefined') {
 	;(window as any).__gp_shell_active = true
 }
 
+import '@admin-panel/ui/assets/styles/bundle.scss'
 import '@admin-panel/ui/inject-styles'
 
 import { i18nPlugin, initUiStyles } from '@admin-panel/ui'
@@ -25,48 +26,38 @@ import * as elementPlus from 'element-plus'
 
 const { on } = useEvents()
 
-// Manually populate federation shared scope for dynamic remotes in development
-if (import.meta.env.DEV) {
-	const shared = ((window as any).__federation_shared__ = (window as any).__federation_shared__ || {})
+// Manually populate federation shared scope for dynamic remotes
+const shared = ((window as any).__federation_shared__ = (window as any).__federation_shared__ || {})
 
-	const setShared = (name: string, module: any, version: string) => {
-		if (!shared[name]) {
-			shared[name] = {
-				[version]: {
-					get: () => Promise.resolve(() => module),
-					version,
-				},
-			}
+const setShared = (name: string, module: any, version: string) => {
+	if (!shared[name]) {
+		shared[name] = {
+			[version]: {
+				get: () => Promise.resolve(() => module),
+				version,
+			},
 		}
 	}
-
-	// Dynamic imports to avoid bundling in production and potentially fix build issues
-	const [vue, vueRouter, piniaPkg, vueQueryPkg, i18nPkg, libPkg, uiPkg] = await Promise.all([
-		import('vue'),
-		import('vue-router'),
-		import('pinia'),
-		import('@tanstack/vue-query'),
-		import('@admin-panel/i18n'),
-		import('@admin-panel/lib'),
-		import('@admin-panel/ui'),
-	])
-
-	setShared('vue', vue, '3.5.22')
-
-	setShared('vue-router', vueRouter, '4.5.1')
-
-	setShared('element-plus', elementPlus, '2.13.0')
-
-	setShared('pinia', piniaPkg, '2.1.0')
-
-	setShared('@tanstack/vue-query', vueQueryPkg, '5.92.1')
-
-	setShared('@admin-panel/ui', uiPkg, '1.0.0')
-
-	setShared('@admin-panel/lib', libPkg, '1.0.0')
-
-	setShared('@admin-panel/i18n', i18nPkg, '1.0.0')
 }
+
+const [vue, vueRouter, piniaPkg, vueQueryPkg, i18nPkg, libPkg, uiPkg] = await Promise.all([
+	import('vue'),
+	import('vue-router'),
+	import('pinia'),
+	import('@tanstack/vue-query'),
+	import('@admin-panel/i18n'),
+	import('@admin-panel/lib'),
+	import('@admin-panel/ui'),
+])
+
+setShared('vue', vue, '3.5.22')
+setShared('vue-router', vueRouter, '4.5.1')
+setShared('element-plus', elementPlus, '2.13.0')
+setShared('pinia', piniaPkg, '2.1.0')
+setShared('@tanstack/vue-query', vueQueryPkg, '5.92.1')
+setShared('@admin-panel/ui', uiPkg, '1.0.0')
+setShared('@admin-panel/lib', libPkg, '1.0.0')
+setShared('@admin-panel/i18n', i18nPkg, '1.0.0')
 
 import { createApp } from 'vue'
 // Styles handled by initUiStyles

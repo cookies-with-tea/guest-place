@@ -44,16 +44,16 @@ const { filters, openAddModal, allNamespaces, allLanguages } = useTranslations()
 <style scoped>
 .translations-filters {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
+	justify-content: space-between;
 	margin-bottom: 24px;
 	gap: 20px;
 }
 
 .translations-filters__main {
 	display: flex;
-	gap: 12px;
 	flex: 1;
+	gap: 12px;
 }
 
 .translations-filters__item {
@@ -61,7 +61,7 @@ const { filters, openAddModal, allNamespaces, allLanguages } = useTranslations()
 }
 
 .translations-filters__item.search {
-	flex: 1;
 	max-width: 400px;
+	flex: 1;
 }
 </style>

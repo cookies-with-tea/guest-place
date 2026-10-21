@@ -1,5 +1,41 @@
 export const MEDIA_QUERY_KEY = 'media'
 
+export interface MediaVariant {
+	path: string
+	url: string
+	width: number
+	height: number
+	format: string
+	sizeBytes: number
+}
+
+export interface MediaVariants {
+	thumbnail?: MediaVariant
+	medium?: MediaVariant
+	large?: MediaVariant
+	original?: MediaVariant
+}
+
+export interface MediaFolder {
+	id: string
+	name: string
+	parentId?: string | null
+	color?: string
+	createdAt: string
+	itemCount?: number
+}
+
+export interface MediaTagCount {
+	tag: string
+	count: number
+}
+
+export interface MediaConfig {
+	cdnUrl?: string | null
+	publicUrl: string
+	maxQuota: number
+}
+
 export interface MediaItem {
 	uuid: string
 	title?: string
@@ -13,6 +49,17 @@ export interface MediaItem {
 	createdAt: Date | string
 	source: string
 	mediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
+	width?: number
+	height?: number
+	blurhash?: string
+	optimizedPath?: string
+	variants?: MediaVariants
+	dominantColor?: string
+	palette?: string[]
+	exif?: Record<string, any>
+	folderId?: string
+	contentHash?: string
+	cdnUrl?: string
 }
 
 export interface MediaFilters {
@@ -22,7 +69,12 @@ export interface MediaFilters {
 	mediaTypes?: string[]
 	category?: string[]
 	tags?: string[]
+	folderId?: string
 	source?: string[]
+	minSizeBytes?: number
+	maxSizeBytes?: number
+	dateFrom?: string
+	dateTo?: string
 	page?: number
 	limit?: number
 }
@@ -66,4 +118,41 @@ export interface MediaResponse {
 			totalPages: number
 		}
 	}
+}
+
+export interface InitChunkUploadDTO {
+	filename: string
+	totalSize: number
+	chunkSize: number
+	totalChunks: number
+	checksumSha256?: string
+	title?: string
+	alt?: string
+	category?: string
+	tags?: string[]
+	source?: string
+	convertToWebp?: boolean
+	folderId?: string | null
+}
+
+export interface InitChunkUploadResponse {
+	uploadId: string
+	chunkSize: number
+	totalChunks: number
+	receivedChunks: number[]
+}
+
+export interface ChunkStatusResponse {
+	uploadId: string
+	totalChunks: number
+	totalSize: number
+	receivedChunks: number[]
+	isComplete: boolean
+}
+
+export interface ChunkUploadResultDTO {
+	uploadId: string
+	chunkIndex: number
+	receivedChunks: number[]
+	totalChunks: number
 }

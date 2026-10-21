@@ -62,7 +62,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Lint with [Oxlint](https://oxc.rs/)
 
 ```sh
 pnpm lint

@@ -1,6 +1,6 @@
 {
 	"extends": "../../packages/typescript-config/node.json",
-	"include": ["vite.config.ts"],
+	"include": ["env.d.ts", "vite.config.ts"],
 	"compilerOptions": {
 		"composite": true,
 		"module": "ESNext",

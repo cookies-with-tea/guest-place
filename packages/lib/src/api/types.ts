@@ -468,6 +468,22 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/locks/{entity_type}/{entity_id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_lock_status']
+		put?: never
+		post: operations['acquire_lock']
+		delete: operations['release_lock']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/api/v1/media': {
 		parameters: {
 			query?: never
@@ -484,6 +500,86 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/media/optimize/bulk': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['bulk_optimize_media']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/upload/chunk/init': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['init_chunk_upload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/upload/chunk/{upload_id}/complete': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['complete_chunk_upload']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/upload/chunk/{upload_id}/status': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_chunk_status']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/upload/chunk/{upload_id}/{chunk_index}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['upload_chunk']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/api/v1/media/{uuid}': {
 		parameters: {
 			query?: never
@@ -495,6 +591,22 @@ export interface paths {
 		put: operations['update_media']
 		post?: never
 		delete: operations['delete_media_by_uuid']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/{uuid}/optimize': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['optimize_media']
+		delete?: never
 		options?: never
 		head?: never
 		patch?: never
@@ -558,6 +670,22 @@ export interface paths {
 		get: operations['get_platforms']
 		put: operations['update_platforms']
 		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/system/alert': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['send_system_alert']
 		delete?: never
 		options?: never
 		head?: never
@@ -687,6 +815,11 @@ export interface components {
 			/** Format: uuid */
 			who_we_are_guide_uuid?: string | null
 		}
+		AcquireLockRequest: {
+			force?: boolean | null
+			user_id: string
+			user_name: string
+		}
 		AdditionalServiceDTO: {
 			icon?: null | components['schemas']['MediaDTO']
 			/** Format: uuid */
@@ -714,12 +847,19 @@ export interface components {
 		ApiPaginationDTO_MediaItemDTO: {
 			items: {
 				alt?: string | null
+				blurhash?: string | null
 				category?: string | null
 				/** Format: date-time */
 				createdAt: string
+				dominantColor?: string | null
+				exif?: unknown
 				extension?: string | null
+				/** Format: int32 */
+				height?: number | null
 				mediaType: components['schemas']['MediaType']
 				name?: string | null
+				optimizedPath?: string | null
+				palette?: unknown
 				/** Format: int64 */
 				sizeBytes: number
 				source: string
@@ -727,6 +867,9 @@ export interface components {
 				title?: string | null
 				url: string
 				uuid: string
+				variants?: unknown
+				/** Format: int32 */
+				width?: number | null
 			}[]
 			pagination: components['schemas']['PaginationDTO']
 		}
@@ -825,6 +968,34 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_ChunkStatusResponse: {
+			data?: {
+				is_complete: boolean
+				received_chunks: number[]
+				total_chunks: number
+				/** Format: int64 */
+				total_size: number
+				/** Format: uuid */
+				upload_id: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_ChunkUploadResultDTO: {
+			data?: {
+				chunk_index: number
+				received_chunks: number[]
+				total_chunks: number
+				/** Format: uuid */
+				upload_id: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_ContentEntry: {
 			data?: {
 				/** Format: date-time */
@@ -891,15 +1062,46 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_InitChunkUploadResponse: {
+			data?: {
+				chunk_size: number
+				received_chunks: number[]
+				total_chunks: number
+				/** Format: uuid */
+				upload_id: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_LockStatusResponse: {
+			data?: {
+				is_locked: boolean
+				is_own_lock: boolean
+				lock_info?: null | components['schemas']['LockInfo']
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_MediaItemDTO: {
 			data?: {
 				alt?: string | null
+				blurhash?: string | null
 				category?: string | null
 				/** Format: date-time */
 				createdAt: string
+				dominantColor?: string | null
+				exif?: unknown
 				extension?: string | null
+				/** Format: int32 */
+				height?: number | null
 				mediaType: components['schemas']['MediaType']
 				name?: string | null
+				optimizedPath?: string | null
+				palette?: unknown
 				/** Format: int64 */
 				sizeBytes: number
 				source: string
@@ -907,6 +1109,9 @@ export interface components {
 				title?: string | null
 				url: string
 				uuid: string
+				variants?: unknown
+				/** Format: int32 */
+				width?: number | null
 			}
 			errors?: {
 				[key: string]: string[]
@@ -1096,6 +1301,38 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_MediaItemDTO: {
+			data?: {
+				alt?: string | null
+				blurhash?: string | null
+				category?: string | null
+				/** Format: date-time */
+				createdAt: string
+				dominantColor?: string | null
+				exif?: unknown
+				extension?: string | null
+				/** Format: int32 */
+				height?: number | null
+				mediaType: components['schemas']['MediaType']
+				name?: string | null
+				optimizedPath?: string | null
+				palette?: unknown
+				/** Format: int64 */
+				sizeBytes: number
+				source: string
+				tags?: string[] | null
+				title?: string | null
+				url: string
+				uuid: string
+				variants?: unknown
+				/** Format: int32 */
+				width?: number | null
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_Vec_Mfe: {
 			data?: {
 				category: string
@@ -1167,12 +1404,31 @@ export interface components {
 			refresh_expires_in: number
 			refresh_token: string
 		}
+		BulkOptimizeMediaDTO: {
+			uuids: string[]
+		}
 		ChangePasswordDTO: {
 			new_password: string
 			old_password: string
 		}
 		CheckEmailCodeDTO: {
 			key: string
+		}
+		ChunkStatusResponse: {
+			is_complete: boolean
+			received_chunks: number[]
+			total_chunks: number
+			/** Format: int64 */
+			total_size: number
+			/** Format: uuid */
+			upload_id: string
+		}
+		ChunkUploadResultDTO: {
+			chunk_index: number
+			received_chunks: number[]
+			total_chunks: number
+			/** Format: uuid */
+			upload_id: string
 		}
 		CohortRowDto: {
 			cohort_month: string
@@ -1355,6 +1611,27 @@ export interface components {
 			redis: string
 			status: string
 		}
+		InitChunkUploadDTO: {
+			alt?: string | null
+			category?: string | null
+			checksum_sha256?: string | null
+			chunk_size: number
+			convert_to_webp?: boolean | null
+			filename: string
+			source?: string | null
+			tags?: string[] | null
+			title?: string | null
+			total_chunks: number
+			/** Format: int64 */
+			total_size: number
+		}
+		InitChunkUploadResponse: {
+			chunk_size: number
+			received_chunks: number[]
+			total_chunks: number
+			/** Format: uuid */
+			upload_id: string
+		}
 		InteractionCardDTO: {
 			button_text: string
 			icon?: null | components['schemas']['MediaDTO']
@@ -1378,6 +1655,18 @@ export interface components {
 			icon: components['schemas']['MediaDTO']
 			text: string
 		}
+		LockInfo: {
+			entity_id: string
+			entity_type: string
+			locked_at: string
+			user_id: string
+			user_name: string
+		}
+		LockStatusResponse: {
+			is_locked: boolean
+			is_own_lock: boolean
+			lock_info?: null | components['schemas']['LockInfo']
+		}
 		ManifestDto: {
 			remotes: components['schemas']['RemoteDto'][]
 		}
@@ -1388,9 +1677,15 @@ export interface components {
 		}
 		MediaFilterQuery: {
 			category?: string | null
+			date_from?: string | null
+			date_to?: string | null
 			/** Format: int32 */
 			limit?: number | null
+			/** Format: int64 */
+			max_size_bytes?: number | null
 			media_type?: string | null
+			/** Format: int64 */
+			min_size_bytes?: number | null
 			/** Format: int32 */
 			page?: number | null
 			search?: string | null
@@ -1401,12 +1696,19 @@ export interface components {
 		}
 		MediaItemDTO: {
 			alt?: string | null
+			blurhash?: string | null
 			category?: string | null
 			/** Format: date-time */
 			createdAt: string
+			dominantColor?: string | null
+			exif?: unknown
 			extension?: string | null
+			/** Format: int32 */
+			height?: number | null
 			mediaType: components['schemas']['MediaType']
 			name?: string | null
+			optimizedPath?: string | null
+			palette?: unknown
 			/** Format: int64 */
 			sizeBytes: number
 			source: string
@@ -1414,9 +1716,29 @@ export interface components {
 			title?: string | null
 			url: string
 			uuid: string
+			variants?: unknown
+			/** Format: int32 */
+			width?: number | null
 		}
 		/** @enum {string} */
 		MediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
+		MediaVariantDTO: {
+			format: string
+			/** Format: int32 */
+			height: number
+			path: string
+			/** Format: int64 */
+			sizeBytes: number
+			url: string
+			/** Format: int32 */
+			width: number
+		}
+		MediaVariantsDTO: {
+			large?: null | components['schemas']['MediaVariantDTO']
+			medium?: null | components['schemas']['MediaVariantDTO']
+			original?: null | components['schemas']['MediaVariantDTO']
+			thumbnail?: null | components['schemas']['MediaVariantDTO']
+		}
 		Mfe: {
 			category: string
 			config: unknown
@@ -1517,6 +1839,11 @@ export interface components {
 		}
 		SearchPromoDTO: {
 			description: string
+			title: string
+		}
+		SendAlertDTO: {
+			level?: string | null
+			message: string
 			title: string
 		}
 		SessionResponseDto: {
@@ -1804,14 +2131,17 @@ export interface operations {
 	}
 	get_engagement_stats: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Number of days to look back */
+				days?: number | null
+			}
 			header?: never
 			path?: never
 			cookie?: never
 		}
 		requestBody?: never
 		responses: {
-			/** @description Engagement stats */
+			/** @description Engagement stats by entity */
 			200: {
 				headers: {
 					[name: string]: unknown
@@ -1824,7 +2154,10 @@ export interface operations {
 	}
 	get_funnel_stats: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Number of days to look back */
+				days?: number | null
+			}
 			header?: never
 			path?: never
 			cookie?: never
@@ -1844,7 +2177,10 @@ export interface operations {
 	}
 	get_referral_stats: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Number of days to look back */
+				days?: number | null
+			}
 			header?: never
 			path?: never
 			cookie?: never
@@ -1908,7 +2244,10 @@ export interface operations {
 	}
 	get_summary_stats: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Number of days to look back */
+				days?: number | null
+			}
 			header?: never
 			path?: never
 			cookie?: never
@@ -1950,7 +2289,10 @@ export interface operations {
 	}
 	get_traffic_stats: {
 		parameters: {
-			query?: never
+			query?: {
+				/** @description Number of days to look back */
+				days?: number | null
+			}
 			header?: never
 			path?: never
 			cookie?: never
@@ -2998,6 +3340,95 @@ export interface operations {
 			}
 		}
 	}
+	get_lock_status: {
+		parameters: {
+			query?: {
+				/** @description Current user UUID to check ownership */
+				user_id?: string
+			}
+			header?: never
+			path: {
+				/** @description Entity type e.g. schema, entry */
+				entity_type: string
+				/** @description Entity UUID or slug */
+				entity_id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Current lock status */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_LockStatusResponse']
+				}
+			}
+		}
+	}
+	acquire_lock: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Entity type e.g. schema, entry */
+				entity_type: string
+				/** @description Entity UUID or slug */
+				entity_id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['AcquireLockRequest']
+			}
+		}
+		responses: {
+			/** @description Lock acquired or refreshed */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_LockStatusResponse']
+				}
+			}
+			/** @description Entity is locked by another user */
+			409: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_LockStatusResponse']
+				}
+			}
+		}
+	}
+	release_lock: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Entity type e.g. schema, entry */
+				entity_type: string
+				/** @description Entity UUID or slug */
+				entity_id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Lock released successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
 	get_all_media: {
 		parameters: {
 			query: {
@@ -3097,6 +3528,192 @@ export interface operations {
 			}
 			/** @description Internal server error */
 			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	bulk_optimize_media: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BulkOptimizeMediaDTO']
+			}
+		}
+		responses: {
+			/** @description Media items optimized successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_MediaItemDTO']
+				}
+			}
+			/** @description Optimization error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	init_chunk_upload: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['InitChunkUploadDTO']
+			}
+		}
+		responses: {
+			/** @description Chunk upload session initialized */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_InitChunkUploadResponse']
+				}
+			}
+			/** @description Invalid parameters */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Quota exceeded */
+			413: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	complete_chunk_upload: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Upload session UUID */
+				upload_id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description File assembled and saved successfully */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_MediaItemDTO']
+				}
+			}
+			/** @description Validation or checksum error */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Quota exceeded */
+			413: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_chunk_status: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Upload session UUID */
+				upload_id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Upload session status */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_ChunkStatusResponse']
+				}
+			}
+			/** @description Session not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	upload_chunk: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Upload session UUID */
+				upload_id: string
+				/** @description Index of the chunk (0-based) */
+				chunk_index: number
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/octet-stream': number[]
+			}
+		}
+		responses: {
+			/** @description Chunk uploaded successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_ChunkUploadResultDTO']
+				}
+			}
+			/** @description Invalid chunk */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Session not found */
+			404: {
 				headers: {
 					[name: string]: unknown
 				}
@@ -3211,6 +3828,43 @@ export interface operations {
 				content?: never
 			}
 			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	optimize_media: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Media UUID */
+				uuid: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Media optimized successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_MediaItemDTO']
+				}
+			}
+			/** @description Media not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Optimization error */
 			500: {
 				headers: {
 					[name: string]: unknown
@@ -3440,6 +4094,28 @@ export interface operations {
 			}
 			/** @description Database error */
 			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	send_system_alert: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SendAlertDTO']
+			}
+		}
+		responses: {
+			/** @description Alert broadcasted */
+			200: {
 				headers: {
 					[name: string]: unknown
 				}
