@@ -76,6 +76,7 @@ pub async fn create_schema(
     for field in &mut fields {
         field.name = to_snake_case(&field.name);
     }
+    let slug = payload.slug.clone();
 
     let schema = sqlx::query_as::<_, ContentSchema>(
         "INSERT INTO content_schemas (name, slug, fields, is_singleton) VALUES ($1, $2, $3, $4) RETURNING *"
@@ -87,9 +88,15 @@ pub async fn create_schema(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
+        let err_str = e.to_string();
+        if err_str.contains("unique constraint") || err_str.contains("duplicate key") {
+            return (StatusCode::CONFLICT, Json(ApiResponse::<()> {
+                data: None, errors: None, messages: Some(vec![format!("Схема с идентификатором '{}' уже существует", slug)]),
+            }));
+        }
         eprintln!("Database error: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
-            data: None, errors: None, messages: Some(vec!["Database error".to_string()]),
+            data: None, errors: None, messages: Some(vec![format!("Database error: {}", e)]),
         }))
     })?;
 
@@ -379,6 +386,29 @@ async fn validate_entry_data(pool: &sqlx::Pool<sqlx::Postgres>, fields: &[FieldD
                             }
                         }
                     }
+                    FieldType::Repeater => {
+                        if !val.is_array() {
+                            return Err(format!("Field '{}' must be an array of items", field.label));
+                        }
+                    }
+                    FieldType::Group => {
+                        if !val.is_object() {
+                            return Err(format!("Field '{}' must be an object", field.label));
+                        }
+                    }
+                    FieldType::Json => {
+                        // Any valid JSON value is accepted
+                    }
+                    FieldType::Color => {
+                        if !val.is_string() {
+                            return Err(format!("Field '{}' must be a color string", field.label));
+                        }
+                    }
+                    FieldType::Link => {
+                        if !val.is_object() && !val.is_string() {
+                            return Err(format!("Field '{}' must be a link object or URL string", field.label));
+                        }
+                    }
                     _ => {
                         if !val.is_string() && !val.is_object() && !val.is_array() {
                             return Err(format!("Field '{}' has invalid type", field.label));
@@ -537,15 +567,22 @@ pub async fn create_entry(
     // 3. Insert entry
     let status = payload.status.unwrap_or(ContentEntryStatus::Draft);
     let i18n = payload.i18n.unwrap_or(serde_json::json!({}));
+    let published_at = if status == ContentEntryStatus::Published {
+        payload.published_at.or_else(|| Some(chrono::Utc::now()))
+    } else {
+        payload.published_at
+    };
 
     let entry = sqlx::query_as::<_, ContentEntry>(
-        "INSERT INTO content_entries (schema_id, slug, data, status, i18n) VALUES ($1, $2, $3, $4, $5) RETURNING *"
+        "INSERT INTO content_entries (schema_id, slug, data, status, i18n, published_at, published_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"
     )
     .bind(payload.schema_id)
     .bind(&payload.slug)
     .bind(sqlx::types::Json(payload.data))
     .bind(status)
     .bind(sqlx::types::Json(i18n))
+    .bind(published_at)
+    .bind(payload.published_by)
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
@@ -739,6 +776,16 @@ pub async fn update_entry(
         parts.push(format!("i18n = ${}", arg_index));
         arg_index += 1;
     }
+    if payload.published_at.is_some() {
+        parts.push(format!("published_at = ${}", arg_index));
+        arg_index += 1;
+    } else if payload.status == Some(ContentEntryStatus::Published) {
+        parts.push("published_at = COALESCE(published_at, NOW())".to_string());
+    }
+    if payload.published_by.is_some() {
+        parts.push(format!("published_by = ${}", arg_index));
+        arg_index += 1;
+    }
 
     if parts.is_empty() {
         return Err((
@@ -769,6 +816,12 @@ pub async fn update_entry(
     }
     if let Some(i18n) = payload.i18n {
         sql_query = sql_query.bind(sqlx::types::Json(i18n));
+    }
+    if let Some(published_at) = payload.published_at {
+        sql_query = sql_query.bind(published_at);
+    }
+    if let Some(published_by) = payload.published_by {
+        sql_query = sql_query.bind(published_by);
     }
     sql_query = sql_query.bind(id);
 

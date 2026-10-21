@@ -6,6 +6,7 @@ use crate::media::dto::{
   MediaItemFromDb,
   UpdateMediaDTO,
   BulkUpdateMediaDTO,
+  BulkOptimizeMediaDTO,
 };
 use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
@@ -20,6 +21,23 @@ use axum::{
 use std::sync::Arc;
 use std::collections::{BTreeMap, HashMap};
 use uuid::Uuid;
+use axum::body::Bytes;
+use crate::media::chunk::{
+    ChunkManager, ChunkStatusResponse, ChunkUploadResultDTO, InitChunkUploadDTO, InitChunkUploadResponse,
+};
+use crate::media::folders;
+
+pub(crate) fn to_dto(row: MediaItemFromDb, cdn_url: Option<&str>, public_url: &str) -> MediaItemDTO {
+    let mut dto = MediaItemDTO::from(row);
+    if let Some(cdn) = cdn_url {
+        if dto.url.starts_with(public_url) {
+            dto.cdn_url = Some(format!("{}{}", cdn, &dto.url[public_url.len()..]));
+        } else {
+            dto.cdn_url = Some(dto.url.clone());
+        }
+    }
+    dto
+}
 
 #[utoipa::path(
     post,
@@ -51,12 +69,13 @@ pub async fn create(
             );
         }
     };
-    let mut uploaded_items = Vec::new();
+    let mut uploaded_items: Vec<MediaItemDTO> = Vec::new();
     let mut files: Vec<(String, Vec<u8>)> = Vec::new();
     let mut titles: BTreeMap<u32, String> = BTreeMap::new();
     let mut alts: BTreeMap<u32, String> = BTreeMap::new();
     let mut categories: BTreeMap<u32, String> = BTreeMap::new();
     let mut tags_map: BTreeMap<u32, Vec<String>> = BTreeMap::new();
+    let mut folder_ids: BTreeMap<u32, Uuid> = BTreeMap::new();
     let mut upload_source = "site".to_string();
     let mut is_multiple = false;
     let mut convert_to_webp_global = true;
@@ -122,6 +141,15 @@ pub async fn create(
                     tags_map.insert(idx, tags);
                 }
             }
+        } else if name.starts_with("folder_id_") {
+            is_multiple = true;
+            if let Ok(idx) = name["folder_id_".len()..].parse::<u32>() {
+                if let Ok(text) = field.text().await {
+                    if let Ok(u) = Uuid::parse_str(text.trim()) {
+                        folder_ids.insert(idx, u);
+                    }
+                }
+            }
         } else if name == "title" {
             if let Ok(text) = field.text().await {
                 titles.insert(0, text);
@@ -138,6 +166,12 @@ pub async fn create(
             if let Ok(text) = field.text().await {
                 let tags: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
                 tags_map.insert(0, tags);
+            }
+        } else if name == "folder_id" {
+            if let Ok(text) = field.text().await {
+                if let Ok(u) = Uuid::parse_str(text.trim()) {
+                    folder_ids.insert(0, u);
+                }
             }
         } else if name == "source" {
             if let Ok(text) = field.text().await {
@@ -235,8 +269,10 @@ pub async fn create(
                     let category = categories.get(&(i as u32)).cloned();
                     let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
 
+                    let item_folder_id = folder_ids.get(&(i as u32)).cloned().or_else(|| folder_ids.get(&0).cloned());
+
                     let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source",
+                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source, folder_id, content_hash) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash",
                     )
                     .bind(media_uuid)
                     .bind(media_type_str)
@@ -249,6 +285,8 @@ pub async fn create(
                     .bind(&category)
                     .bind(&tags)
                     .bind(&upload_source)
+                    .bind(item_folder_id)
+                    .bind(&_hash)
                     .fetch_one(&state.pool)
                     .await;
 
@@ -257,20 +295,14 @@ pub async fn create(
                             state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
                         }
 
-                        uploaded_items.push(MediaItemDTO {
-                            uuid: row.uuid.to_string(),
-                            url: row.url,
-                            name: row.name,
-                            extension: row.extension,
-                            title: row.title,
-                            alt: row.alt,
-                            category: row.category,
-                            tags: row.tags,
-                            size_bytes: row.size_bytes,
-                            created_at: row.created_at,
-                            source: row.source,
-                            media_type: row.media_type,
+                        state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
+                            id: row.uuid.to_string(),
+                            name: row.name.clone().unwrap_or_else(|| "media".to_string()),
+                            path: relative_path.clone(),
+                            user: None,
                         });
+
+                        uploaded_items.push(to_dto(row, state.config.cdn_url.as_deref(), &state.config.public_url));
                     }
                 }
             },
@@ -349,7 +381,7 @@ pub async fn get_all(
 
     // 2. Build SELECT query
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media"
     );
     
     let mut select_where_clause = false;
@@ -380,20 +412,7 @@ pub async fn get_all(
         Ok(db_items) => {
             let media_list = db_items
                 .into_iter()
-                .map(|row| MediaItemDTO {
-                    uuid: row.uuid.to_string(),
-                    url: row.url,
-                    name: row.name,
-                    extension: row.extension,
-                    title: row.title,
-                    alt: row.alt,
-                    category: row.category,
-                    tags: row.tags,
-                    size_bytes: row.size_bytes,
-                    created_at: row.created_at,
-                    source: row.source,
-                    media_type: row.media_type,
-                })
+                .map(|item| to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url))
                 .collect();
 
             let pagination = PaginationDTO {
@@ -437,6 +456,12 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
         builder.push(" OR title ILIKE ");
         builder.push_bind(format!("%{}%", search));
         builder.push(" OR alt ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR category ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR extension ILIKE ");
+        builder.push_bind(format!("%{}%", search));
+        builder.push(" OR array_to_string(tags, ' ') ILIKE ");
         builder.push_bind(format!("%{}%", search));
         builder.push(")");
     }
@@ -486,10 +511,64 @@ fn apply_filters<'a>(builder: &mut QueryBuilder<'a, Postgres>, filter: &'a Media
         }
     }
 
+    if let Some(min_size) = filter.min_size_bytes {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("size_bytes >= ");
+        builder.push_bind(min_size);
+    }
+
+    if let Some(max_size) = filter.max_size_bytes {
+        if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+        builder.push("size_bytes <= ");
+        builder.push_bind(max_size);
+    }
+
+    if let Some(date_from) = &filter.date_from {
+        if !date_from.is_empty() {
+            if let Ok(parsed_date) = chrono::DateTime::parse_from_rfc3339(date_from) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at >= ");
+                builder.push_bind(parsed_date.with_timezone(&chrono::Utc));
+            } else if let Ok(parsed_naive) = chrono::NaiveDateTime::parse_from_str(date_from, "%Y-%m-%d %H:%M:%S").or_else(|_| chrono::NaiveDate::parse_from_str(date_from, "%Y-%m-%d").map(|d| d.and_hms_opt(0, 0, 0).unwrap())) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at >= ");
+                builder.push_bind(chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(parsed_naive, chrono::Utc));
+            }
+        }
+    }
+
+    if let Some(date_to) = &filter.date_to {
+        if !date_to.is_empty() {
+            if let Ok(parsed_date) = chrono::DateTime::parse_from_rfc3339(date_to) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at <= ");
+                builder.push_bind(parsed_date.with_timezone(&chrono::Utc));
+            } else if let Ok(parsed_naive) = chrono::NaiveDateTime::parse_from_str(date_to, "%Y-%m-%d %H:%M:%S").or_else(|_| chrono::NaiveDate::parse_from_str(date_to, "%Y-%m-%d").map(|d| d.and_hms_opt(23, 59, 59).unwrap())) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("created_at <= ");
+                builder.push_bind(chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(parsed_naive, chrono::Utc));
+            }
+        }
+    }
+
     if let Some(source) = &filter.source {
         if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
         builder.push("source = ");
         builder.push_bind(source);
+    }
+
+    if let Some(folder_str) = &filter.folder_id {
+        let trimmed = folder_str.trim();
+        if !trimmed.is_empty() {
+            if trimmed.eq_ignore_ascii_case("root") || trimmed.eq_ignore_ascii_case("none") || trimmed.eq_ignore_ascii_case("null") {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("folder_id IS NULL");
+            } else if let Ok(f_uuid) = Uuid::parse_str(trimmed) {
+                if !*where_clause { builder.push(" WHERE "); *where_clause = true; } else { builder.push(" AND "); }
+                builder.push("folder_id = ");
+                builder.push_bind(f_uuid);
+            }
+        }
     }
 }
 
@@ -513,7 +592,7 @@ pub async fn get_one(
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
     let result = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -521,20 +600,7 @@ pub async fn get_one(
 
     match result {
         Ok(Some(media)) => {
-                let media_response = MediaItemDTO {
-                uuid: media.uuid.to_string(),
-                url: media.url,
-                name: media.name,
-                extension: media.extension,
-                title: media.title,
-                alt: media.alt,
-                category: media.category,
-                tags: media.tags,
-                size_bytes: media.size_bytes,
-                created_at: media.created_at,
-                source: media.source,
-                media_type: media.media_type,
-            };
+            let media_response = to_dto(media, state.config.cdn_url.as_deref(), &state.config.public_url);
 
             let msg = state.i18n.t("media.fetch_success", &locale).await;
             into_api_response(
@@ -625,7 +691,7 @@ pub async fn update(
 
     let mut has_updates = false;
     if payload.name.is_some() || payload.extension.is_some() || payload.title.is_some() || 
-       payload.alt.is_some() || payload.category.is_some() || payload.tags.is_some() {
+       payload.alt.is_some() || payload.category.is_some() || payload.tags.is_some() || payload.folder_id.is_some() {
         has_updates = true;
     }
 
@@ -639,7 +705,7 @@ pub async fn update(
     }
 
     let existing_media = sqlx::query_as::<_, MediaItemFromDb>(
-        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
     )
     .bind(uuid)
     .fetch_optional(&state.pool)
@@ -680,6 +746,11 @@ pub async fn update(
                 query_param_index += 1;
             }
 
+            if payload.folder_id.is_some() {
+                update_query.push_str(&format!("folder_id = ${}, ", query_param_index));
+                query_param_index += 1;
+            }
+
             // Remove trailing comma and space
             if update_query.ends_with(", ") {
                 update_query.truncate(update_query.len() - 2);
@@ -713,6 +784,10 @@ pub async fn update(
                 query = query.bind(tags);
             }
 
+            if let Some(folder_id) = payload.folder_id {
+                query = query.bind(folder_id);
+            }
+
             query = query.bind(uuid);
 
             let result = query.execute(&state.pool).await;
@@ -720,7 +795,7 @@ pub async fn update(
             match result {
                 Ok(_) => {
                     let updated_media = sqlx::query_as::<_, MediaItemFromDb>(
-                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source FROM media WHERE uuid = $1"
+                        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
                     )
                     .bind(uuid)
                     .fetch_one(&state.pool)
@@ -728,20 +803,7 @@ pub async fn update(
 
                     match updated_media {
                         Ok(media) => {
-                            let media_response = MediaItemDTO {
-                                uuid: media.uuid.to_string(),
-                                url: media.url,
-                                name: media.name,
-                                extension: media.extension,
-                                title: media.title,
-                                alt: media.alt,
-                                category: media.category,
-                                tags: media.tags,
-                                size_bytes: media.size_bytes,
-                                created_at: media.created_at,
-                                source: media.source,
-                                media_type: media.media_type,
-                            };
+                            let media_response = to_dto(media, state.config.cdn_url.as_deref(), &state.config.public_url);
 
                             let msg = state.i18n.t("media.update_success", &locale).await;
                             into_api_response(
@@ -830,6 +892,9 @@ pub async fn delete_one(
                 .await;
             match result {
                 Ok(_) => {
+                    let variants_dir = std::path::Path::new("uploads").join("variants").join(uuid.to_string());
+                    let _ = tokio::fs::remove_dir_all(&variants_dir).await;
+
                     let msg = state.i18n.t("media.delete_success", &locale).await;
                     into_api_response(
                         StatusCode::OK,
@@ -978,6 +1043,11 @@ pub async fn update_bulk(
         query_param_index += 1;
         has_updates = true;
     }
+    if payload.data.folder_id.is_some() {
+        update_query.push_str(&format!("folder_id = ${}, ", query_param_index));
+        query_param_index += 1;
+        has_updates = true;
+    }
 
     if !has_updates {
         let msg = state.i18n.t("media.no_update_fields", &locale).await;
@@ -1001,6 +1071,7 @@ pub async fn update_bulk(
     if let Some(alt) = &payload.data.alt { query = query.bind(alt); }
     if let Some(category) = &payload.data.category { query = query.bind(category); }
     if let Some(tags) = &payload.data.tags { query = query.bind(tags); }
+    if let Some(folder_id) = payload.data.folder_id { query = query.bind(folder_id); }
 
     query = query.bind(uuids);
 
@@ -1019,8 +1090,502 @@ pub async fn update_bulk(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/init",
+    tag = "Media",
+    request_body = InitChunkUploadDTO,
+    responses(
+        (status = 200, description = "Chunk upload session initialized", body = ApiResponse<InitChunkUploadResponse>),
+        (status = 400, description = "Invalid parameters"),
+        (status = 413, description = "Quota exceeded")
+    ),
+    operation_id = "init_chunk_upload"
+)]
+pub async fn init_chunk_upload(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<InitChunkUploadDTO>,
+) -> Result<Json<ApiResponse<InitChunkUploadResponse>>, (StatusCode, Json<ApiResponse<InitChunkUploadResponse>>)> {
+    if payload.filename.trim().is_empty() || payload.total_chunks == 0 || payload.chunk_size == 0 || payload.total_size < 0 {
+        let msg = state.i18n.t("media.invalid_request", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map("chunk", "Invalid chunk upload parameters")),
+            Some(vec![msg]),
+        );
+    }
+
+    match state.media_quota.check_quota(payload.total_size).await {
+        Ok(true) => {},
+        Ok(false) => {
+            let msg = state.i18n.t("media.quota_exceeded", &locale).await;
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Storage quota exceeded")),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("media.quota_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to check quota")),
+                Some(vec![msg]),
+            );
+        }
+    }
+
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.init_session(payload).await {
+        Ok(resp) => {
+            into_api_response(StatusCode::OK, Some(resp), None, None)
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.upload_failed", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("chunk", &format!("Failed to initialize chunk session: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/{upload_id}/{chunk_index}",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID"),
+        ("chunk_index" = usize, Path, description = "Index of the chunk (0-based)")
+    ),
+    request_body(content = Vec<u8>, content_type = "application/octet-stream"),
+    responses(
+        (status = 200, description = "Chunk uploaded successfully", body = ApiResponse<ChunkUploadResultDTO>),
+        (status = 400, description = "Invalid chunk"),
+        (status = 404, description = "Session not found")
+    ),
+    operation_id = "upload_chunk"
+)]
+pub async fn upload_chunk(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path((upload_id, chunk_index)): Path<(Uuid, usize)>,
+    body: Bytes,
+) -> Result<Json<ApiResponse<ChunkUploadResultDTO>>, (StatusCode, Json<ApiResponse<ChunkUploadResultDTO>>)> {
+    if body.is_empty() {
+        let msg = state.i18n.t("media.invalid_request", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map("chunk", "Chunk body is empty")),
+            Some(vec![msg]),
+        );
+    }
+
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.save_chunk(&upload_id, chunk_index, &body).await {
+        Ok(res) => {
+            into_api_response(StatusCode::OK, Some(res), None, None)
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.upload_failed", &locale).await;
+            into_api_response(
+                StatusCode::BAD_REQUEST,
+                None,
+                Some(error_map("chunk", &format!("Failed to save chunk: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/media/upload/chunk/{upload_id}/status",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID")
+    ),
+    responses(
+        (status = 200, description = "Upload session status", body = ApiResponse<ChunkStatusResponse>),
+        (status = 404, description = "Session not found")
+    ),
+    operation_id = "get_chunk_status"
+)]
+pub async fn get_chunk_status(
+    State(_state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(upload_id): Path<Uuid>,
+) -> Result<Json<ApiResponse<ChunkStatusResponse>>, (StatusCode, Json<ApiResponse<ChunkStatusResponse>>)> {
+    let chunk_manager = ChunkManager::new("uploads");
+    match chunk_manager.get_status(&upload_id).await {
+        Ok(res) => into_api_response(StatusCode::OK, Some(res), None, None),
+        Err(e) => {
+            let msg = _state.i18n.t("media.not_found", &locale).await;
+            into_api_response(
+                StatusCode::NOT_FOUND,
+                None,
+                Some(error_map("session", &format!("Session not found: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/upload/chunk/{upload_id}/complete",
+    tag = "Media",
+    params(
+        ("upload_id" = Uuid, Path, description = "Upload session UUID")
+    ),
+    responses(
+        (status = 201, description = "File assembled and saved successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 400, description = "Validation or checksum error"),
+        (status = 413, description = "Quota exceeded"),
+        (status = 500, description = "Internal server error")
+    ),
+    operation_id = "complete_chunk_upload"
+)]
+pub async fn complete_chunk_upload(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(upload_id): Path<Uuid>,
+) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
+    let chunk_manager = ChunkManager::new("uploads");
+    let (assembled_data, meta) = match chunk_manager.assemble(&upload_id).await {
+        Ok(res) => res,
+        Err(e) => {
+            let msg = state.i18n.t("media.invalid_request", &locale).await;
+            return into_api_response(
+                StatusCode::BAD_REQUEST,
+                None,
+                Some(error_map("assemble", &format!("Assembly failed: {}", e))),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let file_name = meta.filename;
+    let content_type = mime_guess::from_path(&file_name)
+        .first()
+        .map(|m| m.to_string())
+        .unwrap_or_else(|| "application/octet-stream".to_string());
+
+    let (media_type_str, _) = if content_type.starts_with("image/") {
+        ("image", crate::media::dto::MediaType::Image)
+    } else if content_type.starts_with("video/") {
+        ("video", crate::media::dto::MediaType::Video)
+    } else if content_type.contains("pdf") || content_type.contains("document") || content_type.contains("msword") || content_type.contains("officedocument") || content_type.contains("text/csv") || content_type.contains("text/plain") {
+        ("document", crate::media::dto::MediaType::Document)
+    } else if content_type.contains("zip") || content_type.contains("tar") || content_type.contains("compressed") {
+        ("archive", crate::media::dto::MediaType::Archive)
+    } else {
+        ("other", crate::media::dto::MediaType::Other)
+    };
+
+    let file_size = assembled_data.len() as i64;
+    match state.media_quota.check_quota(file_size).await {
+        Ok(true) => {},
+        Ok(false) => {
+            let msg = state.i18n.t("media.quota_exceeded", &locale).await;
+            return into_api_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                None,
+                Some(error_map("quota", "Storage quota exceeded")),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("media.quota_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("quota", "Failed to check quota")),
+                Some(vec![msg]),
+            );
+        }
+    }
+
+    let media_uuid = Uuid::new_v4();
+    let extension = std::path::Path::new(&file_name)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("bin");
+    let final_name = std::path::Path::new(&file_name)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(&file_name)
+        .to_string();
+
+    let convert_to_webp = meta.convert_to_webp.unwrap_or(true);
+    let save_result = if media_type_str == "image" && convert_to_webp {
+        let processed_data = state.media_storage.process_image(&assembled_data).await;
+        if let Ok(p_data) = processed_data {
+            state.media_storage.save_cas(&p_data, "webp").await
+        } else {
+            state.media_storage.save_cas(&assembled_data, extension).await
+        }
+    } else {
+        state.media_storage.save_cas(&assembled_data, extension).await
+    };
+
+    let (_hash, relative_path) = match save_result {
+        Ok(res) => res,
+        Err(e) => {
+            let msg = state.i18n.t("media.save_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("storage", &format!("Save error: {}", e))),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
+    let upload_source = meta.source.unwrap_or_else(|| "site".to_string());
+    let tags = meta.tags.unwrap_or_default();
+
+    let db_result = sqlx::query_as::<_, MediaItemFromDb>(
+        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source, folder_id, content_hash) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash",
+    )
+    .bind(media_uuid)
+    .bind(media_type_str)
+    .bind(&full_url)
+    .bind(&final_name)
+    .bind(extension)
+    .bind(&meta.title)
+    .bind(&meta.alt)
+    .bind(file_size)
+    .bind(&meta.category)
+    .bind(&tags)
+    .bind(&upload_source)
+    .bind(meta.folder_id)
+    .bind(&_hash)
+    .fetch_one(&state.pool)
+    .await;
+
+    match db_result {
+        Ok(item) => {
+            if media_type_str == "image" {
+                state.media_optimizer.process_image(media_uuid, relative_path.clone()).await;
+            }
+            state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
+                id: media_uuid.to_string(),
+                name: item.name.clone().unwrap_or_else(|| "media".to_string()),
+                path: relative_path,
+                user: None,
+            });
+            let dto = to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url);
+            let msg = state.i18n.t("media.upload_success", &locale).await;
+            into_api_response(StatusCode::CREATED, Some(dto), None, Some(vec![msg]))
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &format!("Database error: {}", e))),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/{uuid}/optimize",
+    tag = "Media",
+    params(
+        ("uuid" = Uuid, Path, description = "Media UUID")
+    ),
+    responses(
+        (status = 200, description = "Media optimized successfully", body = ApiResponse<MediaItemDTO>),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Optimization error")
+    ),
+    operation_id = "optimize_media",
+)]
+pub async fn optimize_one(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Path(uuid): Path<Uuid>,
+) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
+    match state.media_optimizer.reoptimize_by_uuid(uuid).await {
+        Ok(_) => {
+            let row = sqlx::query_as::<_, MediaItemFromDb>(
+                "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
+            )
+            .bind(uuid)
+            .fetch_optional(&state.pool)
+            .await;
+
+            match row {
+                Ok(Some(item)) => {
+                    let msg = state.i18n.t("media.fetch_success", &locale).await;
+                    into_api_response(StatusCode::OK, Some(to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url)), None, Some(vec![msg]))
+                }
+                _ => {
+                    let msg = state.i18n.t("media.not_found", &locale).await;
+                    into_api_response(StatusCode::NOT_FOUND, None, Some(error_map("media", "Not found")), Some(vec![msg]))
+                }
+            }
+        }
+        Err(e) => {
+            let msg = state.i18n.t("media.save_error", &locale).await;
+            into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, Some(error_map("optimize", &format!("Optimization failed: {}", e))), Some(vec![msg]))
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/media/optimize/bulk",
+    tag = "Media",
+    request_body = BulkOptimizeMediaDTO,
+    responses(
+        (status = 200, description = "Media items optimized successfully", body = ApiResponse<Vec<MediaItemDTO>>),
+        (status = 500, description = "Optimization error")
+    ),
+    operation_id = "bulk_optimize_media",
+)]
+pub async fn optimize_bulk(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<BulkOptimizeMediaDTO>,
+) -> Result<Json<ApiResponse<Vec<MediaItemDTO>>>, (StatusCode, Json<ApiResponse<Vec<MediaItemDTO>>>)> {
+    let mut optimized_items = Vec::new();
+    for uuid in payload.uuids {
+        if state.media_optimizer.reoptimize_by_uuid(uuid).await.is_ok() {
+            if let Ok(Some(item)) = sqlx::query_as::<_, MediaItemFromDb>(
+                "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
+            )
+            .bind(uuid)
+            .fetch_optional(&state.pool)
+            .await {
+                optimized_items.push(to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url));
+            }
+        }
+    }
+
+    let msg = state.i18n.t("media.fetch_success", &locale).await;
+    into_api_response(StatusCode::OK, Some(optimized_items), None, Some(vec![msg]))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/media/{uuid}/variants/{size}",
+    tag = "Media",
+    params(
+        ("uuid" = Uuid, Path, description = "Media UUID"),
+        ("size" = String, Path, description = "Variant size: thumbnail, medium, large, original")
+    ),
+    responses(
+        (status = 307, description = "Redirect to variant URL"),
+        (status = 400, description = "Invalid variant size"),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Internal error")
+    ),
+    operation_id = "get_media_variant",
+)]
+pub async fn get_variant(
+    State(state): State<Arc<AppState>>,
+    Path((uuid, size)): Path<(Uuid, String)>,
+) -> Result<axum::response::Redirect, (StatusCode, Json<ApiResponse<()>>)> {
+    let allowed_sizes = ["thumbnail", "medium", "large", "original"];
+    if !allowed_sizes.contains(&size.as_str()) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse {
+                data: None,
+                errors: Some(error_map("size", "Invalid size requested. Must be thumbnail, medium, large, or original")),
+                messages: Some(vec!["Invalid variant size".to_string()]),
+            }),
+        ));
+    }
+
+    let item = sqlx::query_as::<_, MediaItemFromDb>(
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
+    )
+    .bind(uuid)
+    .fetch_optional(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("DB error fetching media for variant: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
+            data: None,
+            errors: Some(error_map("database", "Database error")),
+            messages: None,
+        }))
+    })?;
+
+    let item = match item {
+        Some(i) => i,
+        None => return Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse {
+                data: None,
+                errors: Some(error_map("media", "Media not found")),
+                messages: None,
+            }),
+        )),
+    };
+
+    let variant_file = std::path::Path::new("uploads")
+        .join("variants")
+        .join(uuid.to_string())
+        .join(format!("{}.webp", size));
+
+    if variant_file.exists() {
+        let rel_path = format!("variants/{}/{}.webp", uuid, size);
+        let target_url = if let Some(cdn) = &state.config.cdn_url {
+            format!("{}/uploads/{}", cdn, rel_path)
+        } else {
+            format!("{}/uploads/{}", state.config.public_url, rel_path)
+        };
+        return Ok(axum::response::Redirect::temporary(&target_url));
+    }
+
+    // Lazy generation!
+    if item.media_type == crate::media::dto::MediaType::Image {
+        if state.media_optimizer.reoptimize_by_uuid(uuid).await.is_ok() {
+            let rel_path = format!("variants/{}/{}.webp", uuid, size);
+            let target_url = if let Some(cdn) = &state.config.cdn_url {
+                format!("{}/uploads/{}", cdn, rel_path)
+            } else {
+                format!("{}/uploads/{}", state.config.public_url, rel_path)
+            };
+            return Ok(axum::response::Redirect::temporary(&target_url));
+        }
+    }
+
+    // Fallback: redirect to original URL
+    Ok(axum::response::Redirect::temporary(&item.url))
+}
+
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/upload/chunk/init", post(init_chunk_upload))
+        .route("/upload/chunk/{upload_id}/{chunk_index}", post(upload_chunk).layer(DefaultBodyLimit::disable()))
+        .route("/upload/chunk/{upload_id}/status", get(get_chunk_status))
+        .route("/upload/chunk/{upload_id}/complete", post(complete_chunk_upload))
+        .route("/optimize/bulk", post(optimize_bulk))
+        .route("/folders", get(folders::get_folders))
+        .route("/folders", post(folders::create_folder))
+        .route("/folders/{id}", put(folders::update_folder))
+        .route("/folders/{id}", delete(folders::delete_folder))
+        .route("/batch/move", post(folders::batch_move_media))
+        .route("/tags", get(folders::get_media_tags))
+        .route("/config", get(folders::get_media_config))
+        .route("/{uuid}/optimize", post(optimize_one))
+        .route("/{uuid}/variants/{size}", get(get_variant))
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))

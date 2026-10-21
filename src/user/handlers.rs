@@ -155,14 +155,17 @@ pub async fn create(
         None => UserStatus::Active,
     };
 
+    let first_name_str = payload.first_name.unwrap_or_default();
+    let last_name_str = payload.last_name.unwrap_or_default();
+
     let result = sqlx::query(
         "INSERT INTO guest_user (
             first_name, second_name, last_name, phone, birth_date, password_hash, role, status, email, avatar, avatar_uuid, street, gender, city
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
     )
-    .bind(&payload.first_name.unwrap_or_else(|| "".to_string()))
+    .bind(&first_name_str)
     .bind(&payload.second_name.unwrap_or_else(|| "".to_string()))
-    .bind(&payload.last_name.unwrap_or_else(|| "".to_string()))
+    .bind(&last_name_str)
     .bind(&payload.phone.unwrap_or_else(|| "".to_string()))
     .bind(payload.birth_date)
     .bind(&password_hash)
@@ -179,6 +182,13 @@ pub async fn create(
 
     match result {
         Ok(_) => {
+            let full_name = format!("{} {}", first_name_str, last_name_str).trim().to_string();
+            state.bus.publish(crate::core::bus::SystemEvent::GuestRegistered {
+                id: payload.email.clone(),
+                name: if full_name.is_empty() { payload.email.clone() } else { full_name },
+                email: payload.email.clone(),
+                created_at: chrono::Utc::now().to_rfc3339(),
+            });
             let msg = state.i18n.t("user.created", &locale).await;
             into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
         }

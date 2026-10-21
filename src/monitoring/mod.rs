@@ -12,5 +12,6 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/stats/stream", axum::routing::get(handlers::get_stats_stream))
         .route("/logs", axum::routing::get(handlers::get_logs))
         .route("/modules/{name}/reload", axum::routing::post(handlers::reload_module))
+        .route("/alert", axum::routing::post(handlers::send_system_alert))
         .route("/search", axum::routing::get(handlers::global_search))
 }

@@ -14,9 +14,16 @@ impl StorageService {
         Self { base_path: base_path.into() }
     }
 
-    /// Сохраняет данные по хешу содержимого (CAS)
+    /// Сохраняет данные по хешу содержимого (CAS) с автоматической очисткой чувствительных метаданных
     pub async fn save_cas(&self, data: &[u8], extension: &str) -> Result<(String, String)> {
-        let hash = self.calculate_hash(data);
+        let clean_data = match extension.to_lowercase().as_str() {
+            "jpg" | "jpeg" | "png" | "webp" => {
+                crate::media::sanitizer::extract_and_sanitize(data, extension).data
+            }
+            _ => data.to_vec(),
+        };
+
+        let hash = self.calculate_hash(&clean_data);
         
         // Организация папок: aa/bb/hash
         let dir1 = &hash[0..2];
@@ -29,7 +36,7 @@ impl StorageService {
         let relative_path = format!("{}/{}/{}.{}", dir1, dir2, hash, extension);
 
         if !path.exists() {
-            fs::write(&path, data).await.context("Failed to write CAS file")?;
+            fs::write(&path, &clean_data).await.context("Failed to write CAS file")?;
         }
 
         Ok((hash, relative_path))

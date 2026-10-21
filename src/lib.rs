@@ -12,6 +12,11 @@ pub mod user;
 pub mod platforms;
 pub mod monitoring;
 pub mod analytics;
+pub mod pages;
+pub mod menus;
+pub mod redirects;
+pub mod venues;
+pub mod home;
 
 pub use crate::core::dto::ApiResponse;
 
@@ -63,15 +68,38 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/guests", guests::router())
         .nest("/api/v1/platforms", platforms::handlers::router())
         .nest("/api/v1/features", features::router())
+        .nest("/api/v1/content", content::public_router())
+        .nest("/api/v1/pages", pages::pages_public_router())
+        .nest("/api/v1/block-types", pages::block_types_public_router())
+        .nest("/api/v1/menus", menus::public_router())
+        .nest("/api/v1/redirects", redirects::public_router())
+        .nest("/api/v1/venues", venues::public_router())
+        .nest("/api/v1/home", home::router())
+        .route("/sitemap.xml", axum::routing::get(pages::handlers::get_sitemap_xml))
+        .route("/r/{*path}", axum::routing::get(redirects::handlers::handle_redirect_navigation))
         .nest("/api/v1/analytics", analytics::handlers::public_router())
-        .nest_service("/uploads", ServeDir::new("uploads"));
+        .nest("/api/v1/locks", core::lock::router())
+        .nest(
+            "/uploads",
+            Router::new()
+                .fallback_service(ServeDir::new("uploads"))
+                .layer(tower_http::set_header::SetResponseHeaderLayer::overriding(
+                    axum::http::header::CACHE_CONTROL,
+                    axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),
+                )),
+        );
 
     let protected_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::protected_router())
         .nest("/api/v1/user", user::handlers::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
-        .nest("/api/v1/content", content::router())
+        .nest("/api/v1/content", content::protected_router())
+        .nest("/api/v1/pages", pages::pages_protected_router())
+        .nest("/api/v1/block-types", pages::block_types_protected_router())
+        .nest("/api/v1/menus", menus::protected_router())
+        .nest("/api/v1/redirects", redirects::protected_router())
+        .nest("/api/v1/venues", venues::protected_router())
         .nest("/api/v1/analytics", analytics::handlers::protected_router())
         .layer(middleware::from_fn_with_state(
             state.clone(),

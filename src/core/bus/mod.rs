@@ -8,6 +8,11 @@ pub enum SystemEvent {
     ContentUpdated { id: String, schema: String },
     ContentLocked { id: String, user_id: String },
     ConfigChanged { key: String },
+    GuestRegistered { id: String, name: String, email: String, created_at: String },
+    MediaUploaded { id: String, name: String, path: String, user: Option<String> },
+    EntityLocked { entity_type: String, entity_id: String, user_id: String, user_name: String },
+    EntityUnlocked { entity_type: String, entity_id: String },
+    SystemAlert { level: String, title: String, message: String, timestamp: String },
 }
 
 #[derive(Debug)]

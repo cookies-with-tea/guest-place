@@ -20,7 +20,14 @@ struct ApiDoc;
 async fn setup_test_app() -> axum::Router {
     dotenv().ok();
     
-    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://admin:admin@localhost:5432/admin".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        let user = std::env::var("POSTGRES_USER").unwrap_or_else(|_| "guest-place".to_string());
+        let pass = std::env::var("POSTGRES_PASSWORD").unwrap_or_else(|_| "guest-place".to_string());
+        let host = std::env::var("POSTGRES_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+        let port = std::env::var("POSTGRES_PORT").unwrap_or_else(|_| "5432".to_string());
+        let db = std::env::var("POSTGRES_DB").unwrap_or_else(|_| "guest-place".to_string());
+        format!("postgres://{}:{}@{}:{}/{}", user, pass, host, port, db)
+    });
     
     // Use a real pool if possible, otherwise lazy
     let pool = PgPoolOptions::new()
@@ -36,6 +43,14 @@ async fn setup_test_app() -> axum::Router {
     let mut config = AppConfig::new();
     config.public_url = "http://localhost:8000".to_string();
 
+    let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(100));
+    let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
+        pool.clone(),
+        bus.clone(),
+        "uploads_test".to_string(),
+        "http://localhost:8000".to_string(),
+    ));
+
     let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let state = Arc::new(AppState {
         pool: pool.clone(),
@@ -43,8 +58,9 @@ async fn setup_test_app() -> axum::Router {
         i18n: I18nService::new(pool.clone()),
         media_storage: Arc::new(StorageService::new("uploads_test")),
         redis: redis_service.clone(),
-        features: Arc::new(FeatureFlagService::new(redis_service.clone())),
+        features: Arc::new(FeatureFlagService::new(pool.clone(), redis_service.clone())),
         media_quota: Arc::new(QuotaService::new(pool.clone(), 1024)), // Small quota for testing
+        media_optimizer,
         frontend_url: "http://localhost:3000".to_string(),
         smtp_host: "localhost".to_string(),
         smtp_port: 587,
@@ -52,6 +68,7 @@ async fn setup_test_app() -> axum::Router {
         smtp_password: "test".to_string(),
         smtp_from: "test@example.com".to_string(),
         log_tx,
+        bus,
     });
 
     create_router(state, ApiDoc::openapi(), CorsLayer::permissive())

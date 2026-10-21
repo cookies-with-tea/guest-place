@@ -33,11 +33,25 @@ use utoipa::{
     guest_place::user::handlers::update_me,
     guest_place::user::handlers::change_password,
     guest_place::media::handlers::create,
+    guest_place::media::handlers::init_chunk_upload,
+    guest_place::media::handlers::upload_chunk,
+    guest_place::media::handlers::get_chunk_status,
+    guest_place::media::handlers::complete_chunk_upload,
+    guest_place::media::handlers::optimize_one,
+    guest_place::media::handlers::optimize_bulk,
     guest_place::media::handlers::get_all,
     guest_place::media::handlers::get_one,
     guest_place::media::handlers::update,
     guest_place::media::handlers::delete_one,
     guest_place::media::handlers::delete_all,
+    guest_place::media::handlers::get_variant,
+    guest_place::media::folders::get_folders,
+    guest_place::media::folders::create_folder,
+    guest_place::media::folders::update_folder,
+    guest_place::media::folders::delete_folder,
+    guest_place::media::folders::batch_move_media,
+    guest_place::media::folders::get_media_tags,
+    guest_place::media::folders::get_media_config,
     guest_place::i18n::handlers::create_or_update,
     guest_place::i18n::handlers::get_all,
     guest_place::i18n::handlers::delete_one,
@@ -79,10 +93,43 @@ use utoipa::{
     guest_place::analytics::handlers::get_referral_stats,
     guest_place::analytics::handlers::get_funnel_stats,
     guest_place::analytics::handlers::get_retention_stats,
+    guest_place::monitoring::handlers::send_system_alert,
+    guest_place::core::lock::get_lock_status,
+    guest_place::core::lock::acquire_lock,
+    guest_place::core::lock::release_lock,
+    guest_place::pages::handlers::get_pages,
+    guest_place::pages::handlers::get_page,
+    guest_place::pages::handlers::create_page,
+    guest_place::pages::handlers::update_page,
+    guest_place::pages::handlers::delete_page,
+    guest_place::pages::handlers::get_page_breadcrumbs,
+    guest_place::pages::handlers::get_block_types,
+    guest_place::pages::handlers::create_block_type,
+    guest_place::pages::handlers::update_block_type,
+    guest_place::pages::handlers::delete_block_type,
+    guest_place::pages::handlers::sync_block_types,
+    guest_place::menus::handlers::get_menus,
+    guest_place::menus::handlers::get_menu_by_location,
+    guest_place::menus::handlers::create_menu,
+    guest_place::menus::handlers::update_menu,
+    guest_place::menus::handlers::delete_menu,
+    guest_place::redirects::handlers::get_redirects,
+    guest_place::redirects::handlers::check_redirect,
+    guest_place::redirects::handlers::create_redirect,
+    guest_place::redirects::handlers::update_redirect,
+    guest_place::redirects::handlers::delete_redirect,
+    guest_place::venues::handlers::get_venues,
+    guest_place::venues::handlers::get_venue_by_id_or_slug,
+    guest_place::venues::handlers::create_venue,
+    guest_place::venues::handlers::update_venue,
+    guest_place::venues::handlers::delete_venue,
+    guest_place::home::handlers::get_home,
+    guest_place::home::handlers::update_home,
   ),
   modifiers(&SecurityAddon),
   tags(
         (name = "Auth", description = "Auth"),
+        (name = "Home", description = "Home page information and management"),
         (name = "About", description = "About platform information"),
         (name = "Media", description = "Media"),
         (name = "User", description = "User"),
@@ -90,12 +137,31 @@ use utoipa::{
         (name = "MFE", description = "Microfrontends management"),
         (name = "Features", description = "Feature Flags management"),
         (name = "Content", description = "Dynamic Content Management"),
+        (name = "Pages", description = "Page constructor and block types management"),
+        (name = "Menus", description = "Site Navigation Menus management"),
+        (name = "Redirects", description = "URL Redirects (301/302) management"),
         (name = "Platforms", description = "Platforms information"),
         (name = "System", description = "System monitoring and orchestration"),
         (name = "Analytics", description = "Website behavior analytics"),
   ),
   components(
     schemas(
+        guest_place::pages::model::Page,
+        guest_place::pages::model::CreatePageDTO,
+        guest_place::pages::model::UpdatePageDTO,
+        guest_place::pages::model::BreadcrumbItem,
+        guest_place::pages::model::BlockType,
+        guest_place::pages::model::CreateBlockTypeDTO,
+        guest_place::pages::model::UpdateBlockTypeDTO,
+        guest_place::pages::model::SyncBlockTypeItem,
+        guest_place::pages::model::SyncBlockTypesDTO,
+        guest_place::menus::model::Menu,
+        guest_place::menus::model::CreateMenuDTO,
+        guest_place::menus::model::UpdateMenuDTO,
+        guest_place::redirects::model::Redirect,
+        guest_place::redirects::model::CreateRedirectDTO,
+        guest_place::redirects::model::UpdateRedirectDTO,
+        guest_place::redirects::model::CheckRedirectResponse,
         guest_place::auth::dto::AuthRequestDTO,
         guest_place::auth::dto::RegisterRequestDTO,
         guest_place::auth::dto::AuthResponseDTO,
@@ -113,9 +179,22 @@ use utoipa::{
         guest_place::content::model::UpdateContentEntryDTO,
         guest_place::content::model::EntryFilterQuery,
         guest_place::media::dto::MediaItemDTO,
+        guest_place::media::dto::MediaVariantDTO,
+        guest_place::media::dto::MediaVariantsDTO,
+        guest_place::media::dto::BulkOptimizeMediaDTO,
         guest_place::media::dto::UpdateMediaDTO,
         guest_place::media::dto::MediaType,
         guest_place::media::dto::MediaFilterQuery,
+        guest_place::media::dto::MediaFolderDTO,
+        guest_place::media::dto::CreateFolderDTO,
+        guest_place::media::dto::UpdateFolderDTO,
+        guest_place::media::dto::BatchMoveMediaDTO,
+        guest_place::media::dto::MediaTagCountDTO,
+        guest_place::media::dto::MediaConfigDTO,
+        guest_place::media::chunk::InitChunkUploadDTO,
+        guest_place::media::chunk::InitChunkUploadResponse,
+        guest_place::media::chunk::ChunkStatusResponse,
+        guest_place::media::chunk::ChunkUploadResultDTO,
         guest_place::i18n::dto::LanguageDTO,
         guest_place::i18n::dto::TranslationDTO,
         guest_place::i18n::dto::CreateTranslationDTO,
@@ -140,6 +219,14 @@ use utoipa::{
         guest_place::analytics::dto::CohortRowDto,
         guest_place::analytics::dto::ReferralDto,
         guest_place::analytics::dto::AnalyticsSummaryDto,
+        guest_place::monitoring::handlers::SendAlertDTO,
+        guest_place::core::lock::LockInfo,
+        guest_place::core::lock::LockStatusResponse,
+        guest_place::core::lock::AcquireLockRequest,
+        guest_place::home::dto::HomeResponseDTO,
+        guest_place::home::dto::HomeCategoryDTO,
+        guest_place::home::dto::HomeInteractionItemDTO,
+        guest_place::home::dto::UpdateHomeDTO,
     )
   )
 )]
@@ -177,7 +264,10 @@ async fn main() {
         return;
     }
 
-    dotenv::dotenv().ok();
+    match dotenv::dotenv() {
+        Ok(path) => println!("[dotenv] Loaded env from: {:?}", path),
+        Err(e) => eprintln!("[dotenv] Error loading .env: {:?}", e),
+    }
 
     let (log_tx, _) = tokio::sync::broadcast::channel(100);
     let log_layer = guest_place::monitoring::service::LogBroadcastLayer { tx: log_tx.clone() };
@@ -200,20 +290,23 @@ async fn main() {
         .expect("Invalid SMTP_PORT");
     let smtp_username = std::env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
     let smtp_password = std::env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
-    let smtp_from = std::env::var("SMTP_FROM").expect("SMTP_FROM must be set");
+    let smtp_from = std::env::var("SMTP_FROM")
+        .or_else(|_| std::env::var("MAIL_FROM"))
+        .expect("SMTP_FROM or MAIL_FROM must be set");
 
     let i18n = I18nService::new(pool.clone());
     let media_storage = Arc::new(StorageService::new("uploads"));
 
     let redis_pool = create_redis_pool(&config);
     let redis = Arc::new(RedisService::new(redis_pool));
-    let features = Arc::new(FeatureFlagService::new(redis.clone()));
+    let features = Arc::new(FeatureFlagService::new(pool.clone(), redis.clone()));
     let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
     let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(1024));
     let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
         pool.clone(),
         bus.clone(),
         "uploads".to_string(),
+        config.public_url.clone(),
     ));
 
     let mut plugin_manager = guest_place::core::plugin::PluginManager::new();
@@ -261,6 +354,7 @@ async fn main() {
                 axum::http::Method::GET,
                 axum::http::Method::POST,
                 axum::http::Method::PUT,
+                axum::http::Method::PATCH,
                 axum::http::Method::DELETE,
                 axum::http::Method::OPTIONS,
             ]))
