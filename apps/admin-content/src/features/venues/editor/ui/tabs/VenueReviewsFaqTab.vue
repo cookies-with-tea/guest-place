@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard icon="💬" title="Отзывы гостей площадки" description="Реальные отзывы гостей с оценкой и аватаром">
+	<UiGlassCard icon="💬" title="Отзывы гостей площадки" description="Реальные отзывы гостей с оценкой и аватаром">
 		<template #actions>
 			<el-button size="small" type="primary" :icon="Plus" @click="venueForm.addReview">Добавить отзыв</el-button>
 		</template>
@@ -20,9 +20,9 @@
 			</div>
 		</div>
 		<div v-if="!venueForm.formReviews.length" class="empty-list-notice">Нет отзывов. Нажмите «Добавить отзыв».</div>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="❓"
 		title="Вопросы и ответы (FAQ)"
 		description="Часто задаваемые вопросы по бронированию и сервису"
@@ -46,13 +46,13 @@
 			</div>
 		</div>
 		<div v-if="!venueForm.formFaq.length" class="empty-list-notice">FAQ пуст. Нажмите «Добавить вопрос».</div>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

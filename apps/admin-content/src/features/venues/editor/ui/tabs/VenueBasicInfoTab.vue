@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard
+	<UiGlassCard
 		icon="🏷️"
 		title="Основная информация"
 		description="Название площадки, URL-идентификатор (слаг) и краткое позиционирование"
@@ -39,9 +39,9 @@
 				/>
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="📍"
 		title="Локация и транспортная доступность"
 		description="Фактический адрес, метро и пешие ориентиры для гостей"
@@ -142,9 +142,9 @@
 				</div>
 			</div>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="📞"
 		title="Контакты и статус публикации"
 		description="Телефон менеджера и видимость площадки в каталоге"
@@ -168,9 +168,9 @@
 				</el-col>
 			</el-row>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard icon="⏰" title="Режим работы" description="Часы приёма гостей в будни и выходные дни">
+	<UiGlassCard icon="⏰" title="Режим работы" description="Часы приёма гостей в будни и выходные дни">
 		<el-form label-position="top">
 			<el-row :gutter="16">
 				<el-col :span="12">
@@ -193,13 +193,9 @@
 				</el-col>
 			</el-row>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
-		icon="⭐"
-		title="Рейтинг и репутация"
-		description="Отображаемая оценка в каталоге и количество отзывов"
-	>
+	<UiGlassCard icon="⭐" title="Рейтинг и репутация" description="Отображаемая оценка в каталоге и количество отзывов">
 		<el-form label-position="top">
 			<el-row :gutter="16">
 				<el-col :span="12">
@@ -237,12 +233,12 @@
 				</el-col>
 			</el-row>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

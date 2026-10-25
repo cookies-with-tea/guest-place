@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard icon="🎯" title="Классификация и теги" description="Фильтры каталога, типы заведений и особенности">
+	<UiGlassCard icon="🎯" title="Классификация и теги" description="Фильтры каталога, типы заведений и особенности">
 		<el-form label-position="top">
 			<el-form-item label="Типы площадки (через запятую)">
 				<el-input
@@ -21,9 +21,9 @@
 				<el-input v-model="venueForm.cuisinesString" placeholder="Европейская, Русская, Авторская" @input="onChange" />
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="⚙️"
 		title="Оснащение, сервис и парковка"
 		description="Техническое оборудование и сопутствующие услуги"
@@ -49,12 +49,12 @@
 				<el-input v-model="venueForm.form.parking" placeholder="на 5 А/М, охраняемая" @input="onChange" />
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

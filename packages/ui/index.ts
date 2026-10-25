@@ -4,6 +4,7 @@ import ContentFormGenerator from './src/components/content'
 import UiAuthGuard from './src/components/ui-auth-guard'
 import UiButton from './src/components/ui-button'
 import UiErrorBoundary from './src/components/ui-error-boundary/ui/UiErrorBoundary.vue'
+import UiGlassCard from './src/components/ui-glass-card'
 import UiIcon from './src/components/ui-icon'
 import UiInput from './src/components/ui-input'
 import UiMediaPicker from './src/components/ui-media-picker'
@@ -34,6 +35,7 @@ export {
 	UiButton,
 	UiErrorBoundary,
 	UiFloatingSettings,
+	UiGlassCard,
 	UiIcon,
 	UiInput,
 	UiLanguageSwitcher,

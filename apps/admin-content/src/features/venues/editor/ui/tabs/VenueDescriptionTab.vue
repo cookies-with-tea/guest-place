@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard
+	<UiGlassCard
 		icon="📝"
 		title="Подробное описание площадки"
 		description="Основной текст о заведении для карточки и поисковых систем"
@@ -15,12 +15,12 @@
 				/>
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

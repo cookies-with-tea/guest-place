@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard icon="🖼️" title="Фотогалерея и 3D-тур" description="Ссылки на изображения и видео-тур площадки">
+	<UiGlassCard icon="🖼️" title="Фотогалерея и 3D-тур" description="Ссылки на изображения и видео-тур площадки">
 		<el-form label-position="top">
 			<el-form-item label="Фотографии площадки (URL по одному на строке)">
 				<el-input
@@ -25,12 +25,12 @@
 				>
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

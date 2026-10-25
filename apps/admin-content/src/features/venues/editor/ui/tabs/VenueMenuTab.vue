@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard
+	<UiGlassCard
 		icon="🍽️"
 		title="Фотогалерея блюд и банкетов"
 		description="Фотографии авторских блюд для вкладки «Меню» на лендинге"
@@ -27,13 +27,13 @@
 		<div v-if="!venueForm.formMenuPhotos.length" class="empty-list-notice">
 			В меню пока нет фотографий. Введите URL выше или нажмите «✨ Демо-блюда».
 		</div>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

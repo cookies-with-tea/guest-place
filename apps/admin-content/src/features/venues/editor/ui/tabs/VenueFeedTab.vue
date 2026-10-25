@@ -1,9 +1,5 @@
 <template>
-	<VenueEditorCard
-		icon="📰"
-		title="Публикации и новости площадки"
-		description="Посты для интерактивной вкладки «Лента»"
-	>
+	<UiGlassCard icon="📰" title="Публикации и новости площадки" description="Посты для интерактивной вкладки «Лента»">
 		<template #actions>
 			<el-button size="small" type="primary" :icon="Plus" @click="venueForm.addFeedItem">Добавить публикацию</el-button>
 		</template>
@@ -56,13 +52,13 @@
 		<div v-if="!venueForm.formFeed.length" class="empty-list-notice"
 			>Лента новостей пуста. Нажмите «Добавить публикацию».</div
 		>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

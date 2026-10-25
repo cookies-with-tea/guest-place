@@ -1,5 +1,5 @@
 <template>
-	<VenueEditorCard
+	<UiGlassCard
 		icon="💰"
 		title="Основные тарифы площадки"
 		description="Средний чек, банкетное меню и стоимость аренды в час"
@@ -41,9 +41,9 @@
 				</el-col>
 			</el-row>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="🏦"
 		title="Депозиты закрытия залов"
 		description="Минимальная стоимость закрытия площадки под мероприятие"
@@ -102,9 +102,9 @@
 				</el-col>
 			</el-row>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 
-	<VenueEditorCard
+	<UiGlassCard
 		icon="📄"
 		title="Документы и файлы меню"
 		description="Ссылки на PDF меню, технический райдер и особые примечания"
@@ -137,12 +137,12 @@
 				/>
 			</el-form-item>
 		</el-form>
-	</VenueEditorCard>
+	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
+import { UiGlassCard } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
-import VenueEditorCard from '../VenueEditorCard.vue'
 
 defineProps<{
 	venueForm: VenueForm

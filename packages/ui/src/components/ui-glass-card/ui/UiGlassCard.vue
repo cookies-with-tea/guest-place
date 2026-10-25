@@ -1,5 +1,5 @@
 <template>
-	<div class="editor-glass-card">
+	<div class="ui-glass-card">
 		<div class="card-head">
 			<div class="card-head__icon">{{ icon }}</div>
 			<div class="card-head__text">
@@ -13,15 +13,17 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+interface Props {
 	icon: string
 	title: string
 	description?: string
-}>()
+}
+
+defineProps<Props>()
 </script>
 
 <style scoped lang="scss">
-.editor-glass-card {
+.ui-glass-card {
 	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.08));
 	border-radius: 12px;
 	background: var(--gp-bg-card, var(--gp-bg-surface, rgb(30, 41, 59, 0.5)));
