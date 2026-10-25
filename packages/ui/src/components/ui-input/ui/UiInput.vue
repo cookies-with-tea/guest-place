@@ -2,6 +2,7 @@
 	<div class="ui-input">
 		<input
 			:class="['ui-input__control', `ui-input__control--${size}`]"
+			:disabled="disabled"
 			:placeholder="placeholder"
 			:type="type"
 			:value="modelValue"
@@ -16,6 +17,7 @@ interface IProps {
 	placeholder?: string
 	type?: 'text' | 'password' | 'email'
 	size?: 'm' | 'l'
+	disabled?: boolean
 }
 
 withDefaults(defineProps<IProps>(), {
@@ -23,6 +25,7 @@ withDefaults(defineProps<IProps>(), {
 	placeholder: '',
 	type: 'text',
 	size: 'l',
+	disabled: false,
 })
 
 const emit = defineEmits<{
@@ -77,6 +80,11 @@ function onInput(event: Event) {
 		&::placeholder {
 			opacity: 0.7;
 		}
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 }
 
