@@ -108,18 +108,17 @@ export function useUnifiedPageList(pagesAndSchemas: PagesAndSchemas) {
 
 	const totalItemsCount = computed(() => pagesAndSchemas.pages.length + schemaPages.value.length)
 
+	const filteredBlockItems = computed(() => {
+		if (statusFilter.value === 'all') return blockItems.value
+		return blockItems.value.filter((b) => (b.status || 'draft') === statusFilter.value)
+	})
+
 	const displayItems = computed(() => {
 		if (typeFilter.value === 'schemas') return schemaPages.value
-
-		let filteredBlocks = blockItems.value
-		if (statusFilter.value !== 'all') {
-			filteredBlocks = filteredBlocks.filter((b) => (b.status || 'draft') === statusFilter.value)
-		}
-
-		if (typeFilter.value === 'blocks') return filteredBlocks
+		if (typeFilter.value === 'blocks') return filteredBlockItems.value
 
 		// 'all' shows both blocks and schemas
-		return [...schemaPages.value, ...filteredBlocks]
+		return [...schemaPages.value, ...filteredBlockItems.value]
 	})
 
 	function getStatusShort(st: string): string {
@@ -147,6 +146,7 @@ export function useUnifiedPageList(pagesAndSchemas: PagesAndSchemas) {
 		statusFilter,
 		schemaPages,
 		blockItems,
+		filteredBlockItems,
 		totalItemsCount,
 		displayItems,
 		getStatusShort,

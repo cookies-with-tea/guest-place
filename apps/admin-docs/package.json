@@ -22,7 +22,7 @@
 		"npm-run-all2": "^8.0.4",
 		"serve": "^14.2.5",
 		"storybook": "9.1.15",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
 	},

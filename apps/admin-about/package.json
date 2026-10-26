@@ -16,7 +16,7 @@
 		"@admin-panel/typescript-config": "workspace:*",
 		"npm-run-all2": "^8.0.4",
 		"ts-node": "10.9.2",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7"
 	},
 	"private": true,

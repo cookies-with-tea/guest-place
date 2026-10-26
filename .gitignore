@@ -23,4 +23,5 @@ public/dist
 .prettiercache
 playwright-report
 test-results
-*.tsbuildinfo
+*.tsbuildinfo
+stats.html

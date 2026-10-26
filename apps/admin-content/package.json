@@ -26,7 +26,7 @@
 		"@admin-panel/typescript-config": "workspace:*",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"npm-run-all2": "^8.0.4",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7"
 	},
 	"private": true,

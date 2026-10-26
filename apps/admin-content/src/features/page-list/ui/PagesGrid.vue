@@ -11,6 +11,38 @@
 		</div>
 	</div>
 
+	<div v-else-if="list.typeFilter === 'all'" class="pages-sections">
+		<section v-if="list.schemaPages.length > 0" class="pages-section">
+			<h3 class="pages-section__title">📋 Схемные страницы</h3>
+			<div class="pages-grid">
+				<PageListCard
+					v-for="item in list.schemaPages"
+					:key="item.key"
+					:item="item"
+					:list="list"
+					:pages-and-schemas="pagesAndSchemas"
+					:actions="actions"
+					@card-click="actions.handleCardClick"
+				/>
+			</div>
+		</section>
+
+		<section v-if="list.filteredBlockItems.length > 0" class="pages-section">
+			<h3 class="pages-section__title">📦 Блочные страницы</h3>
+			<div class="pages-grid">
+				<PageListCard
+					v-for="item in list.filteredBlockItems"
+					:key="item.key"
+					:item="item"
+					:list="list"
+					:pages-and-schemas="pagesAndSchemas"
+					:actions="actions"
+					@card-click="actions.handleCardClick"
+				/>
+			</div>
+		</section>
+	</div>
+
 	<div v-else class="pages-grid">
 		<PageListCard
 			v-for="item in list.displayItems"
@@ -38,6 +70,19 @@ defineProps<{
 </script>
 
 <style scoped>
+.pages-sections {
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+}
+
+.pages-section__title {
+	font-weight: 600;
+	font-size: 14px;
+	color: var(--text-primary);
+	margin: 0 0 16px;
+}
+
 .pages-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));

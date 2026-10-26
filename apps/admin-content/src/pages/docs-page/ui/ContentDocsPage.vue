@@ -23,6 +23,84 @@
 		<!-- Main Content Tabs -->
 		<div class="docs-body">
 			<el-tabs v-model="activeTab" class="docs-tabs glass-card">
+				<!-- TAB 0: ТРИ МОДЕЛИ КОНТЕНТА -->
+				<el-tab-pane label="0. Три модели контента (Обзор)" name="overview">
+					<div class="tab-content">
+						<div class="section-intro">
+							<h2>Почему в проекте одновременно три разные модели контента</h2>
+							<p>
+								На сайте есть три параллельные, независимые друг от друга системы хранения и редактирования контента. Ни
+								одна из них не заменяет другую — у каждой свой сценарий использования. Этот обзор объясняет границу
+								между ними, прежде чем переходить к деталям Schema Builder на следующих вкладках.
+							</p>
+						</div>
+
+						<div class="comparison-cards">
+							<div class="split-card glass-panel">
+								<div class="split-badge">PAGECONSTRUCTOR</div>
+								<h3>Блочные страницы</h3>
+								<p class="split-desc">
+									Визуальный конструктор страниц из палитры переиспользуемых блоков (Hero, Features, CTA, Quotes...).
+									Данные — <code>PageItem</code> с массивом <code>blocks[]</code>, типы блоков приходят из
+									<code>pagesApi.getBlockTypes()</code>. Роуты вида <code>/p/*</code>.
+								</p>
+								<ul class="styled-list mt-3">
+									<li>Когда использовать: когда странице нужна гибкая, собираемая на лету композиция блоков.</li>
+									<li>Не связан со схемами Schema Builder — отдельная таблица и отдельный редактор.</li>
+								</ul>
+							</div>
+
+							<div class="split-card glass-panel">
+								<div class="split-badge split-badge--live">SCHEMA BUILDER</div>
+								<h3>Схемные страницы (Schema / Entry)</h3>
+								<p class="split-desc">
+									Контент описывается декларативной схемой полей (<code>ContentSchema</code>) и хранится в
+									<code>ContentEntry</code> (<code>schema_id, slug, data, status</code>). Рендерится универсальным
+									<code>ContentFormGenerator</code>/<code>ContentEditor</code>, независимо от конкретной схемы.
+									<code>is_singleton: true</code> — страница-одиночка (например, «О платформе», «Глобальные настройки»),
+									<code>false</code> — коллекция с произвольным числом записей.
+								</p>
+								<ul class="styled-list mt-3">
+									<li
+										>Когда использовать: когда у сущности простой, предсказуемый набор полей без сложной
+										бизнес-логики.</li
+									>
+									<li>Подробности модели Schema/Entry — на вкладке «1. Схемы данных» ниже.</li>
+								</ul>
+							</div>
+
+							<div class="split-card glass-panel">
+								<div class="split-badge split-badge--entity">ЖЁСТКИЕ MFE</div>
+								<h3>Сущности с собственной бизнес-логикой</h3>
+								<p class="split-desc">
+									Venues, Menus, Media, Guests, Platforms, About, Redirects — каждая это отдельное
+									микрофронтенд-приложение со своей Rust/TS-моделью, фиксированным набором полей и собственной
+									CRUD-вёрсткой. Схемами тут не пахнет: поля захардкожены в коде обеих сторон (сервер + клиент).
+								</p>
+								<ul class="styled-list mt-3">
+									<li>
+										Когда использовать: когда у сущности есть нетривиальная бизнес-логика (например, ценообразование и
+										бронирования у Venues, статусы заявок у Guests), которую неудобно или рискованно выражать через
+										generic-схему.
+									</li>
+									<li>Каждая такая сущность — это осознанный компромисс: больше кода, но предсказуемое поведение.</li>
+								</ul>
+							</div>
+						</div>
+
+						<div class="info-card glass-panel mt-4">
+							<div class="card-icon">⚠️</div>
+							<h3>Частый источник путаницы</h3>
+							<p>
+								Список страниц (<code>/content</code>) показывает блочные и схемные страницы в одной витрине —
+								различаются только подписанными секциями/значком на карточке. Это две независимые системы хранения, а не
+								одна. Страница «Глобальные настройки» (<code>/settings</code>) — это просто схема Schema Builder с
+								зарезервированным slug'ом <code>global-settings</code>, а не отдельный системный механизм.
+							</p>
+						</div>
+					</div>
+				</el-tab-pane>
+
 				<!-- TAB 1: СХЕМЫ ДАННЫХ -->
 				<el-tab-pane label="1. Схемы данных (Schemas)" name="schemas">
 					<div class="tab-content">
@@ -318,7 +396,7 @@ import { useRouter } from 'vue-router'
 import { Back, Plus } from '@element-plus/icons-vue'
 
 const router = useRouter()
-const activeTab = ref('schemas')
+const activeTab = ref('overview')
 
 const goBack = () => {
 	router.push('/content')
@@ -331,19 +409,19 @@ const goToCreateSchema = () => {
 
 <style scoped lang="scss">
 .content-docs-page {
-	padding: 0;
 	color: var(--gp-text-main, #fff);
+	padding: 0;
 }
 
 .docs-header {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: flex-start;
 	justify-content: space-between;
-	padding: 24px;
 	border-radius: 14px;
+	padding: 24px;
 	margin-bottom: 24px;
 	gap: 16px;
-	flex-wrap: wrap;
 
 	&__left {
 		display: flex;
@@ -356,10 +434,10 @@ const goToCreateSchema = () => {
 		flex-direction: column;
 
 		h1 {
-			font-size: 1.6rem;
 			font-weight: 700;
-			margin: 8px 0 4px;
+			font-size: 1.6rem;
 			letter-spacing: -0.3px;
+			margin: 8px 0 4px;
 		}
 
 		.docs-subtitle {
@@ -380,8 +458,8 @@ const goToCreateSchema = () => {
 }
 
 .docs-tabs {
-	padding: 20px 24px;
 	border-radius: 14px;
+	padding: 20px 24px;
 }
 
 .tab-content {
@@ -392,8 +470,8 @@ const goToCreateSchema = () => {
 	margin-bottom: 24px;
 
 	h2 {
-		font-size: 1.35rem;
 		font-weight: 600;
+		font-size: 1.35rem;
 		margin: 0 0 8px;
 	}
 
@@ -412,10 +490,10 @@ const goToCreateSchema = () => {
 }
 
 .info-card {
-	padding: 20px;
+	border: 1px solid rgb(255, 255, 255, 0.08);
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(255, 255, 255, 0.02);
+	background: rgb(255, 255, 255, 0.02);
+	padding: 20px;
 
 	.card-icon {
 		font-size: 28px;
@@ -423,68 +501,68 @@ const goToCreateSchema = () => {
 	}
 
 	h3 {
-		font-size: 1.1rem;
 		font-weight: 600;
+		font-size: 1.1rem;
 		margin: 0 0 10px;
 	}
 
 	p {
 		font-size: 0.88rem;
-		color: var(--gp-text-secondary, #a0aec0);
 		line-height: 1.5;
+		color: var(--gp-text-secondary, #a0aec0);
 	}
 }
 
 .styled-list {
-	margin: 12px 0 0;
-	padding-left: 20px;
-	color: var(--gp-text-secondary, #a0aec0);
 	font-size: 0.85rem;
 	line-height: 1.6;
+	color: var(--gp-text-secondary, #a0aec0);
+	padding-left: 20px;
+	margin: 12px 0 0;
 
 	li {
 		margin-bottom: 6px;
 	}
 
 	code {
-		color: var(--gp-primary, #42b883);
-		background: rgba(66, 184, 131, 0.1);
-		padding: 2px 6px;
 		border-radius: 4px;
 		font-family: monospace;
+		color: var(--gp-primary, #42b883);
+		background: rgb(66, 184, 131, 0.1);
+		padding: 2px 6px;
 	}
 }
 
 .field-types-chips {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
 	margin-top: 10px;
+	gap: 6px;
 }
 
 .code-block-card {
-	padding: 20px;
+	border: 1px solid rgb(255, 255, 255, 0.08);
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(0, 0, 0, 0.3);
+	background: rgb(0, 0, 0, 0.3);
+	padding: 20px;
 
 	.code-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 12px;
 		font-weight: 500;
 		font-size: 0.85rem;
 		color: var(--gp-text-secondary, #a0aec0);
+		margin-bottom: 12px;
 	}
 
 	.code-content {
-		margin: 0;
-		background: transparent;
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 0.8rem;
-		color: #e2e8f0;
 		line-height: 1.5;
+		color: #e2e8f0;
+		background: transparent;
+		margin: 0;
 		overflow-x: auto;
 	}
 }
@@ -498,33 +576,38 @@ const goToCreateSchema = () => {
 
 .split-card {
 	position: relative;
-	padding: 24px;
+	border: 1px solid rgb(255, 255, 255, 0.08);
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(255, 255, 255, 0.02);
+	background: rgb(255, 255, 255, 0.02);
+	padding: 24px;
 
 	.split-badge {
-		position: absolute;
 		top: 16px;
 		right: 16px;
-		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 3px 8px;
+		position: absolute;
 		border-radius: 6px;
-		background: rgba(100, 108, 255, 0.2);
+		font-weight: 700;
+		font-size: 0.7rem;
 		color: #646cff;
+		background: rgb(100, 108, 255, 0.2);
+		padding: 3px 8px;
 
 		&--live {
-			background: rgba(66, 184, 131, 0.2);
 			color: var(--gp-primary, #42b883);
+			background: rgb(66, 184, 131, 0.2);
+		}
+
+		&--entity {
+			color: #ec4899;
+			background: rgb(236, 72, 153, 0.2);
 		}
 	}
 
 	h3 {
-		font-size: 1.15rem;
 		font-weight: 600;
-		margin: 0 0 8px;
+		font-size: 1.15rem;
 		padding-right: 70px;
+		margin: 0 0 8px;
 	}
 
 	.split-desc {
@@ -539,22 +622,22 @@ const goToCreateSchema = () => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12px;
 	border-radius: 8px;
-	background: rgba(0, 0, 0, 0.25);
+	background: rgb(0, 0, 0, 0.25);
+	padding: 12px;
 	margin-bottom: 16px;
 	gap: 8px;
 
 	.col-visual {
-		flex: 1;
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		align-items: center;
-		text-align: center;
-		padding: 8px;
+		border: 1px dashed rgb(255, 255, 255, 0.15);
 		border-radius: 6px;
-		border: 1px dashed rgba(255, 255, 255, 0.15);
-		background: rgba(255, 255, 255, 0.02);
+		text-align: center;
+		background: rgb(255, 255, 255, 0.02);
+		padding: 8px;
 
 		strong {
 			font-size: 0.75rem;
@@ -576,68 +659,68 @@ const goToCreateSchema = () => {
 
 /* Protocol Timeline */
 .protocol-timeline {
-	padding: 24px;
+	border: 1px solid rgb(255, 255, 255, 0.08);
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(0, 0, 0, 0.2);
+	background: rgb(0, 0, 0, 0.2);
+	padding: 24px;
 
 	h3 {
-		font-size: 1.15rem;
 		font-weight: 600;
+		font-size: 1.15rem;
 		margin: 0 0 20px;
 	}
 }
 
 .protocol-step {
-	display: flex;
-	gap: 16px;
-	margin-bottom: 20px;
 	position: relative;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
+	display: flex;
+	margin-bottom: 20px;
+	gap: 16px;
 
 	.step-num {
 		width: 32px;
 		height: 32px;
-		border-radius: 50%;
-		background: var(--gp-primary, #42b883);
-		color: #000;
-		font-weight: 700;
 		display: flex;
+		flex-shrink: 0;
 		align-items: center;
 		justify-content: center;
-		flex-shrink: 0;
+		border-radius: 50%;
+		font-weight: 700;
+		color: #000;
+		background: var(--gp-primary, #42b883);
 	}
 
 	.step-body {
 		flex: 1;
 
 		h4 {
-			font-size: 0.95rem;
 			font-weight: 600;
-			margin: 0 0 6px;
+			font-size: 0.95rem;
 			color: var(--gp-text-main, #fff);
+			margin: 0 0 6px;
 		}
 
 		p {
 			font-size: 0.85rem;
+			line-height: 1.5;
 			color: var(--gp-text-secondary, #a0aec0);
 			margin: 0 0 8px;
-			line-height: 1.5;
 		}
+	}
+
+	&:last-child {
+		margin-bottom: 0;
 	}
 }
 
 .code-inline {
 	display: block;
-	padding: 6px 10px;
 	border-radius: 6px;
-	background: rgba(0, 0, 0, 0.4);
-	color: #646cff;
 	font-family: monospace;
 	font-size: 0.8rem;
+	color: #646cff;
+	background: rgb(0, 0, 0, 0.4);
+	padding: 6px 10px;
 	overflow-x: auto;
 }
 
@@ -649,26 +732,26 @@ const goToCreateSchema = () => {
 	}
 
 	:deep(.el-collapse-item__header) {
+		border-bottom: 1px solid rgb(255, 255, 255, 0.06);
+		border-radius: 8px;
 		font-weight: 600;
 		font-size: 0.95rem;
-		background: rgba(255, 255, 255, 0.02);
-		border-radius: 8px;
-		padding: 0 16px;
 		color: var(--gp-text-main, #fff);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		background: rgb(255, 255, 255, 0.02);
+		padding: 0 16px;
 		margin-bottom: 8px;
 	}
 
 	:deep(.el-collapse-item__wrap) {
-		background: transparent;
 		border: none;
+		background: transparent;
 	}
 
 	:deep(.el-collapse-item__content) {
-		padding: 12px 16px 20px;
-		color: var(--gp-text-secondary, #a0aec0);
 		font-size: 0.88rem;
 		line-height: 1.6;
+		color: var(--gp-text-secondary, #a0aec0);
+		padding: 12px 16px 20px;
 	}
 }
 
@@ -678,8 +761,8 @@ const goToCreateSchema = () => {
 	}
 
 	ul {
-		margin: 8px 0 0;
 		padding-left: 20px;
+		margin: 8px 0 0;
 	}
 
 	li {

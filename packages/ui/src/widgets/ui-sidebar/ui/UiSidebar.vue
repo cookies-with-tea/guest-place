@@ -33,7 +33,10 @@
 				<template v-for="item in sidebarData" :key="item.title">
 					<!-- Simple Mode with Children -->
 					<template v-if="simple && item.children">
-						<div v-show="!isCollapsed" class="menu-group-title">{{ t(item.title) }}</div>
+						<div v-show="!isCollapsed" class="menu-group-title">
+							{{ t(item.title) }}
+							<UiInfoButton v-if="mfeHelp(item)" v-bind="mfeHelp(item)!" />
+						</div>
 						<router-link
 							v-for="child in item.children"
 							:key="child.path"
@@ -58,6 +61,7 @@
 						<div class="menu-item" :class="{ active: item.path === '/' ? isExactActive : isActive }" @click="navigate">
 							<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
 							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
+							<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
 						</div>
 					</router-link>
 
@@ -66,6 +70,7 @@
 						<div class="item-main">
 							<ElIcon><component :is="getIcon(item.icon)" /></ElIcon>
 							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
+							<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
 						</div>
 						<ElIcon v-show="!isCollapsed" class="arrow"><ArrowRight /></ElIcon>
 					</div>
@@ -105,10 +110,12 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
+import { MFE_HELP } from '@admin-panel/lib'
 import * as Icons from '@element-plus/icons-vue'
 import { ArrowRight, CircleCheckFilled, Expand, Fold } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 
+import UiInfoButton from '../../../components/ui-info-button'
 import { useSidebar } from '../lib/useSidebar'
 import type { ISidebarItem, SidebarContext } from '../model'
 
@@ -175,6 +182,8 @@ const handlePrimaryClick = (item: ISidebarItem) => {
 }
 
 const getIcon = (name?: string) => (name && (Icons as any)[name]) || Icons.Menu
+
+const mfeHelp = (item: ISidebarItem) => (item.mfeName ? MFE_HELP[item.mfeName] : undefined)
 
 watch(
 	() => route.path,
@@ -318,6 +327,8 @@ watch(
 }
 
 .menu-group-title {
+	display: flex;
+	align-items: center;
 	font-weight: 700;
 	font-size: 0.75rem;
 	letter-spacing: 0.05em;
@@ -325,6 +336,7 @@ watch(
 	color: var(--gp-text-muted);
 	padding: 12px 12px 4px;
 	margin-top: 8px;
+	gap: 6px;
 }
 
 .menu-group-title:first-child {
@@ -345,6 +357,7 @@ watch(
 
 .item-main {
 	display: flex;
+	flex: 1;
 	align-items: center;
 	gap: 12px;
 }
@@ -353,6 +366,10 @@ watch(
 	font-weight: 500;
 	font-size: 0.9rem;
 	white-space: nowrap;
+}
+
+.menu-item :deep(.ui-info-button) {
+	margin-left: auto;
 }
 
 .menu-item .el-icon {

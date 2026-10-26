@@ -34,6 +34,13 @@
 
 			<!-- State 1: Schema Exists -> Show Editor -->
 			<template v-else-if="schema">
+				<p class="mechanism-note">
+					Это обычная схема CMS Schema Builder с зарезервированным системным slug'ом
+					<code>global-settings</code> — не отдельный особый механизм. Она отрисовывается тем же
+					<code>ContentEditor</code>, что и любая другая singleton-схема; единственное отличие — пункт меню и путь
+					<code>/settings</code>.
+				</p>
+
 				<div class="schema-info-bar glass-card">
 					<div class="info-meta">
 						<span class="status-dot"></span>
@@ -302,24 +309,24 @@ onMounted(fetchData)
 <style scoped lang="scss">
 .settings-page {
 	min-height: calc(100vh - 70px);
-	padding: 28px 32px;
 	color: var(--gp-text-main, #1e293b);
 	background: transparent;
 	transition: all 0.3s ease;
+	padding: 28px 32px;
 }
 
 .glass-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 20px 24px;
+	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.2));
 	border-radius: 16px;
-	background: var(--gp-bg-glass, rgba(255, 255, 255, 0.65));
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.2));
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 8px 24px rgb(0, 0, 0, 0.04);
+	background: var(--gp-bg-glass, rgb(255, 255, 255, 0.65));
+	padding: 20px 24px;
 	margin-bottom: 24px;
+	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(16px);
 }
 
 .header-left {
@@ -331,13 +338,13 @@ onMounted(fetchData)
 .header-icon-box {
 	width: 48px;
 	height: 48px;
-	border-radius: 14px;
-	background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgb(99, 102, 241, 0.2);
+	border-radius: 14px;
 	color: #6366f1;
-	border: 1px solid rgba(99, 102, 241, 0.2);
+	background: linear-gradient(135deg, rgb(99, 102, 241, 0.15), rgb(168, 85, 247, 0.15));
 }
 
 .header-icon {
@@ -348,22 +355,22 @@ onMounted(fetchData)
 	.title-row {
 		display: flex;
 		align-items: center;
-		gap: 12px;
 		margin-bottom: 4px;
+		gap: 12px;
 
 		h1 {
-			margin: 0;
-			font-size: 22px;
 			font-weight: 700;
+			font-size: 22px;
 			letter-spacing: -0.02em;
 			color: var(--gp-text-main, #1e293b);
+			margin: 0;
 		}
 	}
 
 	.subtitle {
-		margin: 0;
 		font-size: 13px;
 		color: var(--gp-text-secondary, #64748b);
+		margin: 0;
 	}
 }
 
@@ -379,17 +386,36 @@ onMounted(fetchData)
 }
 
 .glass-card {
-	background: var(--gp-bg-glass, rgba(255, 255, 255, 0.7));
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.2));
+	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.2));
 	border-radius: 20px;
-	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+	box-shadow: 0 12px 32px rgb(0, 0, 0, 0.05);
+	background: var(--gp-bg-glass, rgb(255, 255, 255, 0.7));
 	padding: 32px;
+	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(16px);
 }
 
 .loading-state {
 	padding: 40px;
+}
+
+.mechanism-note {
+	border: 1px solid rgb(99, 102, 241, 0.15);
+	border-radius: 10px;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--gp-text-secondary, #64748b);
+	background: rgb(99, 102, 241, 0.05);
+	padding: 10px 16px;
+	margin: 0 0 20px;
+
+	code {
+		border-radius: 4px;
+		font-family: monospace;
+		color: #6366f1;
+		background: rgb(99, 102, 241, 0.1);
+		padding: 1px 6px;
+	}
 }
 
 /* Schema Info Bar */
@@ -397,22 +423,22 @@ onMounted(fetchData)
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	border-radius: 12px;
 	padding: 14px 20px;
 	margin-bottom: 20px;
-	border-radius: 12px;
 
 	.info-meta {
 		display: flex;
 		align-items: center;
-		gap: 8px;
 		font-size: 13px;
+		gap: 8px;
 
 		.status-dot {
 			width: 8px;
 			height: 8px;
 			border-radius: 50%;
-			background: #10b981;
 			box-shadow: 0 0 8px #10b981;
+			background: #10b981;
 		}
 
 		.info-label {
@@ -420,17 +446,17 @@ onMounted(fetchData)
 		}
 
 		.schema-badge {
-			padding: 2px 8px;
-			background: rgba(99, 102, 241, 0.1);
-			color: #6366f1;
 			border-radius: 6px;
 			font-family: monospace;
 			font-weight: 600;
+			color: #6366f1;
+			background: rgb(99, 102, 241, 0.1);
+			padding: 2px 8px;
 		}
 
 		.fields-count {
-			color: var(--gp-text-muted, #94a3b8);
 			font-size: 12px;
+			color: var(--gp-text-muted, #94a3b8);
 		}
 	}
 }
@@ -441,28 +467,28 @@ onMounted(fetchData)
 
 /* Onboarding Hero */
 .onboarding-card {
-	padding: 48px;
 	text-align: center;
+	padding: 48px;
 }
 
 .onboarding-hero {
 	max-width: 620px;
-	margin: 0 auto 32px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	margin: 0 auto 32px;
 }
 
 .hero-icon-wrapper {
 	width: 72px;
 	height: 72px;
-	border-radius: 20px;
-	background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgb(99, 102, 241, 0.25);
+	border-radius: 20px;
+	background: linear-gradient(135deg, rgb(99, 102, 241, 0.15), rgb(168, 85, 247, 0.15));
 	margin-bottom: 20px;
-	border: 1px solid rgba(99, 102, 241, 0.25);
 }
 
 .hero-icon {
@@ -475,10 +501,10 @@ onMounted(fetchData)
 }
 
 .hero-title {
-	font-size: 24px;
 	font-weight: 800;
+	font-size: 24px;
 	color: var(--gp-text-main, #1e293b);
-	margin: 0 0 12px 0;
+	margin: 0 0 12px;
 }
 
 .hero-desc {
@@ -488,11 +514,11 @@ onMounted(fetchData)
 	margin: 0;
 
 	code {
-		background: rgba(99, 102, 241, 0.1);
-		color: #6366f1;
-		padding: 2px 6px;
 		border-radius: 4px;
 		font-family: monospace;
+		color: #6366f1;
+		background: rgb(99, 102, 241, 0.1);
+		padding: 2px 6px;
 	}
 }
 
@@ -500,65 +526,65 @@ onMounted(fetchData)
 .features-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 20px;
-	margin-bottom: 32px;
 	text-align: left;
+	margin-bottom: 32px;
+	gap: 20px;
 }
 
 .feature-box {
-	background: rgba(255, 255, 255, 0.4);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	padding: 20px;
-	border-radius: 14px;
 	position: relative;
+	border: 1px solid rgb(255, 255, 255, 0.2);
+	border-radius: 14px;
+	background: rgb(255, 255, 255, 0.4);
 	transition: all 0.2s ease;
-
-	&:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-	}
+	padding: 20px;
 
 	.feature-num {
-		font-size: 12px;
 		font-weight: 800;
-		color: #6366f1;
-		opacity: 0.8;
-		margin-bottom: 8px;
+		font-size: 12px;
 		letter-spacing: 0.05em;
+		color: #6366f1;
+		margin-bottom: 8px;
+		opacity: 0.8;
 	}
 
 	h4 {
-		margin: 0 0 8px 0;
-		font-size: 15px;
 		font-weight: 700;
+		font-size: 15px;
 		color: var(--gp-text-main, #1e293b);
+		margin: 0 0 8px;
 	}
 
 	p {
-		margin: 0;
 		font-size: 13px;
 		line-height: 1.5;
 		color: var(--gp-text-secondary, #64748b);
+		margin: 0;
+	}
+
+	&:hover {
+		box-shadow: 0 8px 20px rgb(0, 0, 0, 0.05);
+		transform: translateY(-2px);
 	}
 }
 
 /* Default Fields Card */
 .default-fields-card {
-	background: rgba(99, 102, 241, 0.05);
-	border: 1px solid rgba(99, 102, 241, 0.15);
+	border: 1px solid rgb(99, 102, 241, 0.15);
 	border-radius: 14px;
+	text-align: left;
+	background: rgb(99, 102, 241, 0.05);
 	padding: 16px 20px;
 	margin-bottom: 36px;
-	text-align: left;
 
 	.fields-card-header {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		font-size: 13px;
 		font-weight: 600;
+		font-size: 13px;
 		color: #4f46e5;
 		margin-bottom: 12px;
+		gap: 8px;
 	}
 
 	.fields-chips {
@@ -569,13 +595,13 @@ onMounted(fetchData)
 		.chip {
 			display: inline-flex;
 			align-items: center;
-			gap: 4px;
-			background: var(--gp-bg-surface, #ffffff);
-			padding: 4px 10px;
+			border: 1px solid rgb(0, 0, 0, 0.06);
 			border-radius: 8px;
 			font-size: 12px;
-			border: 1px solid rgba(0, 0, 0, 0.06);
 			color: var(--gp-text-main, #334155);
+			background: var(--gp-bg-surface, #fff);
+			padding: 4px 10px;
+			gap: 4px;
 
 			strong {
 				font-family: monospace;
@@ -592,21 +618,21 @@ onMounted(fetchData)
 /* Actions */
 .hero-actions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
 	gap: 16px;
-	flex-wrap: wrap;
 }
 
 .btn-gradient {
-	background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
 	border: none !important;
+	box-shadow: 0 4px 14px rgb(99, 102, 241, 0.35);
 	font-weight: 600;
-	box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+	background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
 
 	&:hover {
-		opacity: 0.95;
 		transform: translateY(-1px);
+		opacity: 0.95;
 	}
 }
 
@@ -614,29 +640,29 @@ onMounted(fetchData)
 .is-dark {
 	.glass-header,
 	.glass-card {
-		background: rgba(15, 23, 42, 0.75);
-		border-color: rgba(255, 255, 255, 0.08);
-		box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+		border-color: rgb(255, 255, 255, 0.08);
+		box-shadow: 0 12px 32px rgb(0, 0, 0, 0.3);
+		background: rgb(15, 23, 42, 0.75);
 	}
 
 	.feature-box {
-		background: rgba(30, 41, 59, 0.5);
-		border-color: rgba(255, 255, 255, 0.06);
+		border-color: rgb(255, 255, 255, 0.06);
+		background: rgb(30, 41, 59, 0.5);
 	}
 
 	.default-fields-card {
-		background: rgba(99, 102, 241, 0.08);
-		border-color: rgba(99, 102, 241, 0.2);
+		border-color: rgb(99, 102, 241, 0.2);
+		background: rgb(99, 102, 241, 0.08);
 
 		.fields-chips .chip {
-			background: #1e293b;
-			border-color: rgba(255, 255, 255, 0.1);
+			border-color: rgb(255, 255, 255, 0.1);
 			color: #e2e8f0;
+			background: #1e293b;
 		}
 	}
 }
 
-@media (max-width: 840px) {
+@media (width <= 840px) {
 	.features-grid {
 		grid-template-columns: 1fr;
 	}

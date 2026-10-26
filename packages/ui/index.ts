@@ -6,6 +6,7 @@ import UiButton from './src/components/ui-button'
 import UiErrorBoundary from './src/components/ui-error-boundary/ui/UiErrorBoundary.vue'
 import UiGlassCard from './src/components/ui-glass-card'
 import UiIcon from './src/components/ui-icon'
+import UiInfoButton from './src/components/ui-info-button'
 import UiInput from './src/components/ui-input'
 import UiMediaPicker from './src/components/ui-media-picker'
 import UiMfeFallback from './src/components/ui-mfe-fallback/ui/UiMfeFallback.vue'
@@ -37,6 +38,7 @@ export {
 	UiFloatingSettings,
 	UiGlassCard,
 	UiIcon,
+	UiInfoButton,
 	UiInput,
 	UiLanguageSwitcher,
 	UiMediaPicker,
