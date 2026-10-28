@@ -100,55 +100,6 @@ importers:
         specifier: ^3.3.12
         version: 3.3.12(typescript@5.9.3)
 
-  apps/admin-about:
-    dependencies:
-      '@admin-panel/i18n':
-        specifier: workspace:*
-        version: link:../../packages/i18n
-      '@admin-panel/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
-      '@admin-panel/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@element-plus/icons-vue':
-        specifier: ^2.3.2
-        version: 2.3.2(vue@3.5.42(typescript@5.9.3))
-      '@tanstack/vue-query':
-        specifier: ^5.92.1
-        version: 5.102.8(vue@3.5.42(typescript@5.9.3))
-      element-plus:
-        specifier: ^2.13.0
-        version: 2.14.5(vue@3.5.42(typescript@5.9.3))
-      pinia:
-        specifier: ^2.1.7
-        version: 2.3.1(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.22
-        version: 3.5.42(typescript@5.9.3)
-      vue-router:
-        specifier: ^4.5.1
-        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
-    devDependencies:
-      '@admin-panel/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      npm-run-all2:
-        specifier: ^8.0.4
-        version: 8.0.4
-      ts-node:
-        specifier: 10.9.2
-        version: 10.9.2(@types/node@24.13.3)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.1.7
-        version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
-      vue-tsc:
-        specifier: ^3.1.0
-        version: 3.3.12(typescript@5.9.3)
-
   apps/admin-content:
     dependencies:
       '@admin-panel/i18n':
@@ -258,55 +209,6 @@ importers:
       vue-tsc:
         specifier: ^3.1.0
         version: 3.3.11(typescript@5.9.3)
-
-  apps/admin-guests:
-    dependencies:
-      '@admin-panel/i18n':
-        specifier: workspace:*
-        version: link:../../packages/i18n
-      '@admin-panel/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
-      '@admin-panel/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@element-plus/icons-vue':
-        specifier: ^2.3.2
-        version: 2.3.2(vue@3.5.42(typescript@5.9.3))
-      '@tanstack/vue-query':
-        specifier: ^5.92.1
-        version: 5.102.8(vue@3.5.42(typescript@5.9.3))
-      element-plus:
-        specifier: ^2.13.0
-        version: 2.14.5(vue@3.5.42(typescript@5.9.3))
-      pinia:
-        specifier: ^2.1.7
-        version: 2.3.1(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.22
-        version: 3.5.42(typescript@5.9.3)
-      vue-router:
-        specifier: ^4.5.1
-        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
-    devDependencies:
-      '@admin-panel/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      npm-run-all2:
-        specifier: ^8.0.4
-        version: 8.0.4
-      ts-node:
-        specifier: 10.9.2
-        version: 10.9.2(@types/node@24.13.3)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.1.7
-        version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
-      vue-tsc:
-        specifier: ^3.1.0
-        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-media:
     dependencies:
@@ -432,55 +334,6 @@ importers:
       vue-tsc:
         specifier: ^3.1.0
         version: 3.3.11(typescript@5.9.3)
-
-  apps/admin-platforms:
-    dependencies:
-      '@admin-panel/i18n':
-        specifier: workspace:*
-        version: link:../../packages/i18n
-      '@admin-panel/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
-      '@admin-panel/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@element-plus/icons-vue':
-        specifier: ^2.3.2
-        version: 2.3.2(vue@3.5.42(typescript@5.9.3))
-      '@tanstack/vue-query':
-        specifier: ^5.92.1
-        version: 5.102.8(vue@3.5.42(typescript@5.9.3))
-      element-plus:
-        specifier: ^2.13.0
-        version: 2.14.5(vue@3.5.42(typescript@5.9.3))
-      pinia:
-        specifier: ^2.1.7
-        version: 2.3.1(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.22
-        version: 3.5.42(typescript@5.9.3)
-      vue-router:
-        specifier: ^4.5.1
-        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
-    devDependencies:
-      '@admin-panel/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      npm-run-all2:
-        specifier: ^8.0.4
-        version: 8.0.4
-      ts-node:
-        specifier: 10.9.2
-        version: 10.9.2(@types/node@24.13.3)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.1.7
-        version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
-      vue-tsc:
-        specifier: ^3.1.0
-        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-profile:
     dependencies:
@@ -694,55 +547,6 @@ importers:
       vue-tsc:
         specifier: ^3.1.0
         version: 3.3.11(typescript@5.9.3)
-
-  apps/admin-test-crud-scaffold:
-    dependencies:
-      '@admin-panel/i18n':
-        specifier: workspace:*
-        version: link:../../packages/i18n
-      '@admin-panel/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
-      '@admin-panel/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@element-plus/icons-vue':
-        specifier: ^2.3.2
-        version: 2.3.2(vue@3.5.42(typescript@5.9.3))
-      '@tanstack/vue-query':
-        specifier: ^5.92.1
-        version: 5.102.8(vue@3.5.42(typescript@5.9.3))
-      element-plus:
-        specifier: ^2.13.0
-        version: 2.14.5(vue@3.5.42(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.22
-        version: 3.5.42(typescript@5.9.3)
-      vue-router:
-        specifier: ^4.5.1
-        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
-    devDependencies:
-      '@admin-panel/stylelint-config':
-        specifier: workspace:*
-        version: link:../../packages/stylelint-config
-      '@admin-panel/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      '@types/node':
-        specifier: ^24.9.2
-        version: 24.13.3
-      '@vitejs/plugin-vue':
-        specifier: ^6.0.1
-        version: 6.0.8(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0))(vue@3.5.42(typescript@5.9.3))
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.1.7
-        version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
-      vue-tsc:
-        specifier: ^3.1.0
-        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-translations:
     dependencies:
@@ -1317,10 +1121,6 @@ packages:
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
     engines: {node: '>=0.1.90'}
 
-  '@cspotcode/source-map-support@0.8.1':
-    resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
-    engines: {node: '>=12'}
-
   '@csstools/color-helpers@6.1.1':
     resolution: {integrity: sha512-gLNsunvwf3mCi5u5o46/Z/JcJMnhbHSaZ69rkgPzNM3J4s8hWwpPUQB6/tt0EDFyCiWzxANlx+2LJwpYj4zS1w==}
     engines: {node: '>=20.19.0'}
@@ -1775,9 +1575,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@jridgewell/trace-mapping@0.3.9':
-    resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
   '@keyv/bigmap@1.3.1':
     resolution: {integrity: sha512-WbzE9sdmQtKy8vrNPa9BRnwZh5UF4s1KTmSK0KUVLo3eff5BlQNNWDnFOouNpKfPKDnms9xynJjsMYjMaT/aFQ==}
@@ -2718,18 +2515,6 @@ packages:
       '@tiptap/pm': 3.31.3
       vue: ^3.0.0
 
-  '@tsconfig/node10@1.0.13':
-    resolution: {integrity: sha512-gcLdvR9HO1ZJBypsOGqaP6TFEzb6vIta0KSTLt9NAQ6pXQO3cRgSVyCN6pzYqI9DlJgY71XKO0dpDhCf08b3pg==}
-
-  '@tsconfig/node12@1.0.11':
-    resolution: {integrity: sha512-cqefuRsh12pWyGsIoBKJA9luFu3mRxCA+ORZvA4ktLSzIuCUtWVxGIuXigEwO5/ywWFMZ2QEGKWvkZG1zDMTag==}
-
-  '@tsconfig/node14@1.0.3':
-    resolution: {integrity: sha512-ysT8mhdixWK6Hw3i1V2AeRqZ5WfXg1G43mqoYlM2nc6388Fq5jcXyr5mRsqViLx/GJYdoL0bfXD8nmF+Zn/Iow==}
-
-  '@tsconfig/node16@1.0.4':
-    resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
-
   '@tsconfig/node22@22.0.6':
     resolution: {integrity: sha512-/5thavHAnWDZwH2H6eEn/T8pBEBhtuKaWGMslsj82kJfvzQgOgEMK7X4goBbIUjgVtAzPTtM9Ml64LA0uxO6Iw==}
 
@@ -3135,10 +2920,6 @@ packages:
     resolution: {integrity: sha512-FS7hV565M5l1R08MXqo8odwMTB02C2UqzB17RVgu9EyuYFBqJZ3/ZY97sQD5FewVu1UyDFc1yztUDrAwT0EypA==}
     engines: {node: '>=0.4.0'}
 
-  acorn-walk@8.3.5:
-    resolution: {integrity: sha512-HEHNfbars9v4pgpW6SO1KSPkfoS0xVOM/9UzkJltjlsHZmJasxg8aXkuZa7SMf8vKGIBhpUsPluQSqhJFCqebw==}
-    engines: {node: '>=0.4.0'}
-
   acorn@7.4.1:
     resolution: {integrity: sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==}
     engines: {node: '>=0.4.0'}
@@ -3217,9 +2998,6 @@ packages:
 
   arch@3.0.0:
     resolution: {integrity: sha512-AmIAC+Wtm2AU8lGfTtHsw0Y9Qtftx2YXEEtiBP10xFUtMOA+sHHx6OAddyL52mUKh1vsXQ6/w1mVDptZCyUt4Q==}
-
-  arg@4.1.3:
-    resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
 
   arg@5.0.2:
     resolution: {integrity: sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==}
@@ -3649,9 +3427,6 @@ packages:
       typescript:
         optional: true
 
-  create-require@1.1.1:
-    resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -3966,10 +3741,6 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
-
-  diff@4.0.4:
-    resolution: {integrity: sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ==}
-    engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
@@ -4911,9 +4682,6 @@ packages:
   make-dir@4.0.0:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
-
-  make-error@1.3.6:
-    resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
 
   map-stream@0.1.0:
     resolution: {integrity: sha512-CkYQrPYZfWnu/DAmVCpTSX/xHpKZ80eKh2lAkyA6AJTef6bW+6JpbQZN5rofum7da+SyN1bi5ctTm+lTfcCW3g==}
@@ -6347,20 +6115,6 @@ packages:
   ts-map@1.0.3:
     resolution: {integrity: sha512-vDWbsl26LIcPGmDpoVzjEP6+hvHZkBkLW7JpvwbCv/5IYPJlsbzCVXY3wsCeAxAUeTclNOUZxnLdGh3VBD/J6w==}
 
-  ts-node@10.9.2:
-    resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': '>=1.2.50'
-      '@swc/wasm': '>=1.2.50'
-      '@types/node': '*'
-      typescript: '>=2.7'
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      '@swc/wasm':
-        optional: true
-
   tsconfig-paths-webpack-plugin@4.1.0:
     resolution: {integrity: sha512-xWFISjviPydmtmgeUAuXp4N1fky+VCtfhOkDUFIv5ea7p4wuTomI4QTrXvFBX2S4jZsmyTSrStQl+E+4w+RzxA==}
     engines: {node: '>=10.13.0'}
@@ -6551,9 +6305,6 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-
-  v8-compile-cache-lib@3.0.1:
-    resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -6940,10 +6691,6 @@ packages:
     resolution: {integrity: sha512-jIH9yLR9wqr0wOS0TpBvo/g/2UgZH5qePVbjgRliiF0BYvOZyaBknKsF+x9Iht0O6sqgnB93rCICdOZFecJuDw==}
     engines: {node: '>=12'}
 
-  yn@3.1.1:
-    resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
-    engines: {node: '>=6'}
-
   zrender@6.1.0:
     resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
 
@@ -7207,10 +6954,6 @@ snapshots:
   '@colordx/core@5.8.0': {}
 
   '@colors/colors@1.6.0': {}
-
-  '@cspotcode/source-map-support@0.8.1':
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.9
 
   '@csstools/color-helpers@6.1.1': {}
 
@@ -7503,11 +7246,6 @@ snapshots:
   '@jridgewell/sourcemap-codec@1.6.0': {}
 
   '@jridgewell/trace-mapping@0.3.31':
-    dependencies:
-      '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.6.0
-
-  '@jridgewell/trace-mapping@0.3.9':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -8306,14 +8044,6 @@ snapshots:
       '@tiptap/extension-bubble-menu': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
       '@tiptap/extension-floating-menu': 3.31.3(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
 
-  '@tsconfig/node10@1.0.13': {}
-
-  '@tsconfig/node12@1.0.11': {}
-
-  '@tsconfig/node14@1.0.3': {}
-
-  '@tsconfig/node16@1.0.4': {}
-
   '@tsconfig/node22@22.0.6': {}
 
   '@turbo/darwin-64@2.10.12':
@@ -8808,10 +8538,6 @@ snapshots:
 
   acorn-walk@8.3.0: {}
 
-  acorn-walk@8.3.5:
-    dependencies:
-      acorn: 8.18.0
-
   acorn@7.4.1: {}
 
   acorn@8.11.2: {}
@@ -8878,8 +8604,6 @@ snapshots:
   arch@2.2.0: {}
 
   arch@3.0.0: {}
-
-  arg@4.1.3: {}
 
   arg@5.0.2: {}
 
@@ -9287,8 +9011,6 @@ snapshots:
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.9.3
-
-  create-require@1.1.1: {}
 
   cross-spawn@7.0.6:
     dependencies:
@@ -9704,8 +9426,6 @@ snapshots:
 
   detect-libc@2.1.2:
     optional: true
-
-  diff@4.0.4: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -10688,8 +10408,6 @@ snapshots:
   make-dir@4.0.0:
     dependencies:
       semver: 7.8.5
-
-  make-error@1.3.6: {}
 
   map-stream@0.1.0: {}
 
@@ -12202,24 +11920,6 @@ snapshots:
 
   ts-map@1.0.3: {}
 
-  ts-node@10.9.2(@types/node@24.13.3)(typescript@5.9.3):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.13
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 24.13.3
-      acorn: 8.18.0
-      acorn-walk: 8.3.5
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.4
-      make-error: 1.3.6
-      typescript: 5.9.3
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-
   tsconfig-paths-webpack-plugin@4.1.0:
     dependencies:
       chalk: 4.1.2
@@ -12449,8 +12149,6 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
-
-  v8-compile-cache-lib@3.0.1: {}
 
   vary@1.1.2: {}
 
@@ -12860,8 +12558,6 @@ snapshots:
   yauzl@3.4.0:
     dependencies:
       pend: 1.2.0
-
-  yn@3.1.1: {}
 
   zrender@6.1.0:
     dependencies:
