@@ -17,7 +17,8 @@
 		"npm-run-all2": "^8.0.4",
 		"ts-node": "10.9.2",
 		"typescript": "^5.9.3",
-		"vite": "^7.1.7"
+		"vite": "^7.1.7",
+		"vue-tsc": "^3.1.0"
 	},
 	"private": true,
 	"scripts": {
@@ -32,7 +33,8 @@
 		"preview": "vite preview",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
 		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }
