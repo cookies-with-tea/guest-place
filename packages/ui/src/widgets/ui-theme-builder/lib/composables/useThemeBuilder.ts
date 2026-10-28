@@ -5,7 +5,7 @@ import { GP_EVENTS, isBrowser, useEvents } from '@admin-panel/lib'
 const ACCENT_COLOR_KEY = 'gp-theme-accent-color'
 const GLASS_BLUR_KEY = 'gp-theme-glass-blur'
 
-const DEFAULT_ACCENT = '#42b883'
+const DEFAULT_ACCENT = '#7c3aed'
 const DEFAULT_BLUR = 16
 
 const accentColor = ref(isBrowser ? localStorage.getItem(ACCENT_COLOR_KEY) || DEFAULT_ACCENT : DEFAULT_ACCENT)
