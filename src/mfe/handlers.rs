@@ -67,6 +67,7 @@ pub async fn get_manifest(
         (status = 200, description = "All microfrontends list", body = ApiResponse<Vec<Mfe>>),
         (status = 500, description = "Database error")
     ),
+    operation_id = "get_all_mfes",
     tag = "MFE"
 )]
 pub async fn get_all(
@@ -101,6 +102,7 @@ pub async fn get_all(
         (status = 400, description = "Bad request"),
         (status = 500, description = "Database error")
     ),
+    operation_id = "create_mfe",
     tag = "MFE"
 )]
 pub async fn create(
@@ -153,6 +155,7 @@ pub async fn create(
         (status = 404, description = "Not found"),
         (status = 500, description = "Database error")
     ),
+    operation_id = "update_mfe",
     tag = "MFE"
 )]
 pub async fn update(
@@ -225,6 +228,7 @@ pub async fn update(
         (status = 404, description = "Not found"),
         (status = 500, description = "Database error")
     ),
+    operation_id = "delete_mfe_by_id",
     tag = "MFE"
 )]
 pub async fn delete_one(

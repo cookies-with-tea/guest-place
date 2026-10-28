@@ -1,8 +1,8 @@
+use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 use sqlx::FromRow;
-use utoipa::{ToSchema, IntoParams};
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[derive(sqlx::Type, Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
 #[sqlx(type_name = "text", rename_all = "snake_case")]
