@@ -16,10 +16,12 @@
 		"@tiptap/extension-underline": "^3.31.3",
 		"@tiptap/starter-kit": "^3.31.3",
 		"@tiptap/vue-3": "^3.31.3",
+		"echarts": "^6.1.0",
 		"element-plus": "^2.13.0",
 		"pinia": "^2.1.7",
 		"svgo": "^4.0.0",
-		"vue": "^3.5.22"
+		"vue": "^3.5.22",
+		"vue-echarts": "^8.2.0"
 	},
 	"devDependencies": {
 		"@admin-panel/typescript-config": "workspace:*",
