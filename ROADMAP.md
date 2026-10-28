@@ -47,29 +47,50 @@ KPI-карточки с трендом, donut/radial-прогресса, sparkli
 `UiThemeBuilder`/`useThemeBuilder` — пользовательская рантайм-настройка
 `--gp-primary`/блюра через localStorage, не трогает дефолты в SCSS.
 
-1.1. **Цветовая палитра** — сменить дефолтный `$gp-primary`/`--accent-primary`
-   на фиолетовый/индиго (как на всех трёх референсах) в
-   `packages/ui/assets/styles/_variables.scss` и `_tokens.scss`, для
-   светлой и тёмной темы отдельно. Решить, остаётся ли glassmorphism или
-   переходим на сплошные карточки с тенью (решает дизайнер/владелец
-   продукта — не чисто техническое решение, облик сильно меняется).
-   `useThemeBuilder`'s `DEFAULT_ACCENT` обновить тем же цветом.
-1.2. **Виджеты в `@admin-panel/ui`** — завести переиспользуемые, которых
-   сейчас нет:
-   - KPI-карточка (заголовок, значение, badge тренда ▲/▼ %, опционально
-     иконка) — на всех трёх референсах.
-   - Donut/radial-прогресс (значение по центру, подписи сегментов) —
-     Master-X, DotPress.
-   - Area/line-график с градиентной заливкой под линией (Dashdark X —
-     Revenue/Expenses, DotPress — Total Users).
-   - Sparkline для встраивания в карточку (DotPress — Pageviews/Bounce
-     Rate/Forum/Chat).
-   - Список по странам/флагам с прогресс-баром (Master-X — "Installed by
-     Country") и world-map с точками (DotPress — "Visitors Map").
-   Решить на одной графической библиотеке вместо двух: кандидат —
-   ECharts (уже есть в `admin-statistics`, умеет все типы графиков с
-   референсов из коробки); `admin-orchestrator`'s D3-спарклайн тогда
-   переносится на неё же для консистентности.
+1.1. [x] **Цветовая палитра** — сделано. `$gp-primary` в
+   `_variables.scss`/`_tokens.scss`: `#42b883` → `#7c3aed` (светлая тема),
+   `#a78bfa` (тёмная, ярче для контраста). `--accent-primary`/`--accent-hover`
+   больше не отдельный синий — алиас на `--gp-primary`/`--gp-primary-hover`.
+   Glassmorphism-токены (`--gp-bg-glass` и парные, `--gp-bg-surface`/
+   `--gp-bg-element` в тёмной теме) заменены на solid-цвета вместо
+   `rgba(...)`, `--gp-glass-blur: 0`. `styles-loader.ts`'s CRITICAL_CSS и
+   `useThemeBuilder`'s `DEFAULT_ACCENT` обновлены тем же цветом (иначе FOUC
+   и "Reset" темы на мгновение показывали бы старый зелёный). Проверено
+   через `pnpm build` + `pnpm preview` в реальном федеративном шелле (dev
+   mode не поддерживает module federation) — светлая и тёмная тема, живым
+   браузером. ~20 файлов в admin-content/admin-orchestrator/admin-statistics
+   с захардкоженным `#42b883` напрямую в своих графиках/конфигах — не
+   трогал (не через CSS-переменную, часть может быть осознанным "success
+   green"), кандидат на аудит вместе с 1.2's консолидацией графиков.
+1.2. [x] **Виджеты в `@admin-panel/ui`** — сделано пять: `UiStatCard` (KPI
+   с бейджем тренда ▲/▼ %), `UiDonutProgress` (кольцевой прогресс, значение
+   по центру), `UiAreaChart` (line/area с градиентной заливкой,
+   мульти-серия, легенда), `UiSparkline` (без осей, для карточек),
+   `UiRankedList` (иконка/флаг + подпись + значение + прогресс-бар + тренд —
+   "Installed by Country"/"Applications" на референсах). World-map с точками
+   (DotPress — "Visitors Map") не делал — нужны гео-данные, отдельная,
+   более тяжёлая задача.
+   - Графики — на ECharts (`vue-echarts`), решение по единой библиотеке
+     принято: `echarts`/`vue-echarts` помечены `external` в
+     `packages/ui/vite.config.ts` (как `vue`/`pinia`/`element-plus`),
+     потребляющее приложение ставит их сам (сделано для `admin-docs`, чтобы
+     собрать Storybook-истории). `admin-orchestrator`'s D3-спарклайн на
+     новый `UiSparkline` **ещё не перенесён** — сам виджет для этого готов,
+     перенос — отдельный шаг.
+   - Новый `packages/ui/src/lib/resolveCssColor.ts`: ECharts рисует в
+     canvas и не резолвит `var(--x)` сам — composable читает значение через
+     `getComputedStyle` и держит в курсе смены темы.
+   - Два бага пойманы и исправлены через живой браузерный харнесс
+     (Storybook): `UiSparkline` не регистрировал ECharts' `GridComponent` —
+     без него график не рисовался вовсе (не визуально "пусто", а реальная
+     ошибка `xAxis "0" not found` в консоли); `UiAreaChart`'s палитра по
+     умолчанию использовала `var(--el-color-primary, ...)` для второй
+     серии — в этом приложении `--el-color-primary` равен `--gp-primary`,
+     так что все серии накладывались друг на друга одним цветом и
+     выглядели как одна линия. Без браузерной проверки обе находки остались
+     бы незамеченными при обычном код-ревью.
+   - Storybook-истории на все пять (`apps/admin-docs/stories/`), проверены
+     живым браузерным харнессом — рендерятся и реагируют на смену темы.
 1.3. **Layout** — сайдбар с иконкой+подписью по образцу референсов
    (сравнить с текущим `ui-sidebar`), топ-хедер с поиском/уведомлениями/
    аватаром (сравнить с текущим — `UiNotificationBell` уже есть).
