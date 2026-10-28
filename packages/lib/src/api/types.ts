@@ -4,22 +4,6 @@
  */
 
 export interface paths {
-	'/api/v1/about': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get: operations['get_about']
-		put: operations['update_about']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
 	'/api/v1/analytics/engagement': {
 		parameters: {
 			query?: never
@@ -414,22 +398,6 @@ export interface paths {
 		get: operations['get_features']
 		put?: never
 		post: operations['update_features']
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
-	'/api/v1/guests': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get: operations['get_guests']
-		put: operations['update_guests']
-		post?: never
 		delete?: never
 		options?: never
 		head?: never
@@ -916,22 +884,6 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/api/v1/platforms': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get: operations['get_platforms']
-		put: operations['update_platforms']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
 	'/api/v1/redirects': {
 		parameters: {
 			query?: never
@@ -1128,39 +1080,10 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
 	schemas: {
-		AboutResponseDTO: {
-			description: string
-			hero_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			leadership: components['schemas']['LeadershipDTO']
-			leadership_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			leadership_guide_uuid?: string | null
-			news: components['schemas']['NewsDTO']
-			news_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			news_guide_uuid?: string | null
-			opportunities: components['schemas']['OpportunitiesDTO']
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			who_we_are: components['schemas']['WhoWeAreItemDTO'][]
-			who_we_are_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			who_we_are_guide_uuid?: string | null
-		}
 		AcquireLockRequest: {
 			force?: boolean | null
 			user_id: string
 			user_name: string
-		}
-		AdditionalServiceDTO: {
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			text: string
 		}
 		AnalyticsSummaryDto: {
 			/** Format: int64 */
@@ -1315,35 +1238,6 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
-		ApiResponse_AboutResponseDTO: {
-			data?: {
-				description: string
-				hero_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				hero_guide_uuid?: string | null
-				leadership: components['schemas']['LeadershipDTO']
-				leadership_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				leadership_guide_uuid?: string | null
-				news: components['schemas']['NewsDTO']
-				news_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				news_guide_uuid?: string | null
-				opportunities: components['schemas']['OpportunitiesDTO']
-				opportunities_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
-				title: string
-				who_we_are: components['schemas']['WhoWeAreItemDTO'][]
-				who_we_are_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				who_we_are_guide_uuid?: string | null
-			}
-			errors?: {
-				[key: string]: string[]
-			} | null
-			messages?: string[] | null
-		}
 		ApiResponse_AnalyticsSummaryDto: {
 			data?: {
 				/** Format: int64 */
@@ -1478,34 +1372,6 @@ export interface components {
 				slug: string
 				/** Format: date-time */
 				updated_at: string
-			}
-			errors?: {
-				[key: string]: string[]
-			} | null
-			messages?: string[] | null
-		}
-		ApiResponse_GuestsResponseDTO: {
-			data?: {
-				additional_services: components['schemas']['AdditionalServiceDTO'][]
-				additional_services_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				additional_services_guide_uuid?: string | null
-				hero_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				hero_guide_uuid?: string | null
-				interaction_cards: components['schemas']['InteractionCardDTO'][]
-				interaction_cards_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				interaction_cards_guide_uuid?: string | null
-				opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-				opportunities_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
-				search_promo: components['schemas']['SearchPromoDTO']
-				search_promo_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				search_promo_guide_uuid?: string | null
-				title: string
 			}
 			errors?: {
 				[key: string]: string[]
@@ -1670,27 +1536,6 @@ export interface components {
 				title: string
 				/** Format: date-time */
 				updated_at: string
-			}
-			errors?: {
-				[key: string]: string[]
-			} | null
-			messages?: string[] | null
-		}
-		ApiResponse_PlatformsResponseDTO: {
-			data?: {
-				description: string
-				hero_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				hero_guide_uuid?: string | null
-				opportunities: components['schemas']['OpportunitiesDTO']
-				opportunities_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
-				title: string
-				tools_and_services: components['schemas']['ToolsAndServicesDTO']
-				tools_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				tools_guide_uuid?: string | null
 			}
 			errors?: {
 				[key: string]: string[]
@@ -2536,37 +2381,6 @@ export interface components {
 			/** Format: float */
 			percentage: number
 		}
-		GuestOpportunityItemDTO: {
-			button_text: string
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			items: string[]
-			link: string
-			title: string
-		}
-		GuestsResponseDTO: {
-			additional_services: components['schemas']['AdditionalServiceDTO'][]
-			additional_services_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			additional_services_guide_uuid?: string | null
-			hero_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			interaction_cards: components['schemas']['InteractionCardDTO'][]
-			interaction_cards_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			interaction_cards_guide_uuid?: string | null
-			opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			search_promo: components['schemas']['SearchPromoDTO']
-			search_promo_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			search_promo_guide_uuid?: string | null
-			title: string
-		}
 		HealthStatus: {
 			db: string
 			redis: string
@@ -2646,28 +2460,9 @@ export interface components {
 			/** Format: uuid */
 			upload_id: string
 		}
-		InteractionCardDTO: {
-			button_text: string
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			link: string
-			text: string
-			title: string
-		}
 		LanguageDTO: {
 			code: string
 			name: string
-		}
-		LeadershipDTO: {
-			description: string
-			items: components['schemas']['LeadershipItemDTO'][]
-			logo: components['schemas']['MediaDTO']
-			title: string
-		}
-		LeadershipItemDTO: {
-			icon: components['schemas']['MediaDTO']
-			text: string
 		}
 		LockInfo: {
 			entity_id: string
@@ -2823,25 +2618,6 @@ export interface components {
 			/** Format: date-time */
 			updated_at: string
 		}
-		NewsDTO: {
-			items: components['schemas']['NewsItemDTO'][]
-			title: string
-		}
-		NewsItemDTO: {
-			icon: components['schemas']['MediaDTO']
-			text: string
-		}
-		OpportunitiesDTO: {
-			items: components['schemas']['OpportunityItemDTO'][]
-			title: string
-		}
-		OpportunityItemDTO: {
-			button_text: string
-			icon: components['schemas']['MediaDTO']
-			items: string[]
-			link: string
-			title: string
-		}
 		Page: {
 			blocks: Record<string, never>
 			/** Format: date-time */
@@ -2870,21 +2646,6 @@ export interface components {
 			total?: number | null
 			/** Format: int32 */
 			total_pages?: number | null
-		}
-		PlatformsResponseDTO: {
-			description: string
-			hero_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			opportunities: components['schemas']['OpportunitiesDTO']
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			tools_and_services: components['schemas']['ToolsAndServicesDTO']
-			tools_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			tools_guide_uuid?: string | null
 		}
 		Redirect: {
 			/** Format: date-time */
@@ -2924,10 +2685,6 @@ export interface components {
 			url: string
 			version?: string | null
 		}
-		SearchPromoDTO: {
-			description: string
-			title: string
-		}
 		SendAlertDTO: {
 			level?: string | null
 			message: string
@@ -2955,15 +2712,6 @@ export interface components {
 		}
 		SyncBlockTypesDTO: {
 			blocks: components['schemas']['SyncBlockTypeItem'][]
-		}
-		ToolItemDTO: {
-			text: string
-			title: string
-		}
-		ToolsAndServicesDTO: {
-			items: components['schemas']['ToolItemDTO'][]
-			logo: components['schemas']['MediaDTO']
-			title: string
 		}
 		TrackEventDto: {
 			entity_id?: string | null
@@ -3004,29 +2752,6 @@ export interface components {
 			schema_name: string
 			schema_slug: string
 		}
-		UpdateAboutDTO: {
-			description: string
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			leadership_description: string
-			/** Format: uuid */
-			leadership_guide_uuid?: string | null
-			leadership_items: components['schemas']['UpdateLeadershipItemDTO'][]
-			/** Format: uuid */
-			leadership_logo_uuid?: string | null
-			leadership_title: string
-			/** Format: uuid */
-			news_guide_uuid?: string | null
-			news_items: components['schemas']['UpdateNewsItemDTO'][]
-			news_title: string
-			opportunities: components['schemas']['UpdateOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			who_we_are: components['schemas']['UpdateWhoWeAreItemDTO'][]
-			/** Format: uuid */
-			who_we_are_guide_uuid?: string | null
-		}
 		UpdateBlockTypeDTO: {
 			category?: string | null
 			description?: string | null
@@ -3049,23 +2774,6 @@ export interface components {
 			name?: string | null
 			/** Format: uuid */
 			parentId?: string | null
-		}
-		UpdateGuestsDTO: {
-			additional_services: components['schemas']['AdditionalServiceDTO'][]
-			/** Format: uuid */
-			additional_services_guide_uuid?: string | null
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			interaction_cards: components['schemas']['InteractionCardDTO'][]
-			/** Format: uuid */
-			interaction_cards_guide_uuid?: string | null
-			opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			search_promo: components['schemas']['SearchPromoDTO']
-			/** Format: uuid */
-			search_promo_guide_uuid?: string | null
-			title: string
 		}
 		UpdateHomeCategoryDTO: {
 			/** Format: uuid */
@@ -3113,11 +2821,6 @@ export interface components {
 			text: string
 			title: string
 		}
-		UpdateLeadershipItemDTO: {
-			/** Format: uuid */
-			icon_uuid?: string | null
-			text: string
-		}
 		UpdateMediaDTO: {
 			alt?: string | null
 			category?: string | null
@@ -3146,19 +2849,6 @@ export interface components {
 			url?: string | null
 			version?: string | null
 		}
-		UpdateNewsItemDTO: {
-			/** Format: uuid */
-			icon_uuid?: string | null
-			text: string
-		}
-		UpdateOpportunityItemDTO: {
-			button_text: string
-			/** Format: uuid */
-			icon_uuid?: string | null
-			items: string[]
-			link: string
-			title: string
-		}
 		UpdatePageDTO: {
 			blocks?: unknown
 			clear_parent?: boolean | null
@@ -3173,21 +2863,6 @@ export interface components {
 			status?: string | null
 			title?: string | null
 		}
-		UpdatePlatformsDTO: {
-			description: string
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			opportunities: components['schemas']['UpdateOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			/** Format: uuid */
-			tools_guide_uuid?: string | null
-			tools_items: components['schemas']['UpdateToolItemDTO'][]
-			/** Format: uuid */
-			tools_logo_uuid?: string | null
-			tools_title: string
-		}
 		UpdateRedirectDTO: {
 			is_active?: boolean | null
 			source_path?: string | null
@@ -3200,10 +2875,6 @@ export interface components {
 			is_singleton?: boolean | null
 			name?: string | null
 			slug?: string | null
-		}
-		UpdateToolItemDTO: {
-			text: string
-			title: string
 		}
 		UpdateUserDTO: {
 			avatar?: string | null
@@ -3279,12 +2950,6 @@ export interface components {
 			video_tour_url?: string | null
 			working_hours_weekdays?: string | null
 			working_hours_weekends?: string | null
-		}
-		UpdateWhoWeAreItemDTO: {
-			description: string
-			/** Format: uuid */
-			image_uuid?: string | null
-			title: string
 		}
 		UserResponseDTO: {
 			avatar?: string | null
@@ -3376,11 +3041,6 @@ export interface components {
 			working_hours_weekdays?: string | null
 			working_hours_weekends?: string | null
 		}
-		WhoWeAreItemDTO: {
-			description: string
-			image: components['schemas']['MediaDTO']
-			title: string
-		}
 	}
 	responses: never
 	parameters: never
@@ -3390,70 +3050,6 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-	get_about: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-		}
-	}
-	update_about: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateAboutDTO']
-			}
-		}
-		responses: {
-			/** @description About page updated */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Database error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-		}
-	}
 	get_engagement_stats: {
 		parameters: {
 			query?: {
@@ -4597,62 +4193,6 @@ export interface operations {
 		responses: {
 			/** @description Success */
 			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-		}
-	}
-	get_guests: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_GuestsResponseDTO']
-				}
-			}
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_GuestsResponseDTO']
-				}
-			}
-		}
-	}
-	update_guests: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateGuestsDTO']
-			}
-		}
-		responses: {
-			/** @description Guests page updated */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Database error */
-			500: {
 				headers: {
 					[name: string]: unknown
 				}
@@ -6279,70 +5819,6 @@ export interface operations {
 				content?: never
 			}
 			/** @description Internal Server Error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-		}
-	}
-	get_platforms: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
-				}
-			}
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
-				}
-			}
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
-				}
-			}
-		}
-	}
-	update_platforms: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdatePlatformsDTO']
-			}
-		}
-		responses: {
-			/** @description Platforms page updated */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Database error */
 			500: {
 				headers: {
 					[name: string]: unknown
