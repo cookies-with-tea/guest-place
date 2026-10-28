@@ -3,8 +3,31 @@
 		class="tiptap-editor"
 		:class="{ 'is-dark': isDark, 'is-disabled': disabled, 'is-focused': controller.isFocused }"
 	>
-		<TiptapToolbar v-if="!disabled" :controller="controller" />
-		<TiptapLinkDialog :controller="controller" />
+		<RichTextToolbar v-if="!disabled" :controller="controller" />
+		<RichTextLinkDialog :controller="controller" />
+		<RichTextActionDialog
+			confirm-label="Отправить"
+			label="Ключ перевода:"
+			:model-value="controller.pendingKey"
+			:open="controller.isKeyDialogOpen"
+			placeholder="namespace.field.1"
+			@cancel="controller.isKeyDialogOpen = false"
+			@confirm="onConfirmKey"
+			@input-ref="(el) => (controller.keyInputRef = el)"
+			@update:model-value="controller.pendingKey = $event"
+		/>
+		<RichTextActionDialog
+			confirm-label="Вставить"
+			input-type="number"
+			label="Сумма:"
+			:model-value="controller.pendingCurrency"
+			:open="controller.isCurrencyDialogOpen"
+			placeholder="1990.50"
+			@cancel="controller.isCurrencyDialogOpen = false"
+			@confirm="controller.confirmCurrency"
+			@input-ref="(el) => (controller.currencyInputRef = el)"
+			@update:model-value="controller.pendingCurrency = $event"
+		/>
 
 		<!-- Editor area -->
 		<EditorContent :editor="controller.editor" class="tiptap-content" />
@@ -12,28 +35,38 @@
 </template>
 
 <script setup lang="ts">
-import { useTheme } from '@admin-panel/ui'
+import { useTheme } from '../../../widgets/ui-theme-switcher/lib/composables/useTheme'
 import { EditorContent } from '@tiptap/vue-3'
 
-import { useTiptapEditor } from '../../composables/useTiptapEditor'
-import TiptapLinkDialog from './tiptap/TiptapLinkDialog.vue'
-import TiptapToolbar from './tiptap/TiptapToolbar.vue'
+import { createTranslationKey } from '../lib/translationKey'
+import { useRichTextEditor } from '../composables/useRichTextEditor'
+import RichTextActionDialog from './RichTextActionDialog.vue'
+import RichTextLinkDialog from './RichTextLinkDialog.vue'
+import RichTextToolbar from './RichTextToolbar.vue'
 
 interface Props {
 	placeholder?: string
 	disabled?: boolean
+	namespace?: string
+	fieldPath?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	placeholder: 'Start writing...',
 	disabled: false,
+	namespace: 'content',
+	fieldPath: 'field',
 })
 
 const modelValue = defineModel<string>({ default: '' })
 
 const { isDark } = useTheme()
 
-const controller = useTiptapEditor(modelValue, props)
+const controller = useRichTextEditor(modelValue, props)
+
+const onConfirmKey = () => {
+	controller.confirmTranslationKey((key, fallback) => createTranslationKey(key, fallback, props.namespace))
+}
 </script>
 
 <style scoped>
@@ -200,6 +233,27 @@ const controller = useTiptapEditor(modelValue, props)
 		border: none;
 		border-top: 2px solid var(--tiptap-border);
 		margin: 1em 0;
+	}
+
+	/* i18n marks */
+	.gp-i18n-key {
+		border-radius: 3px;
+		box-shadow: 0 0 0 1px rgb(99, 102, 241, 0.3);
+		background: rgb(99, 102, 241, 0.15);
+	}
+
+	.gp-i18n-literal {
+		border-radius: 3px;
+		box-shadow: 0 0 0 1px rgb(148, 163, 184, 0.35);
+		background: rgb(148, 163, 184, 0.2);
+	}
+
+	.gp-currency-chip {
+		border-radius: 3px;
+		font-family: monospace;
+		color: var(--tiptap-active-bg);
+		background: rgb(99, 102, 241, 0.12);
+		padding: 0 4px;
 	}
 
 	/* Selection */

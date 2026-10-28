@@ -74,7 +74,8 @@
 		"prepack": "pnpm unbuild",
 		"prepublishOnly": "npm run build",
 		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "tsc --noEmit"
 	},
 	"type": "module",
 	"types": "dist/index.d.ts"

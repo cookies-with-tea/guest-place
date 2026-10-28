@@ -46,6 +46,35 @@ export async function getMfParams(nextDevPort, nextPreviewPort) {
 	const devPort = await devPortPrompt.run()
 	const previewPort = await previewPortPrompt.run()
 
+	const templatePrompt = new Select({
+		message: 'Choose a starting page template:',
+		choices: ['Basic page', 'List + filters + CRUD dialogs'],
+	})
+
+	const template = await templatePrompt.run()
+	const isCrud = template === 'List + filters + CRUD dialogs'
+
+	let entitySingular = ''
+	if (isCrud) {
+		const defaultEntity = name
+			.replace(/^admin-/, '')
+			.replace(/s$/, '')
+			.split('-')
+			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+			.join('')
+
+		const entityPrompt = new Input({
+			message: 'Entity name for the CRUD scaffold (singular, PascalCase, e.g. "Widget"):',
+			initial: defaultEntity,
+			validate: (value) => {
+				if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) return 'Must be PascalCase, e.g. "Widget"'
+				return true
+			},
+		})
+
+		entitySingular = await entityPrompt.run()
+	}
+
 	const confirmPrompt = new Select({
 		message: `Create micro-frontend "${name}" with ports ${devPort} (dev) and ${previewPort} (preview)?`,
 		choices: ['Yes', 'No'],
@@ -53,5 +82,5 @@ export async function getMfParams(nextDevPort, nextPreviewPort) {
 
 	const confirm = await confirmPrompt.run()
 
-	return { name, displayName, devPort, previewPort, confirm: confirm === 'Yes' }
+	return { name, displayName, devPort, previewPort, isCrud, entitySingular, confirm: confirm === 'Yes' }
 }

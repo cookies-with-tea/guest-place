@@ -12,7 +12,13 @@
 	>
 		<el-form label-position="top">
 			<el-form-item label="Название пункта">
-				<el-input v-model="dialog.itemForm.title" placeholder="О платформе, Каталог, Контакты..." />
+				<UiRichTextField
+					v-model="dialog.itemForm.title"
+					field-path="item.title"
+					mode="simple"
+					namespace="menus"
+					placeholder="О платформе, Каталог, Контакты..."
+				/>
 			</el-form-item>
 
 			<el-form-item label="Тип ссылки">
@@ -65,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+import { UiRichTextField } from '@admin-panel/ui'
+
 import type { MenuItemDialog } from '../composables/useMenuItemDialog'
 import type { MenusList } from '../composables/useMenusList'
 

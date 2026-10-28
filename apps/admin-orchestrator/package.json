@@ -37,7 +37,8 @@
 		"preview": "vite preview",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
 		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

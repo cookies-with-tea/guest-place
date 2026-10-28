@@ -1,13 +1,11 @@
 <template>
-	<ContentFormGeneratorBase v-model="modelValue" :errors="errors" :fields="fields" :readonly="readonly">
-		<template #rich-text="{ field, value, disabled, update }">
-			<TiptapEditor
-				:disabled="disabled"
-				:model-value="value"
-				:placeholder="`Write ${field.label}...`"
-				@update:model-value="update"
-			/>
-		</template>
+	<ContentFormGeneratorBase
+		v-model="modelValue"
+		:errors="errors"
+		:fields="fields"
+		:readonly="readonly"
+		:translation-namespace="translationNamespace"
+	>
 		<template #relation="{ field, value, disabled, update }">
 			<UiRelationPicker
 				:disabled="disabled"
@@ -25,14 +23,19 @@
 import type { FieldDefinition } from '@admin-panel/lib'
 import { ContentFormGenerator as ContentFormGeneratorBase } from '@admin-panel/ui'
 
-import TiptapEditor from './TiptapEditor.vue'
 import UiRelationPicker from './UiRelationPicker.vue'
 
 const modelValue = defineModel<Record<string, any>>({ required: true, default: () => ({}) })
 
-defineProps<{
-	fields: FieldDefinition[]
-	errors?: Record<string, string[]>
-	readonly?: boolean
-}>()
+withDefaults(
+	defineProps<{
+		fields: FieldDefinition[]
+		errors?: Record<string, string[]>
+		readonly?: boolean
+		translationNamespace?: string
+	}>(),
+	{
+		translationNamespace: 'content',
+	}
+)
 </script>

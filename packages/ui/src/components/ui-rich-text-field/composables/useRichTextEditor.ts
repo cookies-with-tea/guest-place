@@ -11,17 +11,30 @@ import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { useEditor } from '@tiptap/vue-3'
 
-interface TiptapEditorProps {
+import { suggestTranslationKey } from '../lib/translationKey'
+import { NonTranslatableMark, TranslationKeyMark } from '../tiptap/marks'
+
+interface RichTextEditorProps {
 	placeholder: string
 	disabled: boolean
+	namespace: string
+	fieldPath: string
 }
 
-/** Editor instance, external-sync watchers and the link-insert dialog for TiptapEditor.vue. */
-export const useTiptapEditor = (modelValue: Ref<string>, props: TiptapEditorProps) => {
+/** Editor instance, external-sync watchers and the link/i18n-action dialogs for RichTextFullEditor.vue. */
+export const useRichTextEditor = (modelValue: Ref<string>, props: RichTextEditorProps) => {
 	const isFocused = ref(false)
 	const isLinkDialogOpen = ref(false)
 	const linkUrl = ref('')
 	const linkInputRef = ref<HTMLInputElement | null>(null)
+
+	const isKeyDialogOpen = ref(false)
+	const pendingKey = ref('')
+	const keyInputRef = ref<HTMLInputElement | null>(null)
+
+	const isCurrencyDialogOpen = ref(false)
+	const pendingCurrency = ref('')
+	const currencyInputRef = ref<HTMLInputElement | null>(null)
 
 	const editor = useEditor({
 		content: modelValue.value,
@@ -48,6 +61,8 @@ export const useTiptapEditor = (modelValue: Ref<string>, props: TiptapEditorProp
 				placeholder: props.placeholder,
 			}),
 			CharacterCount,
+			TranslationKeyMark,
+			NonTranslatableMark,
 		],
 		onFocus() {
 			isFocused.value = true
@@ -116,6 +131,72 @@ export const useTiptapEditor = (modelValue: Ref<string>, props: TiptapEditorProp
 		linkUrl.value = ''
 	}
 
+	// "Отправить в перевод": wraps the current selection with a translation-key mark.
+	// The dialog lets the content manager rename the auto-suggested key before confirming.
+	const handleSendToTranslation = () => {
+		if (editor.value?.isActive('translationKey')) {
+			editor.value.chain().focus().unsetTranslationKey().run()
+
+			return
+		}
+
+		pendingKey.value = suggestTranslationKey(editor.value?.getHTML() || '', props.namespace, props.fieldPath)
+		isKeyDialogOpen.value = true
+
+		nextTick(() => keyInputRef.value?.focus())
+	}
+
+	const confirmTranslationKey = async (createKey: (key: string, fallback: string) => Promise<void>) => {
+		const key = pendingKey.value.trim()
+
+		if (!key || !editor.value) {
+			isKeyDialogOpen.value = false
+
+			return
+		}
+
+		const { state } = editor.value
+		const fallback = state.doc.textBetween(state.selection.from, state.selection.to, ' ')
+
+		editor.value.chain().focus().setTranslationKey(key).run()
+
+		isKeyDialogOpen.value = false
+
+		await createKey(key, fallback)
+	}
+
+	// "Исключить из перевода": purely local, no server call needed.
+	const handleExclude = () => {
+		if (editor.value?.isActive('nonTranslatable')) {
+			editor.value.chain().focus().unsetNonTranslatable().run()
+
+			return
+		}
+
+		editor.value?.chain().focus().setNonTranslatable().run()
+	}
+
+	// "Валюта": inserts a {currency:N} slot chip at the cursor.
+	const handleInsertCurrency = () => {
+		pendingCurrency.value = ''
+		isCurrencyDialogOpen.value = true
+
+		nextTick(() => currencyInputRef.value?.focus())
+	}
+
+	const confirmCurrency = () => {
+		const amount = parseFloat(pendingCurrency.value.replace(',', '.'))
+
+		if (!isNaN(amount)) {
+			const chip = `<span class="gp-currency-chip" data-slot="currency:${amount}" contenteditable="false">{currency:${amount}}</span>`
+
+			editor.value?.chain().focus().insertContent(chip).run()
+		}
+
+		isCurrencyDialogOpen.value = false
+		pendingCurrency.value = ''
+	}
+
 	onBeforeUnmount(() => {
 		editor.value?.destroy()
 	})
@@ -128,7 +209,18 @@ export const useTiptapEditor = (modelValue: Ref<string>, props: TiptapEditorProp
 		linkInputRef,
 		handleLinkToggle,
 		confirmLink,
+		isKeyDialogOpen,
+		pendingKey,
+		keyInputRef,
+		handleSendToTranslation,
+		confirmTranslationKey,
+		handleExclude,
+		isCurrencyDialogOpen,
+		pendingCurrency,
+		currencyInputRef,
+		handleInsertCurrency,
+		confirmCurrency,
 	})
 }
 
-export type TiptapEditorController = ReturnType<typeof useTiptapEditor>
+export type RichTextEditorController = ReturnType<typeof useRichTextEditor>

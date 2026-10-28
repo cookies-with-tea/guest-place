@@ -103,19 +103,19 @@ const goHome = () => {
 <style scoped lang="scss">
 .error-boundary-container {
 	min-height: 380px;
+	max-width: 680px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin: 24px auto;
-	max-width: 680px;
-	padding: 40px;
+	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.15));
 	border-radius: 20px;
-	background: var(--gp-bg-glass, rgba(255, 255, 255, 0.7));
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
-	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.15));
-	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 12px 32px rgb(0, 0, 0, 0.08);
+	background: var(--gp-bg-glass, rgb(255, 255, 255, 0.7));
 	transition: all 0.3s ease;
+	padding: 40px;
+	margin: 24px auto;
+	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(16px);
 }
 
 .error-content {
@@ -129,11 +129,11 @@ const goHome = () => {
 .icon-wrapper {
 	width: 64px;
 	height: 64px;
-	border-radius: 50%;
-	background: rgba(230, 162, 60, 0.12);
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border-radius: 50%;
+	background: rgb(230, 162, 60, 0.12);
 	margin-bottom: 16px;
 }
 
@@ -147,68 +147,68 @@ const goHome = () => {
 }
 
 .error-title {
-	font-size: 20px;
 	font-weight: 700;
+	font-size: 20px;
 	color: var(--gp-text-main, #1e293b);
-	margin: 0 0 8px 0;
+	margin: 0 0 8px;
 }
 
 .error-desc {
+	max-width: 480px;
 	font-size: 14px;
 	line-height: 1.6;
 	color: var(--gp-text-secondary, #64748b);
-	max-width: 480px;
-	margin: 0 0 24px 0;
+	margin: 0 0 24px;
 }
 
 .error-accordion {
 	width: 100%;
-	margin-bottom: 24px;
 	text-align: left;
+	margin-bottom: 24px;
 }
 
 .error-toggle {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	background: transparent;
 	border: none;
-	cursor: pointer;
+	border-radius: 6px;
 	font-size: 13px;
 	color: var(--gp-text-secondary, #64748b);
-	padding: 6px 10px;
-	border-radius: 6px;
+	background: transparent;
 	transition: all 0.2s ease;
+	cursor: pointer;
+	padding: 6px 10px;
+	gap: 6px;
 
 	&:hover {
 		color: var(--gp-primary, #409eff);
-		background: rgba(64, 158, 255, 0.08);
+		background: rgb(64, 158, 255, 0.08);
 	}
 }
 
 .error-details-box {
-	margin-top: 10px;
-	background: #0f172a;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 10px;
-	padding: 14px;
 	max-height: 220px;
+	border: 1px solid rgb(255, 255, 255, 0.1);
+	border-radius: 10px;
+	background: #0f172a;
+	padding: 14px;
+	margin-top: 10px;
 	overflow-y: auto;
 }
 
 .error-code {
-	margin: 0;
 	font-family: 'JetBrains Mono', 'Fira Code', monospace;
 	font-size: 12px;
 	line-height: 1.5;
-	color: #fca5a5;
-	white-space: pre-wrap;
 	word-break: break-all;
+	white-space: pre-wrap;
+	color: #fca5a5;
+	margin: 0;
 }
 
 .error-actions {
 	display: flex;
-	gap: 12px;
 	justify-content: center;
+	gap: 12px;
 }
 </style>

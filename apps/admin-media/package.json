@@ -41,7 +41,8 @@
 		"test:coverage": "vitest run --coverage --passWithNoTests",
 		"test:e2e": "start-server-and-test 'vite dev' http://localhost:4177 'cypress run --e2e'",
 		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4177 'cypress open --e2e'",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

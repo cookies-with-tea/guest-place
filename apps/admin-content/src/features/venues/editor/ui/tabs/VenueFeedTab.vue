@@ -20,13 +20,15 @@
 					<el-button type="danger" link @click="venueForm.removeFeedItem(idx)">✕</el-button>
 				</div>
 
-				<el-input
+				<UiRichTextField
 					v-model="item.text"
-					type="textarea"
-					:rows="3"
+					field-path="feed.text"
+					mode="simple"
+					multiline
+					namespace="venues"
 					placeholder="Текст новости или анонса мероприятия..."
 					style="margin-bottom: 10px"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 
 				<el-row :gutter="12">
@@ -56,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard } from '@admin-panel/ui'
+import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
 

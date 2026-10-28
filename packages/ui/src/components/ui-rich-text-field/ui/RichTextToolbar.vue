@@ -611,6 +611,63 @@
 
 		<div class="toolbar-divider" />
 
+		<!-- Translation / i18n actions -->
+		<div class="toolbar-group">
+			<button
+				:class="{ 'is-active': controller.editor?.isActive('translationKey') }"
+				class="toolbar-btn"
+				title="Отправить в перевод"
+				type="button"
+				@click="controller.handleSendToTranslation"
+			>
+				<svg fill="none" height="15" viewBox="0 0 24 24" width="15" xmlns="http://www.w3.org/2000/svg">
+					<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+					<line stroke="currentColor" stroke-linecap="round" stroke-width="2" x1="2" x2="22" y1="12" y2="12" />
+					<path
+						d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+					/>
+				</svg>
+			</button>
+			<button
+				:class="{ 'is-active': controller.editor?.isActive('nonTranslatable') }"
+				class="toolbar-btn"
+				title="Исключить из перевода"
+				type="button"
+				@click="controller.handleExclude"
+			>
+				<svg fill="none" height="15" viewBox="0 0 24 24" width="15" xmlns="http://www.w3.org/2000/svg">
+					<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+					<line
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-width="2"
+						x1="4.93"
+						x2="19.07"
+						y1="4.93"
+						y2="19.07"
+					/>
+				</svg>
+			</button>
+			<button class="toolbar-btn" title="Вставить валюту" type="button" @click="controller.handleInsertCurrency">
+				<svg fill="none" height="15" viewBox="0 0 24 24" width="15" xmlns="http://www.w3.org/2000/svg">
+					<line stroke="currentColor" stroke-linecap="round" stroke-width="2" x1="12" x2="12" y1="1" y2="23" />
+					<path
+						d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+					/>
+				</svg>
+			</button>
+		</div>
+
+		<div class="toolbar-divider" />
+
 		<!-- History -->
 		<div class="toolbar-group">
 			<button
@@ -674,10 +731,10 @@
 </template>
 
 <script setup lang="ts">
-import type { TiptapEditorController } from '../../../composables/useTiptapEditor'
+import type { RichTextEditorController } from '../composables/useRichTextEditor'
 
 defineProps<{
-	controller: TiptapEditorController
+	controller: RichTextEditorController
 }>()
 </script>
 

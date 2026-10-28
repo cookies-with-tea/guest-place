@@ -19,7 +19,7 @@
 			</UiTableColumn>
 			<UiTableColumn label="Key" min-width="200" prop="key" />
 			<UiTableColumn label="Translation" min-width="200" prop="value" />
-			<el-table-column label="Actions" width="160" align="center">
+			<el-table-column label="Actions" width="200" align="center">
 				<template #default="scope">
 					<div class="action-buttons">
 						<el-tooltip content="Edit Translation" placement="top">
@@ -44,6 +44,17 @@
 								@click="openHistory(scope.row)"
 							/>
 						</el-tooltip>
+						<el-tooltip content="Где используется" placement="top">
+							<el-button
+								v-if="scope.row"
+								circle
+								plain
+								size="small"
+								type="info"
+								:icon="Link"
+								@click="openRefs(scope.row)"
+							/>
+						</el-tooltip>
 						<el-tooltip content="Delete Translation" placement="top">
 							<el-button
 								v-if="scope.row"
@@ -61,6 +72,7 @@
 		</UiTable>
 
 		<TranslationsHistoryDialog />
+		<TranslationsRefsDialog />
 	</div>
 </template>
 
@@ -68,14 +80,15 @@
 import { computed } from 'vue'
 
 import { UiTable, UiTableColumn } from '@admin-panel/ui'
-import { Clock, Delete, Edit } from '@element-plus/icons-vue'
+import { Clock, Delete, Edit, Link } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 import { useTranslations } from '#entities/translation/lib/composables'
 
 import { TranslationsHistoryDialog } from '../../translations-history'
+import { TranslationsRefsDialog } from '../../translations-refs'
 
-const { translations, isLoading, pagination, openEditModal, openHistory, handleDelete, setPage, setLimit } =
+const { translations, isLoading, pagination, openEditModal, openHistory, openRefs, handleDelete, setPage, setLimit } =
 	useTranslations()
 
 const currentPage = computed({

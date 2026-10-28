@@ -31,7 +31,9 @@
 			"cache": false
 		},
 		"type-check": {
-			"outputs": []
+			"outputs": [],
+			"dependsOn": ["^build"],
+			"cache": true
 		},
 		"clean": {
 			"cache": false

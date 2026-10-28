@@ -1,6 +1,6 @@
 import { createApi, type IPaginationQuery, type IResponse, type IWithPagination } from '@admin-panel/lib'
 
-import type { Translation, TranslationFilters } from '../model'
+import type { Translation, TranslationFilters, TranslationRef } from '../model'
 
 export interface FetchTranslationsParams extends TranslationFilters, IPaginationQuery {}
 
@@ -53,5 +53,12 @@ export const fetchTranslationVersions = async (key: string, locale: string): Pro
 export const rollbackTranslation = async (versionId: string): Promise<IResponse<void>> => {
 	return fetchData<void>(`/versions/${versionId}/rollback`, {
 		method: 'POST',
+	})
+}
+
+/** Content entries/fields referencing this key (see content_translation_refs, server/src/content/translation_refs.rs). */
+export const fetchTranslationRefs = async (key: string): Promise<IResponse<TranslationRef[]>> => {
+	return fetchData<TranslationRef[]>(`/${key}/refs`, {
+		method: 'GET',
 	})
 }

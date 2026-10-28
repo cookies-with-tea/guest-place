@@ -39,7 +39,8 @@
 		"preview-storybook": "serve storybook-static",
 		"storybook": "storybook dev -p 6006",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
-		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache"
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

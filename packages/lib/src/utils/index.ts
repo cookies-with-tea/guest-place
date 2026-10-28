@@ -1,5 +1,6 @@
 export * from './browser'
 export * from './federation'
+export * from './formatCurrency'
 export * from './formatNumbers'
 export * from './lifecycle'
 export * from './mappers'

@@ -19,7 +19,7 @@ async function main() {
 			return
 		}
 
-		const { name, displayName, devPort, previewPort } = params
+		const { name, displayName, devPort, previewPort, isCrud, entitySingular } = params
 		const mfName = name.replace(/^admin-/, '')
 
 		// Update ports.ts
@@ -41,10 +41,15 @@ async function main() {
 			'src/app/assets/styles',
 			'src/app/layouts',
 			`src/pages/${mfName}-page/ui/components`,
+			`src/pages/${mfName}-page/composables`,
 			'src/entities',
 			'src/features',
 			'src/shared',
 		]
+
+		if (isCrud) {
+			dirs.push(`src/entities/${mfName}/api`)
+		}
 
 		dirs.forEach((dir) => fs.mkdirSync(path.join(appDir, dir), { recursive: true }))
 		console.log('✅ Created directory structure')
@@ -70,7 +75,46 @@ async function main() {
 				.split('-')
 				.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 				.join('') + 'Page'
-		writeFile(`src/pages/${mfName}-page/ui/${componentName}.vue`, templates.getPageVue(name, displayName))
+
+		if (isCrud) {
+			const entityPlural = entitySingular.endsWith('s') ? entitySingular : `${entitySingular}s`
+			const entityPluralCamel = entityPlural.charAt(0).toLowerCase() + entityPlural.slice(1)
+
+			writeFile(
+				`src/entities/${mfName}/api/index.ts`,
+				templates.getCrudEntityApi(mfName, entitySingular, entityPlural, entityPluralCamel)
+			)
+			writeFile(`src/entities/${mfName}/index.ts`, "export * from './api'\n")
+
+			writeFile(
+				`src/pages/${mfName}-page/composables/use${entityPlural}Data.ts`,
+				templates.getCrudComposable(mfName, entitySingular, entityPlural, entityPluralCamel)
+			)
+
+			writeFile(
+				`src/pages/${mfName}-page/ui/components/${entityPlural}PageHeader.vue`,
+				templates.getCrudPageHeader(displayName, entityPlural, entityPluralCamel)
+			)
+			writeFile(
+				`src/pages/${mfName}-page/ui/components/${entityPlural}FilterBar.vue`,
+				templates.getCrudFilterBar(entityPlural, entityPluralCamel)
+			)
+			writeFile(
+				`src/pages/${mfName}-page/ui/components/${entityPlural}Table.vue`,
+				templates.getCrudTable(entityPlural, entityPluralCamel)
+			)
+			writeFile(
+				`src/pages/${mfName}-page/ui/components/${entityPlural}FormDialog.vue`,
+				templates.getCrudFormDialog(entitySingular, entityPlural, entityPluralCamel)
+			)
+			writeFile(
+				`src/pages/${mfName}-page/ui/${componentName}.vue`,
+				templates.getCrudPageVue(entityPlural, entityPluralCamel)
+			)
+		} else {
+			writeFile(`src/pages/${mfName}-page/ui/${componentName}.vue`, templates.getPageVue(name, displayName))
+		}
+
 		writeFile(`src/pages/${mfName}-page/index.ts`, templates.getPageIndex(name))
 
 		writeFile('tsconfig.json', templates.getTsConfig())

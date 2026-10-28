@@ -1,24 +1,7 @@
 <template>
 	<div class="media-table-feature" :class="{ 'is-dark': isDark }">
-		<div v-if="selectedItems.length > 0" class="bulk-actions">
-			<el-dropdown trigger="click" @command="handleBulkCommand">
-				<el-button type="primary" size="small">
-					Групповые операции ({{ selectedItems.length }})
-					<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-				</el-button>
-				<template #dropdown>
-					<el-dropdown-menu>
-						<el-dropdown-item :icon="FolderOpened" command="moveToFolder">Переместить в папку</el-dropdown-item>
-						<el-dropdown-item :icon="PriceTag" command="addTags">Добавить теги</el-dropdown-item>
-						<el-dropdown-item :icon="FolderOpened" command="changeCategory">Сменить категорию</el-dropdown-item>
-						<el-dropdown-item :icon="Refresh" command="convertToWebP">Конвертировать в WebP</el-dropdown-item>
-						<el-dropdown-item divided :icon="Delete" command="delete" style="color: var(--el-color-danger)">
-							Удалить выбранные
-						</el-dropdown-item>
-					</el-dropdown-menu>
-				</template>
-			</el-dropdown>
-		</div>
+		<MediaBulkActionsBar :bulk="bulk" />
+
 		<UiTable
 			v-model:page="pagination.page"
 			v-model:limit="pagination.limit"
@@ -28,295 +11,39 @@
 			:data="mediaItems"
 			element-loading-text="Loading data..."
 			:total="pagination.total"
-			@selection-change="handleSelectionChange"
+			@selection-change="bulk.handleSelectionChange"
 			@row-click="(row: MediaItem) => openPreviewDialog(row.uuid)"
 			@update:page="setPage"
 			@update:limit="setLimit"
 		>
-			<el-table-column type="selection" width="55" />
-
-			<!-- Name Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				label="Name"
-				min-width="150"
-				prop="name"
-				sortable
-				@sort="setSort"
-			>
-				<template #default="{ row }">
-					<span class="media-name">{{ row.name || 'unnamed' }}</span>
-				</template>
-			</UiTableColumn>
-
-			<!-- Media Type Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				filterable
-				label="Type"
-				prop="media_type"
-				sortable
-				width="140"
-				:show-filter-active="filters.mediaTypes && filters.mediaTypes.length > 0"
-				@sort="setSort"
-			>
-				<template #filter>
-					<el-select
-						v-model="filters.mediaTypes"
-						clearable
-						collapse-tags
-						collapse-tags-tooltip
-						multiple
-						placeholder="Select types"
-						popper-class="dark-select"
-					>
-						<el-option label="Image" value="image" />
-						<el-option label="Video" value="video" />
-						<el-option label="Document" value="document" />
-						<el-option label="Archive" value="archive" />
-						<el-option label="Other" value="other" />
-					</el-select>
-				</template>
-				<template #default="{ row }">
-					<el-tag effect="plain" size="small">{{ row.mediaType }}</el-tag>
-				</template>
-			</UiTableColumn>
-
-			<!-- Category Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				filterable
-				label="Category"
-				prop="category"
-				sortable
-				width="140"
-				:show-filter-active="filters.category && filters.category.length > 0"
-				@sort="setSort"
-			>
-				<template #filter>
-					<el-select
-						v-model="filters.category"
-						clearable
-						collapse-tags
-						collapse-tags-tooltip
-						filterable
-						multiple
-						placeholder="Select categories"
-						popper-class="dark-select"
-					>
-						<!-- These would ideally come from a separate API -->
-						<el-option label="Marketing" value="Marketing" />
-						<el-option label="UI/UX" value="UI/UX" />
-						<el-option label="Content" value="Content" />
-					</el-select>
-				</template>
-				<template #default="{ row }">
-					<span class="media-category">{{ row.category || '—' }}</span>
-				</template>
-			</UiTableColumn>
-
-			<!-- Tags Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				filterable
-				label="Tags"
-				prop="tags"
-				width="180"
-				:show-filter-active="filters.tags && filters.tags.length > 0"
-				@sort="setSort"
-			>
-				<template #filter>
-					<el-select
-						v-model="filters.tags"
-						allow-create
-						clearable
-						collapse-tags
-						collapse-tags-tooltip
-						default-first-option
-						filterable
-						multiple
-						placeholder="Filter by tags"
-						popper-class="dark-select"
-					>
-						<!-- Tags would also ideally be fetched -->
-					</el-select>
-				</template>
-				<template #default="{ row }">
-					<div class="tags-container">
-						<template v-if="row.tags && row.tags.length">
-							<el-tag v-for="tag in row.tags" :key="tag" class="media-tag" effect="light" size="small">
-								{{ tag }}
-							</el-tag>
-						</template>
-						<span v-else>—</span>
-					</div>
-				</template>
-			</UiTableColumn>
-
-			<!-- Folder Column -->
-			<el-table-column label="Folder" width="140">
-				<template #default="{ row }">
-					<div v-if="getFolderById(row.folderId)" class="table-folder-badge">
-						<span class="folder-dot" :style="{ backgroundColor: getFolderById(row.folderId)?.color || '#409EFF' }" />
-						<span class="folder-name">{{ getFolderById(row.folderId)?.name }}</span>
-					</div>
-					<span v-else class="text-muted">—</span>
-				</template>
-			</el-table-column>
-
-			<!-- Preview Column -->
-			<el-table-column label="Preview" width="105">
-				<template #default="{ row }">
-					<div class="media-preview-cell">
-						<span
-							v-if="row.dominantColor"
-							class="cell-color-dot"
-							:style="{ backgroundColor: row.dominantColor }"
-							:title="`Dominant color: ${row.dominantColor}`"
-						/>
-						<el-image
-							v-if="row.mediaType === 'image'"
-							class="preview-img"
-							fit="cover"
-							lazy
-							:src="row.variants?.thumbnail?.url || row.optimizedPath || row.url"
-						/>
-						<div v-else-if="row.mediaType === 'video'" class="video-preview-thumb">
-							<video class="preview-img" muted loop autoplay playsinline :src="row.url" />
-							<span class="video-play-indicator">▶</span>
-						</div>
-						<div
-							v-else-if="row.extension?.toLowerCase() === 'pdf' || row.mediaType === 'document'"
-							class="doc-preview-cell"
-						>
-							<span class="doc-badge">PDF</span>
-							<el-icon :size="20"><Document /></el-icon>
-						</div>
-						<el-icon v-else :size="24"><Document /></el-icon>
-					</div>
-				</template>
-			</el-table-column>
-
-			<!-- Size Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				label="Size"
-				prop="size_bytes"
-				sortable
-				width="120"
-				@sort="setSort"
-			>
-				<template #default="{ row }">
-					{{ formatFileSize(row.sizeBytes) }}
-				</template>
-			</UiTableColumn>
-
-			<!-- Source Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				filterable
-				label="Source"
-				prop="source"
-				sortable
-				width="140"
-				:show-filter-active="filters.source && filters.source.length > 0"
-				@sort="setSort"
-			>
-				<template #filter>
-					<el-select
-						v-model="filters.source"
-						clearable
-						collapse-tags
-						collapse-tags-tooltip
-						filterable
-						multiple
-						placeholder="Select sources"
-						popper-class="dark-select"
-					>
-						<el-option label="CMS" value="cms" />
-						<el-option label="Site" value="site" />
-					</el-select>
-				</template>
-				<template #default="{ row }">
-					<el-tag effect="plain" :type="(row.source || 'cms') === 'site' ? 'warning' : 'primary'" size="small">{{
-						row.source || 'cms'
-					}}</el-tag>
-				</template>
-			</UiTableColumn>
-
-			<!-- Date Column -->
-			<UiTableColumn
-				v-model:sortBy="filters.sortBy"
-				v-model:sortOrder="filters.sortOrder"
-				label="Added"
-				prop="created_at"
-				sortable
-				width="160"
-				@sort="setSort"
-			>
-				<template #default="{ row }">
-					{{ formatDate(row.createdAt) }}
-				</template>
-			</UiTableColumn>
-
-			<!-- Actions Column -->
-			<el-table-column label="Actions" width="120">
-				<template #default="{ row }">
-					<div class="action-buttons">
-						<el-tooltip content="Edit Media" placement="top">
-							<el-button circle plain size="small" type="warning" :icon="Edit" @click.stop="openEditModal(row.uuid)" />
-						</el-tooltip>
-						<el-tooltip content="Delete Media" placement="top">
-							<el-button circle plain size="small" type="danger" :icon="Delete" @click.stop="confirmDelete(row.uuid)" />
-						</el-tooltip>
-					</div>
-				</template>
-			</el-table-column>
+			<MediaTableColumns
+				:confirm-delete="bulk.confirmDelete"
+				:filters="filters"
+				:get-folder-by-id="bulk.getFolderById"
+				:on-sort="setSort"
+				:open-edit-modal="openEditModal"
+			/>
 		</UiTable>
 
 		<MediaPreviewDialog />
 		<MediaUpdateModal />
 		<MediaUploadDialog />
 
-		<!-- Move to Folder Dialog -->
-		<el-dialog v-model="isMoveFolderDialogOpen" title="Move to Folder" width="400px">
-			<el-form label-position="top">
-				<el-form-item label="Target Folder">
-					<el-select v-model="targetFolderId" placeholder="Select destination folder" style="width: 100%">
-						<el-option label="📁 Unorganized (Root)" value="root" />
-						<el-option v-for="folder in folders" :key="folder.id" :label="folder.name" :value="folder.id">
-							<span class="folder-dot" :style="{ backgroundColor: folder.color || '#409EFF', marginRight: '8px' }" />
-							<span>{{ folder.name }}</span>
-						</el-option>
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<template #footer>
-				<el-button @click="isMoveFolderDialogOpen = false">Cancel</el-button>
-				<el-button type="primary" :loading="isMoving" @click="confirmMoveToFolder">Move Items</el-button>
-			</template>
-		</el-dialog>
+		<MoveToFolderDialog :bulk="bulk" />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-import { UiTable, UiTableColumn, useTheme } from '@admin-panel/ui'
-import { ArrowDown, Delete, Document, Edit, FolderOpened, PriceTag, Refresh } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { UiTable, useTheme } from '@admin-panel/ui'
 
 import { useMedia } from '#entities/media'
 import type { MediaItem } from '#entities/media/model'
-import { mediaUtils } from '#entities/media/utils/media.utils'
 
 import { MediaPreviewDialog, MediaUpdateModal, MediaUploadDialog } from '../../media-dialogs'
+import { useMediaTableBulkActions } from '../composables/useMediaTableBulkActions'
+import MediaBulkActionsBar from './components/MediaBulkActionsBar.vue'
+import MediaTableColumns from './components/MediaTableColumns.vue'
+import MoveToFolderDialog from './components/MoveToFolderDialog.vue'
 
 const {
 	mediaItems,
@@ -324,154 +51,21 @@ const {
 	pagination,
 	isLoading,
 	isFetching,
-	folders,
-	batchMove,
 	setPage,
 	setLimit,
 	setSort,
 	openPreviewDialog,
 	openEditModal,
-	handleDelete,
-	handleMultipleDelete,
-	handleBulkUpdate,
-	handleBulkOptimize,
 } = useMedia()
 
 const { isDark } = useTheme()
 
-const selectedItems = ref<MediaItem[]>([])
-const isMoveFolderDialogOpen = ref(false)
-const targetFolderId = ref('root')
-const isMoving = ref(false)
-
-const getFolderById = (folderId?: string) => {
-	if (!folderId) return null
-	return folders.value.find((f) => f.id === folderId)
-}
-
-const handleMoveToFolder = () => {
-	targetFolderId.value = 'root'
-	isMoveFolderDialogOpen.value = true
-}
-
-const confirmMoveToFolder = async () => {
-	isMoving.value = true
-	try {
-		const uuids = selectedItems.value.map((i) => i.uuid)
-		const fId = targetFolderId.value === 'root' ? null : targetFolderId.value
-		await batchMove({ uuids, folderId: fId })
-		ElMessage.success('Files moved successfully')
-		isMoveFolderDialogOpen.value = false
-		selectedItems.value = []
-	} catch (e: any) {
-		ElMessage.error(e?.message || 'Failed to move files')
-	} finally {
-		isMoving.value = false
-	}
-}
-
-const handleSelectionChange = (val: MediaItem[]) => {
-	selectedItems.value = val
-}
-
-const formatFileSize = (bytes: number) => mediaUtils.formatFileSize(bytes)
-const formatDate = (date: string | Date) => mediaUtils.formatDate(date)
-
-const confirmDelete = (uuid: string) => {
-	ElMessageBox.confirm('Are you sure you want to delete this file?', 'Warning', {
-		confirmButtonText: 'Delete',
-		cancelButtonText: 'Cancel',
-		type: 'warning',
-	}).then(() => {
-		handleDelete(uuid)
-	})
-}
-
-const confirmMultipleDelete = () => {
-	if (selectedItems.value.length === 0) return
-	ElMessageBox.confirm(`Are you sure you want to delete ${selectedItems.value.length} files?`, 'Warning', {
-		confirmButtonText: 'Delete All',
-		cancelButtonText: 'Cancel',
-		type: 'warning',
-	}).then(() => {
-		const uuids = selectedItems.value.map((item) => item.uuid)
-
-		handleMultipleDelete(uuids)
-
-		selectedItems.value = []
-	})
-}
-
-const handleBulkCommand = (command: string) => {
-	const uuids = selectedItems.value.map((i) => i.uuid)
-
-	switch (command) {
-		case 'moveToFolder':
-			handleMoveToFolder()
-			break
-		case 'delete':
-			confirmMultipleDelete()
-
-			break
-		case 'addTags':
-			ElMessageBox.prompt('Введите теги через запятую', 'Добавить теги', {
-				confirmButtonText: 'Добавить',
-				cancelButtonText: 'Отмена',
-			}).then(({ value }) => {
-				if (value) {
-					const tags = value.split(',').map((t) => t.trim())
-
-					handleBulkUpdate(uuids, { tags })
-
-					ElMessage.success(`Теги добавлены для ${uuids.length} файлов`)
-
-					selectedItems.value = []
-				}
-			})
-
-			break
-		case 'changeCategory':
-			ElMessageBox.prompt('Введите название категории', 'Сменить категорию', {
-				confirmButtonText: 'Сменить',
-				cancelButtonText: 'Отмена',
-			}).then(({ value }) => {
-				if (value) {
-					handleBulkUpdate(uuids, { category: value })
-
-					ElMessage.success(`Категория изменена для ${uuids.length} файлов`)
-
-					selectedItems.value = []
-				}
-			})
-
-			break
-		case 'convertToWebP':
-			ElMessage.info(`Генерация responsive превью и WebP для ${uuids.length} файлов...`)
-
-			handleBulkOptimize(uuids)
-				.then(() => {
-					ElMessage.success(`Файлы (${uuids.length}) успешно обработаны и сконвертированы в WebP`)
-
-					selectedItems.value = []
-				})
-				.catch((err: any) => {
-					ElMessage.error(`Ошибка оптимизации: ${err?.message || 'Не удалось обработать'}`)
-				})
-
-			break
-	}
-}
+const bulk = useMediaTableBulkActions()
 </script>
 
 <style scoped>
 .media-table-feature {
 	width: 100%;
-}
-
-.bulk-actions {
-	display: flex;
-	justify-content: flex-start;
-	margin-bottom: 12px;
 }
 
 .ui-table {
@@ -480,32 +74,6 @@ const handleBulkCommand = (command: string) => {
 	box-shadow: var(--shadow-sm);
 	background-color: var(--bg-card) !important;
 	overflow: hidden;
-}
-
-.media-preview-cell {
-	position: relative;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.cell-color-dot {
-	top: -3px;
-	left: -3px;
-	width: 10px;
-	height: 10px;
-	position: absolute;
-	border: 1.5px solid #fff;
-	border-radius: 50%;
-	box-shadow: 0 1px 3px rgb(0, 0, 0, 0.4);
-	z-index: 2;
-}
-
-.preview-img {
-	width: 48px;
-	height: 48px;
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
 }
 
 .pagination-container {
@@ -538,83 +106,5 @@ const handleBulkCommand = (command: string) => {
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	color: #94a3b8;
-}
-
-.action-buttons {
-	display: flex;
-	justify-content: center;
-	gap: 8px;
-}
-
-.table-folder-badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 3px 8px;
-	border-radius: 6px;
-	background: var(--bg-surface-secondary, rgba(255, 255, 255, 0.05));
-	font-size: 12px;
-	font-weight: 500;
-}
-
-.folder-dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
-	display: inline-block;
-}
-
-.folder-name {
-	max-width: 95px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.video-preview-thumb {
-	position: relative;
-	width: 48px;
-	height: 48px;
-	border-radius: 8px;
-	overflow: hidden;
-}
-
-.video-play-indicator {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background: rgba(0, 0, 0, 0.65);
-	color: #fff;
-	width: 18px;
-	height: 18px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 9px;
-}
-
-.doc-preview-cell {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 2px;
-	width: 48px;
-	height: 48px;
-	border-radius: 8px;
-	background: rgba(230, 162, 60, 0.1);
-	border: 1px dashed rgba(230, 162, 60, 0.4);
-	color: #e6a23c;
-}
-
-.doc-badge {
-	font-size: 9px;
-	font-weight: 700;
-	background: #e6a23c;
-	color: #fff;
-	border-radius: 3px;
-	padding: 1px 3px;
 }
 </style>

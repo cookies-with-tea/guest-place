@@ -6,12 +6,13 @@
 	>
 		<el-form label-position="top">
 			<el-form-item label="Текст описания">
-				<el-input
+				<UiRichTextField
 					v-model="venueForm.form.description_html"
-					type="textarea"
-					:rows="10"
+					field-path="description"
+					mode="full"
+					namespace="venues"
 					placeholder="У Вас намечается банкет? Отлично! Приглашаем отметить ваше торжество..."
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 		</el-form>
@@ -19,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard } from '@admin-panel/ui'
+import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{

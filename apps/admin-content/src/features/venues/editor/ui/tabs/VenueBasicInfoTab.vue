@@ -6,11 +6,13 @@
 	>
 		<el-form label-position="top">
 			<el-form-item label="Название площадки *" required>
-				<el-input
+				<UiRichTextField
 					v-model="venueForm.form.title"
+					field-path="title"
+					mode="simple"
+					namespace="venues"
 					placeholder="Например: Крыша Неглинная Руфтоп"
-					size="large"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 
@@ -30,12 +32,14 @@
 			</el-form-item>
 
 			<el-form-item label="Подзаголовок / Краткое позиционирование">
-				<el-input
+				<UiRichTextField
 					v-model="venueForm.form.subtitle"
-					type="textarea"
-					:rows="2"
+					field-path="subtitle"
+					mode="simple"
+					multiline
+					namespace="venues"
 					placeholder="Стильная терраса на крыше особняка с панорамным видом на исторический центр Москвы"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 		</el-form>
@@ -237,7 +241,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard } from '@admin-panel/ui'
+import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
 import type { VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{

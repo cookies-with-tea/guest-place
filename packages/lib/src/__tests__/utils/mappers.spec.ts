@@ -39,11 +39,11 @@ describe('mappers', () => {
 		})
 
 		it('should handle non-object values', () => {
-			expect(snakeToCamel(null)).toBe(null)
+			expect(snakeToCamel(null as any)).toBe(null)
 
-			expect(snakeToCamel(123)).toBe(123)
+			expect(snakeToCamel(123 as any)).toBe(123)
 
-			expect(snakeToCamel('string')).toBe('string')
+			expect(snakeToCamel('string' as any)).toBe('string')
 		})
 	})
 

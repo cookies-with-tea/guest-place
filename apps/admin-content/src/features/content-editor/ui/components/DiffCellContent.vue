@@ -58,32 +58,33 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 	font-size: 13px;
 	line-height: 1.65;
 	color: var(--gp-text-main, #e2e8f0);
-	word-break: break-word;
+	overflow-wrap: anywhere;
 }
 
 .bool-chip {
 	display: inline-flex;
 	align-items: center;
-	font-size: 12px;
-	font-weight: 600;
-	padding: 3px 10px;
 	border-radius: 20px;
+	font-weight: 600;
+	font-size: 12px;
+	padding: 3px 10px;
 
 	&.is-true {
+		border: 1px solid rgb(34, 197, 94, 0.25);
 		color: #4ade80;
-		background: rgba(34, 197, 94, 0.12);
-		border: 1px solid rgba(34, 197, 94, 0.25);
+		background: rgb(34, 197, 94, 0.12);
 	}
+
 	&.is-false {
+		border: 1px solid rgb(239, 68, 68, 0.2);
 		color: #f87171;
-		background: rgba(239, 68, 68, 0.1);
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		background: rgb(239, 68, 68, 0.1);
 	}
 }
 
 .number-value {
-	font-size: 22px;
 	font-weight: 700;
+	font-size: 22px;
 	color: #818cf8;
 }
 
@@ -93,40 +94,46 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 }
 
 .richtext-preview {
+	max-height: 260px;
 	font-size: 13px;
 	line-height: 1.6;
 	color: var(--gp-text-main, #e2e8f0);
-	max-height: 260px;
 	overflow-y: auto;
 
 	:deep(h1),
 	:deep(h2),
 	:deep(h3) {
-		font-size: 14px;
 		font-weight: 700;
+		font-size: 14px;
 		margin: 4px 0;
 	}
+
 	:deep(p) {
 		margin: 2px 0;
 	}
+
 	:deep(strong) {
 		font-weight: 700;
 	}
+
 	:deep(em) {
 		font-style: italic;
 	}
+
 	:deep(code) {
+		border-radius: 3px;
 		font-family: monospace;
 		font-size: 12px;
-		background: rgba(99, 102, 241, 0.15);
+		background: rgb(99, 102, 241, 0.15);
 		padding: 1px 4px;
-		border-radius: 3px;
 	}
+
 	:deep(ul),
 	:deep(ol) {
 		padding-left: 16px;
 		margin: 2px 0;
 	}
+
 	:deep(blockquote) {
 		border-left: 2px solid #4f46e5;
 		padding-left: 8px;
@@ -147,9 +154,9 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 .media-img {
 	max-width: 100%;
 	max-height: 180px;
+	border: 1px solid rgb(255, 255, 255, 0.06);
 	border-radius: 8px;
 	object-fit: cover;
-	border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .media-file {
@@ -162,7 +169,7 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 }
 
 .empty-val {
-	color: var(--gp-text-secondary, #475569);
 	font-style: italic;
+	color: var(--gp-text-secondary, #475569);
 }
 </style>

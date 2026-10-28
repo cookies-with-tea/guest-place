@@ -6,31 +6,49 @@
 	>
 		<el-form label-position="top">
 			<el-form-item label="Главный заголовок">
-				<el-input
+				<UiRichTextField
 					v-model="homeForm.form.title"
+					field-path="hero.title"
+					mode="simple"
+					namespace="home"
 					placeholder="СОЦИАЛЬНАЯ ИНТЕРАКТИВНАЯ ПЛАТФОРМА"
-					size="large"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 			<el-form-item label="Подзаголовок">
-				<el-input
+				<UiRichTextField
 					v-model="homeForm.form.subtitle"
-					type="textarea"
-					:rows="3"
+					field-path="hero.subtitle"
+					mode="simple"
+					multiline
+					namespace="home"
 					placeholder="Соединяем гостей и места&#10;Общение, бронирование здесь и сейчас"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 			<el-row :gutter="16">
 				<el-col :span="12">
 					<el-form-item label="Кнопка «На карте»">
-						<el-input v-model="homeForm.form.heroMapButtonText" placeholder="Показать на карте" @input="onChange" />
+						<UiRichTextField
+							v-model="homeForm.form.heroMapButtonText"
+							field-path="hero.mapButtonText"
+							mode="simple"
+							namespace="home"
+							placeholder="Показать на карте"
+							@update:model-value="onChange"
+						/>
 					</el-form-item>
 				</el-col>
 				<el-col :span="12">
 					<el-form-item label="Кнопка «Списком»">
-						<el-input v-model="homeForm.form.heroListButtonText" placeholder="Показать списком" @input="onChange" />
+						<UiRichTextField
+							v-model="homeForm.form.heroListButtonText"
+							field-path="hero.listButtonText"
+							mode="simple"
+							namespace="home"
+							placeholder="Показать списком"
+							@update:model-value="onChange"
+						/>
 					</el-form-item>
 				</el-col>
 			</el-row>
@@ -50,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard, UiMediaPicker } from '@admin-panel/ui'
+import { UiGlassCard, UiMediaPicker, UiRichTextField } from '@admin-panel/ui'
 import type { HomePageForm } from '../../composables/useHomePageForm'
 
 defineProps<{

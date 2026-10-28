@@ -1,24 +1,43 @@
 <template>
-	<div v-if="controller.isLinkDialogOpen" class="link-dialog">
+	<div v-if="open" class="link-dialog">
+		<span class="action-dialog-label">{{ label }}</span>
 		<input
-			:ref="(el) => (controller.linkInputRef = el as HTMLInputElement | null)"
-			v-model="controller.linkUrl"
+			:ref="(el) => emit('input-ref', el as HTMLInputElement | null)"
 			class="link-input"
-			placeholder="https://example.com"
-			type="url"
-			@keydown.enter="controller.confirmLink"
-			@keydown.escape="controller.isLinkDialogOpen = false"
+			:placeholder="placeholder"
+			:type="inputType"
+			:value="modelValue"
+			@input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+			@keydown.enter="emit('confirm')"
+			@keydown.escape="emit('cancel')"
 		/>
-		<button class="link-confirm-btn" type="button" @click="controller.confirmLink">Insert</button>
-		<button class="link-cancel-btn" type="button" @click="controller.isLinkDialogOpen = false">Cancel</button>
+		<button class="link-confirm-btn" type="button" @click="emit('confirm')">{{ confirmLabel }}</button>
+		<button class="link-cancel-btn" type="button" @click="emit('cancel')">Отмена</button>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { TiptapEditorController } from '../../../composables/useTiptapEditor'
+withDefaults(
+	defineProps<{
+		open: boolean
+		label: string
+		modelValue: string
+		placeholder?: string
+		confirmLabel?: string
+		inputType?: 'text' | 'number'
+	}>(),
+	{
+		placeholder: '',
+		confirmLabel: 'Применить',
+		inputType: 'text',
+	}
+)
 
-defineProps<{
-	controller: TiptapEditorController
+const emit = defineEmits<{
+	(e: 'update:modelValue', value: string): void
+	(e: 'confirm'): void
+	(e: 'cancel'): void
+	(e: 'input-ref', el: HTMLInputElement | null): void
 }>()
 </script>
 
@@ -43,6 +62,12 @@ defineProps<{
 		transform: translateY(0);
 		opacity: 1;
 	}
+}
+
+.action-dialog-label {
+	font-size: 12px;
+	white-space: nowrap;
+	color: var(--tiptap-muted);
 }
 
 .link-input {

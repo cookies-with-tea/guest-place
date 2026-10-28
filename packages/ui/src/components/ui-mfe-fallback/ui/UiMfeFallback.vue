@@ -205,52 +205,52 @@ const navigateOrchestrator = () => {
 
 <style scoped lang="scss">
 .mfe-fallback-container {
-	position: relative;
 	min-height: 480px;
+	max-width: 760px;
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgb(255, 95, 95, 0.2);
+	border-radius: 16px;
+	box-shadow:
+		0 12px 36px rgb(0, 0, 0, 0.4),
+		0 0 24px rgb(255, 95, 95, 0.08) inset;
+	background: linear-gradient(145deg, rgb(30, 20, 20, 0.6) 0%, rgb(15, 15, 15, 0.9) 100%);
 	padding: 48px 24px;
 	margin: 24px auto;
-	max-width: 760px;
-	border-radius: 16px;
-	border: 1px solid rgba(255, 95, 95, 0.2);
-	background: linear-gradient(145deg, rgba(30, 20, 20, 0.6) 0%, rgba(15, 15, 15, 0.9) 100%);
-	backdrop-filter: blur(20px);
-	box-shadow:
-		0 12px 36px rgba(0, 0, 0, 0.4),
-		0 0 24px rgba(255, 95, 95, 0.08) inset;
 	overflow: hidden;
+	backdrop-filter: blur(20px);
 }
 
 .ambient-glow {
-	position: absolute;
 	top: -30%;
 	left: 50%;
-	transform: translateX(-50%);
 	width: 320px;
 	height: 320px;
+	position: absolute;
 	border-radius: 50%;
-	background: radial-gradient(circle, rgba(255, 95, 95, 0.15) 0%, transparent 70%);
-	pointer-events: none;
+	background: radial-gradient(circle, rgb(255, 95, 95, 0.15) 0%, transparent 70%);
 	filter: blur(40px);
+	transform: translateX(-50%);
+	pointer-events: none;
 }
 
 .mfe-fallback-content {
-	position: relative;
-	z-index: 1;
 	width: 100%;
 	max-width: 580px;
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
+	z-index: 1;
 }
 
 .icon-wrapper {
-	position: relative;
 	width: 80px;
 	height: 80px;
+	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -260,16 +260,16 @@ const navigateOrchestrator = () => {
 .status-icon {
 	font-size: 52px;
 	color: #ff5f5f;
+	filter: drop-shadow(0 0 12px rgb(255, 95, 95, 0.4));
 	z-index: 2;
-	filter: drop-shadow(0 0 12px rgba(255, 95, 95, 0.4));
 }
 
 .pulse-ring {
-	position: absolute;
 	width: 72px;
 	height: 72px;
+	position: absolute;
+	border: 2px solid rgb(255, 95, 95, 0.4);
 	border-radius: 50%;
-	border: 2px solid rgba(255, 95, 95, 0.4);
 	animation: pulse-ring 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
@@ -278,10 +278,12 @@ const navigateOrchestrator = () => {
 		transform: scale(0.8);
 		opacity: 0.8;
 	}
+
 	50% {
 		transform: scale(1.3);
 		opacity: 0.2;
 	}
+
 	100% {
 		transform: scale(1.6);
 		opacity: 0;
@@ -291,13 +293,13 @@ const navigateOrchestrator = () => {
 .badge-row {
 	display: flex;
 	align-items: center;
-	gap: 8px;
 	margin-bottom: 16px;
+	gap: 8px;
 }
 
 .fallback-title {
-	font-size: 1.65rem;
 	font-weight: 700;
+	font-size: 1.65rem;
 	letter-spacing: -0.3px;
 	color: var(--gp-text-main, #fff);
 	margin: 0 0 12px;
@@ -319,10 +321,10 @@ const navigateOrchestrator = () => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 16px;
+	border: 1px solid rgb(255, 255, 255, 0.08);
 	border-radius: 10px;
-	background: rgba(0, 0, 0, 0.3);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgb(0, 0, 0, 0.3);
+	padding: 10px 16px;
 	margin-bottom: 20px;
 	gap: 12px;
 }
@@ -335,21 +337,21 @@ const navigateOrchestrator = () => {
 }
 
 .endpoint-label {
-	font-size: 0.7rem;
 	font-weight: 600;
-	text-transform: uppercase;
+	font-size: 0.7rem;
 	letter-spacing: 0.5px;
+	text-transform: uppercase;
 	color: var(--gp-text-muted, #718096);
 }
 
 .endpoint-url {
+	max-width: 440px;
 	font-family: 'JetBrains Mono', monospace, ui-monospace;
 	font-size: 0.8rem;
-	color: var(--gp-primary, #42b883);
 	white-space: nowrap;
-	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 440px;
+	color: var(--gp-primary, #42b883);
+	overflow: hidden;
 }
 
 .error-accordion {
@@ -358,16 +360,16 @@ const navigateOrchestrator = () => {
 }
 
 .error-toggle {
-	background: transparent;
-	border: none;
-	cursor: pointer;
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	border: none;
 	font-size: 0.8rem;
 	color: var(--gp-text-muted, #718096);
-	padding: 4px 0;
+	background: transparent;
 	transition: color 0.2s;
+	cursor: pointer;
+	padding: 4px 0;
+	gap: 6px;
 
 	&:hover {
 		color: var(--gp-text-secondary, #cbd5e0);
@@ -375,23 +377,23 @@ const navigateOrchestrator = () => {
 }
 
 .error-details-box {
-	margin-top: 8px;
-	padding: 12px;
-	border-radius: 8px;
-	background: rgba(0, 0, 0, 0.4);
-	border: 1px solid rgba(255, 95, 95, 0.15);
-	text-align: left;
 	max-height: 160px;
+	border: 1px solid rgb(255, 95, 95, 0.15);
+	border-radius: 8px;
+	text-align: left;
+	background: rgb(0, 0, 0, 0.4);
+	padding: 12px;
+	margin-top: 8px;
 	overflow-y: auto;
 }
 
 .error-code {
-	margin: 0;
 	font-family: monospace;
 	font-size: 0.75rem;
-	color: #ff9999;
-	white-space: pre-wrap;
 	word-break: break-all;
+	white-space: pre-wrap;
+	color: #f99;
+	margin: 0;
 }
 
 .fallback-actions {

@@ -145,6 +145,9 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-content:
     dependencies:
@@ -157,42 +160,6 @@ importers:
       '@admin-panel/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@tiptap/extension-character-count':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/extensions@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
-      '@tiptap/extension-color':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/extension-text-style@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3)))
-      '@tiptap/extension-highlight':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-      '@tiptap/extension-image':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-      '@tiptap/extension-link':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
-      '@tiptap/extension-placeholder':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/extensions@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
-      '@tiptap/extension-text-align':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-      '@tiptap/extension-text-style':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-      '@tiptap/extension-underline':
-        specifier: ^3.31.3
-        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-      '@tiptap/pm':
-        specifier: ^3.31.3
-        version: 3.31.3
-      '@tiptap/starter-kit':
-        specifier: ^3.31.3
-        version: 3.31.3
-      '@tiptap/vue-3':
-        specifier: ^3.31.3
-        version: 3.31.3(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)(vue@3.5.42(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.14.5(vue@3.5.42(typescript@5.9.3))
@@ -221,6 +188,9 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-docs:
     dependencies:
@@ -334,6 +304,9 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-media:
     dependencies:
@@ -505,6 +478,9 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-profile:
     dependencies:
@@ -718,6 +694,55 @@ importers:
       vue-tsc:
         specifier: ^3.1.0
         version: 3.3.11(typescript@5.9.3)
+
+  apps/admin-test-crud-scaffold:
+    dependencies:
+      '@admin-panel/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@admin-panel/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
+      '@admin-panel/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@element-plus/icons-vue':
+        specifier: ^2.3.2
+        version: 2.3.2(vue@3.5.42(typescript@5.9.3))
+      '@tanstack/vue-query':
+        specifier: ^5.92.1
+        version: 5.102.8(vue@3.5.42(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.13.0
+        version: 2.14.5(vue@3.5.42(typescript@5.9.3))
+      vue:
+        specifier: ^3.5.22
+        version: 3.5.42(typescript@5.9.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.4(vue@3.5.42(typescript@5.9.3))
+    devDependencies:
+      '@admin-panel/stylelint-config':
+        specifier: workspace:*
+        version: link:../../packages/stylelint-config
+      '@admin-panel/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.13.3
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.1
+        version: 6.0.8(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0))(vue@3.5.42(typescript@5.9.3))
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.1.7
+        version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
   apps/admin-translations:
     dependencies:
@@ -1028,6 +1053,36 @@ importers:
       '@tanstack/vue-query':
         specifier: ^5.92.1
         version: 5.102.8(vue@3.5.42(typescript@5.9.3))
+      '@tiptap/core':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/pm@3.31.3)
+      '@tiptap/extension-character-count':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/extensions@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
+      '@tiptap/extension-highlight':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
+      '@tiptap/extension-link':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
+      '@tiptap/extension-placeholder':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/extensions@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
+      '@tiptap/extension-text-align':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
+      '@tiptap/extension-text-style':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
+      '@tiptap/extension-underline':
+        specifier: ^3.31.3
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
+      '@tiptap/starter-kit':
+        specifier: ^3.31.3
+        version: 3.31.3
+      '@tiptap/vue-3':
+        specifier: ^3.31.3
+        version: 3.31.3(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)(vue@3.5.42(typescript@5.9.3))
       element-plus:
         specifier: ^2.13.0
         version: 2.14.5(vue@3.5.42(typescript@5.9.3))
@@ -1053,12 +1108,18 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.2.4
         version: 3.2.7(vitest@3.2.7(@types/node@24.13.3)(happy-dom@17.6.3)(jiti@2.7.0)(jsdom@27.4.0)(sass@1.103.1)(yaml@2.9.0))
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0)
       vite-svg-sprite-wrapper:
         specifier: ^1.5.0
         version: 1.5.0(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(sass@1.103.1)(yaml@2.9.0))
+      vue-tsc:
+        specifier: ^3.1.0
+        version: 3.3.12(typescript@5.9.3)
 
 packages:
 
@@ -2527,11 +2588,6 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.31.3
 
-  '@tiptap/extension-color@3.31.3':
-    resolution: {integrity: sha512-rsZ/HlCYagMoyqn8kKxLYaZwHvowGUTeHVVxEuMJqTantIrnnQMSQUA3a7+X22l2eD7ec/LlG4bBGPjw+gf3tw==}
-    peerDependencies:
-      '@tiptap/extension-text-style': 3.31.3
-
   '@tiptap/extension-document@3.31.3':
     resolution: {integrity: sha512-EexgmqnyDNyGlISxo7SMrp5MygpJYmqD+0cY5jB6L1U6L4CpKKRWUt8OO1sWzEHDE1+TTvwt+WIFoIWAziOtEA==}
     peerDependencies:
@@ -2574,11 +2630,6 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.31.3
       '@tiptap/pm': 3.31.3
-
-  '@tiptap/extension-image@3.31.3':
-    resolution: {integrity: sha512-wWNG9BOtx2Cg4vwxPVGDIJ5DGX+ETkldeoaFJLB1NXUL4OPUiVTf8cHZ+hdYgJWP704BEB7jQgjlpvdi6VigTg==}
-    peerDependencies:
-      '@tiptap/core': 3.31.3
 
   '@tiptap/extension-italic@3.31.3':
     resolution: {integrity: sha512-ibGvdvAPyfxBMUVNRI43eb9h2/Jka1MRG5GtnGqbcCX/2+Y/y0EOfFrPQPkuYphiWQYyu9+FzPKMB/pjuaLuKQ==}
@@ -8106,10 +8157,6 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
 
-  '@tiptap/extension-color@3.31.3(@tiptap/extension-text-style@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3)))':
-    dependencies:
-      '@tiptap/extension-text-style': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
-
   '@tiptap/extension-document@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))':
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
@@ -8145,10 +8192,6 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
       '@tiptap/pm': 3.31.3
-
-  '@tiptap/extension-image@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))':
-    dependencies:
-      '@tiptap/core': 3.31.3(@tiptap/pm@3.31.3)
 
   '@tiptap/extension-italic@3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))':
     dependencies:

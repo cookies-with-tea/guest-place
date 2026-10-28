@@ -95,7 +95,7 @@
 		"test:coverage": "turbo run test:coverage --parallel",
 		"test:e2e": "pnpm --filter admin-shell test:e2e:pw",
 		"test:unit": "turbo run test:unit --parallel",
-		"type-check": "tsc --build"
+		"type-check": "turbo run type-check"
 	},
 	"type": "module"
 }

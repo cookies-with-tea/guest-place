@@ -218,26 +218,26 @@ const typeBadge = (type: DiffType) => {
 
 <style scoped>
 .version-diff-viewer {
+	display: flex;
+	flex-direction: column;
 	font-family:
 		'Inter',
 		-apple-system,
 		sans-serif;
-	display: flex;
-	flex-direction: column;
 	gap: 0;
 }
 
 /* Header */
 .diff-header {
 	display: grid;
-	grid-template-columns: 1fr 32px 1fr;
-	gap: 0;
-	margin-bottom: 16px;
-	padding: 14px 20px;
-	background: var(--gp-bg-glass-hover, rgba(255, 255, 255, 0.04));
-	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.08));
-	border-radius: 12px;
 	align-items: center;
+	grid-template-columns: 1fr 32px 1fr;
+	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.08));
+	border-radius: 12px;
+	background: var(--gp-bg-glass-hover, rgb(255, 255, 255, 0.04));
+	padding: 14px 20px;
+	margin-bottom: 16px;
+	gap: 0;
 }
 
 .diff-col {
@@ -253,23 +253,23 @@ const typeBadge = (type: DiffType) => {
 
 .diff-col__badge {
 	display: inline-flex;
-	font-size: 10px;
+	border-radius: 4px;
 	font-weight: 800;
+	font-size: 10px;
 	letter-spacing: 0.1em;
 	padding: 3px 8px;
-	border-radius: 4px;
 }
 
 .diff-col__badge--old {
+	border: 1px solid rgb(245, 158, 11, 0.3);
 	color: #f59e0b;
-	background: rgba(245, 158, 11, 0.12);
-	border: 1px solid rgba(245, 158, 11, 0.3);
+	background: rgb(245, 158, 11, 0.12);
 }
 
 .diff-col__badge--new {
+	border: 1px solid rgb(52, 211, 153, 0.3);
 	color: #34d399;
-	background: rgba(52, 211, 153, 0.12);
-	border: 1px solid rgba(52, 211, 153, 0.3);
+	background: rgb(52, 211, 153, 0.12);
 }
 
 .diff-col__meta {
@@ -294,11 +294,11 @@ const typeBadge = (type: DiffType) => {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 16px;
-	padding: 60px 24px;
-	color: var(--gp-text-secondary, #64748b);
 	font-size: 14px;
 	text-align: center;
+	color: var(--gp-text-secondary, #64748b);
+	padding: 60px 24px;
+	gap: 16px;
 }
 
 /* Body */
@@ -309,21 +309,24 @@ const typeBadge = (type: DiffType) => {
 }
 
 .diff-row {
-	border: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.07));
+	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.07));
 	border-radius: 10px;
-	overflow: hidden;
 	transition: border-color 0.2s;
+	overflow: hidden;
 }
 
 .diff-row.is-changed {
-	border-color: rgba(99, 102, 241, 0.35);
+	border-color: rgb(99, 102, 241, 0.35);
 }
+
 .diff-row.is-added {
-	border-color: rgba(52, 211, 153, 0.3);
+	border-color: rgb(52, 211, 153, 0.3);
 }
+
 .diff-row.is-removed {
-	border-color: rgba(239, 68, 68, 0.3);
+	border-color: rgb(239, 68, 68, 0.3);
 }
+
 .diff-row.is-unchanged {
 	opacity: 0.55;
 }
@@ -331,10 +334,10 @@ const typeBadge = (type: DiffType) => {
 .diff-row__label {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	border-bottom: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.06));
+	background: var(--gp-bg-glass-hover, rgb(255, 255, 255, 0.03));
 	padding: 8px 16px;
-	background: var(--gp-bg-glass-hover, rgba(255, 255, 255, 0.03));
-	border-bottom: 1px solid var(--gp-glass-border, rgba(255, 255, 255, 0.06));
+	gap: 10px;
 }
 
 .diff-row__field-name {
@@ -344,29 +347,32 @@ const typeBadge = (type: DiffType) => {
 }
 
 .diff-row__type-badge {
-	font-size: 9px;
+	border-radius: 4px;
 	font-weight: 800;
+	font-size: 9px;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
 	padding: 2px 7px;
-	border-radius: 4px;
 }
 
 .diff-row__type-badge.is-changed {
 	color: #818cf8;
-	background: rgba(99, 102, 241, 0.15);
+	background: rgb(99, 102, 241, 0.15);
 }
+
 .diff-row__type-badge.is-added {
 	color: #34d399;
-	background: rgba(52, 211, 153, 0.12);
+	background: rgb(52, 211, 153, 0.12);
 }
+
 .diff-row__type-badge.is-removed {
 	color: #f87171;
-	background: rgba(239, 68, 68, 0.12);
+	background: rgb(239, 68, 68, 0.12);
 }
+
 .diff-row__type-badge.is-unchanged {
 	color: #64748b;
-	background: rgba(100, 116, 139, 0.1);
+	background: rgb(100, 116, 139, 0.1);
 }
 
 .diff-row__body {
@@ -375,48 +381,49 @@ const typeBadge = (type: DiffType) => {
 }
 
 .diff-cell {
-	padding: 14px 16px;
+	min-height: 48px;
 	font-size: 13px;
 	line-height: 1.6;
-	min-height: 48px;
+	padding: 14px 16px;
 	overflow-x: auto;
 }
 
 .diff-cell--old {
-	background: rgba(239, 68, 68, 0.04);
+	background: rgb(239, 68, 68, 0.04);
 }
+
 .diff-cell--new {
-	background: rgba(52, 211, 153, 0.04);
+	background: rgb(52, 211, 153, 0.04);
 }
 
 .diff-cell__empty {
-	color: var(--gp-text-secondary, #475569);
 	font-style: italic;
+	color: var(--gp-text-secondary, #475569);
 }
 
 .diff-divider-body {
-	background: var(--gp-glass-border, rgba(255, 255, 255, 0.07));
 	width: 1px;
+	background: var(--gp-glass-border, rgb(255, 255, 255, 0.07));
 }
 
 /* Summary bar */
 .diff-summary {
 	display: flex;
-	align-items: center;
-	gap: 20px;
-	padding: 14px 4px 0;
-	border-top: 1px dashed var(--gp-glass-border, rgba(255, 255, 255, 0.07));
-	margin-top: 16px;
 	flex-wrap: wrap;
+	align-items: center;
+	border-top: 1px dashed var(--gp-glass-border, rgb(255, 255, 255, 0.07));
+	padding: 14px 4px 0;
+	margin-top: 16px;
+	gap: 20px;
 }
 
 .diff-summary__item {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	font-size: 12px;
 	font-weight: 600;
+	font-size: 12px;
 	color: var(--gp-text-secondary, #64748b);
+	gap: 6px;
 }
 
 .dot {
@@ -428,12 +435,15 @@ const typeBadge = (type: DiffType) => {
 .diff-summary__item.is-changed .dot {
 	background: #818cf8;
 }
+
 .diff-summary__item.is-added .dot {
 	background: #34d399;
 }
+
 .diff-summary__item.is-removed .dot {
 	background: #f87171;
 }
+
 .diff-summary__item.is-unchanged .dot {
 	background: #475569;
 }

@@ -6,21 +6,25 @@
 	>
 		<el-form label-position="top">
 			<el-form-item label="Заголовок баннера">
-				<el-input
+				<UiRichTextField
 					v-model="homeForm.form.bannerTitle"
-					type="textarea"
-					:rows="2"
+					field-path="banner.title"
+					mode="simple"
+					multiline
+					namespace="home"
 					placeholder="Для быстрого поиска Вы можете пользоваться всеми вариантами одновременно."
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 			<el-form-item label="Слоган / Текст баннера">
-				<el-input
+				<UiRichTextField
 					v-model="homeForm.form.bannerText"
-					type="textarea"
-					:rows="2"
+					field-path="banner.text"
+					mode="simple"
+					multiline
+					namespace="home"
 					placeholder="GP Платформа позволяет общаться напрямую здесь и сейчас. Мы за «прозрачные отношения»"
-					@input="onChange"
+					@update:model-value="onChange"
 				/>
 			</el-form-item>
 		</el-form>
@@ -35,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard, UiMediaPicker } from '@admin-panel/ui'
+import { UiGlassCard, UiMediaPicker, UiRichTextField } from '@admin-panel/ui'
 import type { HomePageForm } from '../../composables/useHomePageForm'
 
 defineProps<{

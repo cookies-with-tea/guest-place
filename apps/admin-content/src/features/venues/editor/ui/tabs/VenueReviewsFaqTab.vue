@@ -16,7 +16,15 @@
 					<el-button type="danger" link style="margin-left: auto" @click="venueForm.removeReview(idx)">✕</el-button>
 				</div>
 				<el-input v-model="rev.avatar" placeholder="URL аватара гостя" style="margin-bottom: 8px" @input="onChange" />
-				<el-input v-model="rev.text" type="textarea" :rows="2" placeholder="Текст отзыва..." @input="onChange" />
+				<UiRichTextField
+					v-model="rev.text"
+					field-path="review.text"
+					mode="simple"
+					multiline
+					namespace="venues"
+					placeholder="Текст отзыва..."
+					@update:model-value="onChange"
+				/>
 			</div>
 		</div>
 		<div v-if="!venueForm.formReviews.length" class="empty-list-notice">Нет отзывов. Нажмите «Добавить отзыв».</div>
@@ -34,15 +42,26 @@
 		<div class="faq-list">
 			<div v-for="(item, idx) in venueForm.formFaq" :key="item.id" class="faq-item-card">
 				<div class="faq-item-header">
-					<el-input
+					<UiRichTextField
 						v-model="item.question"
+						field-path="faq.question"
+						mode="simple"
+						namespace="venues"
 						placeholder="Вопрос (Каков процент за обслуживание?)"
 						style="flex: 1"
-						@input="onChange"
+						@update:model-value="onChange"
 					/>
 					<el-button type="danger" link @click="venueForm.removeFaq(idx)">✕</el-button>
 				</div>
-				<el-input v-model="item.answer" type="textarea" :rows="2" placeholder="Подробный ответ..." @input="onChange" />
+				<UiRichTextField
+					v-model="item.answer"
+					field-path="faq.answer"
+					mode="simple"
+					multiline
+					namespace="venues"
+					placeholder="Подробный ответ..."
+					@update:model-value="onChange"
+				/>
 			</div>
 		</div>
 		<div v-if="!venueForm.formFaq.length" class="empty-list-notice">FAQ пуст. Нажмите «Добавить вопрос».</div>
@@ -50,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { UiGlassCard } from '@admin-panel/ui'
+import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
 import { Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
 

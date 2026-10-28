@@ -62,7 +62,7 @@ export const createApi = (entityName: string) => {
 			return snakeToCamel(response) as IResponse<CamelCasedProperties<T>>
 		} catch (error: any) {
 			const errors = error.data?.errors ? snakeToCamel(error.data.errors) : {}
-			const messages = error.data?.messages ? snakeToCamel(error.data.messages) : []
+			const messages = error.data?.messages ? (snakeToCamel(error.data.messages) as string[]) : []
 
 			if (error.statusCode === 401 || error.statusCode === 403) {
 				if (isBrowser) {

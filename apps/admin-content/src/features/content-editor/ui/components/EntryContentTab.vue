@@ -1,7 +1,13 @@
 <template>
 	<div class="editor-content" :class="{ 'is-translation': translation.isTranslationMode }">
 		<template v-if="!translation.isTranslationMode">
-			<ContentFormGenerator v-if="schema" v-model="modelValue" :errors="errors" :fields="schema.fields" />
+			<ContentFormGenerator
+				v-if="schema"
+				v-model="modelValue"
+				:errors="errors"
+				:fields="schema.fields"
+				:translation-namespace="schema.slug"
+			/>
 		</template>
 		<template v-else>
 			<div class="translation-mode-container">
@@ -13,7 +19,13 @@
 						<span class="column-label">SOURCE</span>
 					</div>
 					<div class="column-body">
-						<ContentFormGenerator v-if="schema" v-model="translation.sourceData" :fields="schema.fields" readonly />
+						<ContentFormGenerator
+							v-if="schema"
+							v-model="translation.sourceData"
+							:fields="schema.fields"
+							readonly
+							:translation-namespace="schema.slug"
+						/>
 					</div>
 				</div>
 
@@ -30,6 +42,7 @@
 							v-model="translation.targetData"
 							:errors="errors"
 							:fields="schema.fields"
+							:translation-namespace="schema.slug"
 						/>
 					</div>
 				</div>

@@ -27,8 +27,9 @@ export function parseTranslation(text: string): I18nNode[] {
 	const nodes: I18nNode[] = []
 	const stack: { name: string; children: I18nNode[] }[] = [{ name: 'root', children: nodes }]
 
-	// Regex to match {tag}, {/tag}, or {slot}
-	const regex = /\{(\/?)([a-zA-Z0-9_.-]+)\}/g
+	// Regex to match {tag}, {/tag}, or {slot}. ":" is allowed so a tag/slot name
+	// can carry a value, e.g. {key:page.title} or {currency:1990}.
+	const regex = /\{(\/?)([a-zA-Z0-9_.:-]+)\}/g
 	let lastIndex = 0
 	let match: RegExpExecArray | null
 
@@ -171,7 +172,7 @@ export function validateTranslation(text: string): ValidationResult {
 	}
 
 	const stack: { name: string; index: number }[] = []
-	const regex = /\{(\/?)([a-zA-Z0-9_.-]+)\}/g
+	const regex = /\{(\/?)([a-zA-Z0-9_.:-]+)\}/g
 	let match: RegExpExecArray | null
 
 	while ((match = regex.exec(text)) !== null) {
@@ -321,7 +322,7 @@ export function unwrapTag(
 
 	// If no tag specified, strip all tags from selection
 	const selected = text.substring(start, end)
-	const cleaned = selected.replace(/\{(\/?[a-zA-Z0-9_.-]+)\}/g, '')
+	const cleaned = selected.replace(/\{(\/?[a-zA-Z0-9_.:-]+)\}/g, '')
 	const newText = text.substring(0, start) + cleaned + text.substring(end)
 
 	return {
@@ -348,6 +349,13 @@ export function translationToHtml(text: string): string {
 			if (node.name === 'br') return '<br/>'
 			if (node.name === 'hr') return '<hr/>'
 
+			// A {currency:1990} slot renders as a distinct chip for editor styling, but
+			// keeps the same data-slot attribute so the generic slot-chip bridge below
+			// (htmlToTranslation) round-trips it without any dedicated currency rule.
+			if (node.name.startsWith('currency:')) {
+				return `<span class="gp-currency-chip" data-slot="${node.name}" contenteditable="false">{${node.name}}</span>`
+			}
+
 			return `<span class="gp-slot-chip" data-slot="${node.name}" contenteditable="false">{${node.name}}</span>`
 		}
 
@@ -360,6 +368,21 @@ export function translationToHtml(text: string): string {
 			if (tag === 'u') return `<u>${inner}</u>`
 			if (tag === 'code') return `<code>${inner}</code>`
 			if (tag === 'span') return `<span class="gp-highlight-span">${inner}</span>`
+
+			// {key:namespace.key}fallback text{/key:namespace.key} — a span bound to a
+			// translation key; the wrapped text is the fallback shown until the client
+			// resolves `key` from the i18n dictionary (see ContentRichText, roadmap 4.2).
+			if (tag.startsWith('key:')) {
+				const key = node.name.slice('key:'.length)
+
+				return `<span class="gp-i18n-key" data-i18n-key="${escapeHtml(key)}">${inner}</span>`
+			}
+
+			// {nontranslatable}literal text{/nontranslatable} — excluded from any future
+			// bulk/machine translation of the surrounding field; rendered verbatim.
+			if (tag === 'nontranslatable') {
+				return `<span class="gp-i18n-literal" data-gp-literal="true">${inner}</span>`
+			}
 
 			return `<span data-gp-tag="${node.name}">${inner}</span>`
 		}
@@ -382,6 +405,18 @@ export function htmlToTranslation(html: string): string {
 	res = res.replace(/<span[^>]*class="[^"]*gp-slot-chip[^"]*"[^>]*data-slot="([^"]+)"[^>]*>.*?<\/span>/gi, '{$1}')
 
 	res = res.replace(/<span[^>]*data-slot="([^"]+)"[^>]*>.*?<\/span>/gi, '{$1}')
+
+	// Replace translation-key spans
+	res = res.replace(
+		/<span[^>]*class="[^"]*gp-i18n-key[^"]*"[^>]*data-i18n-key="([^"]+)"[^>]*>(.*?)<\/span>/gi,
+		'{key:$1}$2{/key:$1}'
+	)
+
+	// Replace non-translatable literal spans
+	res = res.replace(
+		/<span[^>]*class="[^"]*gp-i18n-literal[^"]*"[^>]*>(.*?)<\/span>/gi,
+		'{nontranslatable}$1{/nontranslatable}'
+	)
 
 	// Replace custom tag spans
 	res = res.replace(/<span[^>]*data-gp-tag="([^"]+)"[^>]*>(.*?)<\/span>/gi, '{$1}$2{/$1}')

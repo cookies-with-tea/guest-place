@@ -8,12 +8,13 @@ import { ElMessage } from 'element-plus'
 import {
 	createTranslation,
 	deleteTranslation,
+	fetchTranslationRefs,
 	fetchTranslations,
 	fetchTranslationVersions,
 	rollbackTranslation,
 	updateTranslation,
 } from '../../api'
-import type { Translation, TranslationFilters } from '../../model'
+import type { Translation, TranslationFilters, TranslationRef } from '../../model'
 import { TRANSLATIONS_QUERY_KEY } from '../../model'
 
 // === PERSISTENT STATE (SHARED) ===
@@ -34,6 +35,9 @@ const isHistoryOpen = ref(false)
 const editingTranslation = ref<Translation | null>(null)
 const translationHistory = ref<any[]>([])
 const isHistoryLoading = ref(false)
+const isRefsOpen = ref(false)
+const translationRefs = ref<TranslationRef[]>([])
+const isRefsLoading = ref(false)
 
 export const useTranslations = () => {
 	const { loadLanguages, loadNamespaces } = useI18n()
@@ -159,6 +163,34 @@ export const useTranslations = () => {
 		translationHistory.value = []
 	}
 
+	const fetchRefs = async (key: string) => {
+		isRefsLoading.value = true
+
+		try {
+			const res = await fetchTranslationRefs(key)
+
+			translationRefs.value = res.data || []
+		} finally {
+			isRefsLoading.value = false
+		}
+	}
+
+	const openRefs = async (t: Translation) => {
+		editingTranslation.value = t
+
+		isRefsOpen.value = true
+
+		await fetchRefs(t.key)
+	}
+
+	const closeRefs = () => {
+		isRefsOpen.value = false
+
+		editingTranslation.value = null
+
+		translationRefs.value = []
+	}
+
 	const handleRollback = async (versionId: string) => {
 		await rollbackTranslation(versionId)
 
@@ -238,6 +270,9 @@ export const useTranslations = () => {
 		editingTranslation,
 		translationHistory,
 		isHistoryLoading,
+		isRefsOpen,
+		translationRefs,
+		isRefsLoading,
 		isSubmitting: computed(() => createMutation.isPending.value || updateMutation.isPending.value),
 
 		// data
@@ -255,6 +290,8 @@ export const useTranslations = () => {
 		openHistory,
 		closeHistory,
 		handleRollback,
+		openRefs,
+		closeRefs,
 		setPage,
 		setLimit,
 	}

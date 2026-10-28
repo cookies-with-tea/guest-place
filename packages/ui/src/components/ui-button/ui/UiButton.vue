@@ -11,7 +11,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-interface IProps {
+export interface IProps {
 	as?: 'button' | 'router-link'
 	appearance?: 'primary' | 'secondary' | 'text'
 	size?: 'm' | 'l'
