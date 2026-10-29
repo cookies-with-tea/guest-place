@@ -2,7 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import type { ContentSchema, FieldDefinition } from '@admin-panel/lib'
 import { createApi, useEntityLock } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
-import { toSlug, uid } from '../lib/helpers'
+import { addFieldMeta, stripFieldMeta, toSlug } from '../lib/helpers'
 
 export interface FieldWithMeta extends FieldDefinition {
 	_id: string
@@ -61,11 +61,7 @@ export function useSchemaForm(apiFetch: FetchData, onSaved: () => void) {
 		form.name = schema.name
 		form.slug = schema.slug
 		form.isSingleton = !!schema.isSingleton
-		form.fields = JSON.parse(JSON.stringify(schema.fields)).map((f: FieldDefinition) => ({
-			...f,
-			_id: uid(),
-			_nameTouched: true,
-		}))
+		form.fields = addFieldMeta(JSON.parse(JSON.stringify(schema.fields))) as FieldWithMeta[]
 		slugTouched.value = true
 		openBuilder()
 	}
@@ -75,7 +71,7 @@ export function useSchemaForm(apiFetch: FetchData, onSaved: () => void) {
 		try {
 			const payload = {
 				...form,
-				fields: form.fields.map(({ _id: _, _nameTouched: __, ...rest }) => rest),
+				fields: stripFieldMeta(form.fields),
 			}
 			if (isEdit.value) {
 				await apiFetch(`/${currentSchemaId.value}`, { method: 'PATCH', body: payload })

@@ -111,6 +111,24 @@
 					/>
 				</div>
 			</template>
+
+			<!-- Repeater/Group sub-fields -->
+			<template v-if="fieldBuilder.isNestable(fieldBuilder.selectedField.fieldType)">
+				<div class="config-divider">Sub-fields</div>
+				<p class="config-hint">
+					{{
+						fieldBuilder.selectedField.fieldType === FieldType.Repeater
+							? 'Each repeated item has these fields.'
+							: 'This group holds these fields, nested under one key.'
+					}}
+				</p>
+				<button class="config-drill-btn" @click="fieldBuilder.drillInto(fieldBuilder.selectedFieldId!)">
+					Edit {{ fieldBuilder.selectedField.fields?.length || 0 }} sub-field{{
+						fieldBuilder.selectedField.fields?.length === 1 ? '' : 's'
+					}}
+					→
+				</button>
+			</template>
 		</div>
 	</aside>
 </template>
@@ -239,6 +257,23 @@ defineProps<{
 	color: var(--gp-text-main);
 	cursor: pointer;
 	gap: 8px;
+}
+
+.config-drill-btn {
+	width: 100%;
+	border: 1px solid var(--gp-glass-border);
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--gp-primary);
+	background: var(--gp-primary-light);
+	transition: background 0.15s;
+	cursor: pointer;
+	padding: 8px 10px;
+
+	&:hover {
+		background: var(--gp-bg-glass-hover);
+	}
 }
 
 .config-divider {

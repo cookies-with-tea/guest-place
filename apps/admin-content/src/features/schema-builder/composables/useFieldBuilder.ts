@@ -31,27 +31,77 @@ export const FIELD_TYPE_PALETTE: FieldTypeInfo[] = [
 		color: '#ef4444',
 	},
 	{ value: FieldType.Relation, label: 'Relation', icon: '🔗', description: 'Link to another schema', color: '#f97316' },
+	{
+		value: FieldType.Repeater,
+		label: 'Repeater',
+		icon: '📚',
+		description: 'A list of sub-fields, repeated any number of times',
+		color: '#14b8a6',
+	},
+	{
+		value: FieldType.Group,
+		label: 'Group',
+		icon: '🗂️',
+		description: 'A fixed set of sub-fields, nested under one key',
+		color: '#a855f7',
+	},
+	{ value: FieldType.Color, label: 'Color', icon: '🎨', description: 'Hex/rgba color picker', color: '#ec4899' },
+	{ value: FieldType.Link, label: 'Link', icon: '🔗', description: 'URL + text + target', color: '#3b82f6' },
+	{ value: FieldType.Json, label: 'JSON', icon: '🧩', description: 'Free-form JSON value', color: '#64748b' },
 ]
+
+const NESTABLE_TYPES = [FieldType.Repeater, FieldType.Group]
 
 const NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/
 
-/** Owns the field canvas: selection, add/remove, drag-and-drop reordering, and validation. */
+interface PathEntry {
+	id: string
+	label: string
+}
+
+/** Owns the field canvas: selection, add/remove, drag-and-drop reordering, validation, and
+ * drilling into a Repeater/Group field's own sub-fields (the canvas shows one "scope" of
+ * fields at a time — top-level, or the sub-fields of whichever nestable field is on top of
+ * `fieldPath`). */
 export function useFieldBuilder(schemaForm: SchemaForm) {
 	const selectedFieldId = ref<string | null>(null)
+	const fieldPath = ref<PathEntry[]>([])
 	const draggingIndex = ref<number | null>(null)
 	const draggingId = ref<string | null>(null)
 	const dragOverIndex = ref<number | null>(null)
 
-	const selectedField = computed(() => schemaForm.form.fields.find((f: any) => f._id === selectedFieldId.value) ?? null)
+	/** The field whose `.fields` array the canvas currently shows (undefined at top level).
+	 * Assumes `drillInto` already ensured every ancestor on the path has a `.fields` array. */
+	const scopeField = computed(() => {
+		let list = schemaForm.form.fields
+		let field: any
+
+		for (const entry of fieldPath.value) {
+			field = list.find((f: any) => f._id === entry.id)
+			if (!field) break
+			list = field.fields ?? []
+		}
+
+		return field
+	})
+
+	/** The list of fields the canvas/palette currently operate on. */
+	const currentFields = computed<any[]>(() => scopeField.value?.fields ?? schemaForm.form.fields)
+
+	const selectedField = computed(() => currentFields.value.find((f: any) => f._id === selectedFieldId.value) ?? null)
 
 	function getFieldTypeInfo(type: FieldType): FieldTypeInfo {
 		return FIELD_TYPE_PALETTE.find((f) => f.value === type) ?? FIELD_TYPE_PALETTE[0]
 	}
 
+	function isNestable(type: FieldType): boolean {
+		return NESTABLE_TYPES.includes(type)
+	}
+
 	function getFieldNameError(name: string): string | null {
 		if (!name) return 'Identifier is required'
 		if (!NAME_PATTERN.test(name)) return 'Only letters, digits, underscores and hyphens'
-		const dupes = schemaForm.form.fields.filter((f: any) => f.name === name)
+		const dupes = currentFields.value.filter((f: any) => f.name === name)
 		if (dupes.length > 1) return 'Identifier must be unique'
 		return null
 	}
@@ -60,15 +110,23 @@ export function useFieldBuilder(schemaForm: SchemaForm) {
 		return !!getFieldNameError(name) || !name
 	}
 
+	function validateFields(fields: any[], path: string): string[] {
+		const errors: string[] = []
+		fields.forEach((f: any, i: number) => {
+			const label = f.label || `#${i + 1}`
+			if (!f.label) errors.push(`${path}Field #${i + 1}: label required`)
+			if (!f.name) errors.push(`${path}Field "${label}": Identifier is required`)
+			else if (!NAME_PATTERN.test(f.name)) errors.push(`${path}Field "${label}": invalid identifier`)
+			if (f.fields?.length) errors.push(...validateFields(f.fields, `${path}${label} > `))
+		})
+		return errors
+	}
+
 	const validationErrors = computed(() => {
 		const errors: string[] = []
 		if (!schemaForm.form.name) errors.push('Schema name is required')
 		if (!schemaForm.form.slug) errors.push('Schema slug is required')
-		schemaForm.form.fields.forEach((f: any, i: number) => {
-			const err = getFieldNameError(f.name)
-			if (!f.label) errors.push(`Field #${i + 1}: label required`)
-			if (err) errors.push(`Field "${f.label || `#${i + 1}`}": ${err}`)
-		})
+		errors.push(...validateFields(schemaForm.form.fields, ''))
 		return errors
 	})
 
@@ -81,7 +139,7 @@ export function useFieldBuilder(schemaForm: SchemaForm) {
 
 	function addFieldOfType(type: FieldType) {
 		const id = uid()
-		schemaForm.form.fields.push({
+		currentFields.value.push({
 			_id: id,
 			label: '',
 			name: '',
@@ -89,16 +147,34 @@ export function useFieldBuilder(schemaForm: SchemaForm) {
 			required: false,
 			multiple: false,
 			_nameTouched: false,
+			fields: isNestable(type) ? [] : undefined,
+		})
+		selectedFieldId.value = id
+	}
+
+	/** Inserts a ready-made set of fields (see `useFieldBlocks`) wrapped in one Group field. */
+	function insertBlock(blockLabel: string, blockName: string, fields: any[]) {
+		const id = uid()
+		currentFields.value.push({
+			_id: id,
+			label: blockLabel,
+			name: blockName,
+			fieldType: FieldType.Group,
+			required: false,
+			multiple: false,
+			_nameTouched: true,
+			fields: fields.map((f) => ({ ...f, _id: uid(), _nameTouched: true })),
 		})
 		selectedFieldId.value = id
 	}
 
 	function removeField(id: string) {
-		const idx = schemaForm.form.fields.findIndex((f: any) => f._id === id)
+		const list = currentFields.value
+		const idx = list.findIndex((f: any) => f._id === id)
 		if (idx !== -1) {
-			schemaForm.form.fields.splice(idx, 1)
+			list.splice(idx, 1)
 			if (selectedFieldId.value === id) {
-				selectedFieldId.value = schemaForm.form.fields[Math.min(idx, schemaForm.form.fields.length - 1)]?._id ?? null
+				selectedFieldId.value = list[Math.min(idx, list.length - 1)]?._id ?? null
 			}
 		}
 	}
@@ -108,6 +184,22 @@ export function useFieldBuilder(schemaForm: SchemaForm) {
 	}
 
 	function resetSelection() {
+		selectedFieldId.value = null
+		fieldPath.value = []
+	}
+
+	/** Enters a Repeater/Group field's own sub-fields; the canvas now shows/edits those. */
+	function drillInto(id: string) {
+		const field = currentFields.value.find((f: any) => f._id === id)
+		if (!field || !isNestable(field.fieldType)) return
+		field.fields ??= []
+		fieldPath.value = [...fieldPath.value, { id, label: field.label || field.name || 'Untitled' }]
+		selectedFieldId.value = null
+	}
+
+	/** Jumps back to a breadcrumb entry (or the root, for index -1). */
+	function drillTo(index: number) {
+		fieldPath.value = fieldPath.value.slice(0, index + 1)
 		selectedFieldId.value = null
 	}
 
@@ -135,27 +227,35 @@ export function useFieldBuilder(schemaForm: SchemaForm) {
 			resetDragState()
 			return
 		}
-		const item = schemaForm.form.fields.splice(draggingIndex.value, 1)[0]
-		schemaForm.form.fields.splice(targetIndex, 0, item)
+		const list = currentFields.value
+		const item = list.splice(draggingIndex.value, 1)[0]
+		list.splice(targetIndex, 0, item)
 		resetDragState()
 	}
 
 	return reactive({
 		selectedFieldId,
 		selectedField,
+		fieldPath,
+		scopeField,
+		currentFields,
 		draggingIndex,
 		draggingId,
 		dragOverIndex,
 		fieldTypePalette: FIELD_TYPE_PALETTE,
 		getFieldTypeInfo,
+		isNestable,
 		getFieldNameError,
 		fieldHasError,
 		validationErrors,
 		onFieldLabelInput,
 		addFieldOfType,
+		insertBlock,
 		removeField,
 		selectField,
 		resetSelection,
+		drillInto,
+		drillTo,
 		onDragStart,
 		onDragEnter,
 		onDragLeave,

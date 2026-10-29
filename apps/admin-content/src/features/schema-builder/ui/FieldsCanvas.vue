@@ -1,7 +1,21 @@
 <template>
 	<main class="canvas" @dragover.prevent @drop="fieldBuilder.onCanvasDrop">
+		<nav v-if="fieldBuilder.fieldPath.length" class="breadcrumb">
+			<button class="breadcrumb__item" @click="fieldBuilder.drillTo(-1)">{{ schemaForm.form.name || 'Fields' }}</button>
+			<template v-for="(entry, i) in fieldBuilder.fieldPath" :key="entry.id">
+				<span class="breadcrumb__sep">/</span>
+				<button
+					class="breadcrumb__item"
+					:class="{ 'is-current': i === fieldBuilder.fieldPath.length - 1 }"
+					@click="fieldBuilder.drillTo(i)"
+				>
+					{{ entry.label }}
+				</button>
+			</template>
+		</nav>
+
 		<div
-			v-if="schemaForm.form.fields.length === 0"
+			v-if="fieldBuilder.currentFields.length === 0"
 			class="canvas-empty"
 			@dragover.prevent
 			@drop="fieldBuilder.onCanvasDrop"
@@ -13,7 +27,7 @@
 
 		<transition-group v-else class="fields-list" name="field-list" tag="div">
 			<div
-				v-for="(field, index) in schemaForm.form.fields"
+				v-for="(field, index) in fieldBuilder.currentFields"
 				:key="field._id"
 				:class="[
 					'field-card',
@@ -70,6 +84,27 @@
 				<!-- Actions -->
 				<div class="field-card__actions" @click.stop>
 					<button
+						v-if="fieldBuilder.isNestable(field.fieldType)"
+						class="field-action-btn field-action-btn--drill"
+						:title="`Edit sub-fields (${field.fields?.length || 0})`"
+						@click="fieldBuilder.drillInto(field._id)"
+					>
+						<span class="field-action-btn__count">{{ field.fields?.length || 0 }}</span>
+						<svg
+							fill="none"
+							height="13"
+							stroke="currentColor"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+							width="13"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path d="M9 6l6 6-6 6" />
+						</svg>
+					</button>
+					<button
 						class="field-action-btn field-action-btn--delete"
 						title="Delete field"
 						@click="fieldBuilder.removeField(field._id)"
@@ -111,6 +146,57 @@ defineProps<{
 </script>
 
 <style scoped>
+.breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	font-size: 12px;
+	margin-bottom: 16px;
+	gap: 4px;
+}
+
+.breadcrumb__item {
+	border: none;
+	border-radius: 6px;
+	color: var(--gp-text-secondary);
+	background: transparent;
+	cursor: pointer;
+	padding: 3px 6px;
+
+	&:hover {
+		color: var(--gp-primary);
+		background: var(--gp-bg-glass-hover);
+	}
+
+	&.is-current {
+		font-weight: 600;
+		color: var(--gp-text-main);
+		cursor: default;
+	}
+}
+
+.breadcrumb__sep {
+	color: var(--gp-text-secondary);
+	opacity: 0.5;
+}
+
+.field-action-btn--drill {
+	width: auto;
+	color: var(--gp-text-secondary);
+	padding: 0 6px;
+	gap: 3px;
+
+	&:hover {
+		color: var(--gp-primary);
+		background: var(--gp-primary-light);
+	}
+}
+
+.field-action-btn__count {
+	font-weight: 700;
+	font-size: 11px;
+}
+
 .canvas {
 	background: transparent;
 	padding: 24px;
