@@ -1,106 +1,115 @@
-# name: CI
-# on:
-#   push:
-#     branches: [ admin-panel ]
-#   pull_request:
-#     branches: [ admin-panel ]
+name: CI
+on:
+  push:
+    branches: [admin-panel, admin-panel-update]
+  pull_request:
+    branches: [admin-panel, admin-panel-update]
 
-# jobs:
-#   setup:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-#   lint:
-#     needs: setup
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Run linting
-#         run: pnpm lint
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run linting
+        run: pnpm lint
 
-#   type-check:
-#     needs: setup
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Run TypeScript check
-#         run: pnpm type-check
+  type-check:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run TypeScript check
+        run: pnpm type-check
 
-#   build:
-#     needs: [lint, type-check]
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Run build
-#         run: pnpm build
+  build:
+    needs: [lint, type-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run build
+        run: pnpm build
 
-#   test:
-#     needs: build
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Run unit tests
-#         run: pnpm test:unit
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run unit tests
+        run: pnpm test:unit
 
-#   security:
-#     needs: setup
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Run Snyk security scan
-#         run: npx snyk test --severity-threshold=high
-#         env:
-#           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # Needs a SNYK_TOKEN repo secret before this can run — nothing in this repo sets one yet
+  # (checked: no such secret is referenced anywhere else in the codebase). Enable once it's
+  # added under Settings > Secrets and variables > Actions.
+  # security:
+  #   needs: setup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 22
+  #         cache: 'pnpm'
+  #     - name: Install dependencies
+  #       run: pnpm install --frozen-lockfile
+  #     - name: Run Snyk security scan
+  #       run: npx snyk test --severity-threshold=high
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-#   dependency-check:
-#     needs: setup
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 22
-#           cache: 'pnpm'
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
-#       - name: Check for outdated dependencies
-#         run: pnpm outdated --parseable
-#       - name: Check dependency graph
-#         run: npx dependency-cruiser --validate .
+  # Both steps are broken as written, confirmed locally, not just guessed:
+  # `pnpm outdated --parseable` exits 1 whenever *any* dependency is outdated (currently 51 —
+  # a normal, permanent state for any real project, not a bug), so this would fail every run
+  # regardless of code quality. `dependency-cruiser@15.5.0 --validate .` crashes outright on
+  # Node 22/24 with "node:fs does not provide an export named 'R_OK'" (its own bug — R_OK has
+  # only ever lived under fs.constants) before it gets anywhere near validating the graph.
+  # dependency-check:
+  #   needs: setup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 22
+  #         cache: 'pnpm'
+  #     - name: Install dependencies
+  #       run: pnpm install --frozen-lockfile
+  #     - name: Check for outdated dependencies
+  #       run: pnpm outdated --parseable
+  #     - name: Check dependency graph
+  #       run: npx dependency-cruiser --validate .
