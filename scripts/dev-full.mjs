@@ -32,7 +32,7 @@ console.log(`${colors.bright}${colors.cyan}════════════�
 // 1. Docker Compose for PostgreSQL and Redis
 log('DOCKER', colors.yellow, 'Starting PostgreSQL & Redis via Docker Compose...')
 try {
-	execSync('docker compose -f server/compose.yaml up -d db redis', {
+	execSync('docker compose up -d db redis', {
 		cwd: rootDir,
 		stdio: 'inherit',
 	})
@@ -46,7 +46,7 @@ log('DATABASE', colors.yellow, 'Verifying PostgreSQL database readiness...')
 let dbReady = false
 for (let attempt = 1; attempt <= 10; attempt++) {
 	try {
-		execSync('docker compose -f server/compose.yaml exec -T db pg_isready -U guest-place -d guest-place', {
+		execSync('docker compose exec -T db pg_isready -U guest-place -d guest-place', {
 			cwd: rootDir,
 			stdio: 'ignore',
 		})

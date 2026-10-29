@@ -26,7 +26,8 @@
 
 | Сценарий | Команда Make | Команда pnpm | Что происходит |
 | :--- | :--- | :--- | :--- |
-| **Разработка только клиента** | `make dev-client` | `pnpm dev:client` | DB, Redis, Server и Admin поднимаются в Docker, клиент запускается локально в dev |
+| **Разработка клиента (быстрый prod-режим)** | `make dev-client` | `pnpm dev:client` | DB + Redis в Docker, Server и Admin в production preview, Client в dev (hot reload) |
+| **Разработка клиента (всё в Docker)** | `make dev-client-docker` | `pnpm dev:client:docker` | Server и Admin собираются в Docker контейнерах, Client в dev локально |
 | **Разработка только админки** | `make dev-admin` | `pnpm dev:admin` | DB, Redis и Server поднимаются в Docker, админка запускается локально в dev |
 | **Разработка только бэкенда** | `make dev-server` | `pnpm dev:server` | DB и Redis поднимаются в Docker, сервер запускается локально в `cargo watch` |
 | **Полный стек в dev-режиме** | `make dev-full` | `pnpm dev:full` | DB/Redis в Docker + Rust + Все микрофронтенды + Nuxt клиент в dev (hot-reload) |
@@ -48,7 +49,7 @@
    # или
    pnpm dev:client
    ```
-   *Команда поднимет PostgreSQL, Redis, Rust API сервер (порт 8000) и микрофронтенды админки (порт 4173) в готовых Docker-контейнерах, а затем запустит Nuxt `pnpm dev` на порту 3000.*
+   *Команда поднимет PostgreSQL, Redis, Rust API сервер (порт 8000) и микрофронтенды админки (порт 4173) в готовых Docker-контейнерах.*
 
 2. **Заполните базу тестовыми данными (при первом запуске):**
    ```bash
@@ -56,10 +57,15 @@
    # или pnpm seed
    ```
 
-3. **Готово к работе:**
+3. **Запустите в отдельном терминале клиент (cd client):**
+   ```bash
+   pnpm dev
+   ```
+
+4. **Готово к работе:**
    - Гостевой сайт (dev, hot-reload): `http://localhost:3000`
    - Бэкенд API: `http://localhost:8000/api/v1`
-   - Swagger / OpenAPI UI: `http://localhost:8000/swagger-ui`
+   - Swagger / OpenAPI UI: `http://localhost:8000/docs`
    - Админ-панель (контейнер): `http://localhost:4173`
 
 ---
@@ -140,100 +146,15 @@ pnpm dev:full
 
 ---
 
-## 🌿 Git Workflow: Работа с ветками и Pull Request в `main`
 
-В этом репозитории каждая подсистема живет в отдельной ветке. Вся работа ведется через фиче-ветки и **Pull Request (PR)**.
-
-### 1. Как устроен процесс PR для отдельных проектов
-
-У каждого подпроекта есть своя целевая ветка:
-- **Server:** разработка в ветке `server-update` -> PR в ветку `server`
-- **Admin Panel:** разработка в ветке `admin-panel-update` -> PR в ветку `admin-panel`
-- **Client:** разработка в ветке `dev` -> PR в ветку `client`
-
+## **Клонирование конкретной ветки разработчиком:**
 ```bash
-# Пример отправки изменений по серверу:
-cd server
-git add .
-git commit -m "feat(server): add redis soft entity locking and sse bus"
-git push origin server-update
-# -> Открыть Pull Request на GitHub: server-update -> server
+# Клонировать только клиент:
+git clone -b client https://github.com/cookies-with-tea/guest-place.git client
+
+# Клонировать только админку:
+git clone -b admin-panel https://github.com/cookies-with-tea/guest-place.git admin-panel
+
+# Клонировать только бэкенд:
+git clone -b server https://github.com/cookies-with-tea/guest-place.git server
 ```
-
----
-
-### 2. Как залить `Makefile`, `compose.yaml`, `package.json` и `README.md` в ветку `main`
-
-Ветка `main` содержит общую документацию, оркестратор и корневые файлы автоматизации (`Makefile`, `compose.yaml`, `package.json`, `scripts/`, `README.md`).
-
-Поскольку вы пушите **только через PR**, создайте фиче-ветку для корневой инфраструктуры (например, `infra/root-dx`):
-
-#### Шаг 1. Инициализировать репозиторий в корне (если еще не инициализирован)
-```bash
-# Находясь в корне /Users/miirsery/web/practice/cookies/guest-place:
-git init
-git remote add origin https://github.com/cookies-with-tea/guest-place.git
-git fetch origin main
-```
-
-#### Шаг 2. Создать ветку от `origin/main`
-```bash
-git checkout -b infra/root-dx origin/main
-```
-
-#### Шаг 3. Добавить корневые файлы и настроить `.gitignore`
-Создайте/проверьте файл `.gitignore` в корне, чтобы не коммитить папки подрепозиториев (`server`, `admin-panel`, `client`) целиком внутрь `main`, если они ведутся отдельными ветками:
-
-```gitignore
-# .gitignore в корне
-node_modules/
-.DS_Store
-*.log
-
-# Если server, admin-panel и client ведутся в отдельных ветках:
-# они могут быть исключены из ветки main, либо добавлены как git submodule
-```
-
-Добавьте только корневые файлы инфраструктуры:
-```bash
-git add Makefile compose.yaml package.json pnpm-lock.yaml scripts/ README.md admin-panel/Dockerfile client/Dockerfile
-git commit -m "feat(infra): add root Makefile, docker compose orchestrator and DX documentation"
-```
-
-#### Шаг 4. Запушить фиче-ветку на GitHub
-```bash
-git push -u origin infra/root-dx
-```
-
-#### Шаг 5. Открыть Pull Request в `main`
-1. Перейдите в репозиторий на GitHub: `https://github.com/cookies-with-tea/guest-place/pulls`
-2. Нажмите кнопку **New pull request**.
-3. Выберите:
-   - **Base repository:** `cookies-with-tea/guest-place`
-   - **Base branch:** `main`
-   - **Compare branch:** `infra/root-dx`
-4. Проверьте диффы (в PR войдут `Makefile`, `compose.yaml`, `package.json`, `scripts/`, `README.md`).
-5. Нажмите **Create pull request** и выполните Merge после ревью.
-
----
-
-### 3. Ссылки на ветки внутри `main`
-
-Чтобы внутри ветки `main` (в GitHub веб-интерфейсе и документации) были прямые и удобные переходы на другие ветки проекта:
-
-1. **В шапке `README.md`** уже добавлены прямые ссылки на ветки:
-   - [Ветка `server`](https://github.com/cookies-with-tea/guest-place/tree/server)
-   - [Ветка `admin-panel`](https://github.com/cookies-with-tea/guest-place/tree/admin-panel)
-   - [Ветка `client`](https://github.com/cookies-with-tea/guest-place/tree/client)
-2. **Переключение веток в GitHub UI**: В левом верхнем выпадающем меню GitHub (`Branch: main`) любой разработчик может переключиться на нужную ветку.
-3. **Клонирование конкретной ветки разработчиком:**
-   ```bash
-   # Клонировать только клиент:
-   git clone -b client https://github.com/cookies-with-tea/guest-place.git client
-
-   # Клонировать только админку:
-   git clone -b admin-panel https://github.com/cookies-with-tea/guest-place.git admin-panel
-
-   # Клонировать только бэкенд:
-   git clone -b server https://github.com/cookies-with-tea/guest-place.git server
-   ```

@@ -1,0 +1,17 @@
+{
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "admin-docs-storybook",
+			"runtimeExecutable": "sh",
+			"runtimeArgs": ["-c", "cd admin-panel && pnpm --filter admin-docs storybook -- --ci"],
+			"port": 6006
+		},
+		{
+			"name": "guest-client",
+			"runtimeExecutable": "sh",
+			"runtimeArgs": ["-c", "cd client && pnpm dev"],
+			"port": 3000
+		}
+	]
+}
