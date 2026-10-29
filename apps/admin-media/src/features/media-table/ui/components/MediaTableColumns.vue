@@ -303,7 +303,7 @@ const formatDate = (date: string | Date) => mediaUtils.formatDate(date)
 	border-radius: 6px;
 	font-weight: 500;
 	font-size: 12px;
-	background: var(--bg-surface-secondary, rgb(255, 255, 255, 0.05));
+	background: var(--bg-surface, rgb(255, 255, 255, 0.05));
 	padding: 3px 8px;
 	gap: 6px;
 }

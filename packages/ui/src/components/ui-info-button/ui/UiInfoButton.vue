@@ -40,7 +40,7 @@ const isOpen = ref(false)
 	justify-content: center;
 	border: none;
 	border-radius: 50%;
-	color: var(--gp-text-muted, #94a3b8);
+	color: var(--text-muted, #94a3b8);
 	background: transparent;
 	transition: all 0.15s ease;
 	cursor: pointer;
@@ -60,7 +60,7 @@ const isOpen = ref(false)
 
 	&:hover {
 		color: var(--gp-primary, #6366f1);
-		background: var(--gp-glass-hover, rgb(99, 102, 241, 0.1));
+		background: var(--gp-bg-glass-hover, rgb(99, 102, 241, 0.1));
 	}
 }
 </style>

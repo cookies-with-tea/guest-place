@@ -74,7 +74,7 @@ defineProps<{
 	justify-content: space-between;
 	border: 1px solid var(--border-color);
 	border-radius: 12px;
-	background: var(--bg-surface-secondary, rgb(255, 255, 255, 0.03));
+	background: var(--bg-surface, rgb(255, 255, 255, 0.03));
 	padding: 8px 12px;
 	gap: 12px;
 }

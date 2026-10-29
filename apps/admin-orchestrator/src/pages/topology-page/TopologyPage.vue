@@ -207,7 +207,7 @@ const chartData = computed(() => {
 	font-size: 0.75rem;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 }
 
 .chart-card {

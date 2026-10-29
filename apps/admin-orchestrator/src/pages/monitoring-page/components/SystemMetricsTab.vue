@@ -199,7 +199,7 @@ const customColors = [
 
 .pulse-icon {
 	font-size: 1.2rem;
-	color: var(--gp-success);
+	color: var(--el-color-success, #10b981);
 	animation: pulse 2s infinite;
 }
 

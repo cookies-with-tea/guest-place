@@ -20,12 +20,20 @@ interface Props {
 	color?: string
 	height?: number
 	areaFill?: boolean
+	/** Fixed y-axis ceiling (e.g. 100 for a percentage gauge) instead of auto-scaling to
+	 * the visible data range — without it, small fluctuations in a narrow band (e.g. CPU
+	 * bouncing between 15-25%) would render as a dramatic full-height zigzag. */
+	max?: number
+	/** Fixed y-axis floor, paired with `max`. Defaults to 0. */
+	min?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	color: 'var(--gp-primary)',
 	height: 48,
 	areaFill: true,
+	max: undefined,
+	min: undefined,
 })
 
 const color = useResolvedColor(toRef(props, 'color'))
@@ -34,7 +42,12 @@ const option = computed(() => ({
 	backgroundColor: 'transparent',
 	grid: { left: 0, right: 0, top: 2, bottom: 2 },
 	xAxis: { type: 'category', show: false, boundaryGap: false, data: props.data.map((_, i) => i) },
-	yAxis: { type: 'value', show: false, min: 'dataMin', max: 'dataMax' },
+	yAxis: {
+		type: 'value',
+		show: false,
+		min: props.max !== undefined ? (props.min ?? 0) : 'dataMin',
+		max: props.max !== undefined ? props.max : 'dataMax',
+	},
 	series: [
 		{
 			type: 'line',

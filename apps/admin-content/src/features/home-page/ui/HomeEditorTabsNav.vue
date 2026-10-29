@@ -95,11 +95,11 @@ defineProps<{
 	}
 
 	&.active {
-		border-color: var(--gp-primary, #42b883);
-		box-shadow: 0 0 16px rgb(66, 184, 131, 0.18);
+		border-color: var(--gp-primary, #7c3aed);
+		box-shadow: 0 0 16px rgb(var(--gp-primary-rgb), 0.18);
 		font-weight: 600;
 		color: #fff;
-		background: rgb(66, 184, 131, 0.15);
+		background: rgb(var(--gp-primary-rgb), 0.15);
 	}
 }
 
@@ -113,7 +113,7 @@ defineProps<{
 	border-radius: 10px;
 	font-weight: 700;
 	font-size: 11px;
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 	background: rgb(0, 0, 0, 0.35);
 	padding: 1px 6px;
 }

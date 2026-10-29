@@ -145,7 +145,7 @@ defineProps<{
 	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.08));
 	border-radius: 12px;
 	box-shadow: 0 8px 32px rgb(0, 0, 0, 0.35);
-	background: var(--gp-surface-card, #161b26);
+	background: var(--bg-card, #161b26);
 	overflow: hidden;
 }
 

@@ -195,8 +195,8 @@ const goToCreateSchema = () => {
 		code {
 			border-radius: 4px;
 			font-family: monospace;
-			color: var(--gp-primary, #42b883);
-			background: rgb(66, 184, 131, 0.1);
+			color: var(--gp-primary, #7c3aed);
+			background: rgb(var(--gp-primary-rgb), 0.1);
 			padding: 2px 6px;
 		}
 	}
@@ -261,8 +261,8 @@ const goToCreateSchema = () => {
 			padding: 3px 8px;
 
 			&--live {
-				color: var(--gp-primary, #42b883);
-				background: rgb(66, 184, 131, 0.2);
+				color: var(--gp-primary, #7c3aed);
+				background: rgb(var(--gp-primary-rgb), 0.2);
 			}
 
 			&--entity {
@@ -314,14 +314,14 @@ const goToCreateSchema = () => {
 
 			span {
 				font-size: 0.65rem;
-				color: var(--gp-text-muted, #718096);
+				color: var(--text-muted, #718096);
 				margin-top: 2px;
 			}
 		}
 
 		.col-arrow {
 			font-size: 14px;
-			color: var(--gp-primary, #42b883);
+			color: var(--gp-primary, #7c3aed);
 		}
 	}
 
@@ -355,7 +355,7 @@ const goToCreateSchema = () => {
 			border-radius: 50%;
 			font-weight: 700;
 			color: #000;
-			background: var(--gp-primary, #42b883);
+			background: var(--gp-primary, #7c3aed);
 		}
 
 		.step-body {

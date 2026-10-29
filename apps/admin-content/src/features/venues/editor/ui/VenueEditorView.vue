@@ -220,11 +220,11 @@ const emit = defineEmits<{
 	}
 
 	&.active {
-		border-color: var(--gp-primary, #42b883);
-		box-shadow: 0 0 12px rgb(66, 184, 131, 0.2);
+		border-color: var(--gp-primary, #7c3aed);
+		box-shadow: 0 0 12px rgb(var(--gp-primary-rgb), 0.2);
 		font-weight: 600;
 		color: #fff;
-		background: rgb(66, 184, 131, 0.15);
+		background: rgb(var(--gp-primary-rgb), 0.15);
 	}
 }
 
@@ -238,7 +238,7 @@ const emit = defineEmits<{
 	border-radius: 8px;
 	font-weight: 700;
 	font-size: 10px;
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 	background: rgb(0, 0, 0, 0.35);
 	padding: 1px 5px;
 }

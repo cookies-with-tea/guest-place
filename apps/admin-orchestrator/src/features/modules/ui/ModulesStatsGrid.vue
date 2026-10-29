@@ -101,8 +101,8 @@ defineProps<{
 	font-size: 22px;
 
 	&--total {
-		color: var(--gp-primary, #42b883);
-		background: rgb(66, 184, 131, 0.15);
+		color: var(--gp-primary, #7c3aed);
+		background: rgb(var(--gp-primary-rgb), 0.15);
 	}
 
 	&--online {
@@ -128,8 +128,8 @@ defineProps<{
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	box-shadow: 0 0 10px var(--gp-primary, #42b883);
-	background-color: var(--gp-primary, #42b883);
+	box-shadow: 0 0 10px var(--gp-primary, #7c3aed);
+	background-color: var(--gp-primary, #7c3aed);
 	animation: pulse-live 2s infinite;
 }
 
@@ -174,12 +174,13 @@ defineProps<{
 	font-size: 0.78rem;
 	letter-spacing: 0.4px;
 	text-transform: uppercase;
-	color: var(--gp-text-muted, #718096);
+	color: var(--text-muted, #718096);
 	margin-top: 2px;
 }
 
 .text-success {
-	color: var(--gp-primary, #42b883) !important;
+	/* Used for health.onlineCount — an actual success/health count, not brand accent. */
+	color: var(--el-color-success, #10b981) !important;
 }
 
 .text-danger {

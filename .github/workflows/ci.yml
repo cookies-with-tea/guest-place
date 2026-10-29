@@ -73,24 +73,30 @@ jobs:
       - name: Run unit tests
         run: pnpm test:unit
 
-  # Needs a SNYK_TOKEN repo secret before this can run — nothing in this repo sets one yet
-  # (checked: no such secret is referenced anywhere else in the codebase). Enable once it's
-  # added under Settings > Secrets and variables > Actions.
-  # security:
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         cache: 'pnpm'
-  #     - name: Install dependencies
-  #       run: pnpm install --frozen-lockfile
-  #     - name: Run Snyk security scan
-  #       run: npx snyk test --severity-threshold=high
-  #       env:
-  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # Replaces the old Snyk job (needed a SNYK_TOKEN secret that was never set — nothing in
+  # this repo ever referenced one). `pnpm audit` needs no external service or secret.
+  #
+  # non-blocking by design, not an oversight: the current dependency tree already has 55
+  # findings (5 low / 22 moderate / 22 high / 6 critical as of 2026-10-29, mostly transitive
+  # dev-only tooling like Cypress/Storybook — checked locally with `pnpm audit`, it exits 1
+  # immediately). A blocking gate here would be red from the first run, exactly the trap the
+  # dependency-check job below already fell into. This job's job is visibility (every run
+  # posts the findings to the Actions log) while a real dependency-upgrade pass happens
+  # separately; flip `continue-on-error` to `false` once that baseline is clean.
+  security:
+    needs: setup
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit dependencies (non-blocking — see job comment)
+        run: pnpm audit --audit-level=high
 
   # Both steps are broken as written, confirmed locally, not just guessed:
   # `pnpm outdated --parseable` exits 1 whenever *any* dependency is outdated (currently 51 —

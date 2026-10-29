@@ -49,7 +49,7 @@ const { isRefsOpen, isRefsLoading, translationRefs, editingTranslation, closeRef
 .refs-info {
 	display: flex;
 	border-radius: 8px;
-	background: var(--gp-bg-lighter);
+	background: var(--bg-surface);
 	padding: 12px;
 	margin-bottom: 20px;
 	gap: 24px;

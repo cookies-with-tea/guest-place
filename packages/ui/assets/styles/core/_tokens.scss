@@ -41,6 +41,9 @@
 	--gp-primary: #{$gp-primary};
 	--gp-primary-hover: #6d28d9;
 	--gp-primary-light: rgb(124, 58, 237, 0.12);
+
+	/* RGB triplet of --gp-primary, for call sites that need their own alpha via rgb(var(--gp-primary-rgb), N) */
+	--gp-primary-rgb: 124, 58, 237;
 	--gp-radius-sm: 16px;
 	--gp-radius-md: 24px;
 	--gp-radius-lg: 32px;
@@ -84,4 +87,5 @@
 	--gp-primary: #a78bfa;
 	--gp-primary-hover: #c4b5fd;
 	--gp-primary-light: rgb(167, 139, 250, 0.18);
+	--gp-primary-rgb: 167, 139, 250;
 }

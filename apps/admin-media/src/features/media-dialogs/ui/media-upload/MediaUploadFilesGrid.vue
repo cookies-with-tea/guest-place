@@ -152,7 +152,7 @@ defineProps<{
 }
 
 .compact-file-item:hover {
-	border-color: var(--color-primary);
+	border-color: var(--accent-primary);
 	box-shadow: var(--shadow-sm);
 }
 
@@ -201,7 +201,7 @@ defineProps<{
 }
 
 .file-thumb:hover {
-	border-color: var(--color-primary);
+	border-color: var(--accent-primary);
 	transform: scale(1.08);
 }
 

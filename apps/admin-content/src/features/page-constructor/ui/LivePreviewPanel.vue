@@ -116,7 +116,7 @@ defineProps<{
 	font-weight: 500;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	color: var(--text-main);
+	color: var(--text-primary);
 	overflow: hidden;
 }
 
@@ -145,7 +145,7 @@ defineProps<{
 	gap: 4px;
 
 	&:hover {
-		color: var(--text-main);
+		color: var(--text-primary);
 		background: rgb(0, 0, 0, 0.05);
 	}
 

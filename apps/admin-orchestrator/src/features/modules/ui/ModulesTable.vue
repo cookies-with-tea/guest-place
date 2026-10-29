@@ -306,8 +306,8 @@ const getIcon = (name: string) => (Icons as any)[name] || Icons.Menu
 	justify-content: center;
 	border-radius: 10px;
 	font-size: 18px;
-	color: var(--gp-primary, #42b883);
-	background: var(--gp-primary-light, rgb(66, 184, 131, 0.1));
+	color: var(--gp-primary, #7c3aed);
+	background: var(--gp-primary-light, rgb(124, 58, 237, 0.1));
 }
 
 .mfe-display-name {
@@ -326,7 +326,7 @@ const getIcon = (name: string) => (Icons as any)[name] || Icons.Menu
 	align-items: center;
 	font-size: 0.8rem;
 	text-decoration: none;
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 	transition: opacity 0.2s;
 	gap: 4px;
 
@@ -359,8 +359,8 @@ const getIcon = (name: string) => (Icons as any)[name] || Icons.Menu
 	transition: background-color 0.3s ease;
 
 	&--online {
-		box-shadow: 0 0 8px var(--gp-primary, #42b883);
-		background-color: var(--gp-primary, #42b883);
+		box-shadow: 0 0 8px var(--gp-primary, #7c3aed);
+		background-color: var(--gp-primary, #7c3aed);
 	}
 
 	&--offline {
@@ -400,7 +400,7 @@ const getIcon = (name: string) => (Icons as any)[name] || Icons.Menu
 }
 
 .status-text.online {
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 }
 
 .status-text.offline {

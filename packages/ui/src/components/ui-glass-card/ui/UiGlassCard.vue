@@ -32,7 +32,7 @@ const resolveIcon = (name: string) => (Icons as Record<string, unknown>)[name] ?
 .ui-glass-card {
 	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.08));
 	border-radius: 12px;
-	background: var(--gp-bg-card, var(--gp-bg-surface, rgb(30, 41, 59, 0.5)));
+	background: var(--bg-card, rgb(30, 41, 59, 0.5));
 	padding: 18px 20px;
 	margin-bottom: 16px;
 	backdrop-filter: blur(12px);

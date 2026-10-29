@@ -68,7 +68,7 @@ import { Box, Tickets } from '@element-plus/icons-vue'
 
 .arch-info strong {
 	font-size: 13px;
-	color: var(--text-main);
+	color: var(--text-primary);
 }
 
 .arch-info span {

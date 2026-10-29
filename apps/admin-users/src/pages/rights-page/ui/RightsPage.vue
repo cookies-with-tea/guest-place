@@ -110,7 +110,7 @@ onMounted(loadData)
 
 .header h1 {
 	font-size: 1.5rem;
-	color: var(--gp-text-primary);
+	color: var(--text-primary);
 	margin: 0;
 }
 

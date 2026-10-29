@@ -76,7 +76,7 @@ const onConfirmKey = () => {
 	--tiptap-toolbar-bg: var(--bg-card, #f8fafc);
 	--tiptap-text: var(--text-primary, #1e293b);
 	--tiptap-muted: var(--text-muted, #94a3b8);
-	--tiptap-active-bg: var(--gp-accent, #6366f1);
+	--tiptap-active-bg: var(--accent-primary, #6366f1);
 	--tiptap-active-text: #fff;
 	--tiptap-btn-hover: rgb(99, 102, 241, 0.1);
 	--tiptap-radius: 12px;

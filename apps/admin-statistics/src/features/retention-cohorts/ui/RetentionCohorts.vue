@@ -105,13 +105,13 @@ onMounted(loadData)
 	th {
 		font-weight: 600;
 		color: var(--gp-text-secondary);
-		background: var(--gp-bg-page);
+		background: var(--bg-page);
 	}
 
 	.cohort-label {
 		font-weight: 600;
 		text-align: left;
-		background: var(--gp-bg-page);
+		background: var(--bg-page);
 	}
 
 	.total-users {
@@ -121,7 +121,7 @@ onMounted(loadData)
 	.rate-cell {
 		font-weight: 500;
 		text-shadow: 0 1px 2px rgb(0, 0, 0, 0.1);
-		color: var(--gp-text-primary);
+		color: var(--text-primary);
 	}
 }
 </style>

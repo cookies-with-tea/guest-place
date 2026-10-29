@@ -160,7 +160,7 @@ const router = useRouter()
 	&.active {
 		font-weight: 600;
 		color: #fff;
-		background: var(--gp-primary, #42b883);
+		background: var(--gp-primary, #7c3aed);
 	}
 }
 </style>

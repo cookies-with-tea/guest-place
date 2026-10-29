@@ -52,7 +52,7 @@ const stats = useSystemStats(microfrontends)
 :deep(.monitoring-tabs .el-tabs__item) {
 	font-weight: 500;
 	font-size: 1.1rem;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 }
 
 :deep(.monitoring-tabs .el-tabs__item.is-active) {

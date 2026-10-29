@@ -341,7 +341,7 @@ const navigateOrchestrator = () => {
 	font-size: 0.7rem;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
-	color: var(--gp-text-muted, #718096);
+	color: var(--text-muted, #718096);
 }
 
 .endpoint-url {
@@ -350,7 +350,7 @@ const navigateOrchestrator = () => {
 	font-size: 0.8rem;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 	overflow: hidden;
 }
 
@@ -364,7 +364,7 @@ const navigateOrchestrator = () => {
 	align-items: center;
 	border: none;
 	font-size: 0.8rem;
-	color: var(--gp-text-muted, #718096);
+	color: var(--text-muted, #718096);
 	background: transparent;
 	transition: color 0.2s;
 	cursor: pointer;

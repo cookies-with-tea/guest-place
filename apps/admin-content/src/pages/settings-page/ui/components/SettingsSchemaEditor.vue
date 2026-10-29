@@ -122,7 +122,7 @@ const { isDark } = useTheme()
 
 		.fields-count {
 			font-size: 12px;
-			color: var(--gp-text-muted, #94a3b8);
+			color: var(--text-muted, #94a3b8);
 		}
 	}
 }

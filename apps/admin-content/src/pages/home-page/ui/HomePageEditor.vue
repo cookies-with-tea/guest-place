@@ -219,7 +219,7 @@ onMounted(() => {
 
 	&.is-focus,
 	&:focus {
-		box-shadow: 0 0 0 1px var(--gp-primary, #42b883) inset !important;
+		box-shadow: 0 0 0 1px var(--gp-primary, #7c3aed) inset !important;
 	}
 }
 

@@ -107,7 +107,7 @@ defineProps<{
 }
 
 .color-badge:hover {
-	background: var(--bg-hover, rgb(0, 0, 0, 0.05));
+	background: var(--gp-bg-glass-hover, rgb(0, 0, 0, 0.05));
 }
 
 .color-dot {

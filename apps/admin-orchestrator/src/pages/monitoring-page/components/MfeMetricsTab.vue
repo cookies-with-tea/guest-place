@@ -93,12 +93,12 @@ defineProps<{
 }
 
 .status-dot.online {
-	box-shadow: 0 0 8px var(--gp-success);
-	background-color: var(--gp-success);
+	box-shadow: 0 0 8px var(--el-color-success, #10b981);
+	background-color: var(--el-color-success, #10b981);
 }
 
 .status-dot.offline {
-	background-color: var(--gp-danger);
+	background-color: var(--el-color-danger, #f04438);
 }
 
 .mr-2 {

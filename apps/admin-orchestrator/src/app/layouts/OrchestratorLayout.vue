@@ -63,7 +63,7 @@
 }
 
 .stat-icon--offline {
-	color: var(--gp-danger);
+	color: var(--el-color-danger, #f04438);
 }
 
 .stat-info {
@@ -81,7 +81,7 @@
 	font-size: 0.75rem;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 }
 
 .page-body {

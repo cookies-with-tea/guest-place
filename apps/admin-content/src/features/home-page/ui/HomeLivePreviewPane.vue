@@ -109,7 +109,7 @@ defineProps<{
 .origin-tag {
 	font-weight: 700;
 	font-size: 11px;
-	color: var(--gp-primary, #42b883);
+	color: var(--gp-primary, #7c3aed);
 }
 
 .url-path {

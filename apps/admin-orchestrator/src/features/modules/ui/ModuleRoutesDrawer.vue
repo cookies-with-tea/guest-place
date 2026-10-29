@@ -75,18 +75,18 @@ defineProps<{
 .drawer-notice {
 	display: flex;
 	align-items: center;
-	border: 1px solid rgb(66, 184, 131, 0.2);
+	border: 1px solid rgb(var(--gp-primary-rgb), 0.2);
 	border-radius: 8px;
 	font-size: 0.8rem;
 	color: var(--gp-text-secondary, #a0aec0);
-	background: rgb(66, 184, 131, 0.1);
+	background: rgb(var(--gp-primary-rgb), 0.1);
 	padding: 10px 14px;
 	gap: 8px;
 
 	.notice-icon {
 		flex-shrink: 0;
 		font-size: 16px;
-		color: var(--gp-primary, #42b883);
+		color: var(--gp-primary, #7c3aed);
 	}
 }
 
@@ -131,7 +131,7 @@ defineProps<{
 .route-path {
 	font-family: monospace;
 	font-size: 0.75rem;
-	color: var(--gp-text-muted, #718096);
+	color: var(--text-muted, #718096);
 	margin-top: 2px;
 }
 
