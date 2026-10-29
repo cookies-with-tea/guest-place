@@ -1,7 +1,7 @@
 <template>
 	<div class="info-strip">
 		<div class="info-item">
-			<span class="info-icon">🎯</span>
+			<el-icon class="info-icon"><Aim /></el-icon>
 			<div>
 				<strong>301 Moved Permanently</strong>
 				<span
@@ -12,7 +12,7 @@
 		</div>
 		<div class="info-sep"></div>
 		<div class="info-item">
-			<span class="info-icon">⏳</span>
+			<el-icon class="info-icon"><Timer /></el-icon>
 			<div>
 				<strong>302 Found (Временный)</strong>
 				<span>Не передаёт поисковый вес. Используется для временных акций, технических работ или A/B тестов.</span>
@@ -20,6 +20,10 @@
 		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+import { Aim, Timer } from '@element-plus/icons-vue'
+</script>
 
 <style scoped>
 .info-strip {
@@ -40,7 +44,11 @@
 }
 
 .info-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 24px;
+	color: var(--gp-primary, #6366f1);
 }
 
 .info-item strong {

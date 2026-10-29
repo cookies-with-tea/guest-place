@@ -70,7 +70,7 @@
 				class="btn-gradient"
 				@click="entry.createDefaultSchema"
 			>
-				✨ Инициализировать схему в 1 клик
+				Инициализировать схему в 1 клик
 			</el-button>
 
 			<el-button size="large" :icon="Operation" @click="emit('go-to-schemas')">

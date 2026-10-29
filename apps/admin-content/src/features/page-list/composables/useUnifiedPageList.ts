@@ -7,7 +7,7 @@ const FIXED_SCHEMA_DEFINITIONS = [
 		title: 'Главная страница (Home)',
 		slug: 'page_home',
 		path: '/',
-		icon: '🏠',
+		icon: 'HomeFilled',
 		description:
 			'Индивидуальная вёрстка: Hero, Места по категориям, Последние добавленные, Самые популярные, Варианты взаимодействия',
 	},
@@ -15,21 +15,21 @@ const FIXED_SCHEMA_DEFINITIONS = [
 		title: 'О платформе (About)',
 		slug: 'page_about',
 		path: '/about',
-		icon: 'ℹ️',
+		icon: 'InfoFilled',
 		description: 'Индивидуальная вёрстка: Hero, Opportunities, Leadership, News, Mission',
 	},
 	{
 		title: 'Гостям (Guests)',
 		slug: 'page_guests',
 		path: '/guests',
-		icon: '👥',
+		icon: 'UserFilled',
 		description: 'Индивидуальная вёрстка: возможности для гостей, каталог, быстрый выбор заведений',
 	},
 	{
 		title: 'Площадкам (Platforms)',
 		slug: 'page_platforms',
 		path: '/platforms',
-		icon: '📍',
+		icon: 'Place',
 		description: 'Индивидуальная вёрстка: тарифы, размещение заведений, аналитика бронирований',
 	},
 ]
@@ -71,7 +71,7 @@ export function useUnifiedPageList(pagesAndSchemas: PagesAndSchemas) {
 					title: s.name,
 					slug: s.slug,
 					path: `/${s.slug}`,
-					icon: '📄',
+					icon: 'Document',
 					description: 'Кастомная Singleton-схема со специфичным набором полей',
 					hasSchema: true,
 					fieldsCount: s.fields?.length || 0,
@@ -93,7 +93,7 @@ export function useUnifiedPageList(pagesAndSchemas: PagesAndSchemas) {
 				title: p.title,
 				slug: p.slug,
 				path: `/p/${p.slug}`,
-				icon: '📦',
+				icon: 'Box',
 				description: 'Динамическая страница из реестра переиспользуемых блоков',
 				status: p.status || 'draft',
 				parent_id: p.parent_id,
@@ -122,9 +122,9 @@ export function useUnifiedPageList(pagesAndSchemas: PagesAndSchemas) {
 	})
 
 	function getStatusShort(st: string): string {
-		if (st === 'published') return '🟢 Опубликовано'
-		if (st === 'review') return '🟠 На проверке'
-		return '⚪ Черновик'
+		if (st === 'published') return 'Опубликовано'
+		if (st === 'review') return 'На проверке'
+		return 'Черновик'
 	}
 
 	function formatDate(dateStr?: string): string {

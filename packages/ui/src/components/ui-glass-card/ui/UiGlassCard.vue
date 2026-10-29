@@ -1,7 +1,9 @@
 <template>
 	<div class="ui-glass-card">
 		<div class="card-head">
-			<div class="card-head__icon">{{ icon }}</div>
+			<el-icon class="card-head__icon">
+				<component :is="resolveIcon(icon)" />
+			</el-icon>
 			<div class="card-head__text">
 				<h3>{{ title }}</h3>
 				<p v-if="description">{{ description }}</p>
@@ -13,6 +15,8 @@
 </template>
 
 <script setup lang="ts">
+import * as Icons from '@element-plus/icons-vue'
+
 interface Props {
 	icon: string
 	title: string
@@ -20,6 +24,8 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const resolveIcon = (name: string) => (Icons as Record<string, unknown>)[name] ?? Icons.Document
 </script>
 
 <style scoped lang="scss">
@@ -42,6 +48,9 @@ defineProps<Props>()
 	gap: 10px;
 
 	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
 		font-size: 20px;
 		line-height: 1;
 	}

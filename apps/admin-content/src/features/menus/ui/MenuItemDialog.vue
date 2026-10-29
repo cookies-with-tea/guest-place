@@ -23,9 +23,15 @@
 
 			<el-form-item label="Тип ссылки">
 				<el-radio-group v-model="dialog.itemForm.type" size="default">
-					<el-radio-button label="page">📄 Страница CMS</el-radio-button>
-					<el-radio-button label="url">🔗 Произвольный URL</el-radio-button>
-					<el-radio-button label="anchor">⚓ Якорь (#секторы)</el-radio-button>
+					<el-radio-button label="page"
+						><el-icon><Document /></el-icon> Страница CMS</el-radio-button
+					>
+					<el-radio-button label="url"
+						><el-icon><Link /></el-icon> Произвольный URL</el-radio-button
+					>
+					<el-radio-button label="anchor"
+						><el-icon><Position /></el-icon> Якорь (#секторы)</el-radio-button
+					>
 				</el-radio-group>
 			</el-form-item>
 
@@ -71,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { Document, Link, Position } from '@element-plus/icons-vue'
 import { UiRichTextField } from '@admin-panel/ui'
 
 import type { MenuItemDialog } from '../composables/useMenuItemDialog'

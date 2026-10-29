@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="📝"
+		icon="EditPen"
 		title="Подробное описание площадки"
 		description="Основной текст о заведении для карточки и поисковых систем"
 	>

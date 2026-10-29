@@ -2,7 +2,9 @@
 	<div class="editor-topbar">
 		<div class="editor-topbar__left">
 			<el-button plain @click="emit('close')"> ← К списку </el-button>
-			<span class="live-pill">⚡ LIVE РЕДАКТОР</span>
+			<span class="live-pill"
+				><el-icon class="live-pill__icon"><Lightning /></el-icon> LIVE РЕДАКТОР</span
+			>
 			<h2 class="editor-title">{{ venueForm.isEditing ? venueForm.form.title : 'Новая площадка' }}</h2>
 			<a
 				v-if="venueForm.form.slug"
@@ -42,18 +44,19 @@
 					title="Только форма (100%)"
 					@click="livePreview.splitRatio = 'full'"
 				>
-					⛶ 100%
+					<el-icon class="split-btn__icon"><FullScreen /></el-icon> 100%
 				</button>
 			</div>
 
-			<el-button type="success" plain @click="openLanding(venueForm.form.slug)"> 🌐 На сайт ↗ </el-button>
+			<el-button :icon="Link" type="success" plain @click="openLanding(venueForm.form.slug)"> На сайт ↗ </el-button>
 
-			<el-button type="primary" :loading="venueForm.saving" @click="emit('save')"> 💾 Сохранить </el-button>
+			<el-button :icon="Check" type="primary" :loading="venueForm.saving" @click="emit('save')"> Сохранить </el-button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { Check, FullScreen, Lightning, Link } from '@element-plus/icons-vue'
 import type { VenueForm } from '../composables/useVenueForm'
 import type { VenueLivePreview } from '../composables/useVenueLivePreview'
 import { getLandingUrl, openLanding } from '../../lib/helpers'
@@ -97,6 +100,8 @@ const emit = defineEmits<{
 }
 
 .live-pill {
+	display: inline-flex;
+	align-items: center;
 	border-radius: 6px;
 	font-weight: 700;
 	font-size: 11px;
@@ -105,6 +110,13 @@ const emit = defineEmits<{
 	color: #fff;
 	background: linear-gradient(135deg, #0ea5e9, #6366f1);
 	padding: 4px 10px;
+	gap: 4px;
+
+	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 }
 
 .editor-title {
@@ -142,6 +154,8 @@ const emit = defineEmits<{
 }
 
 .split-btn {
+	display: inline-flex;
+	align-items: center;
 	border: none;
 	border-radius: 6px;
 	font-weight: 500;
@@ -151,6 +165,13 @@ const emit = defineEmits<{
 	transition: all 0.15s;
 	cursor: pointer;
 	padding: 4px 10px;
+	gap: 4px;
+
+	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 
 	&:hover {
 		color: #fff;

@@ -20,9 +20,9 @@
 			@dragover.prevent
 			@drop="fieldBuilder.onCanvasDrop"
 		>
-			<div class="canvas-empty__icon">🎯</div>
+			<el-icon class="canvas-empty__icon"><Plus /></el-icon>
 			<p class="canvas-empty__title">No fields yet</p>
-			<p class="canvas-empty__hint">Click a field type from the left panel to add it</p>
+			<p class="canvas-empty__hint">Click a field type on the left to add it</p>
 		</div>
 
 		<transition-group v-else class="fields-list" name="field-list" tag="div">
@@ -58,7 +58,9 @@
 				</div>
 
 				<!-- Field info -->
-				<div class="field-card__icon">{{ fieldBuilder.getFieldTypeInfo(field.fieldType).icon }}</div>
+				<el-icon class="field-card__icon" :style="{ color: fieldBuilder.getFieldTypeInfo(field.fieldType).color }">
+					<component :is="resolveIcon(fieldBuilder.getFieldTypeInfo(field.fieldType).icon)" />
+				</el-icon>
 				<div class="field-card__meta">
 					<div class="field-card__label">
 						<span v-if="field.label">{{ field.label }}</span>
@@ -136,6 +138,8 @@
 </template>
 
 <script setup lang="ts">
+import { Plus } from '@element-plus/icons-vue'
+import { resolveIcon } from '../lib/icons'
 import type { SchemaForm } from '../composables/useSchemaForm'
 import type { FieldBuilder } from '../composables/useFieldBuilder'
 
@@ -221,7 +225,12 @@ defineProps<{
 }
 
 .canvas-empty__icon {
-	font-size: 48px;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	font-size: 20px;
+	color: var(--gp-text-secondary);
+	background: var(--gp-bg-glass-hover);
 }
 
 .canvas-empty__title {
@@ -320,6 +329,8 @@ defineProps<{
 }
 
 .field-card__icon {
+	width: 1em;
+	height: 1em;
 	flex-shrink: 0;
 	font-size: 20px;
 }

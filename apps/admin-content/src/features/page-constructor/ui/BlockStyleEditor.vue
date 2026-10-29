@@ -9,7 +9,7 @@
 					:class="{ 'is-active': canvas.getBlockStyle().theme === 'light' }"
 					@click="canvas.setBlockTheme('light')"
 				>
-					☀️ Светлая
+					<el-icon><Sunny /></el-icon>Светлая
 				</button>
 				<button
 					type="button"
@@ -17,7 +17,7 @@
 					:class="{ 'is-active': canvas.getBlockStyle().theme === 'dark' }"
 					@click="canvas.setBlockTheme('dark')"
 				>
-					🌙 Тёмная
+					<el-icon><Moon /></el-icon>Тёмная
 				</button>
 				<button
 					type="button"
@@ -25,7 +25,7 @@
 					:class="{ 'is-active': canvas.getBlockStyle().theme === 'accent' }"
 					@click="canvas.setBlockTheme('accent')"
 				>
-					⚡ Акцент
+					<el-icon><Lightning /></el-icon>Акцент
 				</button>
 				<button
 					type="button"
@@ -33,7 +33,7 @@
 					:class="{ 'is-active': canvas.getBlockStyle().theme === 'muted' }"
 					@click="canvas.setBlockTheme('muted')"
 				>
-					🌫️ Приглушённая
+					<el-icon><Cloudy /></el-icon>Приглушённая
 				</button>
 				<button
 					type="button"
@@ -41,7 +41,7 @@
 					:class="{ 'is-active': canvas.getBlockStyle().theme === 'transparent' }"
 					@click="canvas.setBlockTheme('transparent')"
 				>
-					🪟 Прозрачная
+					<el-icon><Crop /></el-icon>Прозрачная
 				</button>
 			</div>
 		</div>
@@ -141,16 +141,18 @@
 			<el-button
 				type="primary"
 				plain
+				:icon="Star"
 				style="width: 100%"
 				@click="presets.openSavePresetDialog(canvas.selectedBlockIndex!)"
 			>
-				⭐ Сохранить блок и стиль как пресет
+				Сохранить блок и стиль как пресет
 			</el-button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { Cloudy, Crop, Lightning, Moon, Star, Sunny } from '@element-plus/icons-vue'
 import type { BlockCanvas } from '../composables/useBlockCanvas'
 import type { BlockPresetsAndClipboard } from '../composables/useBlockPresets'
 
@@ -190,6 +192,9 @@ defineProps<{
 }
 
 .theme-card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	border: 1px solid var(--border-color);
 	border-radius: 6px;
 	font-weight: 500;
@@ -198,6 +203,13 @@ defineProps<{
 	transition: all 0.15s ease;
 	cursor: pointer;
 	padding: 8px 10px;
+	gap: 5px;
+}
+
+.theme-card .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .theme-card.theme-light {

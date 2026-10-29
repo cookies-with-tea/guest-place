@@ -60,7 +60,7 @@
 		</div>
 
 		<div class="info-card glass-panel mt-4">
-			<div class="card-icon">⚠️</div>
+			<el-icon class="card-icon"><WarningFilled /></el-icon>
 			<h3>Частый источник путаницы</h3>
 			<p>
 				Список страниц (<code>/content</code>) показывает блочные и схемные страницы в одной витрине — различаются
@@ -71,3 +71,16 @@
 		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+import { WarningFilled } from '@element-plus/icons-vue'
+</script>
+
+<style scoped>
+.card-icon {
+	width: 28px;
+	height: 28px;
+	color: #f59e0b;
+	margin-bottom: 12px;
+}
+</style>

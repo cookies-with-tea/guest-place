@@ -25,8 +25,15 @@
 				<el-button v-if="status === 'review'" size="default" plain type="info" @click="status = 'draft'">
 					← В черновик
 				</el-button>
-				<el-button v-if="status !== 'published'" size="default" plain type="success" @click="status = 'published'">
-					Опубликовать 🚀
+				<el-button
+					v-if="status !== 'published'"
+					size="default"
+					plain
+					type="success"
+					:icon="Promotion"
+					@click="status = 'published'"
+				>
+					Опубликовать
 				</el-button>
 				<el-button v-else size="default" plain type="info" @click="status = 'draft'"> Снять с публикации </el-button>
 			</el-button-group>
@@ -62,6 +69,8 @@
 </template>
 
 <script setup lang="ts">
+import { Promotion } from '@element-plus/icons-vue'
+
 defineProps<{
 	isEdit?: boolean
 	isSaving?: boolean

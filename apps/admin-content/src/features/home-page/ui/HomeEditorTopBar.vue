@@ -2,7 +2,9 @@
 	<header class="editor-topbar">
 		<div class="editor-topbar__left">
 			<el-button plain @click="router.push('/pages')"> ← К страницам </el-button>
-			<span class="live-pill">⚡ LIVE РЕДАКТОР</span>
+			<span class="live-pill"
+				><el-icon class="live-pill__icon"><Lightning /></el-icon> LIVE РЕДАКТОР</span
+			>
 			<h1 class="editor-title">Главная страница</h1>
 			<span class="preview-route-pill">/ (Home)</span>
 		</div>
@@ -42,10 +44,10 @@
 				Обновить
 			</el-button>
 
-			<el-button type="success" plain @click="livePreview.openClientPreview"> 🌐 На сайт ↗ </el-button>
+			<el-button type="success" plain :icon="Link" @click="livePreview.openClientPreview"> На сайт ↗ </el-button>
 
 			<el-button type="primary" :icon="Check" :loading="homeForm.saving" @click="emit('save')">
-				💾 Сохранить изменения
+				Сохранить изменения
 			</el-button>
 		</div>
 	</header>
@@ -53,7 +55,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Check, Refresh } from '@element-plus/icons-vue'
+import { Check, Lightning, Link, Refresh } from '@element-plus/icons-vue'
 import type { HomePageForm } from '../composables/useHomePageForm'
 import type { HomeLivePreview } from '../composables/useHomeLivePreview'
 
@@ -98,6 +100,8 @@ const router = useRouter()
 }
 
 .live-pill {
+	display: inline-flex;
+	align-items: center;
 	border-radius: 6px;
 	font-weight: 700;
 	font-size: 11px;
@@ -106,6 +110,13 @@ const router = useRouter()
 	color: #fff;
 	background: linear-gradient(135deg, #0ea5e9, #6366f1);
 	padding: 4px 10px;
+	gap: 4px;
+
+	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 }
 
 .editor-title {

@@ -1,5 +1,9 @@
 <template>
-	<UiGlassCard icon="💬" title="Отзывы гостей площадки" description="Реальные отзывы гостей с оценкой и аватаром">
+	<UiGlassCard
+		icon="ChatDotRound"
+		title="Отзывы гостей площадки"
+		description="Реальные отзывы гостей с оценкой и аватаром"
+	>
 		<template #actions>
 			<el-button size="small" type="primary" :icon="Plus" @click="venueForm.addReview">Добавить отзыв</el-button>
 		</template>
@@ -13,7 +17,7 @@
 					<el-input v-model="rev.author" placeholder="Имя гостя" style="width: 160px" @input="onChange" />
 					<el-input v-model="rev.date" placeholder="Дата (20.03.2024)" style="width: 130px" @input="onChange" />
 					<el-rate v-model="rev.rating" :max="5" style="margin-left: 8px" @change="onChange" />
-					<el-button type="danger" link style="margin-left: auto" @click="venueForm.removeReview(idx)">✕</el-button>
+					<el-button type="danger" link :icon="Close" style="margin-left: auto" @click="venueForm.removeReview(idx)" />
 				</div>
 				<el-input v-model="rev.avatar" placeholder="URL аватара гостя" style="margin-bottom: 8px" @input="onChange" />
 				<UiRichTextField
@@ -31,7 +35,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="❓"
+		icon="QuestionFilled"
 		title="Вопросы и ответы (FAQ)"
 		description="Часто задаваемые вопросы по бронированию и сервису"
 	>
@@ -51,7 +55,7 @@
 						style="flex: 1"
 						@update:model-value="onChange"
 					/>
-					<el-button type="danger" link @click="venueForm.removeFaq(idx)">✕</el-button>
+					<el-button type="danger" link :icon="Close" @click="venueForm.removeFaq(idx)" />
 				</div>
 				<UiRichTextField
 					v-model="item.answer"
@@ -70,7 +74,7 @@
 
 <script setup lang="ts">
 import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
-import { Plus } from '@element-plus/icons-vue'
+import { Close, Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{

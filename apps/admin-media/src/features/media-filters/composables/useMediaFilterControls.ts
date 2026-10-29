@@ -2,12 +2,12 @@ import { computed, reactive, ref, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 
 export const MEDIA_TYPE_OPTIONS = [
-	{ value: 'all', label: 'All Media', icon: '📁' },
-	{ value: 'image', label: 'Images', icon: '🖼️' },
-	{ value: 'video', label: 'Videos', icon: '🎬' },
-	{ value: 'document', label: 'Documents', icon: '📄' },
-	{ value: 'archive', label: 'Archives', icon: '📦' },
-	{ value: 'other', label: 'Other', icon: '📎' },
+	{ value: 'all', label: 'All Media', icon: 'Folder' },
+	{ value: 'image', label: 'Images', icon: 'Picture' },
+	{ value: 'video', label: 'Videos', icon: 'VideoCamera' },
+	{ value: 'document', label: 'Documents', icon: 'Document' },
+	{ value: 'archive', label: 'Archives', icon: 'Box' },
+	{ value: 'other', label: 'Other', icon: 'Paperclip' },
 ]
 
 const PREDEFINED_CATEGORIES = ['Marketing', 'UI/UX', 'Content', 'Suites', 'Amenities', 'General']

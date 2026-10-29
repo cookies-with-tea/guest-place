@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="🎯"
+		icon="Aim"
 		title="Варианты взаимодействия с платформой"
 		description="Шаги 1-4: Самостоятельный поиск, Интерактивная карта, Помощь эксперта, Подбор в чате"
 	>
@@ -23,9 +23,7 @@
 				<div class="item-glass-card__head">
 					<span class="step-badge">Шаг {{ item.stepNumber }}</span>
 					<el-switch v-model="item.isAccent" active-text="Акцент" size="small" @change="onChange" />
-					<el-button type="danger" link size="small" :icon="Delete" @click="homeForm.removeInteraction(idx)"
-						>✕</el-button
-					>
+					<el-button type="danger" link size="small" :icon="Delete" @click="homeForm.removeInteraction(idx)" />
 				</div>
 
 				<el-form label-position="top" size="small">

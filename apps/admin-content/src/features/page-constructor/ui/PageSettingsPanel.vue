@@ -1,7 +1,7 @@
 <template>
 	<div class="inspector-tab-pane inspector-page-settings">
 		<div class="inspector-header">
-			<div class="inspector-icon">⚙️</div>
+			<el-icon class="inspector-icon"><Setting /></el-icon>
 			<div>
 				<h3>Настройки страницы</h3>
 				<span class="inspector-type">Основные параметры, статус и SEO</span>
@@ -30,7 +30,7 @@
 						<el-option label="Опубликовано (PUBLISHED)" value="published" />
 					</el-select>
 					<div v-if="document.pageForm.published_at" class="published-time-hint">
-						🚀 Опубликовано: {{ formatDate(document.pageForm.published_at) }}
+						<el-icon><Promotion /></el-icon>Опубликовано: {{ formatDate(document.pageForm.published_at) }}
 					</div>
 				</el-form-item>
 
@@ -53,7 +53,9 @@
 				</el-form-item>
 
 				<el-divider style="margin: 20px 0 16px" content-position="left">
-					<span style="font-weight: 600; font-size: 13px">🔍 SEO & Поисковые сниппеты</span>
+					<span style="display: inline-flex; align-items: center; font-weight: 600; font-size: 13px; gap: 4px">
+						<el-icon><Search /></el-icon>SEO & Поисковые сниппеты
+					</span>
 				</el-divider>
 
 				<el-form-item>
@@ -96,7 +98,9 @@
 
 				<el-form-item label="OG Image (превью для соцсетей и мессенджеров)">
 					<el-input v-model="document.pageForm.seo.og_image" placeholder="https://... или /uploads/image.jpg">
-						<template #prefix>🖼️</template>
+						<template #prefix
+							><el-icon><Picture /></el-icon
+						></template>
 					</el-input>
 				</el-form-item>
 
@@ -140,9 +144,9 @@
 
 					<div v-else class="social-snippet-card">
 						<div class="social-snippet-thumb" :style="seo.ogImageStyle">
-							<span v-if="!document.pageForm.seo.og_image" class="social-thumb-placeholder"
-								>🖼️ Превью по умолчанию</span
-							>
+							<span v-if="!document.pageForm.seo.og_image" class="social-thumb-placeholder">
+								<el-icon><Picture /></el-icon>Превью по умолчанию
+							</span>
 						</div>
 						<div class="social-snippet-body">
 							<div class="social-snippet-domain">GUESTPLACE.RU</div>
@@ -153,7 +157,7 @@
 				</div>
 
 				<div class="sitemap-info-box">
-					<div class="sitemap-info-icon">🗺️</div>
+					<el-icon class="sitemap-info-icon"><MapLocation /></el-icon>
 					<div class="sitemap-info-text">
 						<strong>Sitemap XML генерация:</strong>
 						<p>Страница автоматически попадает в <code>sitemap.xml</code> при публикации (статус PUBLISHED).</p>
@@ -166,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { MapLocation, Picture, Promotion, Search, Setting } from '@element-plus/icons-vue'
 import type { PageDocument } from '../composables/usePageDocument'
 import type { PageSeo } from '../composables/usePageSeo'
 import { formatDate } from '../lib/helpers'
@@ -179,6 +184,20 @@ defineProps<{
 <style scoped>
 .inspector-page-settings {
 	padding: 16px;
+}
+
+.inspector-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 4px;
+	gap: 10px;
+}
+
+.inspector-icon {
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	color: var(--gp-primary, #6366f1);
 }
 
 .inspector-form {
@@ -203,9 +222,17 @@ defineProps<{
 }
 
 .published-time-hint {
+	display: flex;
+	align-items: center;
 	font-size: 11px;
 	color: var(--text-muted);
 	margin-top: 4px;
+	gap: 4px;
+}
+
+.published-time-hint .el-icon {
+	width: 1em;
+	height: 1em;
 }
 
 .serp-preview-section {
@@ -325,6 +352,17 @@ defineProps<{
 	background: #f3f4f6;
 }
 
+.social-thumb-placeholder {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.social-thumb-placeholder .el-icon {
+	width: 1em;
+	height: 1em;
+}
+
 .social-snippet-body {
 	padding: 12px 14px;
 }
@@ -368,8 +406,10 @@ defineProps<{
 }
 
 .sitemap-info-icon {
+	width: 24px;
+	height: 24px;
 	flex-shrink: 0;
-	font-size: 24px;
+	color: #10b981;
 }
 
 .sitemap-info-text {

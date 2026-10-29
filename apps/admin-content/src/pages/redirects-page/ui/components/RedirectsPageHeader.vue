@@ -11,15 +11,16 @@
 			</p>
 		</div>
 		<div class="page-header__actions">
-			<el-button plain @click="router.push('/pages')"> 🧱 Страницы сайта </el-button>
-			<el-button plain @click="router.push('/menus')"> 🧭 Меню сайта </el-button>
-			<el-button type="primary" @click="redirects.openCreateDialog"> + Создать редирект </el-button>
+			<el-button plain :icon="Grid" @click="router.push('/pages')"> Страницы сайта </el-button>
+			<el-button plain :icon="Compass" @click="router.push('/menus')"> Меню сайта </el-button>
+			<el-button type="primary" :icon="Plus" @click="redirects.openCreateDialog"> Создать редирект </el-button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { Compass, Grid, Plus } from '@element-plus/icons-vue'
 
 import type { RedirectsData } from '../../composables/useRedirectsData'
 

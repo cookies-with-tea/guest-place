@@ -7,7 +7,7 @@
 				type="button"
 				@click="controls.selectFolder(undefined)"
 			>
-				<span class="folder-pill-icon">📂</span>
+				<el-icon class="folder-pill-icon"><FolderOpened /></el-icon>
 				<span class="folder-pill-name">All Files</span>
 			</button>
 			<button
@@ -16,7 +16,7 @@
 				type="button"
 				@click="controls.selectFolder('root')"
 			>
-				<span class="folder-pill-icon">📁</span>
+				<el-icon class="folder-pill-icon"><Folder /></el-icon>
 				<span class="folder-pill-name">Unorganized</span>
 			</button>
 			<div v-for="folder in controls.folders" :key="folder.id" class="folder-pill-group">
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderAdd as FolderAddIcon } from '@element-plus/icons-vue'
+import { Folder, FolderAdd as FolderAddIcon, FolderOpened } from '@element-plus/icons-vue'
 
 import type { MediaFilterControls } from '../../composables/useMediaFilterControls'
 import type { MediaFolderDialog } from '../../composables/useMediaFolderDialog'
@@ -124,6 +124,13 @@ defineProps<{
 	height: 8px;
 	display: inline-block;
 	border-radius: 50%;
+}
+
+.folder-pill-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	font-size: 14px;
 }
 
 .folder-pill-count {

@@ -39,10 +39,10 @@ export function useMenusList() {
 	}
 
 	function getLocationIcon(loc?: string): string {
-		if (loc === 'header') return '🔝'
-		if (loc === 'footer') return '🔻'
-		if (loc === 'sidebar') return '📂'
-		return '🧭'
+		if (loc === 'header') return 'Top'
+		if (loc === 'footer') return 'Bottom'
+		if (loc === 'sidebar') return 'Folder'
+		return 'Compass'
 	}
 
 	function countTotalItems(items?: MenuItem[]): number {

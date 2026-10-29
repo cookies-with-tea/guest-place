@@ -3,8 +3,9 @@
 		<div class="ui-stat-card__head">
 			<span class="ui-stat-card__label">{{ label }}</span>
 			<span v-if="icon" class="ui-stat-card__icon"
-				><slot name="icon">{{ icon }}</slot></span
-			>
+				><slot name="icon"
+					><el-icon><component :is="resolveIcon(icon)" /></el-icon></slot
+			></span>
 		</div>
 
 		<div class="ui-stat-card__body">
@@ -21,6 +22,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import * as Icons from '@element-plus/icons-vue'
 
 interface Props {
 	label: string
@@ -28,8 +30,11 @@ interface Props {
 	/** Percentage change; sign decides the arrow/color, pass a negative number for a drop. */
 	trend?: number
 	trendLabel?: string
+	/** An `@element-plus/icons-vue` component name, e.g. 'View' or 'TrendCharts'. */
 	icon?: string
 }
+
+const resolveIcon = (name: string) => (Icons as Record<string, unknown>)[name] ?? Icons.Document
 
 const props = defineProps<Props>()
 
@@ -63,11 +68,17 @@ const trendDirection = computed(() => ((props.trend ?? 0) >= 0 ? 'is-up' : 'is-d
 		width: 28px;
 		height: 28px;
 		display: inline-flex;
+		flex-shrink: 0;
 		align-items: center;
 		justify-content: center;
 		border-radius: 50%;
 		font-size: 14px;
 		background: var(--gp-primary-light);
+
+		:deep(.el-icon) {
+			width: 1em;
+			height: 1em;
+		}
 	}
 
 	&__body {

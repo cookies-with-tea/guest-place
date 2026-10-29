@@ -1,7 +1,7 @@
 <template>
 	<div class="lock-banner">
 		<div class="lock-banner__content">
-			<span class="lock-banner__icon">⚠️</span>
+			<el-icon class="lock-banner__icon"><WarningFilled /></el-icon>
 			<span class="lock-banner__text">
 				<strong>Режим только для чтения:</strong> Запись сейчас редактирует
 				<u>{{ entry.lockedByName || 'другой администратор' }}</u
@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import { WarningFilled } from '@element-plus/icons-vue'
 import type { ContentEntry } from '../../composables/useContentEntry'
 
 defineProps<{
@@ -40,6 +41,9 @@ defineProps<{
 	}
 
 	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
 		font-size: 16px;
 	}
 

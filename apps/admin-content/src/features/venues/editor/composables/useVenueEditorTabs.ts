@@ -17,25 +17,25 @@ export function useVenueEditorTabs(venueForm: VenueForm) {
 	const activeFormTab = ref<VenueFormTabId>('basic')
 
 	const venueTabs = computed(() => [
-		{ id: 'basic' as const, icon: '🏢', label: 'Основное & Контакты' },
+		{ id: 'basic' as const, icon: 'OfficeBuilding', label: 'Основное & Контакты' },
 		{
 			id: 'halls' as const,
-			icon: '🏰',
+			icon: 'House',
 			label: 'Залы & Номера',
 			badge: venueForm.formHalls.length + venueForm.formRooms.length,
 		},
-		{ id: 'pricing' as const, icon: '💰', label: 'Цены & Аренда' },
-		{ id: 'menu' as const, icon: '🍽️', label: 'Меню', badge: venueForm.formMenuPhotos.length },
-		{ id: 'feed' as const, icon: '📰', label: 'Лента', badge: venueForm.formFeed.length },
+		{ id: 'pricing' as const, icon: 'Money', label: 'Цены & Аренда' },
+		{ id: 'menu' as const, icon: 'KnifeFork', label: 'Меню', badge: venueForm.formMenuPhotos.length },
+		{ id: 'feed' as const, icon: 'Postcard', label: 'Лента', badge: venueForm.formFeed.length },
 		{
 			id: 'chat' as const,
-			icon: '💬',
+			icon: 'ChatDotRound',
 			label: 'Чат, Отзывы & FAQ',
 			badge: venueForm.formReviews.length + venueForm.formFaq.length,
 		},
-		{ id: 'features' as const, icon: '🎯', label: 'Особенности & Услуги' },
-		{ id: 'media' as const, icon: '🖼️', label: 'Фотогалерея' },
-		{ id: 'description' as const, icon: '📝', label: 'Описание' },
+		{ id: 'features' as const, icon: 'Aim', label: 'Особенности & Услуги' },
+		{ id: 'media' as const, icon: 'Picture', label: 'Фотогалерея' },
+		{ id: 'description' as const, icon: 'EditPen', label: 'Описание' },
 	])
 
 	return reactive({ activeFormTab, venueTabs })

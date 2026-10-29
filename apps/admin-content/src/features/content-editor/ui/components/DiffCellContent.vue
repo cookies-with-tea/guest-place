@@ -3,7 +3,8 @@
 		<!-- Boolean -->
 		<template v-if="fieldType === 'Boolean'">
 			<span class="bool-chip" :class="value ? 'is-true' : 'is-false'">
-				{{ value ? '✓ Yes' : '✗ No' }}
+				<el-icon class="bool-chip__icon"><component :is="value ? CircleCheck : CircleClose" /></el-icon>
+				{{ value ? 'Yes' : 'No' }}
 			</span>
 		</template>
 
@@ -26,7 +27,9 @@
 		<template v-else-if="fieldType === 'Media'">
 			<div v-if="value" class="media-preview">
 				<img v-if="isImage(value)" :src="value" class="media-img" :alt="isOld ? 'Old version' : 'Current version'" />
-				<span v-else class="media-file">📎 {{ getFilename(value) }}</span>
+				<span v-else class="media-file"
+					><el-icon class="media-file__icon"><Paperclip /></el-icon> {{ getFilename(value) }}</span
+				>
 			</div>
 			<span v-else class="empty-val">—</span>
 		</template>
@@ -40,6 +43,8 @@
 </template>
 
 <script setup lang="ts">
+import { CircleCheck, CircleClose, Paperclip } from '@element-plus/icons-vue'
+
 interface Props {
 	value: any
 	fieldType: string
@@ -80,6 +85,12 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 		color: #f87171;
 		background: rgb(239, 68, 68, 0.1);
 	}
+}
+
+.bool-chip__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .number-value {
@@ -160,8 +171,17 @@ const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
 }
 
 .media-file {
+	display: inline-flex;
+	align-items: center;
 	font-size: 12px;
 	color: #818cf8;
+	gap: 4px;
+}
+
+.media-file__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .text-value {

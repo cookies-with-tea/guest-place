@@ -1,15 +1,18 @@
 <template>
 	<aside class="config-panel">
 		<div v-if="!fieldBuilder.selectedField" class="config-panel__empty">
-			<div class="config-panel__empty-icon">⚙️</div>
+			<el-icon class="config-panel__empty-icon"><Setting /></el-icon>
 			<p>Select a field to configure it</p>
 		</div>
 
 		<div v-else class="config-form">
 			<div class="config-form__header">
-				<span class="config-form__type-icon">{{
-					fieldBuilder.getFieldTypeInfo(fieldBuilder.selectedField.fieldType).icon
-				}}</span>
+				<el-icon
+					class="config-form__type-icon"
+					:style="{ color: fieldBuilder.getFieldTypeInfo(fieldBuilder.selectedField.fieldType).color }"
+				>
+					<component :is="resolveIcon(fieldBuilder.getFieldTypeInfo(fieldBuilder.selectedField.fieldType).icon)" />
+				</el-icon>
 				<span class="config-form__type-label"
 					>{{ fieldBuilder.getFieldTypeInfo(fieldBuilder.selectedField.fieldType).label }} Field</span
 				>
@@ -134,8 +137,10 @@
 </template>
 
 <script setup lang="ts">
+import { Setting } from '@element-plus/icons-vue'
 import { FieldType } from '@admin-panel/lib'
 import type { FieldBuilder } from '../composables/useFieldBuilder'
+import { resolveIcon } from '../lib/icons'
 
 defineProps<{
 	fieldBuilder: FieldBuilder
@@ -161,6 +166,8 @@ defineProps<{
 }
 
 .config-panel__empty-icon {
+	width: 1em;
+	height: 1em;
 	font-size: 36px;
 }
 
@@ -188,6 +195,9 @@ defineProps<{
 }
 
 .config-form__type-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 20px;
 }
 

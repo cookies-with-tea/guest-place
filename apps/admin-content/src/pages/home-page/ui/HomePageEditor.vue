@@ -52,9 +52,9 @@
 					</div>
 
 					<div class="bottom-buttons">
-						<el-button plain @click="router.push('/pages')"> ✕ Отмена </el-button>
-						<el-button type="primary" size="large" :loading="homeForm.saving" @click="handleSave">
-							💾 Сохранить изменения
+						<el-button plain :icon="Close" @click="router.push('/pages')"> Отмена </el-button>
+						<el-button type="primary" size="large" :icon="Check" :loading="homeForm.saving" @click="handleSave">
+							Сохранить изменения
 						</el-button>
 					</div>
 				</div>
@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { Check, Close } from '@element-plus/icons-vue'
 import { useHomeEditorTabs } from '#features/home-page/composables/useHomeEditorTabs'
 import { useHomeLivePreview } from '#features/home-page/composables/useHomeLivePreview'
 import { useHomePageForm } from '#features/home-page/composables/useHomePageForm'

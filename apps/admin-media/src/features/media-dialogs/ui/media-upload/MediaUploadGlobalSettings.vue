@@ -26,8 +26,13 @@
 					placeholder="Target Folder (Root)"
 					:disabled="!settings.isApplyToAll"
 				>
-					<el-option :value="null" label="📁 Root (No folder)" />
-					<el-option v-for="folder in folders || []" :key="folder.id" :value="folder.id" :label="`📁 ${folder.name}`">
+					<el-option :value="null" label="Root (No folder)">
+						<div class="folder-option">
+							<el-icon class="folder-option-icon"><Folder /></el-icon>
+							<span>Root (No folder)</span>
+						</div>
+					</el-option>
+					<el-option v-for="folder in folders || []" :key="folder.id" :value="folder.id" :label="folder.name">
 						<div class="folder-option">
 							<span class="folder-dot" :style="{ backgroundColor: folder.color || '#3b82f6' }" />
 							<span>{{ folder.name }}</span>
@@ -70,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { Folder } from '@element-plus/icons-vue'
 import type { MediaUploadSubmit } from '../../composables/useMediaUploadSubmit'
 
 defineProps<{
@@ -126,6 +132,12 @@ defineProps<{
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
+}
+
+.folder-option-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 :deep(.el-input-group__prepend) {

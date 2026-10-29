@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="💰"
+		icon="Money"
 		title="Основные тарифы площадки"
 		description="Средний чек, банкетное меню и стоимость аренды в час"
 	>
@@ -44,7 +44,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="🏦"
+		icon="Wallet"
 		title="Депозиты закрытия залов"
 		description="Минимальная стоимость закрытия площадки под мероприятие"
 	>
@@ -105,7 +105,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="📄"
+		icon="Document"
 		title="Документы и файлы меню"
 		description="Ссылки на PDF меню, технический райдер и особые примечания"
 	>

@@ -118,7 +118,7 @@
 							title="Удалить"
 							@click="removeRepeaterItem(index)"
 						>
-							✕
+							<el-icon><CloseBold /></el-icon>
 						</UiButton>
 					</div>
 				</div>
@@ -224,6 +224,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { ElOption } from 'element-plus'
+import { CloseBold } from '@element-plus/icons-vue'
 
 import type { FieldDefinition } from '@admin-panel/lib'
 import { FieldType } from '@admin-panel/lib'
@@ -370,6 +371,12 @@ function getItemPreviewTitle(item: any): string {
 </script>
 
 <style scoped lang="scss">
+:deep(.el-icon) {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+}
+
 .content-form-generator__textarea {
 	width: 100%;
 	min-height: 100px;

@@ -2,7 +2,7 @@
 	<div class="page-card" :class="{ 'is-schema-card': item.isSchema }" @click="emit('card-click', item)">
 		<div class="page-card__header">
 			<div class="page-card__icon-wrap">
-				<span class="page-card__icon">{{ item.icon }}</span>
+				<el-icon class="page-card__icon"><component :is="resolveIcon(item.icon)" /></el-icon>
 				<span class="page-card__type-pill" :class="item.isSchema ? 'pill-schema' : 'pill-block'">
 					{{ item.isSchema ? 'СХЕМА ПОЛЕЙ' : 'БЛОЧНЫЙ КОНСТРУКТОР' }}
 				</span>
@@ -38,16 +38,18 @@
 				<span class="parent-slug">(/p/{{ item.parentSlug }})</span>
 			</div>
 
-			<div v-if="item.published_at" class="page-card__published-date">🚀 {{ list.formatDate(item.published_at) }}</div>
+			<div v-if="item.published_at" class="page-card__published-date">
+				<el-icon><Promotion /></el-icon> {{ list.formatDate(item.published_at) }}
+			</div>
 		</div>
 
 		<div class="page-card__footer">
 			<span class="page-card__count">
 				<template v-if="!item.isSchema">
-					📦 <strong>{{ item.blocks?.length || 0 }}</strong> блоков
+					<el-icon><Box /></el-icon> <strong>{{ item.blocks?.length || 0 }}</strong> блоков
 				</template>
 				<template v-else>
-					📋 <strong>{{ item.fieldsCount || 0 }}</strong> полей схемы
+					<el-icon><Tickets /></el-icon> <strong>{{ item.fieldsCount || 0 }}</strong> полей схемы
 				</template>
 			</span>
 
@@ -57,24 +59,26 @@
 						<el-button size="small" plain title="Сменить статус"> {{ list.getStatusShort(item.status) }} ▾ </el-button>
 						<template #dropdown>
 							<el-dropdown-menu>
-								<el-dropdown-item command="draft" :disabled="item.status === 'draft'">📝 Черновик</el-dropdown-item>
-								<el-dropdown-item command="review" :disabled="item.status === 'review'"
-									>🔍 На проверку</el-dropdown-item
-								>
-								<el-dropdown-item command="published" :disabled="item.status === 'published'"
-									>🚀 Опубликовать</el-dropdown-item
-								>
+								<el-dropdown-item command="draft" :icon="EditPen" :disabled="item.status === 'draft'">
+									Черновик
+								</el-dropdown-item>
+								<el-dropdown-item command="review" :icon="Search" :disabled="item.status === 'review'">
+									На проверку
+								</el-dropdown-item>
+								<el-dropdown-item command="published" :icon="Promotion" :disabled="item.status === 'published'">
+									Опубликовать
+								</el-dropdown-item>
 							</el-dropdown-menu>
 						</template>
 					</el-dropdown>
 
-					<el-button size="small" plain @click="actions.openClientPreview(item.slug)"> 👁️ Просмотр </el-button>
+					<el-button :icon="View" size="small" plain @click="actions.openClientPreview(item.slug)">Просмотр</el-button>
 					<el-button size="small" type="primary" plain @click="actions.goToEdit(item.id)"> Конструктор </el-button>
-					<el-button size="small" type="danger" plain @click="pagesAndSchemas.handleDelete(item)"> ✕ </el-button>
+					<el-button :icon="Close" size="small" type="danger" plain @click="pagesAndSchemas.handleDelete(item)" />
 				</template>
 
 				<template v-else>
-					<el-button size="small" plain @click="actions.openWebsitePath(item.path)"> 👁️ На сайт </el-button>
+					<el-button :icon="View" size="small" plain @click="actions.openWebsitePath(item.path)">На сайт</el-button>
 					<el-button size="small" type="primary" plain @click="actions.handleEditSchemaPage(item)">
 						{{ item.hasSchema ? 'Редактор контента' : 'Инициализировать' }}
 					</el-button>
@@ -85,6 +89,8 @@
 </template>
 
 <script setup lang="ts">
+import { Box, Close, EditPen, Promotion, Search, Tickets, View } from '@element-plus/icons-vue'
+import { resolveIcon } from '../lib/icons'
 import type { PageListActions } from '../composables/usePageListActions'
 import type { PagesAndSchemas } from '../composables/usePagesAndSchemas'
 import type { UnifiedPageList } from '../composables/useUnifiedPageList'
@@ -144,7 +150,11 @@ const emit = defineEmits<{
 }
 
 .page-card__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 22px;
+	color: #6366f1;
 }
 
 .page-card__type-pill {
@@ -222,9 +232,18 @@ const emit = defineEmits<{
 }
 
 .page-card__published-date {
+	display: inline-flex;
+	align-items: center;
 	font-size: 11px;
 	color: var(--text-muted);
 	margin-bottom: 12px;
+	gap: 4px;
+
+	.el-icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 }
 
 .page-card__footer {
@@ -237,8 +256,17 @@ const emit = defineEmits<{
 }
 
 .page-card__count {
+	display: inline-flex;
+	align-items: center;
 	font-size: 12px;
 	color: var(--text-muted);
+	gap: 4px;
+
+	.el-icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 }
 
 .page-card__actions {

@@ -5,14 +5,14 @@
 				<template #default="{ row }">
 					<div class="path-cell">
 						<code class="source-path">{{ row.sourcePath }}</code>
-						<el-button size="small" text @click="redirects.copyPath(row.sourcePath)">📋</el-button>
+						<el-button size="small" text :icon="DocumentCopy" @click="redirects.copyPath(row.sourcePath)" />
 					</div>
 				</template>
 			</el-table-column>
 
 			<el-table-column label="→" width="50" align="center">
 				<template #default>
-					<span style="font-size: 16px; color: #9ca3af">➔</span>
+					<el-icon class="arrow-icon"><Right /></el-icon>
 				</template>
 			</el-table-column>
 
@@ -20,7 +20,7 @@
 				<template #default="{ row }">
 					<div class="path-cell">
 						<code class="target-path">{{ row.targetPath }}</code>
-						<el-button size="small" text @click="redirects.copyPath(row.targetPath)">📋</el-button>
+						<el-button size="small" text :icon="DocumentCopy" @click="redirects.copyPath(row.targetPath)" />
 					</div>
 				</template>
 			</el-table-column>
@@ -35,7 +35,9 @@
 
 			<el-table-column label="Переходов" width="130" align="center">
 				<template #default="{ row }">
-					<span class="hits-counter">👁️ {{ row.hits || 0 }}</span>
+					<span class="hits-counter"
+						><el-icon class="hits-counter__icon"><View /></el-icon> {{ row.hits || 0 }}</span
+					>
 				</template>
 			</el-table-column>
 
@@ -47,9 +49,11 @@
 
 			<el-table-column label="Действия" width="220" align="right">
 				<template #default="{ row }">
-					<el-button size="small" plain type="info" @click="redirects.testRedirect(row)"> ⚡ Проверить </el-button>
+					<el-button size="small" plain type="info" :icon="Lightning" @click="redirects.testRedirect(row)">
+						Проверить
+					</el-button>
 					<el-button size="small" plain @click="redirects.openEditDialog(row)"> Изменить </el-button>
-					<el-button size="small" plain type="danger" @click="redirects.confirmDelete(row)"> ✕ </el-button>
+					<el-button size="small" plain type="danger" :icon="Close" @click="redirects.confirmDelete(row)" />
 				</template>
 			</el-table-column>
 		</el-table>
@@ -57,6 +61,8 @@
 </template>
 
 <script setup lang="ts">
+import { Close, DocumentCopy, Lightning, Right, View } from '@element-plus/icons-vue'
+
 import type { RedirectsData } from '../../composables/useRedirectsData'
 
 defineProps<{
@@ -126,6 +132,8 @@ defineProps<{
 }
 
 .hits-counter {
+	display: inline-flex;
+	align-items: center;
 	border: 1px solid var(--border-color);
 	border-radius: 12px;
 	font-weight: 600;
@@ -133,5 +141,18 @@ defineProps<{
 	color: var(--text-primary);
 	background: var(--bg-surface);
 	padding: 2px 8px;
+	gap: 4px;
+}
+
+.hits-counter__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+}
+
+.arrow-icon {
+	width: 16px;
+	height: 16px;
+	color: #9ca3af;
 }
 </style>

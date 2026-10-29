@@ -9,7 +9,9 @@
 				:title="ft.description"
 				@click="fieldBuilder.addFieldOfType(ft.value)"
 			>
-				<span class="palette-item__icon">{{ ft.icon }}</span>
+				<el-icon class="palette-item__icon" :style="{ color: ft.color }"
+					><component :is="resolveIcon(ft.icon)"
+				/></el-icon>
 				<div class="palette-item__info">
 					<span class="palette-item__label">{{ ft.label }}</span>
 					<span class="palette-item__desc">{{ ft.description }}</span>
@@ -40,7 +42,7 @@
 				:title="`Insert as a Group field named “${block.name}”`"
 				@click="fieldBuilder.insertBlock(block.label, block.name, block.fields)"
 			>
-				<span class="palette-item__icon">{{ block.icon }}</span>
+				<el-icon class="palette-item__icon"><component :is="resolveIcon(block.icon)" /></el-icon>
 				<div class="palette-item__info">
 					<span class="palette-item__label">{{ block.label }}</span>
 					<span class="palette-item__desc">{{ block.description }}</span>
@@ -67,6 +69,7 @@
 <script setup lang="ts">
 import { FIELD_BLOCKS } from '../composables/useFieldBlocks'
 import type { FieldBuilder } from '../composables/useFieldBuilder'
+import { resolveIcon } from '../lib/icons'
 
 defineProps<{
 	fieldBuilder: FieldBuilder
@@ -132,6 +135,8 @@ const fieldBlocks = FIELD_BLOCKS
 }
 
 .palette-item__icon {
+	width: 1em;
+	height: 1em;
 	flex-shrink: 0;
 	font-size: 20px;
 	line-height: 1;

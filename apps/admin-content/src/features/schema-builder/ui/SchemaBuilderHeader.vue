@@ -65,7 +65,7 @@
 	<!-- Entity Soft Lock Warning Banner -->
 	<div v-if="schemaForm.isLockedByOther" class="lock-banner">
 		<div class="lock-banner__content">
-			<span class="lock-banner__icon">⚠️</span>
+			<el-icon class="lock-banner__icon"><WarningFilled /></el-icon>
 			<span class="lock-banner__text">
 				<strong>Режим только для чтения:</strong> Схему сейчас редактирует
 				<u>{{ schemaForm.lockedByName || 'другой администратор' }}</u
@@ -79,6 +79,7 @@
 </template>
 
 <script setup lang="ts">
+import { WarningFilled } from '@element-plus/icons-vue'
 import type { SchemaForm } from '../composables/useSchemaForm'
 import type { FieldBuilder } from '../composables/useFieldBuilder'
 

@@ -1,5 +1,9 @@
 <template>
-	<UiGlassCard icon="📰" title="Публикации и новости площадки" description="Посты для интерактивной вкладки «Лента»">
+	<UiGlassCard
+		icon="Postcard"
+		title="Публикации и новости площадки"
+		description="Посты для интерактивной вкладки «Лента»"
+	>
 		<template #actions>
 			<el-button size="small" type="primary" :icon="Plus" @click="venueForm.addFeedItem">Добавить публикацию</el-button>
 		</template>
@@ -17,7 +21,7 @@
 						style="width: 140px"
 						@input="onChange"
 					/>
-					<el-button type="danger" link @click="venueForm.removeFeedItem(idx)">✕</el-button>
+					<el-button type="danger" link :icon="Close" @click="venueForm.removeFeedItem(idx)" />
 				</div>
 
 				<UiRichTextField
@@ -59,7 +63,7 @@
 
 <script setup lang="ts">
 import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
-import { Plus } from '@element-plus/icons-vue'
+import { Close, Plus } from '@element-plus/icons-vue'
 import { DEFAULT_AVATAR, type VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{

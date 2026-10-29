@@ -105,7 +105,7 @@ export const useRedirectsData = () => {
 			if (res.data?.matched) {
 				ElMessage({
 					type: 'success',
-					message: `⚡ Проверка успешна! ${row.sourcePath} → ${res.data.targetPath} (Код: ${res.data.statusCode})`,
+					message: `Проверка успешна: ${row.sourcePath} → ${res.data.targetPath} (Код: ${res.data.statusCode})`,
 					duration: 4000,
 				})
 				row.hits++

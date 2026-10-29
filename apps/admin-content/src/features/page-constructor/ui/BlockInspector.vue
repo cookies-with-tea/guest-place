@@ -7,7 +7,7 @@
 				:class="{ 'is-active': tabs.inspector === 'block' }"
 				@click="tabs.inspector = 'block'"
 			>
-				📝 Контент блока
+				<el-icon><EditPen /></el-icon>Контент блока
 			</button>
 			<button
 				type="button"
@@ -15,7 +15,7 @@
 				:class="{ 'is-active': tabs.inspector === 'page' }"
 				@click="tabs.inspector = 'page'"
 			>
-				⚙️ Настройки страницы
+				<el-icon><Setting /></el-icon>Настройки страницы
 			</button>
 		</div>
 
@@ -23,17 +23,19 @@
 		<div v-if="tabs.inspector === 'block'" class="inspector-tab-pane">
 			<div v-if="canvas.selectedBlock" class="inspector-content">
 				<div class="inspector-header">
-					<div class="inspector-icon">
-						{{ canvas.selectedBlockType?.icon || '📦' }}
-					</div>
+					<el-icon class="inspector-icon">
+						<component :is="resolveIcon(canvas.selectedBlockType?.icon)" />
+					</el-icon>
 					<div class="inspector-header__info">
 						<h3>{{ canvas.selectedBlockType?.name || canvas.selectedBlock.type }}</h3>
 						<div class="inspector-type-row">
 							<code class="inspector-type">{{ canvas.selectedBlock.type }}</code>
-							<span v-if="canvas.selectedBlock.type === 'wireframe'" class="wireframe-pill">📐 Макет</span>
+							<span v-if="canvas.selectedBlock.type === 'wireframe'" class="wireframe-pill">
+								<el-icon><Crop /></el-icon>Макет
+							</span>
 						</div>
 					</div>
-					<el-button size="small" circle title="Снять выбор" @click="canvas.selectedBlockIndex = null"> ✕ </el-button>
+					<el-button size="small" circle :icon="Close" title="Снять выбор" @click="canvas.selectedBlockIndex = null" />
 				</div>
 
 				<div class="inspector-swap-bar">
@@ -48,13 +50,11 @@
 						placeholder="Сменить тип блока..."
 						@update:model-value="(val: string) => canvas.changeBlockType(canvas.selectedBlockIndex!, val)"
 					>
-						<el-option
-							v-for="bt in blockTypes.blockTypes"
-							:key="bt.slug"
-							:label="`${bt.icon || '📦'} ${bt.name}`"
-							:value="bt.slug"
-						>
-							<span style="float: left">{{ bt.icon || '📦' }} {{ bt.name }}</span>
+						<el-option v-for="bt in blockTypes.blockTypes" :key="bt.slug" :label="bt.name" :value="bt.slug">
+							<span style="display: inline-flex; align-items: center; float: left; gap: 4px">
+								<el-icon style="width: 1em; height: 1em"><component :is="resolveIcon(bt.icon)" /></el-icon>
+								{{ bt.name }}
+							</span>
 							<span style="float: right; font-size: 11px; color: var(--text-muted)"
 								><code>{{ bt.slug }}</code></span
 							>
@@ -69,7 +69,7 @@
 						:class="{ 'is-active': tabs.blockSub === 'content' }"
 						@click="tabs.blockSub = 'content'"
 					>
-						📝 Поля данных
+						<el-icon><EditPen /></el-icon>Поля данных
 					</button>
 					<button
 						type="button"
@@ -77,13 +77,15 @@
 						:class="{ 'is-active': tabs.blockSub === 'style' }"
 						@click="tabs.blockSub = 'style'"
 					>
-						🎨 Стилизация блока
+						<el-icon><Brush /></el-icon>Стилизация блока
 					</button>
 				</div>
 
 				<!-- SUB-PANE 1: CONTENT FIELDS -->
 				<div v-if="tabs.blockSub === 'content'" class="sub-tab-pane">
-					<div class="inspector-notice"> ✏️ Заполните поля блока. Изменения видны в Live Preview: </div>
+					<div class="inspector-notice"
+						><el-icon><EditPen /></el-icon>Заполните поля блока. Изменения видны в Live Preview:</div
+					>
 					<div class="inspector-form">
 						<ContentFormGenerator
 							v-if="canvas.selectedBlockType?.schema && canvas.selectedBlockType.schema.length"
@@ -103,7 +105,7 @@
 
 			<!-- No block selected helper guide -->
 			<div v-else class="inspector-guide">
-				<div class="guide-icon">👈</div>
+				<el-icon class="guide-icon"><Pointer /></el-icon>
 				<h3>Как заполнять контент:</h3>
 				<p class="guide-desc">
 					Страница собирается из блоков. Кликните на любой блок в канвасе по центру, чтобы открыть его поля для
@@ -139,6 +141,7 @@
 </template>
 
 <script setup lang="ts">
+import { Brush, Close, Crop, EditPen, Pointer, Setting } from '@element-plus/icons-vue'
 import type { PageBlock } from '#entities/pages'
 import type { BlockTypesState } from '../composables/useBlockTypes'
 import type { BlockCanvas } from '../composables/useBlockCanvas'
@@ -149,6 +152,7 @@ import type { PageSeo } from '../composables/usePageSeo'
 import ContentFormGenerator from '#features/content-editor/ui/components/ContentFormGenerator.vue'
 import BlockStyleEditor from './BlockStyleEditor.vue'
 import PageSettingsPanel from './PageSettingsPanel.vue'
+import { resolveIcon } from '../lib/icons'
 
 defineProps<{
 	pageForm: { blocks: PageBlock[] }
@@ -179,7 +183,10 @@ defineProps<{
 }
 
 .inspector-nav-tab {
+	display: flex;
 	flex: 1;
+	align-items: center;
+	justify-content: center;
 	border: none;
 	border-bottom: 2px solid transparent;
 	font-weight: 600;
@@ -189,6 +196,13 @@ defineProps<{
 	transition: all 0.2s ease;
 	cursor: pointer;
 	padding: 12px;
+	gap: 6px;
+}
+
+.inspector-nav-tab .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .inspector-nav-tab.is-active {
@@ -220,7 +234,10 @@ defineProps<{
 }
 
 .inspector-icon {
-	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	color: var(--gp-primary, #6366f1);
 }
 
 .inspector-header__info {
@@ -248,11 +265,19 @@ defineProps<{
 }
 
 .wireframe-pill {
+	display: inline-flex;
+	align-items: center;
 	border-radius: 10px;
 	font-size: 10px;
 	color: var(--gp-primary);
 	background: rgb(99, 102, 241, 0.12);
 	padding: 1px 6px;
+	gap: 2px;
+}
+
+.wireframe-pill .el-icon {
+	width: 1em;
+	height: 1em;
 }
 
 .inspector-swap-bar {
@@ -293,7 +318,10 @@ defineProps<{
 }
 
 .sub-tab-btn {
+	display: flex;
 	flex: 1;
+	align-items: center;
+	justify-content: center;
 	border: none;
 	border-radius: 6px;
 	font-weight: 600;
@@ -303,6 +331,13 @@ defineProps<{
 	transition: all 0.15s ease;
 	cursor: pointer;
 	padding: 6px 10px;
+	gap: 5px;
+}
+
+.sub-tab-btn .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .sub-tab-btn.is-active {
@@ -318,8 +353,17 @@ defineProps<{
 }
 
 .inspector-notice {
+	display: flex;
+	align-items: center;
 	font-size: 12px;
 	color: var(--text-muted);
+	gap: 5px;
+}
+
+.inspector-notice .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .inspector-guide {
@@ -333,7 +377,9 @@ defineProps<{
 }
 
 .guide-icon {
-	font-size: 36px;
+	width: 36px;
+	height: 36px;
+	color: var(--text-muted);
 }
 
 .guide-desc {

@@ -66,13 +66,14 @@
 					<el-input v-model="file.title" placeholder="Custom Title" size="small" />
 					<el-input v-model="file.alt" placeholder="Custom Alt" size="small" />
 					<el-select v-model="file.folderId" clearable placeholder="Target Folder" size="small">
-						<el-option :value="null" label="📁 Root (No folder)" />
-						<el-option
-							v-for="folder in folders || []"
-							:key="folder.id"
-							:value="folder.id"
-							:label="`📁 ${folder.name}`"
-						/>
+						<el-option :value="null" label="Root (No folder)">
+							<el-icon class="folder-option-icon"><Folder /></el-icon>
+							<span>Root (No folder)</span>
+						</el-option>
+						<el-option v-for="folder in folders || []" :key="folder.id" :value="folder.id" :label="folder.name">
+							<el-icon class="folder-option-icon"><Folder /></el-icon>
+							<span>{{ folder.name }}</span>
+						</el-option>
 					</el-select>
 					<el-select v-model="file.category" clearable filterable placeholder="Category" size="small">
 						<el-option label="Marketing" value="Marketing" />
@@ -104,7 +105,7 @@
 
 <script setup lang="ts">
 import { mediaUtils } from '#entities/media'
-import { Crop, Document, Edit, UploadFilled, VideoCamera } from '@element-plus/icons-vue'
+import { Crop, Document, Edit, Folder, UploadFilled, VideoCamera } from '@element-plus/icons-vue'
 
 import type { ImageCrop } from '../../composables/useImageCrop'
 import type { UploadFilesList } from '../../composables/useUploadFilesList'
@@ -121,6 +122,13 @@ defineProps<{
 <style scoped>
 .bulk-uploader {
 	width: 100%;
+}
+
+.folder-option-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	margin-right: 8px;
 }
 
 .files-grid {

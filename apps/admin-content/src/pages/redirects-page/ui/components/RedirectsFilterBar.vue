@@ -6,7 +6,9 @@
 			clearable
 			style="width: 320px"
 		>
-			<template #prefix>🔍</template>
+			<template #prefix
+				><el-icon><Search /></el-icon
+			></template>
 		</el-input>
 
 		<el-select v-model="redirects.codeFilter" style="width: 180px">
@@ -24,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import { Search } from '@element-plus/icons-vue'
 import { UiFilterBar } from '@admin-panel/ui'
 
 import type { RedirectsData } from '../../composables/useRedirectsData'

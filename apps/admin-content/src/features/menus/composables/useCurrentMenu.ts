@@ -13,9 +13,9 @@ export function useCurrentMenu(menusList: MenusList) {
 	}
 
 	function getTypeLabel(type: string): string {
-		if (type === 'page') return '📄 Страница'
-		if (type === 'anchor') return '⚓ Якорь'
-		return '🔗 URL'
+		if (type === 'page') return 'Страница'
+		if (type === 'anchor') return 'Якорь'
+		return 'URL'
 	}
 
 	function formatItemUrl(item: MenuItem): string {

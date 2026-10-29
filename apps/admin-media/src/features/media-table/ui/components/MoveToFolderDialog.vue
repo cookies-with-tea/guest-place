@@ -3,7 +3,10 @@
 		<el-form label-position="top">
 			<el-form-item label="Target Folder">
 				<el-select v-model="bulk.targetFolderId" placeholder="Select destination folder" style="width: 100%">
-					<el-option label="📁 Unorganized (Root)" value="root" />
+					<el-option label="Unorganized (Root)" value="root">
+						<el-icon class="folder-option-icon"><Folder /></el-icon>
+						<span>Unorganized (Root)</span>
+					</el-option>
 					<el-option v-for="folder in bulk.folders" :key="folder.id" :label="folder.name" :value="folder.id">
 						<span class="folder-dot" :style="{ backgroundColor: folder.color || '#409EFF', marginRight: '8px' }" />
 						<span>{{ folder.name }}</span>
@@ -19,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { Folder } from '@element-plus/icons-vue'
 import type { MediaTableBulkActions } from '../../composables/useMediaTableBulkActions'
 
 defineProps<{
@@ -32,5 +36,12 @@ defineProps<{
 	height: 7px;
 	display: inline-block;
 	border-radius: 50%;
+}
+
+.folder-option-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	margin-right: 8px;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="🏷️"
+		icon="PriceTag"
 		title="Основная информация"
 		description="Название площадки, URL-идентификатор (слаг) и краткое позиционирование"
 	>
@@ -21,12 +21,13 @@
 					<div class="slug-prefix">/venues/</div>
 					<el-input v-model="venueForm.form.slug" placeholder="rooftop-neglinnaya" @input="onChange" />
 					<el-button
+						:icon="Lightning"
 						type="primary"
 						plain
 						title="Сгенерировать слаг из названия"
 						@click="venueForm.generateSlugFromTitle"
 					>
-						⚡ Из названия
+						Из названия
 					</el-button>
 				</div>
 			</el-form-item>
@@ -46,7 +47,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="📍"
+		icon="LocationFilled"
 		title="Локация и транспортная доступность"
 		description="Фактический адрес, метро и пешие ориентиры для гостей"
 	>
@@ -72,14 +73,18 @@
 				<el-col :span="12">
 					<el-form-item label="Ближайшее метро">
 						<el-input v-model="venueForm.form.metro_station" placeholder="Трубная" @input="onChange">
-							<template #prefix>🚇</template>
+							<template #prefix
+								><el-icon><Position /></el-icon
+							></template>
 						</el-input>
 					</el-form-item>
 				</el-col>
 				<el-col :span="12">
 					<el-form-item label="Пешком от метро">
 						<el-input v-model="venueForm.form.metro_distance_text" placeholder="3 мин пешком" @input="onChange">
-							<template #prefix>🚶</template>
+							<template #prefix
+								><el-icon><Guide /></el-icon
+							></template>
 						</el-input>
 					</el-form-item>
 				</el-col>
@@ -89,7 +94,9 @@
 			<div class="map-coordinates-box">
 				<div class="map-coords-header">
 					<div class="map-coords-title">
-						<span>🗺️ Точка на карте (геолокация)</span>
+						<span
+							><el-icon class="inline-icon"><MapLocation /></el-icon> Точка на карте (геолокация)</span
+						>
 						<small>Необходимо для отображения места в каталоге на карте</small>
 					</div>
 					<el-tag
@@ -98,9 +105,11 @@
 						size="small"
 						effect="dark"
 					>
-						📍 Размещено на карте
+						<el-icon class="inline-icon"><CircleCheckFilled /></el-icon> Размещено на карте
 					</el-tag>
-					<el-tag v-else type="warning" size="small" effect="plain"> ⚠️ Точка не задана </el-tag>
+					<el-tag v-else type="warning" size="small" effect="plain">
+						<el-icon class="inline-icon"><WarningFilled /></el-icon> Точка не задана
+					</el-tag>
 				</div>
 
 				<el-row :gutter="16">
@@ -149,7 +158,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="📞"
+		icon="Phone"
 		title="Контакты и статус публикации"
 		description="Телефон менеджера и видимость площадки в каталоге"
 	>
@@ -158,15 +167,23 @@
 				<el-col :span="12">
 					<el-form-item label="Контактный телефон">
 						<el-input v-model="venueForm.form.phone" placeholder="+7 (495) 123 78 90" @input="onChange">
-							<template #prefix>📞</template>
+							<template #prefix
+								><el-icon><Phone /></el-icon
+							></template>
 						</el-input>
 					</el-form-item>
 				</el-col>
 				<el-col :span="12">
 					<el-form-item label="Статус площадки">
 						<el-select v-model="venueForm.form.status" style="width: 100%">
-							<el-option label="🟢 Опубликовано на сайте" value="published" />
-							<el-option label="⚪ Черновик (скрыто)" value="draft" />
+							<el-option label="Опубликовано на сайте" value="published">
+								<el-icon class="option-status-icon option-status-icon--published"><CircleCheckFilled /></el-icon>
+								Опубликовано на сайте
+							</el-option>
+							<el-option label="Черновик (скрыто)" value="draft">
+								<el-icon class="option-status-icon"><CircleClose /></el-icon>
+								Черновик (скрыто)
+							</el-option>
 						</el-select>
 					</el-form-item>
 				</el-col>
@@ -174,7 +191,7 @@
 		</el-form>
 	</UiGlassCard>
 
-	<UiGlassCard icon="⏰" title="Режим работы" description="Часы приёма гостей в будни и выходные дни">
+	<UiGlassCard icon="AlarmClock" title="Режим работы" description="Часы приёма гостей в будни и выходные дни">
 		<el-form label-position="top">
 			<el-row :gutter="16">
 				<el-col :span="12">
@@ -199,7 +216,11 @@
 		</el-form>
 	</UiGlassCard>
 
-	<UiGlassCard icon="⭐" title="Рейтинг и репутация" description="Отображаемая оценка в каталоге и количество отзывов">
+	<UiGlassCard
+		icon="StarFilled"
+		title="Рейтинг и репутация"
+		description="Отображаемая оценка в каталоге и количество отзывов"
+	>
 		<el-form label-position="top">
 			<el-row :gutter="16">
 				<el-col :span="12">
@@ -242,6 +263,16 @@
 
 <script setup lang="ts">
 import { UiGlassCard, UiRichTextField } from '@admin-panel/ui'
+import {
+	CircleCheckFilled,
+	CircleClose,
+	Guide,
+	Lightning,
+	MapLocation,
+	Phone,
+	Position,
+	WarningFilled,
+} from '@element-plus/icons-vue'
 import type { VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{
@@ -328,5 +359,24 @@ defineProps<{
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 12px;
+}
+
+.inline-icon {
+	width: 1em;
+	height: 1em;
+	vertical-align: -2px;
+}
+
+.option-status-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	vertical-align: -2px;
+	color: var(--text-muted);
+	margin-right: 4px;
+
+	&--published {
+		color: var(--el-color-success);
+	}
 }
 </style>

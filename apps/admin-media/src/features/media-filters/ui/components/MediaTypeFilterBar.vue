@@ -9,7 +9,7 @@
 				type="button"
 				@click="controls.toggleMediaType(typeOption.value)"
 			>
-				<span class="type-pill-icon">{{ typeOption.icon }}</span>
+				<el-icon class="type-pill-icon"><component :is="resolveIcon(typeOption.icon)" /></el-icon>
 				<span class="type-pill-label">{{ typeOption.label }}</span>
 			</button>
 		</div>
@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { MEDIA_TYPE_OPTIONS } from '../../composables/useMediaFilterControls'
 import type { MediaFilterControls } from '../../composables/useMediaFilterControls'
+import { resolveIcon } from '../../lib/icons'
 
 defineProps<{
 	controls: MediaFilterControls
@@ -66,6 +67,9 @@ defineProps<{
 }
 
 .type-pill-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 14px;
 }
 </style>

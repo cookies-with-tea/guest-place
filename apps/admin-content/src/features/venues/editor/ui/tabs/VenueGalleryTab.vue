@@ -1,5 +1,9 @@
 <template>
-	<UiGlassCard icon="🖼️" title="Фотогалерея и 3D-тур" description="Ссылки на изображения и видео-тур площадки">
+	<UiGlassCard
+		icon="PictureFilled"
+		title="Фотогалерея и 3D-тур"
+		description="Ссылки на изображения и видео-тур площадки"
+	>
 		<el-form label-position="top">
 			<el-form-item label="Фотографии площадки (URL по одному на строке)">
 				<el-input

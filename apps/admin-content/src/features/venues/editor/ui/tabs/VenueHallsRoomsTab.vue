@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="🏰"
+		icon="House"
 		title="Залы площадки"
 		description="Вместимость банкетом, фуршетом, рассадкой театр и площадь каждого зала"
 	>
@@ -65,14 +65,14 @@
 			</el-table-column>
 			<el-table-column label="" width="50" align="center">
 				<template #default="{ $index }">
-					<el-button type="danger" link @click="venueForm.removeHall($index)">✕</el-button>
+					<el-button type="danger" link :icon="Close" @click="venueForm.removeHall($index)" />
 				</template>
 			</el-table-column>
 		</el-table>
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="🛏️"
+		icon="Suitcase"
 		title="Номерной фонд отеля"
 		description="Категории номеров, тип размещения и стоимость проживания гостей"
 	>
@@ -110,7 +110,7 @@
 			</el-table-column>
 			<el-table-column label="" width="50" align="center">
 				<template #default="{ $index }">
-					<el-button type="danger" link @click="venueForm.removeRoom($index)">✕</el-button>
+					<el-button type="danger" link :icon="Close" @click="venueForm.removeRoom($index)" />
 				</template>
 			</el-table-column>
 		</el-table>
@@ -119,7 +119,7 @@
 
 <script setup lang="ts">
 import { UiGlassCard } from '@admin-panel/ui'
-import { Plus } from '@element-plus/icons-vue'
+import { Close, Plus } from '@element-plus/icons-vue'
 import type { VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{

@@ -9,7 +9,7 @@ const meta: Meta<typeof UiStatCard> = {
 		label: 'Pageviews',
 		value: '50.8K',
 		trend: 28.4,
-		icon: '👁️',
+		icon: 'View',
 	},
 }
 
@@ -22,7 +22,7 @@ export const Up: Story = {
 		label: 'Pageviews',
 		value: '50.8K',
 		trend: 28.4,
-		icon: '👁️',
+		icon: 'View',
 	},
 }
 
@@ -31,7 +31,7 @@ export const Down: Story = {
 		label: 'Bounce Rate',
 		value: '16%',
 		trend: -12.6,
-		icon: '📉',
+		icon: 'TrendCharts',
 	},
 }
 

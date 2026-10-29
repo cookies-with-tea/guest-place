@@ -11,9 +11,9 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain @click="router.push('/pages')">🧱 Страницы сайта</el-button>
-				<el-button plain @click="router.push('/menus')">🧭 Меню и навигация</el-button>
-				<el-button plain @click="router.push('/redirects')">🔀 Редиректы</el-button>
+				<el-button :icon="Grid" plain @click="router.push('/pages')">Страницы сайта</el-button>
+				<el-button :icon="Compass" plain @click="router.push('/menus')">Меню и навигация</el-button>
+				<el-button :icon="Switch" plain @click="router.push('/redirects')">Редиректы</el-button>
 				<el-button type="primary" :icon="Plus" @click="emit('create')"> + Добавить площадку </el-button>
 			</div>
 		</div>
@@ -79,9 +79,13 @@
 							</a>
 							<div class="venue-slug-row">
 								<el-tag size="small" type="info">{{ row.slug }}</el-tag>
-								<span v-if="row.phone" class="venue-phone-text">📞 {{ row.phone }}</span>
+								<span v-if="row.phone" class="venue-phone-text">
+									<el-icon class="inline-icon"><Phone /></el-icon> {{ row.phone }}
+								</span>
 							</div>
-							<a :href="getLandingUrl(row.slug)" target="_blank" class="landing-pill-btn"> 🌐 Открыть лендинг ↗ </a>
+							<a :href="getLandingUrl(row.slug)" target="_blank" class="landing-pill-btn">
+								<el-icon class="inline-icon"><Link /></el-icon> Открыть лендинг ↗
+							</a>
 						</div>
 					</template>
 				</el-table-column>
@@ -89,9 +93,11 @@
 				<el-table-column label="Локация" min-width="220">
 					<template #default="{ row }">
 						<div class="venue-loc-cell">
-							<span class="venue-address-text">📍 {{ row.address }}</span>
+							<span class="venue-address-text">
+								<el-icon class="inline-icon"><LocationFilled /></el-icon> {{ row.address }}
+							</span>
 							<span v-if="row.metro_station || row.metroStation" class="venue-metro-text">
-								🚇 {{ row.metro_station || row.metroStation }}
+								<el-icon class="inline-icon"><Position /></el-icon> {{ row.metro_station || row.metroStation }}
 								<small v-if="row.metro_distance_text || row.metroDistanceText"
 									>({{ row.metro_distance_text || row.metroDistanceText }})</small
 								>
@@ -103,10 +109,13 @@
 									type="success"
 									effect="light"
 								>
-									🗺️ {{ Number(row.coordinates_lat || row.coordinatesLat).toFixed(4) }},
+									<el-icon class="inline-icon"><MapLocation /></el-icon>
+									{{ Number(row.coordinates_lat || row.coordinatesLat).toFixed(4) }},
 									{{ Number(row.coordinates_lng || row.coordinatesLng).toFixed(4) }}
 								</el-tag>
-								<el-tag v-else size="small" type="info" effect="plain"> ⚠️ Без точки на карте </el-tag>
+								<el-tag v-else size="small" type="info" effect="plain">
+									<el-icon class="inline-icon"><WarningFilled /></el-icon> Без точки на карте
+								</el-tag>
 							</div>
 						</div>
 					</template>
@@ -131,16 +140,18 @@
 				<el-table-column label="Табы сайта" width="170">
 					<template #default="{ row }">
 						<div class="venue-tabs-badges">
-							<el-tag size="small" :type="row.pricing_table ? 'success' : 'info'" effect="plain">💰 Цены</el-tag>
-							<el-tag size="small" :type="row.menu_photos?.length ? 'success' : 'info'" effect="plain">
-								🍽️ Меню ({{ row.menu_photos?.length || 0 }})
+							<el-tag size="small" :type="row.pricing_table ? 'success' : 'info'" effect="plain">
+								<el-icon class="inline-icon"><Money /></el-icon> Цены
 							</el-tag>
-							<el-tag size="small" :type="row.feed?.length ? 'success' : 'info'" effect="plain"
-								>📰 Лента ({{ row.feed?.length || 0 }})</el-tag
-							>
-							<el-tag size="small" :type="row.reviews?.length ? 'success' : 'info'" effect="plain"
-								>💬 Чат ({{ row.reviews?.length || 0 }})</el-tag
-							>
+							<el-tag size="small" :type="row.menu_photos?.length ? 'success' : 'info'" effect="plain">
+								<el-icon class="inline-icon"><KnifeFork /></el-icon> Меню ({{ row.menu_photos?.length || 0 }})
+							</el-tag>
+							<el-tag size="small" :type="row.feed?.length ? 'success' : 'info'" effect="plain">
+								<el-icon class="inline-icon"><Postcard /></el-icon> Лента ({{ row.feed?.length || 0 }})
+							</el-tag>
+							<el-tag size="small" :type="row.reviews?.length ? 'success' : 'info'" effect="plain">
+								<el-icon class="inline-icon"><ChatDotRound /></el-icon> Чат ({{ row.reviews?.length || 0 }})
+							</el-tag>
 						</div>
 					</template>
 				</el-table-column>
@@ -165,8 +176,14 @@
 							>
 								Сайт ↗
 							</el-button>
-							<el-button size="small" type="primary" title="Редактировать в Live формате" @click="emit('edit', row)">
-								⚡ Live редактор
+							<el-button
+								:icon="Lightning"
+								size="small"
+								type="primary"
+								title="Редактировать в Live формате"
+								@click="emit('edit', row)"
+							>
+								Live редактор
 							</el-button>
 							<el-popconfirm
 								title="Удалить эту площадку?"
@@ -175,7 +192,7 @@
 								@confirm="catalog.handleDelete(row)"
 							>
 								<template #reference>
-									<el-button size="small" type="danger" plain> ✕ </el-button>
+									<el-button size="small" type="danger" plain :icon="Delete" />
 								</template>
 							</el-popconfirm>
 						</div>
@@ -200,7 +217,24 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Plus } from '@element-plus/icons-vue'
+import {
+	ChatDotRound,
+	Compass,
+	Delete,
+	Grid,
+	KnifeFork,
+	Lightning,
+	Link,
+	LocationFilled,
+	MapLocation,
+	Money,
+	Phone,
+	Plus,
+	Position,
+	Postcard,
+	Switch,
+	WarningFilled,
+} from '@element-plus/icons-vue'
 import type { VenuesCatalog } from '../composables/useVenuesCatalog'
 import { formatPrice, getLandingUrl, openLanding } from '../../lib/helpers'
 
@@ -446,5 +480,11 @@ const router = useRouter()
 	flex-wrap: wrap;
 	justify-content: flex-end;
 	gap: 6px;
+}
+
+.inline-icon {
+	width: 1em;
+	height: 1em;
+	vertical-align: -2px;
 }
 </style>

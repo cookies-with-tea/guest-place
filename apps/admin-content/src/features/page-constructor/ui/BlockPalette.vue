@@ -7,7 +7,8 @@
 				:class="{ 'is-active': activeTab === 'blocks' }"
 				@click="activeTab = 'blocks'"
 			>
-				📦 Блоки ({{ blockTypes.blockTypes.length }})
+				<el-icon class="palette-tab-btn__icon"><Box /></el-icon>
+				Блоки ({{ blockTypes.blockTypes.length }})
 			</button>
 			<button
 				type="button"
@@ -15,7 +16,8 @@
 				:class="{ 'is-active': activeTab === 'presets' }"
 				@click="activeTab = 'presets'"
 			>
-				⭐ Пресеты ({{ presets.savedPresets.length }})
+				<el-icon class="palette-tab-btn__icon"><Star /></el-icon>
+				Пресеты ({{ presets.savedPresets.length }})
 			</button>
 		</div>
 
@@ -23,7 +25,7 @@
 		<template v-if="activeTab === 'blocks'">
 			<div class="palette-quick-add">
 				<button type="button" class="quick-add-btn" @click="canvas.addWireframeBlock">
-					<span class="quick-add-icon">📐</span>
+					<el-icon class="quick-add-icon"><Crop /></el-icon>
 					<span class="quick-add-text">
 						<strong>Макет (Вайрфрейм)</strong>
 						<small>Прямоугольник для прототипа</small>
@@ -43,7 +45,7 @@
 					class="palette-item"
 					@click="canvas.addBlock(bt)"
 				>
-					<div class="palette-item__icon">{{ bt.icon || '📦' }}</div>
+					<el-icon class="palette-item__icon"><component :is="resolveIcon(bt.icon)" /></el-icon>
 					<div class="palette-item__info">
 						<div class="palette-item__name">{{ bt.name }}</div>
 						<div v-if="bt.description" class="palette-item__desc">{{ bt.description }}</div>
@@ -55,7 +57,8 @@
 			<!-- Sync from Frontend Bridge -->
 			<div v-if="clientManifest.length > 0" class="palette-sync-box">
 				<div class="sync-info">
-					<span>⚡ Фронтенд подключен: {{ clientManifest.length }} блоков</span>
+					<el-icon><Lightning /></el-icon>
+					<span>Фронтенд подключен: {{ clientManifest.length }} блоков</span>
 				</div>
 				<el-button
 					size="small"
@@ -78,9 +81,9 @@
 				</div>
 
 				<div v-if="presets.savedPresets.length === 0" class="presets-empty">
-					<div class="presets-empty-icon">⭐</div>
+					<el-icon class="presets-empty-icon"><Star /></el-icon>
 					<p>Пресеты пока не сохранены.</p>
-					<small>Кликните «⭐ Сохранить как пресет» на любом настроенном блоке в канвасе.</small>
+					<small>Кликните «Сохранить как пресет» на любом настроенном блоке в канвасе.</small>
 				</div>
 
 				<div v-else class="presets-list">
@@ -91,7 +94,9 @@
 						@click="presets.addPresetToCanvas(preset)"
 					>
 						<div class="preset-card__header">
-							<span class="preset-card__icon">{{ blockTypes.getBlockType(preset.type)?.icon || '📦' }}</span>
+							<el-icon class="preset-card__icon">
+								<component :is="resolveIcon(blockTypes.getBlockType(preset.type)?.icon)" />
+							</el-icon>
 							<div class="preset-card__info">
 								<strong>{{ preset.name }}</strong>
 								<code class="preset-type-badge">{{ preset.type }}</code>
@@ -101,11 +106,10 @@
 								circle
 								type="danger"
 								link
+								:icon="Close"
 								title="Удалить пресет"
 								@click.stop="presets.deletePreset(preset.id)"
-							>
-								✕
-							</el-button>
+							/>
 						</div>
 						<div class="preset-card__footer">
 							<span class="preset-date">{{ formatDate(preset.createdAt) }}</span>
@@ -120,10 +124,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Box, Close, Crop, Lightning, Star } from '@element-plus/icons-vue'
 import type { BlockTypesState } from '../composables/useBlockTypes'
 import type { BlockCanvas } from '../composables/useBlockCanvas'
 import type { BlockPresetsAndClipboard } from '../composables/useBlockPresets'
 import { formatDate } from '../lib/helpers'
+import { resolveIcon } from '../lib/icons'
 
 defineProps<{
 	blockTypes: BlockTypesState
@@ -167,6 +173,13 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 	color: var(--gp-primary);
 }
 
+.palette-tab-btn__icon {
+	width: 1em;
+	height: 1em;
+	vertical-align: -2px;
+	margin-right: 2px;
+}
+
 .palette-quick-add {
 	padding: 12px;
 }
@@ -189,7 +202,11 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 }
 
 .quick-add-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 20px;
+	color: var(--gp-primary);
 }
 
 .quick-add-text {
@@ -254,6 +271,9 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 }
 
 .palette-item__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 18px;
 }
 
@@ -289,9 +309,18 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 }
 
 .sync-info {
+	display: flex;
+	align-items: center;
 	font-size: 11px;
 	color: var(--text-muted);
 	margin-bottom: 8px;
+	gap: 4px;
+}
+
+.sync-info .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .presets-container {
@@ -314,7 +343,9 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 }
 
 .presets-empty-icon {
-	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: var(--text-muted);
 	margin-bottom: 8px;
 }
 
@@ -345,6 +376,9 @@ const activeTab = ref<'blocks' | 'presets'>('blocks')
 }
 
 .preset-card__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 18px;
 }
 

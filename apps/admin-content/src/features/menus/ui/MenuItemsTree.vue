@@ -55,9 +55,9 @@
 								size="small"
 								plain
 								type="danger"
+								:icon="Close"
 								@click="currentMenu.removeItem(currentMenu.currentMenu!.items, idx)"
-								>✕</el-button
-							>
+							/>
 						</div>
 					</div>
 
@@ -101,9 +101,13 @@
 
 								<div class="item-actions">
 									<el-button size="small" plain @click="emit('edit-item', sub, item.children!)"> Изменить </el-button>
-									<el-button size="small" plain type="danger" @click="currentMenu.removeItem(item.children!, subIdx)"
-										>✕</el-button
-									>
+									<el-button
+										size="small"
+										plain
+										type="danger"
+										:icon="Close"
+										@click="currentMenu.removeItem(item.children!, subIdx)"
+									/>
 								</div>
 							</div>
 						</div>
@@ -115,6 +119,7 @@
 </template>
 
 <script setup lang="ts">
+import { Close } from '@element-plus/icons-vue'
 import type { MenuItem } from '#entities/menus'
 import type { CurrentMenu } from '../composables/useCurrentMenu'
 

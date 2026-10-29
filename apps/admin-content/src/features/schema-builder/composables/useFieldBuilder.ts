@@ -12,42 +12,42 @@ export interface FieldTypeInfo {
 }
 
 export const FIELD_TYPE_PALETTE: FieldTypeInfo[] = [
-	{ value: FieldType.Text, label: 'Text', icon: '📝', description: 'Short text, single line', color: '#6366f1' },
+	{ value: FieldType.Text, label: 'Text', icon: 'Document', description: 'Single line of text', color: '#6366f1' },
 	{
 		value: FieldType.RichText,
 		label: 'Rich Text',
-		icon: '📄',
-		description: 'Formatted content (Tiptap editor)',
+		icon: 'Reading',
+		description: 'Formatted content',
 		color: '#8b5cf6',
 	},
-	{ value: FieldType.Number, label: 'Number', icon: '🔢', description: 'Integer or decimal number', color: '#0ea5e9' },
-	{ value: FieldType.Boolean, label: 'Boolean', icon: '☑️', description: 'True / false toggle', color: '#10b981' },
-	{ value: FieldType.Date, label: 'Date', icon: '📅', description: 'Date or datetime picker', color: '#f59e0b' },
+	{ value: FieldType.Number, label: 'Number', icon: 'Sort', description: 'Integer or decimal', color: '#0ea5e9' },
+	{ value: FieldType.Boolean, label: 'Boolean', icon: 'CircleCheck', description: 'True / false', color: '#10b981' },
+	{ value: FieldType.Date, label: 'Date', icon: 'Calendar', description: 'Date or datetime', color: '#f59e0b' },
 	{
 		value: FieldType.Media,
 		label: 'Media',
-		icon: '🖼️',
-		description: 'Image, video or file reference',
+		icon: 'PictureFilled',
+		description: 'Image, video or file',
 		color: '#ef4444',
 	},
-	{ value: FieldType.Relation, label: 'Relation', icon: '🔗', description: 'Link to another schema', color: '#f97316' },
+	{
+		value: FieldType.Relation,
+		label: 'Relation',
+		icon: 'Connection',
+		description: 'Link to another schema',
+		color: '#f97316',
+	},
 	{
 		value: FieldType.Repeater,
 		label: 'Repeater',
-		icon: '📚',
-		description: 'A list of sub-fields, repeated any number of times',
+		icon: 'Collection',
+		description: 'Repeated sub-fields',
 		color: '#14b8a6',
 	},
-	{
-		value: FieldType.Group,
-		label: 'Group',
-		icon: '🗂️',
-		description: 'A fixed set of sub-fields, nested under one key',
-		color: '#a855f7',
-	},
-	{ value: FieldType.Color, label: 'Color', icon: '🎨', description: 'Hex/rgba color picker', color: '#ec4899' },
-	{ value: FieldType.Link, label: 'Link', icon: '🔗', description: 'URL + text + target', color: '#3b82f6' },
-	{ value: FieldType.Json, label: 'JSON', icon: '🧩', description: 'Free-form JSON value', color: '#64748b' },
+	{ value: FieldType.Group, label: 'Group', icon: 'Folder', description: 'Nested sub-fields', color: '#a855f7' },
+	{ value: FieldType.Color, label: 'Color', icon: 'Brush', description: 'Hex/rgba color picker', color: '#ec4899' },
+	{ value: FieldType.Link, label: 'Link', icon: 'Position', description: 'URL + text + target', color: '#3b82f6' },
+	{ value: FieldType.Json, label: 'JSON', icon: 'Operation', description: 'Free-form JSON value', color: '#64748b' },
 ]
 
 const NESTABLE_TYPES = [FieldType.Repeater, FieldType.Group]

@@ -2,7 +2,10 @@
 	<div class="exif-box">
 		<div class="exif-header">
 			<span class="exif-title">Camera & Metadata</span>
-			<el-tag v-if="exif.sanitized" size="small" type="success">✓ Sanitized</el-tag>
+			<el-tag v-if="exif.sanitized" size="small" type="success">
+				<el-icon class="exif-tag-icon"><CircleCheck /></el-icon>
+				Sanitized
+			</el-tag>
 		</div>
 		<div class="exif-details">
 			<div v-if="exif.make || exif.model" class="exif-row">
@@ -29,13 +32,18 @@
 				</span>
 			</div>
 			<div v-if="exif.gpsStripped" class="exif-privacy-row">
-				<span class="privacy-note">🔒 Sensitive GPS location stripped</span>
+				<span class="privacy-note">
+					<el-icon class="privacy-note-icon"><Lock /></el-icon>
+					Sensitive GPS location stripped
+				</span>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { CircleCheck, Lock } from '@element-plus/icons-vue'
+
 defineProps<{
 	exif: Record<string, any>
 }>()
@@ -92,8 +100,24 @@ defineProps<{
 }
 
 .privacy-note {
+	display: inline-flex;
+	align-items: center;
 	font-weight: 500;
 	font-size: 11px;
 	color: var(--el-color-success, #67c23a);
+	gap: 4px;
+}
+
+.privacy-note-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+}
+
+.exif-tag-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	vertical-align: -0.15em;
 }
 </style>

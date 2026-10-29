@@ -48,14 +48,18 @@
 					<el-button size="default" plain> Статус: {{ getStatusLabel(document.pageForm.status) }} ▾ </el-button>
 					<template #dropdown>
 						<el-dropdown-menu>
-							<el-dropdown-item command="draft" :disabled="document.pageForm.status === 'draft'">
-								📝 Черновик (Draft)
+							<el-dropdown-item command="draft" :disabled="document.pageForm.status === 'draft'" :icon="EditPen">
+								Черновик (Draft)
 							</el-dropdown-item>
-							<el-dropdown-item command="review" :disabled="document.pageForm.status === 'review'">
-								🔍 На проверку (Review)
+							<el-dropdown-item command="review" :disabled="document.pageForm.status === 'review'" :icon="Search">
+								На проверку (Review)
 							</el-dropdown-item>
-							<el-dropdown-item command="published" :disabled="document.pageForm.status === 'published'">
-								🚀 Опубликовать (Publish)
+							<el-dropdown-item
+								command="published"
+								:disabled="document.pageForm.status === 'published'"
+								:icon="Promotion"
+							>
+								Опубликовать (Publish)
 							</el-dropdown-item>
 						</el-dropdown-menu>
 					</template>
@@ -101,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+import { EditPen, Promotion, Search } from '@element-plus/icons-vue'
 import type { PageDocument } from '../composables/usePageDocument'
 import type { LivePreview } from '../composables/useLivePreview'
 import { getStatusLabel } from '../lib/helpers'

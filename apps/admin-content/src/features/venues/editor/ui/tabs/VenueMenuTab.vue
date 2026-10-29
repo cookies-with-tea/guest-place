@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="🍽️"
+		icon="KnifeFork"
 		title="Фотогалерея блюд и банкетов"
 		description="Фотографии авторских блюд для вкладки «Меню» на лендинге"
 	>
@@ -12,27 +12,27 @@
 				clearable
 			/>
 			<el-button type="primary" :icon="Plus" @click="venueForm.addMenuPhoto">Добавить</el-button>
-			<el-button plain @click="venueForm.addPresetMenuPhotos">✨ Демо-блюда</el-button>
+			<el-button :icon="MagicStick" plain @click="venueForm.addPresetMenuPhotos">Демо-блюда</el-button>
 		</div>
 
 		<div class="photos-grid">
 			<div v-for="(photo, index) in venueForm.formMenuPhotos" :key="index" class="photo-card">
 				<img :src="photo" alt="Блюдо" class="photo-card__img" />
 				<div class="photo-card__badge">#{{ index + 1 }}</div>
-				<button type="button" class="photo-card__del" title="Удалить фото" @click="venueForm.removeMenuPhoto(index)"
-					>✕</button
-				>
+				<button type="button" class="photo-card__del" title="Удалить фото" @click="venueForm.removeMenuPhoto(index)">
+					<el-icon><Close /></el-icon>
+				</button>
 			</div>
 		</div>
 		<div v-if="!venueForm.formMenuPhotos.length" class="empty-list-notice">
-			В меню пока нет фотографий. Введите URL выше или нажмите «✨ Демо-блюда».
+			В меню пока нет фотографий. Введите URL выше или нажмите «Демо-блюда».
 		</div>
 	</UiGlassCard>
 </template>
 
 <script setup lang="ts">
 import { UiGlassCard } from '@admin-panel/ui'
-import { Plus } from '@element-plus/icons-vue'
+import { Close, MagicStick, Plus } from '@element-plus/icons-vue'
 import type { VenueForm } from '../../composables/useVenueForm'
 
 defineProps<{
@@ -96,6 +96,11 @@ defineProps<{
 		background: rgb(239, 68, 68, 0.85);
 		transition: background 0.15s;
 		cursor: pointer;
+
+		.el-icon {
+			width: 1em;
+			height: 1em;
+		}
 
 		&:hover {
 			background: #dc2626;

@@ -1,19 +1,26 @@
 <template>
 	<div v-if="!pagesAndSchemas.loading && list.displayItems.length === 0" class="empty-state">
-		<div class="empty-state__icon">📄</div>
+		<el-icon class="empty-state__icon"><DocumentDelete /></el-icon>
 		<h3>Страниц не найдено</h3>
 		<p>В выбранной категории пока нет доступных страниц</p>
 		<div class="empty-actions">
-			<el-button type="primary" @click="actions.goToCreate">+ Создать блочную страницу</el-button>
-			<el-button plain :loading="actions.isCreatingTemplate" @click="actions.handleCreateAboutTemplate"
-				>✨ Сгенерировать демо «О платформе»</el-button
+			<el-button :icon="Plus" type="primary" @click="actions.goToCreate">Создать блочную страницу</el-button>
+			<el-button
+				:icon="MagicStick"
+				plain
+				:loading="actions.isCreatingTemplate"
+				@click="actions.handleCreateAboutTemplate"
 			>
+				Сгенерировать демо «О платформе»
+			</el-button>
 		</div>
 	</div>
 
 	<div v-else-if="list.typeFilter === 'all'" class="pages-sections">
 		<section v-if="list.schemaPages.length > 0" class="pages-section">
-			<h3 class="pages-section__title">📋 Схемные страницы</h3>
+			<h3 class="pages-section__title"
+				><el-icon><Tickets /></el-icon> Схемные страницы</h3
+			>
 			<div class="pages-grid">
 				<PageListCard
 					v-for="item in list.schemaPages"
@@ -28,7 +35,9 @@
 		</section>
 
 		<section v-if="list.filteredBlockItems.length > 0" class="pages-section">
-			<h3 class="pages-section__title">📦 Блочные страницы</h3>
+			<h3 class="pages-section__title"
+				><el-icon><Box /></el-icon> Блочные страницы</h3
+			>
 			<div class="pages-grid">
 				<PageListCard
 					v-for="item in list.filteredBlockItems"
@@ -57,6 +66,7 @@
 </template>
 
 <script setup lang="ts">
+import { Box, DocumentDelete, MagicStick, Plus, Tickets } from '@element-plus/icons-vue'
 import type { PageListActions } from '../composables/usePageListActions'
 import type { PagesAndSchemas } from '../composables/usePagesAndSchemas'
 import type { UnifiedPageList } from '../composables/useUnifiedPageList'
@@ -77,10 +87,19 @@ defineProps<{
 }
 
 .pages-section__title {
+	display: flex;
+	align-items: center;
 	font-weight: 600;
 	font-size: 14px;
 	color: var(--text-primary);
 	margin: 0 0 16px;
+	gap: 6px;
+
+	.el-icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 }
 
 .pages-grid {
@@ -101,7 +120,9 @@ defineProps<{
 }
 
 .empty-state__icon {
-	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	color: var(--text-muted);
 	margin-bottom: 16px;
 }
 

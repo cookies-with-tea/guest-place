@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="🌟"
+		icon="StarFilled"
 		title="Заголовок и кнопки первого экрана"
 		description="Главный месседж, подзаголовок и целевые действия пользователя"
 	>
@@ -56,7 +56,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="🖼️"
+		icon="PictureFilled"
 		title="Медиа и иллюстрация первого экрана"
 		description="Фоновое изображение или визуальный гайд по каталогу"
 	>

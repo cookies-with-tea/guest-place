@@ -1,7 +1,7 @@
 <template>
 	<div class="architecture-strip">
 		<div class="arch-item">
-			<span class="arch-icon">📦</span>
+			<el-icon class="arch-icon"><Box /></el-icon>
 			<div class="arch-info">
 				<strong>Блочные страницы (Block-based)</strong>
 				<span>
@@ -12,7 +12,7 @@
 		</div>
 		<div class="arch-sep"></div>
 		<div class="arch-item">
-			<span class="arch-icon">📋</span>
+			<el-icon class="arch-icon"><Tickets /></el-icon>
 			<div class="arch-info">
 				<strong>Схемные страницы (Schema-driven)</strong>
 				<span>
@@ -23,6 +23,10 @@
 		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+import { Box, Tickets } from '@element-plus/icons-vue'
+</script>
 
 <style scoped>
 .architecture-strip {
@@ -47,8 +51,12 @@
 }
 
 .arch-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 22px;
 	line-height: 1;
+	color: var(--gp-primary, #6366f1);
 }
 
 .arch-info {

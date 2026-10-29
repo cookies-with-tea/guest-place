@@ -6,7 +6,9 @@
 				<p class="page-subtitle">Define the structure of your content collections</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button type="success" plain @click="router.push({ name: 'PageList' })"> 🧱 Конструктор страниц </el-button>
+				<el-button :icon="Grid" type="success" plain @click="router.push({ name: 'PageList' })">
+					Конструктор страниц
+				</el-button>
 				<el-button
 					:icon="MagicStick"
 					plain
@@ -14,7 +16,7 @@
 					:loading="seedAboutPage.isSeedingAbout"
 					@click="seedAboutPage.seedAboutPage"
 				>
-					✨ Шаблон «О платформе»
+					Шаблон «О платформе»
 				</el-button>
 				<el-button :icon="Notebook" plain @click="schemaList.goToDocs"> Документация подхода </el-button>
 				<el-button :icon="Plus" type="primary" @click="emit('add')"> Create Schema </el-button>
@@ -29,7 +31,7 @@
 			</div>
 
 			<div v-else-if="schemaList.schemas.length === 0" class="empty-state">
-				<div class="empty-state__icon">🗂️</div>
+				<el-icon class="empty-state__icon"><FolderOpened /></el-icon>
 				<h3>No schemas yet</h3>
 				<p>Create your first content schema to start building structured content</p>
 				<el-button :icon="Plus" type="primary" @click="emit('add')">Create Schema</el-button>
@@ -38,9 +40,9 @@
 			<div v-else class="schemas-grid">
 				<div v-for="schema in schemaList.schemas" :key="schema.id" class="schema-card" @click="emit('edit', schema)">
 					<div class="schema-card__header">
-						<div class="schema-card__icon">
-							<span>{{ schema.isSingleton ? '📄' : '📚' }}</span>
-						</div>
+						<el-icon class="schema-card__icon">
+							<component :is="schema.isSingleton ? Document : Files" />
+						</el-icon>
 						<div class="schema-card__badges">
 							<el-tag v-if="schema.isSingleton" size="small" type="warning">Singleton</el-tag>
 						</div>
@@ -78,7 +80,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import type { ContentSchema } from '@admin-panel/lib'
-import { Delete, Document, Edit, MagicStick, Notebook, Plus } from '@element-plus/icons-vue'
+import { Delete, Document, Edit, Files, FolderOpened, Grid, MagicStick, Notebook, Plus } from '@element-plus/icons-vue'
 import type { SchemaList } from '../composables/useSchemaList'
 import type { SeedAboutPage } from '../composables/useSeedAboutPage'
 
@@ -165,8 +167,12 @@ const router = useRouter()
 }
 
 .schema-card__icon {
-	font-size: 28px;
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	font-size: 24px;
 	line-height: 1;
+	color: var(--gp-primary);
 }
 
 .schema-card__body {
@@ -232,8 +238,11 @@ const router = useRouter()
 }
 
 .empty-state__icon {
-	font-size: 48px;
+	width: 1em;
+	height: 1em;
+	font-size: 40px;
 	line-height: 1;
+	color: var(--gp-text-secondary);
 }
 
 .empty-state h3 {

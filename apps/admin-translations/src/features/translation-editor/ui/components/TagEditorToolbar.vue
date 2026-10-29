@@ -88,7 +88,7 @@
 
 			<el-tooltip content="Очистить форматирование выделения" placement="top">
 				<button class="tool-btn" type="button" @click="editor.handleStripFormatting">
-					<span>✕</span>
+					<el-icon><CloseBold /></el-icon>
 				</button>
 			</el-tooltip>
 		</div>
@@ -118,6 +118,7 @@
 </template>
 
 <script setup lang="ts">
+import { CloseBold } from '@element-plus/icons-vue'
 import type { TagEditor } from '../../composables/useTagEditor'
 
 defineProps<{
@@ -169,6 +170,12 @@ defineProps<{
 .tool-btn:hover {
 	color: var(--accent-primary, #3b82f6);
 	background: var(--border-color, #e2e8f0);
+}
+
+.tool-btn .el-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .highlight-btn {

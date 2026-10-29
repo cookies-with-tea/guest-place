@@ -11,22 +11,27 @@
 		<div class="sidebar-primary glass-panel">
 			<div class="sidebar-header" :class="{ 'is-collapsed': isCollapsed }">
 				<h2 v-show="!isCollapsed" class="logo-text">GUEST PLACE</h2>
-				<div class="collapse-trigger" @click="toggleCollapse">
-					<ElIcon><Expand v-if="isCollapsed" /><Fold v-else /></ElIcon>
-				</div>
+				<el-tooltip :content="isCollapsed ? 'Expand' : 'Collapse'" placement="right" :show-after="400">
+					<div class="collapse-trigger" @click="toggleCollapse">
+						<ElIcon><Expand v-if="isCollapsed" /><Fold v-else /></ElIcon>
+					</div>
+				</el-tooltip>
 			</div>
 
 			<div v-if="showContextSwitcher" class="context-container">
-				<div
+				<el-tooltip
 					v-for="ctx in availableContexts"
 					:key="ctx"
-					class="context-item"
-					:class="{ active: activeContext === ctx }"
-					@click="setContext(ctx)"
+					:content="t(`shell.${ctx}`)"
+					placement="right"
+					:disabled="!isCollapsed"
+					:show-after="400"
 				>
-					<ElIcon><component :is="ctx === 'system' ? 'Setting' : 'EditPen'" /></ElIcon>
-					<span v-show="!isCollapsed" class="label">{{ t(`shell.${ctx}`) }}</span>
-				</div>
+					<div class="context-item" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">
+						<ElIcon><component :is="ctx === 'system' ? 'Setting' : 'EditPen'" /></ElIcon>
+						<span v-show="!isCollapsed" class="label">{{ t(`shell.${ctx}`) }}</span>
+					</div>
+				</el-tooltip>
 			</div>
 
 			<div class="menu-container">
@@ -44,10 +49,12 @@
 							:to="child.path || '/'"
 							custom
 						>
-							<div class="menu-item" :class="{ active: isActive }" @click="navigate">
-								<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
-								<span v-show="!isCollapsed" class="label">{{ t(child.title) }}</span>
-							</div>
+							<el-tooltip :content="t(child.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+								<div class="menu-item" :class="{ active: isActive }" @click="navigate">
+									<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
+									<span v-show="!isCollapsed" class="label">{{ t(child.title) }}</span>
+								</div>
+							</el-tooltip>
 						</router-link>
 					</template>
 
@@ -58,22 +65,30 @@
 						:to="item.path || '/'"
 						custom
 					>
-						<div class="menu-item" :class="{ active: item.path === '/' ? isExactActive : isActive }" @click="navigate">
-							<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
-							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
-							<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
-						</div>
+						<el-tooltip :content="t(item.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+							<div
+								class="menu-item"
+								:class="{ active: item.path === '/' ? isExactActive : isActive }"
+								@click="navigate"
+							>
+								<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
+								<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
+								<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
+							</div>
+						</el-tooltip>
 					</router-link>
 
 					<!-- Group Item (Two-column mode) -->
-					<div v-else class="menu-item" :class="{ active: isItemActive(item) }" @click="handlePrimaryClick(item)">
-						<div class="item-main">
-							<ElIcon><component :is="getIcon(item.icon)" /></ElIcon>
-							<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
-							<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
+					<el-tooltip v-else :content="t(item.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+						<div class="menu-item" :class="{ active: isItemActive(item) }" @click="handlePrimaryClick(item)">
+							<div class="item-main">
+								<ElIcon><component :is="getIcon(item.icon)" /></ElIcon>
+								<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
+								<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
+							</div>
+							<ElIcon v-show="!isCollapsed" class="arrow"><ArrowRight /></ElIcon>
 						</div>
-						<ElIcon v-show="!isCollapsed" class="arrow"><ArrowRight /></ElIcon>
-					</div>
+					</el-tooltip>
 				</template>
 			</div>
 		</div>
@@ -83,6 +98,9 @@
 			<div v-if="!simple && !isCollapsed && activeSubMenu" class="sidebar-secondary glass-panel">
 				<div class="secondary-header">
 					<h3>{{ t(activeSubMenu.title) }}</h3>
+					<el-tooltip content="Close" placement="top" :show-after="400">
+						<ElIcon class="secondary-close" @click="selectedPrimaryTitle = null"><Close /></ElIcon>
+					</el-tooltip>
 				</div>
 				<div class="secondary-menu">
 					<router-link
@@ -112,7 +130,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '@admin-panel/i18n'
 import { MFE_HELP } from '@admin-panel/lib'
 import * as Icons from '@element-plus/icons-vue'
-import { ArrowRight, CircleCheckFilled, Expand, Fold } from '@element-plus/icons-vue'
+import { ArrowRight, CircleCheckFilled, Close, Expand, Fold } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 
 import UiInfoButton from '../../../components/ui-info-button'
@@ -276,11 +294,21 @@ watch(
 }
 
 .collapse-trigger {
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
-	font-size: 20px;
+	justify-content: center;
+	border-radius: 6px;
+	font-size: 18px;
 	color: var(--gp-text-secondary);
+	transition: all 0.2s;
 	cursor: pointer;
+}
+
+.collapse-trigger:hover {
+	color: var(--gp-primary);
+	background: var(--gp-bg-glass-hover);
 }
 
 .context-container {
@@ -323,7 +351,18 @@ watch(
 	flex: 1;
 	flex-direction: column;
 	padding: 12px 8px;
+	overflow: hidden auto;
 	gap: 4px;
+	scrollbar-width: thin;
+}
+
+.menu-container::-webkit-scrollbar {
+	width: 4px;
+}
+
+.menu-container::-webkit-scrollbar-thumb {
+	border-radius: 2px;
+	background: var(--gp-glass-border);
 }
 
 .menu-group-title {
@@ -347,11 +386,12 @@ watch(
 	height: 44px;
 	display: flex;
 	align-items: center;
+	border-left: 3px solid transparent;
 	border-radius: 8px;
 	color: var(--gp-text-secondary);
 	transition: all 0.2s;
 	cursor: pointer;
-	padding: 0 12px;
+	padding: 0 12px 0 9px;
 	gap: 12px;
 }
 
@@ -387,6 +427,7 @@ watch(
 }
 
 .menu-item.active {
+	border-left-color: var(--gp-primary);
 	color: var(--gp-primary);
 	background: var(--gp-primary-light);
 }
@@ -403,8 +444,12 @@ watch(
 }
 
 .secondary-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	border-bottom: 1px solid var(--gp-glass-border);
-	padding: 24px 20px;
+	padding: 24px 16px 24px 20px;
+	gap: 8px;
 }
 
 .secondary-header h3 {
@@ -413,6 +458,25 @@ watch(
 	text-transform: uppercase;
 	color: var(--text-muted);
 	margin: 0;
+}
+
+.secondary-close {
+	width: 24px;
+	height: 24px;
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	font-size: 14px;
+	color: var(--gp-text-secondary);
+	transition: all 0.2s;
+	cursor: pointer;
+}
+
+.secondary-close:hover {
+	color: var(--gp-primary);
+	background: var(--gp-bg-glass-hover);
 }
 
 .secondary-menu {

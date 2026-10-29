@@ -11,7 +11,7 @@
 			<!-- Drag & Drop overlay for direct media uploads -->
 			<div v-if="canvas.isMediaDragActive" class="media-drag-overlay">
 				<div class="media-drag-hint">
-					<span class="media-drag-icon">📥</span>
+					<el-icon class="media-drag-icon"><Download /></el-icon>
 					<strong>Отпустите файл для мгновенной загрузки</strong>
 					<p>Изображения создадут Hero-блок, видео создадут Видео-блок</p>
 				</div>
@@ -28,10 +28,11 @@
 						size="small"
 						type="success"
 						plain
+						:icon="DocumentCopy"
 						title="Вставить блок из буфера (Ctrl+V)"
 						@click="presets.pasteBlock"
 					>
-						📋 Вставить блок ({{
+						Вставить блок ({{
 							blockTypes.getBlockType(presets.clipboardBlock.type)?.name || presets.clipboardBlock.type
 						}})
 					</el-button>
@@ -42,15 +43,21 @@
 
 			<!-- Empty Canvas State -->
 			<div v-if="pageForm.blocks.length === 0" class="canvas-empty">
-				<div class="canvas-empty__icon">🧱</div>
+				<el-icon class="canvas-empty__icon"><Grid /></el-icon>
 				<h4>Канвас страницы пуст</h4>
 				<p>Создайте структуру страницы из прямоугольников-макетов или готовых компонентов.</p>
 				<div class="canvas-empty__btns">
-					<el-button type="primary" @click="canvas.addWireframeBlock">
-						📐 Добавить первый макет-прямоугольник
+					<el-button type="primary" :icon="Crop" @click="canvas.addWireframeBlock">
+						Добавить первый макет-прямоугольник
 					</el-button>
-					<el-button v-if="presets.clipboardBlock" type="success" plain @click="presets.pasteBlock">
-						📋 Вставить из буфера
+					<el-button
+						v-if="presets.clipboardBlock"
+						type="success"
+						plain
+						:icon="DocumentCopy"
+						@click="presets.pasteBlock"
+					>
+						Вставить из буфера
 					</el-button>
 				</div>
 			</div>
@@ -74,19 +81,34 @@
 					@dragend="canvas.onDragEnd"
 					@click="canvas.selectBlock(index)"
 				>
-					<div class="block-card__handle" title="Перетащить блок"> ⠿ </div>
-
-					<div class="block-card__icon">
-						{{ blockTypes.getBlockType(block.type)?.icon || '📦' }}
+					<div class="block-card__handle" title="Перетащить блок">
+						<svg fill="currentColor" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="9" cy="5" r="1.5" />
+							<circle cx="15" cy="5" r="1.5" />
+							<circle cx="9" cy="12" r="1.5" />
+							<circle cx="15" cy="12" r="1.5" />
+							<circle cx="9" cy="19" r="1.5" />
+							<circle cx="15" cy="19" r="1.5" />
+						</svg>
 					</div>
+
+					<el-icon class="block-card__icon">
+						<component :is="resolveIcon(blockTypes.getBlockType(block.type)?.icon)" />
+					</el-icon>
 
 					<div class="block-card__details">
 						<div class="block-card__name">
 							<strong>{{ blockTypes.getBlockType(block.type)?.name || block.type }}</strong>
 							<code class="block-card__slug">{{ block.type }}</code>
-							<span v-if="block.type === 'wireframe'" class="wireframe-pill">📐 Макет</span>
-							<span v-if="block.style?.theme" class="style-pill">🎨 {{ block.style.theme }}</span>
-							<span v-if="canvas.selectedBlockIndex === index" class="selected-pill">✏️ Редактируется</span>
+							<span v-if="block.type === 'wireframe'" class="wireframe-pill">
+								<el-icon><Crop /></el-icon>Макет
+							</span>
+							<span v-if="block.style?.theme" class="style-pill">
+								<el-icon><Brush /></el-icon>{{ block.style.theme }}
+							</span>
+							<span v-if="canvas.selectedBlockIndex === index" class="selected-pill">
+								<el-icon><EditPen /></el-icon>Редактируется
+							</span>
 						</div>
 						<div class="block-card__summary">
 							{{ canvas.getBlockSummary(block) }}
@@ -95,7 +117,7 @@
 
 					<div class="block-card__controls" @click.stop>
 						<el-dropdown trigger="click" @command="(cmd: string) => canvas.changeBlockType(index, cmd)">
-							<el-button size="small" circle title="Заменить на реальный компонент"> ⇄ </el-button>
+							<el-button size="small" circle :icon="Switch" title="Заменить на реальный компонент" />
 							<template #dropdown>
 								<el-dropdown-menu>
 									<el-dropdown-item disabled>Заменить на компонент:</el-dropdown-item>
@@ -104,43 +126,59 @@
 										:key="bt.slug"
 										:command="bt.slug"
 										:disabled="bt.slug === block.type"
+										:icon="resolveIcon(bt.icon)"
 									>
-										{{ bt.icon || '📦' }} {{ bt.name }}
+										{{ bt.name }}
 									</el-dropdown-item>
 								</el-dropdown-menu>
 							</template>
 						</el-dropdown>
 
-						<el-button size="small" circle title="Скопировать в буфер (Ctrl+C)" @click="presets.copyBlock(index)">
-							📋
-						</el-button>
-						<el-button size="small" circle title="Сохранить как пресет" @click="presets.openSavePresetDialog(index)">
-							⭐
-						</el-button>
 						<el-button
 							size="small"
 							circle
+							:icon="DocumentCopy"
+							title="Скопировать в буфер (Ctrl+C)"
+							@click="presets.copyBlock(index)"
+						/>
+						<el-button
+							size="small"
+							circle
+							:icon="Star"
+							title="Сохранить как пресет"
+							@click="presets.openSavePresetDialog(index)"
+						/>
+						<el-button
+							size="small"
+							circle
+							:icon="Top"
 							:disabled="index === 0"
 							title="Переместить выше"
 							@click="canvas.moveBlock(index, -1)"
-						>
-							↑
-						</el-button>
+						/>
 						<el-button
 							size="small"
 							circle
+							:icon="Bottom"
 							:disabled="index === pageForm.blocks.length - 1"
 							title="Переместить ниже"
 							@click="canvas.moveBlock(index, 1)"
-						>
-							↓
-						</el-button>
-						<el-button size="small" circle title="Дублировать блок" @click="canvas.duplicateBlock(index)">
-							⎘
-						</el-button>
-						<el-button size="small" circle type="danger" title="Удалить блок" @click="canvas.removeBlock(index)">
-							✕
-						</el-button>
+						/>
+						<el-button
+							size="small"
+							circle
+							:icon="CopyDocument"
+							title="Дублировать блок"
+							@click="canvas.duplicateBlock(index)"
+						/>
+						<el-button
+							size="small"
+							circle
+							type="danger"
+							:icon="Delete"
+							title="Удалить блок"
+							@click="canvas.removeBlock(index)"
+						/>
 					</div>
 				</div>
 			</div>
@@ -151,10 +189,25 @@
 </template>
 
 <script setup lang="ts">
+import {
+	Bottom,
+	Brush,
+	CopyDocument,
+	Crop,
+	Delete,
+	DocumentCopy,
+	Download,
+	EditPen,
+	Grid,
+	Star,
+	Switch,
+	Top,
+} from '@element-plus/icons-vue'
 import type { PageBlock } from '#entities/pages'
 import type { BlockTypesState } from '../composables/useBlockTypes'
 import type { BlockCanvas } from '../composables/useBlockCanvas'
 import type { BlockPresetsAndClipboard } from '../composables/useBlockPresets'
+import { resolveIcon } from '../lib/icons'
 
 defineProps<{
 	pageForm: { blocks: PageBlock[] } & Record<string, any>
@@ -219,7 +272,9 @@ defineProps<{
 }
 
 .media-drag-icon {
-	font-size: 32px;
+	width: 32px;
+	height: 32px;
+	color: var(--gp-primary);
 }
 
 .bg-image-upload-row {
@@ -262,7 +317,9 @@ defineProps<{
 }
 
 .canvas-empty__icon {
-	font-size: 40px;
+	width: 40px;
+	height: 40px;
+	color: var(--text-muted);
 	margin-bottom: 8px;
 }
 
@@ -309,11 +366,21 @@ defineProps<{
 }
 
 .block-card__handle {
+	flex-shrink: 0;
 	color: var(--text-muted);
+	transition: opacity 0.15s;
 	cursor: grab;
+	opacity: 0.5;
+}
+
+.block-card__handle:hover {
+	opacity: 1;
 }
 
 .block-card__icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 18px;
 }
 
@@ -335,6 +402,22 @@ defineProps<{
 .block-card__slug {
 	font-size: 11px;
 	color: var(--text-muted);
+}
+
+.wireframe-pill,
+.style-pill,
+.selected-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.wireframe-pill .el-icon,
+.style-pill .el-icon,
+.selected-pill .el-icon {
+	width: 1em;
+	height: 1em;
+	font-size: 10px;
 }
 
 .selected-pill {

@@ -21,7 +21,7 @@
 					title="Десктоп (100%)"
 					@click="livePreview.previewDevice = 'desktop'"
 				>
-					🖥️ Desktop
+					<el-icon class="device-chip__icon"><Monitor /></el-icon> Desktop
 				</button>
 				<button
 					type="button"
@@ -30,7 +30,7 @@
 					title="Планшет (768px)"
 					@click="livePreview.previewDevice = 'tablet'"
 				>
-					📱 Tablet
+					<el-icon class="device-chip__icon"><Cellphone /></el-icon> Tablet
 				</button>
 				<button
 					type="button"
@@ -39,7 +39,7 @@
 					title="Смартфон (375px)"
 					@click="livePreview.previewDevice = 'mobile'"
 				>
-					📱 Mobile
+					<el-icon class="device-chip__icon"><Iphone /></el-icon> Mobile
 				</button>
 				<button
 					type="button"
@@ -63,6 +63,7 @@
 </template>
 
 <script setup lang="ts">
+import { Cellphone, Iphone, Monitor } from '@element-plus/icons-vue'
 import type { HomeLivePreview } from '../composables/useHomeLivePreview'
 
 defineProps<{
@@ -130,6 +131,8 @@ defineProps<{
 }
 
 .device-chip {
+	display: inline-flex;
+	align-items: center;
 	border: 1px solid var(--gp-glass-border, rgb(255, 255, 255, 0.08));
 	border-radius: 6px;
 	font-size: 11px;
@@ -138,6 +141,13 @@ defineProps<{
 	transition: all 0.15s;
 	cursor: pointer;
 	padding: 4px 8px;
+	gap: 4px;
+
+	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 
 	&:hover {
 		color: #fff;

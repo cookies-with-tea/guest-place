@@ -1,5 +1,9 @@
 <template>
-	<UiGlassCard icon="📂" title="Секция «Места по категориям»" description="Управление быстрым выбором типа площадок">
+	<UiGlassCard
+		icon="Folder"
+		title="Секция «Места по категориям»"
+		description="Управление быстрым выбором типа площадок"
+	>
 		<template #actions>
 			<el-button type="primary" size="small" :icon="Plus" @click="homeForm.addCategory">Добавить категорию</el-button>
 		</template>

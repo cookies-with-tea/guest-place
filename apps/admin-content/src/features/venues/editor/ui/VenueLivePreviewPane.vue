@@ -21,7 +21,7 @@
 					title="Desktop view"
 					@click="livePreview.previewDevice = 'desktop'"
 				>
-					🖥️ Desktop
+					<el-icon class="device-btn__icon"><Monitor /></el-icon> Desktop
 				</button>
 				<button
 					type="button"
@@ -30,7 +30,7 @@
 					title="Tablet view (768px)"
 					@click="livePreview.previewDevice = 'tablet'"
 				>
-					📱 Tablet
+					<el-icon class="device-btn__icon"><Cellphone /></el-icon> Tablet
 				</button>
 				<button
 					type="button"
@@ -39,7 +39,7 @@
 					title="Mobile view (375px)"
 					@click="livePreview.previewDevice = 'mobile'"
 				>
-					📱 Mobile
+					<el-icon class="device-btn__icon"><Iphone /></el-icon> Mobile
 				</button>
 				<button
 					type="button"
@@ -64,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import { Cellphone, Iphone, Monitor } from '@element-plus/icons-vue'
 import type { VenueForm } from '../composables/useVenueForm'
 import type { VenueLivePreview } from '../composables/useVenueLivePreview'
 import { openLanding } from '../../lib/helpers'
@@ -142,6 +143,8 @@ defineProps<{
 }
 
 .device-btn {
+	display: inline-flex;
+	align-items: center;
 	border: 1px solid transparent;
 	border-radius: 5px;
 	font-size: 11px;
@@ -150,6 +153,13 @@ defineProps<{
 	transition: all 0.15s;
 	cursor: pointer;
 	padding: 4px 8px;
+	gap: 4px;
+
+	&__icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+	}
 
 	&:hover {
 		color: #fff;

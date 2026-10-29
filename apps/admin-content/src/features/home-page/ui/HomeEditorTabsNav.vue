@@ -1,7 +1,7 @@
 <template>
 	<div class="editor-tabs-nav">
 		<button type="button" class="tab-nav-btn" :class="{ active: tabs.active === 'hero' }" @click="tabs.active = 'hero'">
-			<span class="tab-icon">🌟</span>
+			<el-icon class="tab-icon"><StarFilled /></el-icon>
 			<span class="tab-label">Первый экран (Hero)</span>
 		</button>
 		<button
@@ -10,7 +10,7 @@
 			:class="{ active: tabs.active === 'categories' }"
 			@click="tabs.active = 'categories'"
 		>
-			<span class="tab-icon">📂</span>
+			<el-icon class="tab-icon"><Folder /></el-icon>
 			<span class="tab-label">Категории</span>
 			<span class="tab-badge">{{ homeForm.form.categories.length }}</span>
 		</button>
@@ -20,7 +20,7 @@
 			:class="{ active: tabs.active === 'latest' }"
 			@click="tabs.active = 'latest'"
 		>
-			<span class="tab-icon">🆕</span>
+			<el-icon class="tab-icon"><Clock /></el-icon>
 			<span class="tab-label">Последние</span>
 		</button>
 		<button
@@ -29,7 +29,7 @@
 			:class="{ active: tabs.active === 'popular' }"
 			@click="tabs.active = 'popular'"
 		>
-			<span class="tab-icon">🔥</span>
+			<el-icon class="tab-icon"><TrendCharts /></el-icon>
 			<span class="tab-label">Популярные</span>
 		</button>
 		<button
@@ -38,7 +38,7 @@
 			:class="{ active: tabs.active === 'interactions' }"
 			@click="tabs.active = 'interactions'"
 		>
-			<span class="tab-icon">🎯</span>
+			<el-icon class="tab-icon"><Aim /></el-icon>
 			<span class="tab-label">Сценарии</span>
 			<span class="tab-badge">{{ homeForm.form.interactions.length }}</span>
 		</button>
@@ -48,13 +48,14 @@
 			:class="{ active: tabs.active === 'banner' }"
 			@click="tabs.active = 'banner'"
 		>
-			<span class="tab-icon">📢</span>
+			<el-icon class="tab-icon"><Promotion /></el-icon>
 			<span class="tab-label">Нижний баннер</span>
 		</button>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { Aim, Clock, Folder, Promotion, StarFilled, TrendCharts } from '@element-plus/icons-vue'
 import type { HomeEditorTabs } from '../composables/useHomeEditorTabs'
 import type { HomePageForm } from '../composables/useHomePageForm'
 
@@ -100,6 +101,12 @@ defineProps<{
 		color: #fff;
 		background: rgb(66, 184, 131, 0.15);
 	}
+}
+
+.tab-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .tab-badge {

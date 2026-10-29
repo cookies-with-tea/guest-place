@@ -4,8 +4,12 @@
 			<span class="filter-label">Тип страниц:</span>
 			<el-radio-group v-model="list.typeFilter" size="default">
 				<el-radio-button label="all">Все ({{ list.totalItemsCount }})</el-radio-button>
-				<el-radio-button label="blocks">📦 Блочные ({{ pagesAndSchemas.pages.length }})</el-radio-button>
-				<el-radio-button label="schemas">📋 Схемные ({{ list.schemaPages.length }})</el-radio-button>
+				<el-radio-button label="blocks">
+					<el-icon><Box /></el-icon> Блочные ({{ pagesAndSchemas.pages.length }})
+				</el-radio-button>
+				<el-radio-button label="schemas">
+					<el-icon><Tickets /></el-icon> Схемные ({{ list.schemaPages.length }})
+				</el-radio-button>
 			</el-radio-group>
 		</div>
 
@@ -24,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { Box, Tickets } from '@element-plus/icons-vue'
 import type { PagesAndSchemas } from '../composables/usePagesAndSchemas'
 import type { UnifiedPageList } from '../composables/useUnifiedPageList'
 
@@ -57,5 +62,14 @@ defineProps<{
 	font-weight: 500;
 	font-size: 13px;
 	color: var(--text-muted);
+}
+
+:deep(.el-radio-button__inner) {
+	.el-icon {
+		width: 1em;
+		height: 1em;
+		flex-shrink: 0;
+		vertical-align: -0.15em;
+	}
 }
 </style>

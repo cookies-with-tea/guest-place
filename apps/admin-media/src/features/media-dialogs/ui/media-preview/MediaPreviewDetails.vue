@@ -39,7 +39,10 @@
 			</div>
 		</el-descriptions-item>
 		<el-descriptions-item v-if="media.folderId" label="Folder">
-			<el-tag size="small" type="primary">📁 {{ preview.folderName || 'Folder' }}</el-tag>
+			<el-tag size="small" type="primary">
+				<el-icon class="folder-tag-icon"><Folder /></el-icon>
+				{{ preview.folderName || 'Folder' }}
+			</el-tag>
 		</el-descriptions-item>
 		<el-descriptions-item v-if="media.cdnUrl" label="CDN URL">
 			<div class="cdn-row">
@@ -62,6 +65,7 @@
 </template>
 
 <script setup lang="ts">
+import { Folder } from '@element-plus/icons-vue'
 import type { MediaPreview } from '../../composables/useMediaPreview'
 
 defineProps<{
@@ -83,6 +87,13 @@ defineProps<{
 
 .no-tags {
 	color: var(--text-muted);
+}
+
+.folder-tag-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+	vertical-align: -0.15em;
 }
 
 .color-badge {

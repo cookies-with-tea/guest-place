@@ -10,7 +10,7 @@
 
 		<div class="grid-2-col">
 			<div class="info-card glass-panel">
-				<div class="card-icon">🏗️</div>
+				<el-icon class="card-icon"><Box /></el-icon>
 				<h3>Как хранятся схемы в PostgreSQL</h3>
 				<p> Каждая схема сохраняется в таблице <code>content_schemas</code>: </p>
 				<ul class="styled-list">
@@ -26,7 +26,7 @@
 			</div>
 
 			<div class="info-card glass-panel">
-				<div class="card-icon">🧩</div>
+				<el-icon class="card-icon"><Operation /></el-icon>
 				<h3>Поддерживаемые типы полей</h3>
 				<div class="field-types-chips">
 					<el-tag type="primary">Text</el-tag>
@@ -66,3 +66,16 @@
 		</div>
 	</div>
 </template>
+
+<script setup lang="ts">
+import { Box, Operation } from '@element-plus/icons-vue'
+</script>
+
+<style scoped>
+.card-icon {
+	width: 28px;
+	height: 28px;
+	color: var(--gp-primary, #6366f1);
+	margin-bottom: 12px;
+}
+</style>

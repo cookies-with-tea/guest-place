@@ -8,7 +8,7 @@ const WIREFRAME_TYPE: BlockTypeItem = {
 	name: 'Макет / Вайрфрейм',
 	slug: 'wireframe',
 	description: 'Свободный прямоугольник с заголовком и текстом для прототипирования структуры',
-	icon: '📐',
+	icon: 'Crop',
 	category: 'prototype',
 	schema: [
 		{ name: 'title', label: 'Заголовок / Назначение блока', fieldType: 'Text', required: true },
@@ -27,7 +27,7 @@ const VIDEO_TYPE: BlockTypeItem = {
 	name: 'Видео блок',
 	slug: 'video_embed',
 	description: 'Встраивание видео (MP4/WebM файлы или YouTube/Vimeo ссылки)',
-	icon: '🎬',
+	icon: 'VideoCamera',
 	category: 'media',
 	schema: [
 		{ name: 'title', label: 'Заголовок блока', fieldType: 'Text' },

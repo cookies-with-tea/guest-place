@@ -1,6 +1,6 @@
 <template>
 	<UiGlassCard
-		icon="📢"
+		icon="Promotion"
 		title="Финальный промо-баннер"
 		description="Блок доверия и одновременного поиска внизу страницы"
 	>
@@ -30,7 +30,7 @@
 		</el-form>
 	</UiGlassCard>
 
-	<UiGlassCard icon="🎨" title="Фоновая графика баннера" description="Изображение для фона или плашки">
+	<UiGlassCard icon="Brush" title="Фоновая графика баннера" description="Изображение для фона или плашки">
 		<div class="media-wrap">
 			<UiMediaPicker v-model="homeForm.form.bannerGuideUuid" @update:model-value="onChange" />
 			<p class="field-hint">Фоновое изображение или иконка нижнего блока</p>

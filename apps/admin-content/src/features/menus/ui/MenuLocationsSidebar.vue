@@ -15,7 +15,7 @@
 				@click="currentMenu.selectMenu(menu)"
 			>
 				<div class="loc-card-header">
-					<span class="loc-icon">{{ menusList.getLocationIcon(menu.location) }}</span>
+					<el-icon class="loc-icon"><component :is="resolveIcon(menusList.getLocationIcon(menu.location))" /></el-icon>
 					<div class="loc-card-info">
 						<strong>{{ menu.name }}</strong>
 						<code>{{ menu.location }}</code>
@@ -31,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { resolveIcon } from '../lib/icons'
 import type { CurrentMenu } from '../composables/useCurrentMenu'
 import type { MenusList } from '../composables/useMenusList'
 
@@ -94,7 +95,11 @@ defineProps<{
 }
 
 .loc-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 	font-size: 20px;
+	color: var(--accent-primary, #6366f1);
 }
 
 .loc-card-info {

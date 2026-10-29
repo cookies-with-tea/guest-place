@@ -10,19 +10,20 @@
 			>
 		</div>
 		<div class="page-header__actions">
-			<el-button plain @click="router.push('/home')"> 🏠 Главная </el-button>
-			<el-button plain @click="router.push('/venues')"> 🏰 Площадки </el-button>
-			<el-button plain @click="router.push('/menus')"> 🧭 Меню сайта </el-button>
-			<el-button plain @click="router.push('/redirects')"> 🔀 Редиректы (301/302) </el-button>
-			<el-button plain @click="actions.openSitemap"> 🗺️ Sitemap.xml </el-button>
-			<el-button plain @click="router.push({ name: ROUTES.content.name })"> 🗂️ Конструктор схем </el-button>
-			<el-button type="primary" @click="actions.goToCreate"> + Создать блочную страницу </el-button>
+			<el-button :icon="HomeFilled" plain @click="router.push('/home')">Главная</el-button>
+			<el-button :icon="OfficeBuilding" plain @click="router.push('/venues')">Площадки</el-button>
+			<el-button :icon="Menu" plain @click="router.push('/menus')">Меню сайта</el-button>
+			<el-button :icon="Sort" plain @click="router.push('/redirects')">Редиректы (301/302)</el-button>
+			<el-button :icon="MapLocation" plain @click="actions.openSitemap">Sitemap.xml</el-button>
+			<el-button :icon="Grid" plain @click="router.push({ name: ROUTES.content.name })">Конструктор схем</el-button>
+			<el-button :icon="Plus" type="primary" @click="actions.goToCreate">Создать блочную страницу</el-button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { Grid, HomeFilled, MapLocation, Menu, OfficeBuilding, Plus, Sort } from '@element-plus/icons-vue'
 import { ROUTES } from '@admin-panel/lib'
 import type { PageListActions } from '../composables/usePageListActions'
 

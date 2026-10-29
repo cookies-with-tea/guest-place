@@ -18,7 +18,7 @@
 						:class="{ active: tabs.activeFormTab === t.id }"
 						@click="tabs.activeFormTab = t.id"
 					>
-						<span class="tab-icon">{{ t.icon }}</span>
+						<el-icon class="tab-icon"><component :is="resolveIcon(t.icon)" /></el-icon>
 						<span class="tab-label">{{ t.label }}</span>
 						<span v-if="'badge' in t" class="tab-badge">{{ t.badge }}</span>
 					</button>
@@ -79,9 +79,9 @@
 					</div>
 
 					<div class="bottom-buttons">
-						<el-button plain @click="emit('close')"> ✕ Закрыть </el-button>
-						<el-button type="primary" size="large" :loading="venueForm.saving" @click="emit('save')">
-							💾 Сохранить площадку
+						<el-button :icon="Close" plain @click="emit('close')"> Закрыть </el-button>
+						<el-button :icon="Check" type="primary" size="large" :loading="venueForm.saving" @click="emit('save')">
+							Сохранить площадку
 						</el-button>
 					</div>
 				</div>
@@ -97,9 +97,11 @@
 </template>
 
 <script setup lang="ts">
+import { Check, Close } from '@element-plus/icons-vue'
 import type { VenueForm } from '../composables/useVenueForm'
 import type { VenueLivePreview } from '../composables/useVenueLivePreview'
 import type { VenueEditorTabs } from '../composables/useVenueEditorTabs'
+import { resolveIcon } from '../../lib/icons'
 import VenueEditorTopBar from './VenueEditorTopBar.vue'
 import VenueLivePreviewPane from './VenueLivePreviewPane.vue'
 import VenueBasicInfoTab from './tabs/VenueBasicInfoTab.vue'
@@ -224,6 +226,12 @@ const emit = defineEmits<{
 		color: #fff;
 		background: rgb(66, 184, 131, 0.15);
 	}
+}
+
+.tab-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .tab-badge {

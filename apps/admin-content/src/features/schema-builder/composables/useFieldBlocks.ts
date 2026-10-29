@@ -25,7 +25,7 @@ export const FIELD_BLOCKS: FieldBlock[] = [
 		id: 'seo',
 		label: 'SEO',
 		name: 'seo',
-		icon: '🔍',
+		icon: 'Search',
 		description: 'Meta title, description, OG image',
 		fields: [
 			{ name: 'metaTitle', label: 'Meta Title', fieldType: FieldType.Text },

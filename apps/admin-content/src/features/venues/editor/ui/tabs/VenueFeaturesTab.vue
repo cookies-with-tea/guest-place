@@ -1,5 +1,9 @@
 <template>
-	<UiGlassCard icon="🎯" title="Классификация и теги" description="Фильтры каталога, типы заведений и особенности">
+	<UiGlassCard
+		icon="PriceTag"
+		title="Классификация и теги"
+		description="Фильтры каталога, типы заведений и особенности"
+	>
 		<el-form label-position="top">
 			<el-form-item label="Типы площадки (через запятую)">
 				<el-input
@@ -24,7 +28,7 @@
 	</UiGlassCard>
 
 	<UiGlassCard
-		icon="⚙️"
+		icon="SetUp"
 		title="Оснащение, сервис и парковка"
 		description="Техническое оборудование и сопутствующие услуги"
 	>

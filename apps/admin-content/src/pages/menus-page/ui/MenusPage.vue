@@ -12,12 +12,17 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain @click="router.push('/venues')"> 🏰 Площадки </el-button>
-				<el-button plain @click="router.push('/pages')"> 🧱 Страницы сайта </el-button>
-				<el-button plain @click="router.push('/redirects')"> 🔀 Редиректы (301/302) </el-button>
-				<el-button plain @click="createMenuDialog.open"> + Новое меню </el-button>
-				<el-button type="primary" :loading="currentMenu.saving" @click="currentMenu.saveCurrentMenu">
-					💾 Сохранить изменения
+				<el-button plain :icon="OfficeBuilding" @click="router.push('/venues')"> Площадки </el-button>
+				<el-button plain :icon="Grid" @click="router.push('/pages')"> Страницы сайта </el-button>
+				<el-button plain :icon="Switch" @click="router.push('/redirects')"> Редиректы (301/302) </el-button>
+				<el-button plain :icon="Plus" @click="createMenuDialog.open"> Новое меню </el-button>
+				<el-button
+					type="primary"
+					:icon="DocumentChecked"
+					:loading="currentMenu.saving"
+					@click="currentMenu.saveCurrentMenu"
+				>
+					Сохранить изменения
 				</el-button>
 			</div>
 		</div>
@@ -27,7 +32,7 @@
 
 			<main class="menus-editor">
 				<div v-if="!currentMenu.currentMenu" class="empty-selection">
-					<div class="empty-icon">🧭</div>
+					<el-icon class="empty-icon"><Compass /></el-icon>
 					<h3>Выберите меню для редактирования</h3>
 					<p>Выберите область из списка слева или создайте новую навигационную область.</p>
 				</div>
@@ -57,6 +62,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { Compass, DocumentChecked, Grid, OfficeBuilding, Plus, Switch } from '@element-plus/icons-vue'
 import { useCreateMenuDialog } from '#features/menus/composables/useCreateMenuDialog'
 import { useCurrentMenu } from '#features/menus/composables/useCurrentMenu'
 import { useMenuItemDialog } from '#features/menus/composables/useMenuItemDialog'
@@ -145,7 +151,9 @@ onMounted(async () => {
 }
 
 .empty-icon {
-	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	color: var(--text-muted);
 	margin-bottom: 12px;
 }
 
