@@ -241,7 +241,7 @@ watch(
 	display: flex;
 	flex-direction: column;
 	border-right: 1px solid var(--gp-glass-border);
-	background: var(--gp-bg-sidebar);
+	background: var(--bg-card);
 	transition: width 0.3s;
 	padding: 0;
 	overflow: hidden;
@@ -304,7 +304,7 @@ watch(
 }
 
 .context-item:hover {
-	background: var(--gp-glass-hover);
+	background: var(--gp-bg-glass-hover);
 }
 
 .context-item.active {
@@ -333,7 +333,7 @@ watch(
 	font-size: 0.75rem;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 	padding: 12px 12px 4px;
 	margin-top: 8px;
 	gap: 6px;
@@ -383,7 +383,7 @@ watch(
 
 .menu-item:hover {
 	color: var(--gp-primary);
-	background: var(--gp-glass-hover);
+	background: var(--gp-bg-glass-hover);
 }
 
 .menu-item.active {
@@ -398,7 +398,7 @@ watch(
 	flex-direction: column;
 	border-right: 1px solid var(--gp-glass-border);
 	box-shadow: 10px 0 30px rgb(0, 0, 0, 0.05);
-	background: var(--gp-bg-sidebar);
+	background: var(--bg-card);
 	z-index: 1;
 }
 
@@ -411,7 +411,7 @@ watch(
 	font-size: 0.8rem;
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 	margin: 0;
 }
 
@@ -435,7 +435,7 @@ watch(
 }
 
 .secondary-item:hover {
-	background: var(--gp-glass-hover);
+	background: var(--gp-bg-glass-hover);
 }
 
 .secondary-item.active {
