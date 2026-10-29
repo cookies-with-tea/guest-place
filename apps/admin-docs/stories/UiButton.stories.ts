@@ -49,3 +49,19 @@ export const Text: Story = {
 		size: 'm',
 	},
 }
+
+export const Disabled: Story = {
+	args: {
+		default: 'Disabled Button',
+		appearance: 'primary',
+		disabled: true,
+	},
+}
+
+export const Loading: Story = {
+	args: {
+		default: 'Loading Button',
+		appearance: 'primary',
+		loading: true,
+	},
+}
