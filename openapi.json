@@ -3267,6 +3267,223 @@
         }
       }
     },
+    "/api/v1/redirects": {
+      "get": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "get_redirects",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_Redirect"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "create_redirect",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRedirectDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/redirects/check": {
+      "get": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "check_redirect",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CheckRedirectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/redirects/{id}": {
+      "delete": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "delete_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "update_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRedirectDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/system/alert": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "send_system_alert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAlertDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Alert broadcasted"
+          }
+        }
+      }
+    },
     "/api/v1/system/health": {
       "get": {
         "tags": [
@@ -5832,6 +6049,79 @@
                 "type": "string"
               },
               "title": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Redirect": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "source_path",
+              "target_path",
+              "status_code",
+              "is_active",
+              "hits",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hits": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "is_active": {
+                "type": "boolean"
+              },
+              "source_path": {
+                "type": "string"
+              },
+              "status_code": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "target_path": {
                 "type": "string"
               },
               "updated_at": {
@@ -9806,6 +10096,58 @@
           }
         }
       },
+      "LockInfo": {
+        "type": "object",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "user_id",
+          "user_name",
+          "locked_at"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "locked_at": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          }
+        }
+      },
+      "LockStatusResponse": {
+        "type": "object",
+        "required": [
+          "is_locked",
+          "is_own_lock"
+        ],
+        "properties": {
+          "is_locked": {
+            "type": "boolean"
+          },
+          "is_own_lock": {
+            "type": "boolean"
+          },
+          "lock_info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LockInfo"
+              }
+            ]
+          }
+        }
+      },
       "ManifestDto": {
         "type": "object",
         "required": [
@@ -10435,6 +10777,69 @@
           }
         }
       },
+      "Page": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "blocks",
+          "status",
+          "seo",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "blocks": {
+            "type": "object"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "seo": {
+            "type": "object"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "PaginationDTO": {
         "type": "object",
         "required": [
@@ -10465,6 +10870,50 @@
               "null"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "Redirect": {
+        "type": "object",
+        "required": [
+          "id",
+          "source_path",
+          "target_path",
+          "status_code",
+          "is_active",
+          "hits",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "status_code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "target_path": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -10591,6 +11040,27 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "SendAlertDTO": {
+        "type": "object",
+        "required": [
+          "title",
+          "message"
+        ],
+        "properties": {
+          "level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
           }
         }
       },
@@ -11323,6 +11793,36 @@
             ]
           },
           "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateRedirectDTO": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "source_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "target_path": {
             "type": [
               "string",
               "null"
