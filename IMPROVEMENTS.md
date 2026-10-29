@@ -114,32 +114,110 @@ other через cookie, account lockout. Изменения не закомми
 
 ## 2. Admin Panel — технический долг (найден при редизайне, не закрыт)
 
-- [ ] **~20 файлов с хардкодженным `#42b883`** вместо CSS-переменной в
-      `admin-content`/`admin-orchestrator`/`admin-statistics` — осталось
-      после смены primary-цвета на фиолетовый, не аудировано.
-- [ ] **5 файлов в `admin-orchestrator`** (Monitoring/Topology/Features,
-      `OrchestratorLayout`, `SparklineMetric`) с паттерном "используется
-      необъявленная CSS-переменная → резолвится в `initial`" — тот же баг,
-      что уже дважды ловили в сайдбаре/хедере.
-- [ ] **D3-спарклайн в `admin-orchestrator` не перенесён** на новый
-      `UiSparkline` из `@admin-panel/ui` — виджет готов, переноса не было.
+- [x] **Необъявленные CSS-переменные → резолвятся в `initial`** — не
+      ограничилось заявленными 5 файлами `admin-orchestrator`: прогнал
+      скрипт-диф "все `var(--x)` в `*.vue`" против "все реально объявленные
+      `--x` в `_tokens.scss`/`_variables.scss`" по ВСЕМУ admin-panel (не
+      только orchestrator) и нашёл 21 реальное использование в 16 файлах
+      (`--gp-text-muted`, `--gp-danger`, `--gp-glass-hover`, `--gp-success`,
+      `--gp-bg-page`, `--gp-bg-lighter`, `--gp-surface-card`, `--gp-bg-card`,
+      `--gp-text-primary`, `--text-main`, `--gp-accent`, `--color-primary`,
+      `--bg-hover`, `--bg-surface-secondary`, `--gp-primary-rgb`) —
+      переписаны на реально объявленные токены (`--text-muted`,
+      `--el-color-danger`/`--el-color-success` с фоллбэком,
+      `--gp-bg-glass-hover`, `--bg-page`, `--bg-surface`, `--bg-card`,
+      `--text-primary`, `--accent-primary`, `--gp-primary`). Отдельно:
+      `--gp-primary-rgb` не было ни разу объявлено ни для чего — это не
+      опечатка, а отсутствующий токен (RGB-триплет для
+      `rgb(var(--x), alpha)` на произвольном alpha), добавлен в
+      `_tokens.scss` (light+dark). Найден попутно реальный смысловой баг:
+      `ModulesStatsGrid.vue`'s `.text-success` (красит
+      `health.onlineCount`) был перепутан на `--gp-primary` вместо
+      success-цвета — поправлено на `--el-color-success`. Проверено:
+      stylelint/oxlint чистые, live-браузер (Modules/Monitoring/Features
+      страницы `admin-orchestrator`) — цвета рендерятся, консоль чистая.
+- [x] **~20 файлов с хардкодженным `#42b883`** — полный аудит (не только
+      заявленные директории). Реально поправлено 19 вхождений в 12
+      файлах, где `#42b883` — стухший fallback/значение для primary-брендинга
+      (`var(--gp-primary, #42b883)` → `#7c3aed`, плюс соседние
+      `rgb(66, 184, 131, N)` glow/фон → `rgb(var(--gp-primary-rgb), N)`;
+      в `TrafficChart.vue`/`EngagementStats.vue` — хардкоженный цвет
+      основной серии ECharts, тоже на `#7c3aed`). **Осознанно не тронуто**
+      (8 файлов) — `#42b883` там используется как самостоятельный
+      status/semantic-зелёный (online/offline-дуальность, threshold-раскраска
+      CPU/memory-гейджей, retention-heatmap "чем выше retention, тем
+      насыщеннее зелёный", explicit preset-свотч "Vue Green" в
+      `UiThemeBuilder`), не связан с primary-брендингом — тот самый случай,
+      который ROADMAP сам пометил неоднозначным и не стал трогать без
+      владельца продукта: `RetentionCohorts.vue`, `TopologyPage.vue`,
+      `MfeStatsChart.vue`, `MonitoringPage.vue`+`MfeMetricsTab.vue` (парный
+      CPU/memory-градиент), `SystemMetricsTab.vue` (green/amber/red
+      threshold), `UiThemeBuilder.vue`.
+- [x] **Sparkline в `admin-orchestrator` не был на `UiSparkline`** —
+      уточнение: сам компонент (`SparklineMetric.vue`) на деле не D3
+      (чистая SVG-математика, без d3-импорта; единственный файл с d3 в
+      orchestrator — `MfeStatsChart.vue`, но это force-directed граф
+      топологии, не спарклайн, `UiSparkline` для него не замена). Суть
+      пункта та же: локальная реализация вместо общего виджета. Перенесено
+      — `SparklineMetric.vue` теперь рендерит `<UiSparkline>` вместо
+      ручной генерации SVG `<path>`; внешний API компонента (label/
+      heroValue/historyValues/strokeColor/max) не менялся, оба вызывающих
+      компонента (`MfeMetricsTab`, `SystemMetricsTab`) не тронуты.
+      `UiSparkline` расширен необязательными `max`/`min` (фиксированный
+      потолок шкалы вместо авто-масштаба под видимый диапазон данных —
+      нужно для процентных гейджей типа "CPU 15-25%", чтобы мелкие
+      колебания не превращались в зигзаг на всю высоту); дефолт сохраняет
+      старое поведение для уже существующих мест, где `UiSparkline`
+      используется (их не было — только Storybook-истории). Проверено
+      живым браузером: Monitoring → System Infrastructure → карточка
+      Thread CPU — спарклайн рендерится, с нужным цветом и кривой, без
+      ошибок в консоли.
+
+**Проверено после всех правок раздела 2**: `pnpm type-check` (15/15) и
+`pnpm test:unit` (11/11) по всему admin-panel — зелёные; `pnpm stylelint`/
+`pnpm oxlint` — чистые; живой браузер (федеративная сборка, реальный
+сервер) — Monitoring (обе вкладки), Modules, Features — рендер и цвета
+корректны, консоль без ошибок. Изменения не закоммичены.
 
 ---
 
 ## 3. CI / инфраструктура
 
-- [ ] **`security` job в `admin-panel/.github/workflows/ci.yml`** —
-      закомментирован (нет `SNYK_TOKEN`). Рассмотреть более лёгкую замену:
-      `cargo audit` для server + `pnpm audit` для admin-panel без внешнего
-      сервиса.
-- [ ] **`dependency-check` job** — закомментирован, т.к.
-      `dependency-cruiser@15.5.0` крашится на Node 22/24
-      (`node:fs does not provide an export named 'R_OK'`, баг пакета).
-      Следить за фиксом в апстриме, либо откатиться на рабочую версию.
+- [x] **`security` job в `admin-panel/.github/workflows/ci.yml`** —
+      раскомментирован, но не как 1-в-1 замена Snyk на `pnpm audit`:
+      `pnpm audit` локально реально падает (exit 1) — 55 находок (5 low /
+      22 moderate / 22 high / 6 critical на 2026-10-29), в основном
+      транзитивные dev-only тулы (Cypress/Storybook). Включить его как
+      блокирующий job прямо сейчас — наступить на те же грабли, что уже
+      закомментированный `dependency-check` (красный с первого запуска
+      независимо от качества кода). Job включён с `continue-on-error:
+      true` и `--audit-level=high` — находки видны в логе CI при каждом
+      прогоне, но не блокируют мердж; `continue-on-error` на `false` —
+      отдельный шаг, после того как кто-то пройдётся по зависимостям
+      предметно. YAML провалидирован (`python3 -c "import yaml; ..."`).
+      Для `server`: `cargo audit` (установлен и прогнан локально — в
+      репозитории `server` до сих пор нет `.github/` вообще, заводить
+      CI с нуля — отдельное, более крупное решение, не часть этого
+      пункта) нашёл 26 находок, из них одна реально критичная и дешёвая
+      в исправлении — `lettre 0.11.19` (RUSTSEC-2026-0141, severity 9.1
+      critical: TLS hostname verification отключена при Boring TLS
+      backend — потенциальный MITM на SMTP-соединении для писем
+      регистрации). Обновлено до `0.11.23` (`cargo update -p lettre`,
+      в пределах уже заданного в `Cargo.toml` диапазона `"0.11"`, сам
+      `Cargo.toml` не менялся) — 25 находок осталось, все в глубоких
+      транзитивных зависимостях (`sqlx`, `redis` и т.п., часть вообще
+      "No fixed upgrade is available") — предметный апгрейд этого дерева
+      зависимостей не входит в рамки этого пункта. Проверено: `cargo
+      build`/`make test-server` после апгрейда — чисто, все тесты `ok`.
+- [x] **`dependency-check` job** — перепроверено, не изменилось:
+      `dependency-cruiser@15.5.0` всё ещё падает с той же ошибкой на Node
+      24.17 (`node:fs does not provide an export named 'R_OK'`) — баг
+      пакета не пофикшен апстримом. Job остаётся закомментированным,
+      менять нечего.
 - [ ] **`make check-api-drift` / `make smoke-test` не подключены к GitHub
-      Actions** — инструменты контроля API-контракта и smoke-проверки уже
-      есть локально, но CI их не гоняет. Требует решения по единой ветке
-      монорепо (сейчас на GitHub несколько ad hoc веток вместо одной).
+      Actions** — не трогал: требует решения по единой ветке монорепо
+      (сейчас на GitHub несколько ad hoc веток вместо одной), это
+      архитектурное решение за владельцем продукта, не код-фикс.
 
 ---
 
