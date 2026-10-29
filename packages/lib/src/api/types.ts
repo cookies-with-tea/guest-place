@@ -3282,7 +3282,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['AuthResponseDTO']
+				'application/json': components['schemas']['AuthRefreshTokenDTO']
 			}
 		}
 		responses: {
