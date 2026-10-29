@@ -46,23 +46,52 @@
       неограниченно. Проверено живым сервером: 6-й/7-й подряд запрос на
       `/login` → `429`, `/refresh` в это же время не лимитируется, после
       ожидания лимит восстанавливается.
-- [ ] **Токены не httpOnly** — отмечено самим автором в коде
-      (`// TODO: Переписать на set-cookie. HttpOnly` на `login`). Сейчас
-      `access_token`/`refresh_token` уходят в JSON body → хранятся на
-      фронте в localStorage → украдены любым XSS. Перевести на
-      `Set-Cookie: HttpOnly; Secure; SameSite=Strict`. **Не сделано в этом
-      проходе** — требует согласованных правок на фронте (admin-panel
-      должен перестать читать токены из body и слать их как `Bearer`,
-      плюс нужна CSRF-защита для cookie-flow) и решения по CORS
-      (`allow_credentials`), это отдельная, более крупная задача.
+- [x] **Токены не httpOnly** — `refresh_token` (сутки по умолчанию)
+      перенесён в HttpOnly-cookie; `access_token` (10 минут) остаётся в
+      теле — короткого жития достаточно, чтобы не переписывать весь фронт
+      на cookie-only авторизацию. Сделано через новый мост
+      [`server/src/auth/cookies.rs`](server/src/auth/cookies.rs) —
+      middleware на `/login`/`/refresh`/`/logout`/`/logout/other`,
+      который вырезает `refresh_token` из JSON-ответа в cookie
+      (`gp_refresh_token`; `Path=/api/v1/auth; HttpOnly; SameSite=Lax`,
+      `Secure` если `PUBLIC_URL` на `https://`) и подставляет его обратно
+      в тело запроса из cookie — сами handlers (`login`/`refresh`/
+      `logout`/`logout_other_devices`) не тронуты, только `logout`
+      переведён на `AuthRefreshTokenDTO` вместо избыточного
+      `AuthResponseDTO` в качестве request body. На фронте (admin-panel):
+      `fetch.ts` — `credentials: 'include'`; `useAuth.ts`/`auth.ts`/
+      `useAuthWidget.ts` — `refreshToken` убран из `IAuthTokens` и
+      localStorage, `authApi.refresh()/logout()` больше не берут параметр
+      (токен приходит из cookie на бэкенде). `openapi.json`/
+      `packages/lib/src/api/types.ts` перегенерированы (`make
+      generate-api`). Проверено: `pnpm type-check`/`pnpm test:unit` по
+      всему admin-panel зелёные; живой браузер (admin-shell на 4173,
+      реальный federated build) — логин, `document.cookie` пуст (cookie
+      действительно HttpOnly), `gp_access_token` в localStorage,
+      `gp_refresh_token` — нет нигде на фронте, `refresh_token` отсутствует
+      в теле ответа `/login`, навигация и загрузка MFE (admin-users) с
+      реальными данными работают, консоль чистая; curl'ом — `/refresh` с
+      cookie ротирует токен и cookie, без cookie → `401`; `/logout`
+      чистит cookie (`Max-Age=0`) и сразу инвалидирует refresh-токен в
+      БД; `/logout/other` (защищённый роут) корректно читает cookie
+      текущей сессии через `Authorization: Bearer` + `Cookie`.
 - [x] **`REFRESH_TOKEN_TTL_MINUTES=1` в `.env.example`** — исправлено на
       `1440` (сутки), совпадает с дефолтом в коде.
 - [x] **`dotenv().ok()` внутри `generate_token`** — убрано, `.env`
       грузится один раз в `main()` при старте.
-- [ ] (опционально) **Account lockout / счётчик неудачных попыток логина**
-      — вместе с rate limiting закрывает brute-force полностью. Не
-      делал — пункт помечен опциональным, rate limiting уже даёт основную
-      защиту.
+- [x] **Account lockout / счётчик неудачных попыток логина** — по
+      email, поверх IP-based rate limiting (его одного недостаточно:
+      обходится ботнетом/множеством прокси). Redis (`RedisService`,
+      новый метод `increment_with_ttl` — атомарный `INCR` +
+      `EXPIRE`-на-первом-инкременте), не БД — это временный счётчик
+      злоупотреблений: 5 неудачных попыток за 15 минут → `429` с
+      `auth.too_many_attempts` независимо от правильности следующих
+      попыток; счётчик сбрасывается на успешный логин. Проверено живым
+      сервером (запросы разнесены по времени, чтобы не упираться в
+      IP-лимитер): 3 неудачных → ещё норм, после 5-го — `429` c верным
+      JSON-телом (не текстовый ответ IP-лимитера), другой email в это же
+      время не заблокирован, успешный логин после — счётчик в Redis
+      удаляется (`GET` возвращает пусто).
 - [x] **Удалить отработавшие legacy-бинарники** — `src/bin/migrate_legacy_i18n.rs`
       и `src/bin/migrate_legacy_pages.rs` удалены (`git rm`, не
       закоммичено). Оба явно документированы как "one-time migration" в
@@ -72,11 +101,14 @@
       не тронут — используется только этими бинарниками, но сам по себе не
       содержит доступа к БД.
 
-**Проверено после всех правок**: `cargo build --release` — чисто, без
-`TestBearer`; `make test-server` (`cargo test --features test-auth`) — 29
-unit + 26 integration тестов, все `ok`; живой smoke-test сервера (login
-rate limit, refresh не задет, восстановление лимита) — вручную curl'ом.
-Изменения не закоммичены.
+**Раздел 1 полностью закрыт.** Проверено после всех правок: `cargo build
+--release` — чисто, без `TestBearer`; `make test-server` (`cargo test
+--features test-auth`) — все unit + integration тесты `ok`; `pnpm
+type-check`/`pnpm test:unit` по всему admin-panel — зелёные (15/15 и 11/11
+тасков); живой браузер (реальный federated build admin-panel на :4173 +
+live сервер) — логин, httpOnly-cookie, работа MFE под авторизацией;
+curl-smoke-тесты — rate limiting (login/register), refresh/logout/logout-
+other через cookie, account lockout. Изменения не закоммичены.
 
 ---
 
