@@ -13,23 +13,26 @@ use axum::routing::post;
 use axum::Router;
 use axum::{extract::Extension, extract::State, http::StatusCode, Json};
 use chrono::{Duration, Utc};
-use dotenv::dotenv;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::{query_as, Row};
 use std::env;
 use std::sync::Arc;
 use tokio::task;
+use tower_governor::{governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor, GovernorLayer};
 use uuid::Uuid;
 
 pub fn verify_password(password: &str, hash: &str) -> bool {
-    let parsed_hash = PasswordHash::new(hash).unwrap();
+    // A malformed/corrupted hash in the DB must fail the login, not panic the request thread.
+    let Ok(parsed_hash) = PasswordHash::new(hash) else {
+        return false;
+    };
     Argon2::default()
         .verify_password(password.as_bytes(), &parsed_hash)
         .is_ok()
 }
 
 fn generate_token(user_id: Uuid, role: String, permissions: Vec<String>, expires_in_minutes: i64) -> (String, i64) {
-    dotenv().ok();
+    // .env is loaded once at process startup (see main.rs); no need to reload it on every call.
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
     let expires_in_seconds = expires_in_minutes * 60;
@@ -548,11 +551,54 @@ async fn logout_other_devices(
 }
 
 
+/// Rate limiting на `/login` и `/register` — защита от брутфорса пароля и спама
+/// регистраций/писем. Ключ — IP из `X-Forwarded-For`/`X-Real-IP`/`Forwarded` (если сервер
+/// стоит за реверс-прокси), иначе peer IP самого TCP-соединения (см. `main.rs`,
+/// `into_make_service_with_connect_info`). `/logout` и `/refresh` не лимитируются — туда
+/// можно попасть только с уже выданным токеном, здесь важнее не мешать легитимным клиентам.
 pub fn router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/register", post(register))
-        .route("/register/key", post(check_register_key))
+    let login_governor = GovernorConfigBuilder::default()
+        .key_extractor(SmartIpKeyExtractor)
+        .per_second(10)
+        .burst_size(5)
+        .finish()
+        .expect("invalid login rate-limiter config");
+    let login_limiter = login_governor.limiter().clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(300));
+        loop {
+            interval.tick().await;
+            login_limiter.retain_recent();
+        }
+    });
+
+    let register_governor = GovernorConfigBuilder::default()
+        .key_extractor(SmartIpKeyExtractor)
+        .per_second(30)
+        .burst_size(3)
+        .finish()
+        .expect("invalid register rate-limiter config");
+    let register_limiter = register_governor.limiter().clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(300));
+        loop {
+            interval.tick().await;
+            register_limiter.retain_recent();
+        }
+    });
+
+    let login_route = Router::new()
         .route("/login", post(login))
+        .layer(GovernorLayer::new(login_governor));
+
+    let register_route = Router::new()
+        .route("/register", post(register))
+        .layer(GovernorLayer::new(register_governor));
+
+    Router::new()
+        .merge(login_route)
+        .merge(register_route)
+        .route("/register/key", post(check_register_key))
         .route("/logout", post(logout))
         .route("/refresh", post(refresh))
 }

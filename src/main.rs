@@ -381,7 +381,13 @@ async fn main() {
         eprintln!("[Init] Superadmin initialization failed: {}", e);
     }
 
-    axum::serve(listener, router.into_make_service())
-        .await
-        .expect("Error");
+    // with_connect_info: lets the auth rate limiter (SmartIpKeyExtractor) fall back to the
+    // real peer IP when the request carries no X-Forwarded-For/X-Real-IP/Forwarded header
+    // (i.e. when the server isn't sitting behind a reverse proxy).
+    axum::serve(
+        listener,
+        router.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .expect("Error");
 }
