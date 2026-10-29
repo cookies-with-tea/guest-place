@@ -41,6 +41,19 @@ impl RedisService {
         Ok(())
     }
 
+    /// Атомарный INCR + EXPIRE-на-первом-инкременте — стандартный паттерн для
+    /// скользящего окна (счётчик неудачных попыток логина и т.п.): TTL ставится только
+    /// когда ключ только что создан, так что повторные инкременты внутри окна не
+    /// отодвигают истечение заново.
+    pub async fn increment_with_ttl(&self, key: &str, ttl_seconds: i64) -> anyhow::Result<i64> {
+        let mut conn = self.pool.get().await?;
+        let count: i64 = conn.incr(key, 1).await?;
+        if count == 1 {
+            let _: () = conn.expire(key, ttl_seconds).await?;
+        }
+        Ok(count)
+    }
+
     pub async fn ping(&self) -> anyhow::Result<()> {
         let mut conn = self.pool.get().await?;
         let _ : String = redis::cmd("PING").query_async(&mut conn).await?;

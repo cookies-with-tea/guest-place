@@ -317,7 +317,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AuthResponseDTO"
+                "$ref": "#/components/schemas/AuthRefreshTokenDTO"
               }
             }
           },

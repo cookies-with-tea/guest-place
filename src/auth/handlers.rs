@@ -1,3 +1,4 @@
+use crate::auth::cookies;
 use crate::auth::dto::{
     AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
     RegisterRequestDTO,
@@ -252,7 +253,17 @@ pub async fn check_register_key(
     into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
 }
 
-// TODO: Переписать на set-cookie. HttpOnly
+// Лимит попыток логина по аккаунту (email), поверх IP-based rate limiting на весь
+// /login (см. router()): IP-лимит обходится ботнетом/множеством прокси, лимит по
+// конкретному аккаунту — нет. Redis, не БД: это временный счётчик злоупотреблений,
+// а не постоянные данные пользователя.
+const MAX_LOGIN_ATTEMPTS: i64 = 5;
+const LOGIN_LOCKOUT_WINDOW_SECONDS: i64 = 15 * 60;
+
+fn login_attempts_key(email: &str) -> String {
+    format!("login_attempts:{}", email.trim().to_lowercase())
+}
+
 #[utoipa::path(
     post,
     path = "/api/v1/auth/login",
@@ -260,6 +271,7 @@ pub async fn check_register_key(
     responses(
         (status = 200, description = "Успешно", body = ApiResponse<AuthResponseDTO>),
         (status = 401, description = "Неверные учетные данные", body = ApiResponse<AuthResponseDTO>),
+        (status = 429, description = "Слишком много неудачных попыток входа", body = ApiResponse<AuthResponseDTO>),
         (status = 500, description = "Ошибка базы данных", body = ApiResponse<AuthResponseDTO>)
     ),
     tag = "Auth"
@@ -269,6 +281,19 @@ pub async fn login(
     Extension(locale): Extension<String>,
     Json(payload): Json<AuthRequestDTO>,
 ) -> Result<Json<ApiResponse<AuthResponseDTO>>, (StatusCode, Json<ApiResponse<AuthResponseDTO>>)> {
+    let attempts_key = login_attempts_key(&payload.email);
+    let attempts = state.redis.get::<i64>(&attempts_key).await.unwrap_or(None).unwrap_or(0);
+
+    if attempts >= MAX_LOGIN_ATTEMPTS {
+        let msg = state.i18n.t("auth.too_many_attempts", &locale).await;
+        return into_api_response(
+            StatusCode::TOO_MANY_REQUESTS,
+            None,
+            Some(error_map("auth", &msg)),
+            Some(vec![msg]),
+        );
+    }
+
     let user = match query_as::<_, User>("SELECT * FROM guest_user WHERE email = $1")
         .bind(&payload.email)
         .fetch_optional(&state.pool)
@@ -276,6 +301,10 @@ pub async fn login(
     {
         Ok(Some(user)) => user,
         Ok(None) => {
+            let _ = state
+                .redis
+                .increment_with_ttl(&attempts_key, LOGIN_LOCKOUT_WINDOW_SECONDS)
+                .await;
             let msg = state.i18n.t("auth.invalid_credentials", &locale).await;
             return into_api_response(
                 StatusCode::UNAUTHORIZED,
@@ -296,6 +325,10 @@ pub async fn login(
     };
 
     if !verify_password(&payload.password, &user.password_hash) {
+        let _ = state
+            .redis
+            .increment_with_ttl(&attempts_key, LOGIN_LOCKOUT_WINDOW_SECONDS)
+            .await;
         let msg = state.i18n.t("auth.invalid_credentials", &locale).await;
         return into_api_response(
             StatusCode::UNAUTHORIZED,
@@ -304,6 +337,8 @@ pub async fn login(
             Some(vec![msg]),
         );
     }
+
+    let _ = state.redis.delete(&attempts_key).await;
 
     let role_str = match serde_json::to_value(&user.role) {
         Ok(v) => v.as_str().unwrap_or("user").to_string(),
@@ -471,7 +506,7 @@ pub async fn refresh(
 #[utoipa::path(
     post,
     path = "/api/v1/auth/logout",
-    request_body = AuthResponseDTO,
+    request_body = AuthRefreshTokenDTO,
     responses(
         (status = 200, description = "Успешный выход"),
         (status = 500, description = "Ошибка базы данных")
@@ -481,7 +516,7 @@ pub async fn refresh(
 async fn logout(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
-    Json(payload): Json<AuthResponseDTO>,
+    Json(payload): Json<AuthRefreshTokenDTO>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let result = sqlx::query("DELETE FROM refresh_token WHERE token = $1")
         .bind(&payload.refresh_token)
@@ -589,21 +624,34 @@ pub fn router() -> Router<Arc<AppState>> {
 
     let login_route = Router::new()
         .route("/login", post(login))
+        .layer(axum::middleware::from_fn(cookies::login_cookie_bridge))
         .layer(GovernorLayer::new(login_governor));
 
     let register_route = Router::new()
         .route("/register", post(register))
         .layer(GovernorLayer::new(register_governor));
 
+    // /refresh и /logout больше не ждут refresh_token в теле запроса — он читается из
+    // HttpOnly-cookie `gp_refresh_token`, подставляется в тело middleware-ом
+    // (см. auth::cookies), а handlers ниже остаются ровно такими, какими были.
+    let refresh_route = Router::new()
+        .route("/refresh", post(refresh))
+        .layer(axum::middleware::from_fn(cookies::refresh_cookie_bridge));
+
+    let logout_route = Router::new()
+        .route("/logout", post(logout))
+        .layer(axum::middleware::from_fn(cookies::logout_cookie_bridge));
+
     Router::new()
         .merge(login_route)
         .merge(register_route)
+        .merge(refresh_route)
+        .merge(logout_route)
         .route("/register/key", post(check_register_key))
-        .route("/logout", post(logout))
-        .route("/refresh", post(refresh))
 }
 
 pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/logout/other", post(logout_other_devices))
+        .layer(axum::middleware::from_fn(cookies::inject_refresh_token_from_cookie))
 }
