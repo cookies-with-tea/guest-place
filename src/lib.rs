@@ -1,15 +1,12 @@
-pub mod about;
 pub mod auth;
 pub mod content;
 pub mod core;
 pub mod features;
-pub mod guests;
 pub mod i18n;
 pub mod mailer;
 pub mod media;
 pub mod mfe;
 pub mod user;
-pub mod platforms;
 pub mod monitoring;
 pub mod analytics;
 pub mod pages;
@@ -64,9 +61,6 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/i18n", i18n::handlers::public_router())
         .nest("/api/v1/mfe", mfe::handlers::public_router())
         .nest("/api/v1/media", media::handlers::router())
-        .nest("/api/v1/about", about::handlers::router())
-        .nest("/api/v1/guests", guests::router())
-        .nest("/api/v1/platforms", platforms::handlers::router())
         .nest("/api/v1/features", features::router())
         .nest("/api/v1/content", content::public_router())
         .nest("/api/v1/pages", pages::pages_public_router())

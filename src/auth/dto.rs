@@ -21,6 +21,10 @@ pub struct AuthRequestDTO {
 pub struct AuthResponseDTO {
     pub access_token: String,
     pub access_expires_in: i64,
+    // Собирается тут как обычное поле, но на /login и /refresh никогда не доходит до
+    // клиента: auth::cookies вырезает его из тела ответа и переносит в HttpOnly-cookie
+    // (см. auth::cookies::move_refresh_token_to_cookie). OpenAPI-схема формально его
+    // перечисляет, реальный HTTP-ответ — нет.
     pub refresh_token: String,
     pub refresh_expires_in: i64,
 }

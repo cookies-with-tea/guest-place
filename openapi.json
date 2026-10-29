@@ -9,70 +9,6 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/api/v1/about": {
-      "get": {
-        "tags": [
-          "About"
-        ],
-        "operationId": "get_about",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_AboutResponseDTO"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_AboutResponseDTO"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_AboutResponseDTO"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "About"
-        ],
-        "operationId": "update_about",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAboutDTO"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "About page updated"
-          },
-          "500": {
-            "description": "Database error"
-          }
-        }
-      }
-    },
     "/api/v1/analytics/engagement": {
       "get": {
         "tags": [
@@ -381,7 +317,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AuthResponseDTO"
+                "$ref": "#/components/schemas/AuthRefreshTokenDTO"
               }
             }
           },
@@ -1324,19 +1260,19 @@
         }
       }
     },
-    "/api/v1/guests": {
+    "/api/v1/home": {
       "get": {
         "tags": [
-          "Guests"
+          "Home"
         ],
-        "operationId": "get_guests",
+        "operationId": "get_home",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_GuestsResponseDTO"
+                  "$ref": "#/components/schemas/ApiResponse_HomeResponseDTO"
                 }
               }
             }
@@ -1346,7 +1282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_GuestsResponseDTO"
+                  "$ref": "#/components/schemas/ApiResponse_HomeResponseDTO"
                 }
               }
             }
@@ -1355,14 +1291,14 @@
       },
       "put": {
         "tags": [
-          "Guests"
+          "Home"
         ],
-        "operationId": "update_guests",
+        "operationId": "update_home",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateGuestsDTO"
+                "$ref": "#/components/schemas/UpdateHomeDTO"
               }
             }
           },
@@ -1370,10 +1306,34 @@
         },
         "responses": {
           "200": {
-            "description": "Guests page updated"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HomeResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HomeResponseDTO"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Database error"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_HomeResponseDTO"
+                }
+              }
+            }
           }
         }
       }
@@ -1383,7 +1343,7 @@
         "tags": [
           "I18n"
         ],
-        "operationId": "get_all",
+        "operationId": "get_all_translations",
         "parameters": [
           {
             "name": "locale",
@@ -1554,12 +1514,46 @@
         }
       }
     },
+    "/api/v1/i18n/{key}/refs": {
+      "get": {
+        "tags": [
+          "I18n"
+        ],
+        "operationId": "get_refs",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "Translation key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content entries/fields referencing this key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Vec_TranslationRefDTO"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database error"
+          }
+        }
+      }
+    },
     "/api/v1/i18n/{key}/{locale}": {
       "delete": {
         "tags": [
           "I18n"
         ],
-        "operationId": "delete_one",
+        "operationId": "delete_translation_by_key_locale",
         "parameters": [
           {
             "name": "key",
@@ -2533,6 +2527,41 @@
       }
     },
     "/api/v1/menus/{id}": {
+      "get": {
+        "tags": [
+          "Menus"
+        ],
+        "operationId": "get_menu_by_location",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Menu identifier (ID or location slug like header, footer, sidebar)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Menu"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Menu not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
       "delete": {
         "tags": [
           "Menus"
@@ -2626,49 +2655,12 @@
         ]
       }
     },
-    "/api/v1/menus/{location}": {
-      "get": {
-        "tags": [
-          "Menus"
-        ],
-        "operationId": "get_menu_by_location",
-        "parameters": [
-          {
-            "name": "location",
-            "in": "path",
-            "description": "Menu location identifier (header, footer, sidebar)",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_Menu"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Menu not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/api/v1/mfe": {
       "get": {
         "tags": [
           "MFE"
         ],
-        "operationId": "get_all",
+        "operationId": "get_all_mfes",
         "responses": {
           "200": {
             "description": "All microfrontends list",
@@ -2689,7 +2681,7 @@
         "tags": [
           "MFE"
         ],
-        "operationId": "create",
+        "operationId": "create_mfe",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2741,7 +2733,7 @@
         "tags": [
           "MFE"
         ],
-        "operationId": "update",
+        "operationId": "update_mfe",
         "parameters": [
           {
             "name": "id",
@@ -2780,7 +2772,7 @@
         "tags": [
           "MFE"
         ],
-        "operationId": "delete_one",
+        "operationId": "delete_mfe_by_id",
         "parameters": [
           {
             "name": "id",
@@ -3058,55 +3050,170 @@
         }
       }
     },
-    "/api/v1/platforms": {
+    "/api/v1/redirects": {
       "get": {
         "tags": [
-          "Platforms"
+          "Redirects"
         ],
-        "operationId": "get_platforms",
+        "operationId": "get_redirects",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_PlatformsResponseDTO"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_PlatformsResponseDTO"
+                  "$ref": "#/components/schemas/ApiResponse_Vec_Redirect"
                 }
               }
             }
           },
           "500": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse_PlatformsResponseDTO"
-                }
-              }
-            }
+            "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
       },
-      "put": {
+      "post": {
         "tags": [
-          "Platforms"
+          "Redirects"
         ],
-        "operationId": "update_platforms",
+        "operationId": "create_redirect",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdatePlatformsDTO"
+                "$ref": "#/components/schemas/CreateRedirectDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/redirects/check": {
+      "get": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "check_redirect",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CheckRedirectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/redirects/{id}": {
+      "delete": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "delete_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Value"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Redirects"
+        ],
+        "operationId": "update_redirect",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Redirect ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRedirectDTO"
               }
             }
           },
@@ -3114,10 +3221,48 @@
         },
         "responses": {
           "200": {
-            "description": "Platforms page updated"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Redirect"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Redirect not found"
           },
           "500": {
-            "description": "Database error"
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/system/alert": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "operationId": "send_system_alert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAlertDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Alert broadcasted"
           }
         }
       }
@@ -3622,129 +3767,344 @@
           }
         }
       }
+    },
+    "/api/v1/venues": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "operationId": "get_venues",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search query for title, address, or metro",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status filter (e.g. published, draft, all)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "venue_types",
+            "in": "query",
+            "description": "Comma-separated venue types (e.g. 'Банкетный зал,Лофт')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "features",
+            "in": "query",
+            "description": "Comma-separated features (e.g. 'Летняя веранда,Парковая зона')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "City filter (e.g. 'Москва')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metro_station",
+            "in": "query",
+            "description": "Metro station name filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "description": "Minimum price/average check",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "description": "Maximum price/average check",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "min_capacity",
+            "in": "query",
+            "description": "Minimum capacity",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "max_capacity",
+            "in": "query",
+            "description": "Maximum capacity",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "has_online_tour",
+            "in": "query",
+            "description": "Filter venues with online 3D tour",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "description": "Sort field ('created_at', 'average_check', 'rating_score', 'title')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "Sort order ('asc' or 'desc')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (1-based, default: 1)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseWithPagination_Venue"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Venues"
+        ],
+        "operationId": "create_venue",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVenueDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Venue"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/venues/{id}": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "operationId": "get_venue_by_id_or_slug",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Venue ID (UUID) or unique slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Venue"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Venue not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Venues"
+        ],
+        "operationId": "delete_venue",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Venue ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_bool"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Venue not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Venues"
+        ],
+        "operationId": "update_venue",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Venue ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVenueDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_Venue"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Venue not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
-      "AboutResponseDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "description",
-          "opportunities",
-          "leadership",
-          "who_we_are",
-          "news"
-        ],
-        "properties": {
-          "description": {
-            "type": "string"
-          },
-          "hero_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "hero_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "leadership": {
-            "$ref": "#/components/schemas/LeadershipDTO"
-          },
-          "leadership_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "leadership_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "news": {
-            "$ref": "#/components/schemas/NewsDTO"
-          },
-          "news_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "news_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "opportunities": {
-            "$ref": "#/components/schemas/OpportunitiesDTO"
-          },
-          "opportunities_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "opportunities_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "who_we_are": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WhoWeAreItemDTO"
-            }
-          },
-          "who_we_are_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "who_we_are_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          }
-        }
-      },
       "AcquireLockRequest": {
         "type": "object",
         "required": [
@@ -3762,34 +4122,6 @@
             "type": "string"
           },
           "user_name": {
-            "type": "string"
-          }
-        }
-      },
-      "AdditionalServiceDTO": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "icon": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "icon_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "text": {
             "type": "string"
           }
         }
@@ -4031,6 +4363,369 @@
           }
         }
       },
+      "ApiPaginationDTO_Venue": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "slug",
+                "title",
+                "address",
+                "city",
+                "status",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "address": {
+                  "type": "string"
+                },
+                "area_sqm": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "average_check": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "banquet_price_from": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "capacity_banquet": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "capacity_buffet": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "capacity_theater": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "city": {
+                  "type": "string"
+                },
+                "coordinates_lat": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "format": "double"
+                },
+                "coordinates_lng": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "format": "double"
+                },
+                "corkage_fee_desc": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "corkage_fee_has": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "cuisines": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description_html": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "equipment": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "faq": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "features": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "feed": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "gallery_photos": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "halls": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "halls_count": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "has_online_tour": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "menu_photos": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "menu_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "metro_distance_minutes": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "metro_distance_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "metro_line_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "metro_station": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "parking": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "phone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "price_level": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "pricing_table": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "rating_reviews_count": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "rating_score": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "format": "double"
+                },
+                "rent_price_hour": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "reviews": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "rider_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "rooms": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Value"
+                    }
+                  ]
+                },
+                "services": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "venue_types": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "video_tour_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_hours_weekdays": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "working_hours_weekends": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationDTO"
+          }
+        }
+      },
       "ApiResponseWithPagination_MediaItemDTO": {
         "type": "object",
         "properties": {
@@ -4109,127 +4804,18 @@
           }
         }
       },
-      "ApiResponse_AboutResponseDTO": {
+      "ApiResponseWithPagination_Venue": {
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "required": [
-              "title",
-              "description",
-              "opportunities",
-              "leadership",
-              "who_we_are",
-              "news"
-            ],
-            "properties": {
-              "description": {
-                "type": "string"
+            "oneOf": [
+              {
+                "type": "null"
               },
-              "hero_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "hero_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "leadership": {
-                "$ref": "#/components/schemas/LeadershipDTO"
-              },
-              "leadership_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "leadership_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "news": {
-                "$ref": "#/components/schemas/NewsDTO"
-              },
-              "news_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "news_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "opportunities": {
-                "$ref": "#/components/schemas/OpportunitiesDTO"
-              },
-              "opportunities_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "opportunities_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "title": {
-                "type": "string"
-              },
-              "who_we_are": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/WhoWeAreItemDTO"
-                }
-              },
-              "who_we_are_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "who_we_are_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
+              {
+                "$ref": "#/components/schemas/ApiPaginationDTO_Venue"
               }
-            }
+            ]
           },
           "errors": {
             "type": [
@@ -4799,26 +5385,33 @@
           }
         }
       },
-      "ApiResponse_GuestsResponseDTO": {
+      "ApiResponse_HomeResponseDTO": {
         "type": "object",
         "properties": {
           "data": {
             "type": "object",
             "required": [
               "title",
-              "opportunities",
-              "interaction_cards",
-              "search_promo",
-              "additional_services"
+              "subtitle",
+              "hero_map_button_text",
+              "hero_list_button_text",
+              "categories_title",
+              "categories",
+              "latest_section_title",
+              "latest_section_button_text",
+              "latest_section_button_link",
+              "latest_venues",
+              "popular_section_title",
+              "popular_section_button_text",
+              "popular_section_button_link",
+              "popular_venues",
+              "interactions_title",
+              "interactions",
+              "banner_title",
+              "banner_text"
             ],
             "properties": {
-              "additional_services": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AdditionalServiceDTO"
-                }
-              },
-              "additional_services_guide": {
+              "banner_guide": {
                 "oneOf": [
                   {
                     "type": "null"
@@ -4828,12 +5421,27 @@
                   }
                 ]
               },
-              "additional_services_guide_uuid": {
+              "banner_guide_uuid": {
                 "type": [
                   "string",
                   "null"
                 ],
                 "format": "uuid"
+              },
+              "banner_text": {
+                "type": "string"
+              },
+              "banner_title": {
+                "type": "string"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HomeCategoryDTO"
+                }
+              },
+              "categories_title": {
+                "type": "string"
               },
               "hero_guide": {
                 "oneOf": [
@@ -4852,71 +5460,53 @@
                 ],
                 "format": "uuid"
               },
-              "interaction_cards": {
+              "hero_list_button_text": {
+                "type": "string"
+              },
+              "hero_map_button_text": {
+                "type": "string"
+              },
+              "interactions": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/InteractionCardDTO"
+                  "$ref": "#/components/schemas/HomeInteractionItemDTO"
                 }
               },
-              "interaction_cards_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
+              "interactions_title": {
+                "type": "string"
               },
-              "interaction_cards_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
+              "latest_section_button_link": {
+                "type": "string"
               },
-              "opportunities": {
+              "latest_section_button_text": {
+                "type": "string"
+              },
+              "latest_section_title": {
+                "type": "string"
+              },
+              "latest_venues": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/GuestOpportunityItemDTO"
+                  "$ref": "#/components/schemas/Venue"
                 }
               },
-              "opportunities_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
+              "popular_section_button_link": {
+                "type": "string"
               },
-              "opportunities_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
+              "popular_section_button_text": {
+                "type": "string"
               },
-              "search_promo": {
-                "$ref": "#/components/schemas/SearchPromoDTO"
+              "popular_section_title": {
+                "type": "string"
               },
-              "search_promo_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
+              "popular_venues": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Venue"
+                }
               },
-              "search_promo_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
+              "subtitle": {
+                "type": "string"
               },
               "title": {
                 "type": "string"
@@ -5493,80 +6083,50 @@
           }
         }
       },
-      "ApiResponse_PlatformsResponseDTO": {
+      "ApiResponse_Redirect": {
         "type": "object",
         "properties": {
           "data": {
             "type": "object",
             "required": [
-              "title",
-              "description",
-              "opportunities",
-              "tools_and_services"
+              "id",
+              "source_path",
+              "target_path",
+              "status_code",
+              "is_active",
+              "hits",
+              "created_at",
+              "updated_at"
             ],
             "properties": {
-              "description": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "hits": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "is_active": {
+                "type": "boolean"
+              },
+              "source_path": {
                 "type": "string"
               },
-              "hero_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
+              "status_code": {
+                "type": "integer",
+                "format": "int32"
               },
-              "hero_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "opportunities": {
-                "$ref": "#/components/schemas/OpportunitiesDTO"
-              },
-              "opportunities_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "opportunities_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
-              },
-              "title": {
+              "target_path": {
                 "type": "string"
               },
-              "tools_and_services": {
-                "$ref": "#/components/schemas/ToolsAndServicesDTO"
-              },
-              "tools_guide": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MediaDTO"
-                  }
-                ]
-              },
-              "tools_guide_uuid": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "uuid"
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
               }
             }
           },
@@ -7242,6 +7802,444 @@
           }
         }
       },
+      "ApiResponse_Vec_TranslationRefDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "One content entry/field that references a translation key (see\ncontent_translation_refs, synced from admin-panel/packages/i18n's tag format\nand the TranslationKeyMark Tiptap mark by server/src/content/translation_refs.rs).",
+              "required": [
+                "content_entry_id",
+                "entry_slug",
+                "field_path",
+                "schema_name",
+                "schema_slug"
+              ],
+              "properties": {
+                "content_entry_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "entry_slug": {
+                  "type": "string"
+                },
+                "field_path": {
+                  "type": "string"
+                },
+                "schema_name": {
+                  "type": "string"
+                },
+                "schema_slug": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponse_Venue": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "slug",
+              "title",
+              "address",
+              "city",
+              "status",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "area_sqm": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "average_check": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "banquet_price_from": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "capacity_banquet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "capacity_buffet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "capacity_theater": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "city": {
+                "type": "string"
+              },
+              "coordinates_lat": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "format": "double"
+              },
+              "coordinates_lng": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "format": "double"
+              },
+              "corkage_fee_desc": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "corkage_fee_has": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "cuisines": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description_html": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "equipment": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "faq": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "features": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "feed": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "gallery_photos": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "halls": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "halls_count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "has_online_tour": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "menu_photos": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "menu_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metro_distance_minutes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "metro_distance_text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metro_line_color": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metro_station": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "parking": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "phone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "price_level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pricing_table": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "rating_reviews_count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "rating_score": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "format": "double"
+              },
+              "rent_price_hour": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "reviews": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "rider_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rooms": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Value"
+                  }
+                ]
+              },
+              "services": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "slug": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "subtitle": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "venue_types": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "video_tour_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "working_hours_weekdays": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "working_hours_weekends": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "errors": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "messages": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ApiResponse_bool": {
         "type": "object",
         "properties": {
@@ -8203,6 +9201,343 @@
           }
         }
       },
+      "CreateVenueDTO": {
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "area_sqm": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "average_check": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "banquet_price_from": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "capacity_banquet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_buffet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_theater": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "coordinates_lat": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "coordinates_lng": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "corkage_fee_desc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "corkage_fee_has": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "cuisines": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "description_html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "equipment": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "features": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "feed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "gallery_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "halls": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "halls_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "has_online_tour": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "menu_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "menu_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_distance_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "metro_distance_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_line_color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_station": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parking": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price_level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pricing_table": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rating_reviews_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "rating_score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "rent_price_hour": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "reviews": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rider_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rooms": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "services": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtitle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "venue_types": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "video_tour_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekdays": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekends": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "EngagementStatsDto": {
         "type": "object",
         "required": [
@@ -8350,18 +9685,34 @@
           }
         }
       },
-      "GuestOpportunityItemDTO": {
+      "HealthStatus": {
+        "type": "object",
+        "required": [
+          "status",
+          "db",
+          "redis"
+        ],
+        "properties": {
+          "db": {
+            "type": "string"
+          },
+          "redis": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "HomeCategoryDTO": {
         "type": "object",
         "required": [
           "title",
-          "items",
-          "button_text",
-          "link"
+          "slug",
+          "link",
+          "sort_order"
         ],
         "properties": {
-          "button_text": {
-            "type": "string"
-          },
           "icon": {
             "oneOf": [
               {
@@ -8379,13 +9730,65 @@
             ],
             "format": "uuid"
           },
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "link": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "HomeInteractionItemDTO": {
+        "type": "object",
+        "required": [
+          "step_number",
+          "title",
+          "text",
+          "button_text",
+          "link",
+          "is_accent",
+          "sort_order"
+        ],
+        "properties": {
+          "button_text": {
+            "type": "string"
+          },
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "is_accent": {
+            "type": "boolean"
+          },
+          "link": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
             "type": "string"
           },
           "title": {
@@ -8393,23 +9796,30 @@
           }
         }
       },
-      "GuestsResponseDTO": {
+      "HomeResponseDTO": {
         "type": "object",
         "required": [
           "title",
-          "opportunities",
-          "interaction_cards",
-          "search_promo",
-          "additional_services"
+          "subtitle",
+          "hero_map_button_text",
+          "hero_list_button_text",
+          "categories_title",
+          "categories",
+          "latest_section_title",
+          "latest_section_button_text",
+          "latest_section_button_link",
+          "latest_venues",
+          "popular_section_title",
+          "popular_section_button_text",
+          "popular_section_button_link",
+          "popular_venues",
+          "interactions_title",
+          "interactions",
+          "banner_title",
+          "banner_text"
         ],
         "properties": {
-          "additional_services": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdditionalServiceDTO"
-            }
-          },
-          "additional_services_guide": {
+          "banner_guide": {
             "oneOf": [
               {
                 "type": "null"
@@ -8419,12 +9829,27 @@
               }
             ]
           },
-          "additional_services_guide_uuid": {
+          "banner_guide_uuid": {
             "type": [
               "string",
               "null"
             ],
             "format": "uuid"
+          },
+          "banner_text": {
+            "type": "string"
+          },
+          "banner_title": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HomeCategoryDTO"
+            }
+          },
+          "categories_title": {
+            "type": "string"
           },
           "hero_guide": {
             "oneOf": [
@@ -8443,92 +9868,55 @@
             ],
             "format": "uuid"
           },
-          "interaction_cards": {
+          "hero_list_button_text": {
+            "type": "string"
+          },
+          "hero_map_button_text": {
+            "type": "string"
+          },
+          "interactions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/InteractionCardDTO"
+              "$ref": "#/components/schemas/HomeInteractionItemDTO"
             }
           },
-          "interaction_cards_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
+          "interactions_title": {
+            "type": "string"
           },
-          "interaction_cards_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+          "latest_section_button_link": {
+            "type": "string"
           },
-          "opportunities": {
+          "latest_section_button_text": {
+            "type": "string"
+          },
+          "latest_section_title": {
+            "type": "string"
+          },
+          "latest_venues": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GuestOpportunityItemDTO"
+              "$ref": "#/components/schemas/Venue"
             }
           },
-          "opportunities_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
+          "popular_section_button_link": {
+            "type": "string"
           },
-          "opportunities_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+          "popular_section_button_text": {
+            "type": "string"
           },
-          "search_promo": {
-            "$ref": "#/components/schemas/SearchPromoDTO"
+          "popular_section_title": {
+            "type": "string"
           },
-          "search_promo_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
+          "popular_venues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Venue"
+            }
           },
-          "search_promo_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+          "subtitle": {
+            "type": "string"
           },
           "title": {
-            "type": "string"
-          }
-        }
-      },
-      "HealthStatus": {
-        "type": "object",
-        "required": [
-          "status",
-          "db",
-          "redis"
-        ],
-        "properties": {
-          "db": {
-            "type": "string"
-          },
-          "redis": {
-            "type": "string"
-          },
-          "status": {
             "type": "string"
           }
         }
@@ -8641,46 +10029,6 @@
           }
         }
       },
-      "InteractionCardDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "text",
-          "button_text",
-          "link"
-        ],
-        "properties": {
-          "button_text": {
-            "type": "string"
-          },
-          "icon": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "icon_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "link": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
       "LanguageDTO": {
         "type": "object",
         "required": [
@@ -8696,44 +10044,55 @@
           }
         }
       },
-      "LeadershipDTO": {
+      "LockInfo": {
         "type": "object",
         "required": [
-          "logo",
-          "title",
-          "description",
-          "items"
+          "entity_type",
+          "entity_id",
+          "user_id",
+          "user_name",
+          "locked_at"
         ],
         "properties": {
-          "description": {
+          "entity_id": {
             "type": "string"
           },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LeadershipItemDTO"
-            }
+          "entity_type": {
+            "type": "string"
           },
-          "logo": {
-            "$ref": "#/components/schemas/MediaDTO"
+          "locked_at": {
+            "type": "string"
           },
-          "title": {
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
             "type": "string"
           }
         }
       },
-      "LeadershipItemDTO": {
+      "LockStatusResponse": {
         "type": "object",
         "required": [
-          "icon",
-          "text"
+          "is_locked",
+          "is_own_lock"
         ],
         "properties": {
-          "icon": {
-            "$ref": "#/components/schemas/MediaDTO"
+          "is_locked": {
+            "type": "boolean"
           },
-          "text": {
-            "type": "string"
+          "is_own_lock": {
+            "type": "boolean"
+          },
+          "lock_info": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LockInfo"
+              }
+            ]
           }
         }
       },
@@ -9355,84 +10714,66 @@
           }
         }
       },
-      "NewsDTO": {
+      "Page": {
         "type": "object",
         "required": [
+          "id",
           "title",
-          "items"
+          "slug",
+          "blocks",
+          "status",
+          "seo",
+          "created_at",
+          "updated_at"
         ],
         "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewsItemDTO"
-            }
+          "blocks": {
+            "type": "object"
           },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "NewsItemDTO": {
-        "type": "object",
-        "required": [
-          "icon",
-          "text"
-        ],
-        "properties": {
-          "icon": {
-            "$ref": "#/components/schemas/MediaDTO"
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
           },
-          "text": {
-            "type": "string"
-          }
-        }
-      },
-      "OpportunitiesDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "items"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OpportunityItemDTO"
-            }
+          "id": {
+            "type": "string",
+            "format": "uuid"
           },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "OpportunityItemDTO": {
-        "type": "object",
-        "required": [
-          "icon",
-          "title",
-          "items",
-          "link",
-          "button_text"
-        ],
-        "properties": {
-          "button_text": {
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "seo": {
+            "type": "object"
+          },
+          "slug": {
             "type": "string"
           },
-          "icon": {
-            "$ref": "#/components/schemas/MediaDTO"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "link": {
+          "status": {
             "type": "string"
           },
           "title": {
             "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -9532,77 +10873,47 @@
           }
         }
       },
-      "PlatformsResponseDTO": {
+      "Redirect": {
         "type": "object",
         "required": [
-          "title",
-          "description",
-          "opportunities",
-          "tools_and_services"
+          "id",
+          "source_path",
+          "target_path",
+          "status_code",
+          "is_active",
+          "hits",
+          "created_at",
+          "updated_at"
         ],
         "properties": {
-          "description": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "source_path": {
             "type": "string"
           },
-          "hero_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
+          "status_code": {
+            "type": "integer",
+            "format": "int32"
           },
-          "hero_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "opportunities": {
-            "$ref": "#/components/schemas/OpportunitiesDTO"
-          },
-          "opportunities_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "opportunities_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "title": {
+          "target_path": {
             "type": "string"
           },
-          "tools_and_services": {
-            "$ref": "#/components/schemas/ToolsAndServicesDTO"
-          },
-          "tools_guide": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/MediaDTO"
-              }
-            ]
-          },
-          "tools_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -9732,14 +11043,20 @@
           }
         }
       },
-      "SearchPromoDTO": {
+      "SendAlertDTO": {
         "type": "object",
         "required": [
           "title",
-          "description"
+          "message"
         ],
         "properties": {
-          "description": {
+          "level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "message": {
             "type": "string"
           },
           "title": {
@@ -9860,43 +11177,6 @@
           }
         }
       },
-      "ToolItemDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "ToolsAndServicesDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "logo",
-          "items"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ToolItemDTO"
-            }
-          },
-          "logo": {
-            "$ref": "#/components/schemas/MediaDTO"
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
       "TrackEventDto": {
         "type": "object",
         "required": [
@@ -10009,100 +11289,32 @@
           }
         ]
       },
-      "UpdateAboutDTO": {
+      "TranslationRefDTO": {
         "type": "object",
+        "description": "One content entry/field that references a translation key (see\ncontent_translation_refs, synced from admin-panel/packages/i18n's tag format\nand the TranslationKeyMark Tiptap mark by server/src/content/translation_refs.rs).",
         "required": [
-          "title",
-          "description",
-          "opportunities",
-          "leadership_title",
-          "leadership_description",
-          "leadership_items",
-          "who_we_are",
-          "news_title",
-          "news_items"
+          "content_entry_id",
+          "entry_slug",
+          "field_path",
+          "schema_name",
+          "schema_slug"
         ],
         "properties": {
-          "description": {
+          "content_entry_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entry_slug": {
             "type": "string"
           },
-          "hero_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "leadership_description": {
+          "field_path": {
             "type": "string"
           },
-          "leadership_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "leadership_items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateLeadershipItemDTO"
-            }
-          },
-          "leadership_logo_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "leadership_title": {
+          "schema_name": {
             "type": "string"
           },
-          "news_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "news_items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateNewsItemDTO"
-            }
-          },
-          "news_title": {
+          "schema_slug": {
             "type": "string"
-          },
-          "opportunities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateOpportunityItemDTO"
-            }
-          },
-          "opportunities_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "who_we_are": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateWhoWeAreItemDTO"
-            }
-          },
-          "who_we_are_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -10197,81 +11409,12 @@
           }
         }
       },
-      "UpdateGuestsDTO": {
+      "UpdateHomeCategoryDTO": {
         "type": "object",
         "required": [
           "title",
-          "opportunities",
-          "interaction_cards",
-          "search_promo",
-          "additional_services"
-        ],
-        "properties": {
-          "additional_services": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdditionalServiceDTO"
-            }
-          },
-          "additional_services_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "hero_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "interaction_cards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InteractionCardDTO"
-            }
-          },
-          "interaction_cards_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "opportunities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GuestOpportunityItemDTO"
-            }
-          },
-          "opportunities_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "search_promo": {
-            "$ref": "#/components/schemas/SearchPromoDTO"
-          },
-          "search_promo_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateLeadershipItemDTO": {
-        "type": "object",
-        "required": [
-          "text"
+          "slug",
+          "link"
         ],
         "properties": {
           "icon_uuid": {
@@ -10281,7 +11424,196 @@
             ],
             "format": "uuid"
           },
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "link": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateHomeDTO": {
+        "type": "object",
+        "properties": {
+          "banner_guide_uuid": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "banner_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "banner_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "categories": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UpdateHomeCategoryDTO"
+            }
+          },
+          "categories_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hero_guide_uuid": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "hero_list_button_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hero_map_button_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "interactions": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UpdateHomeInteractionDTO"
+            }
+          },
+          "interactions_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_section_button_link": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_section_button_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_section_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "popular_section_button_link": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "popular_section_button_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "popular_section_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtitle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateHomeInteractionDTO": {
+        "type": "object",
+        "required": [
+          "step_number",
+          "title",
+          "text",
+          "button_text",
+          "link"
+        ],
+        "properties": {
+          "button_text": {
+            "type": "string"
+          },
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "is_accent": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "link": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "step_number": {
+            "type": "integer",
+            "format": "int32"
+          },
           "text": {
+            "type": "string"
+          },
+          "title": {
             "type": "string"
           }
         }
@@ -10416,57 +11748,6 @@
           }
         }
       },
-      "UpdateNewsItemDTO": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "icon_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "text": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateOpportunityItemDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "items",
-          "link",
-          "button_text"
-        ],
-        "properties": {
-          "button_text": {
-            "type": "string"
-          },
-          "icon_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "link": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
       "UpdatePageDTO": {
         "type": "object",
         "properties": {
@@ -10519,64 +11800,33 @@
           }
         }
       },
-      "UpdatePlatformsDTO": {
+      "UpdateRedirectDTO": {
         "type": "object",
-        "required": [
-          "title",
-          "description",
-          "opportunities",
-          "tools_title",
-          "tools_items"
-        ],
         "properties": {
-          "description": {
-            "type": "string"
+          "is_active": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "hero_guide_uuid": {
+          "source_path": {
             "type": [
               "string",
               "null"
+            ]
+          },
+          "status_code": {
+            "type": [
+              "integer",
+              "null"
             ],
-            "format": "uuid"
+            "format": "int32"
           },
-          "opportunities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateOpportunityItemDTO"
-            }
-          },
-          "opportunities_guide_uuid": {
+          "target_path": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "tools_guide_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "tools_items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpdateToolItemDTO"
-            }
-          },
-          "tools_logo_uuid": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "tools_title": {
-            "type": "string"
+            ]
           }
         }
       },
@@ -10639,21 +11889,6 @@
               "string",
               "null"
             ]
-          }
-        }
-      },
-      "UpdateToolItemDTO": {
-        "type": "object",
-        "required": [
-          "title",
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
           }
         }
       },
@@ -10750,25 +11985,344 @@
           }
         }
       },
-      "UpdateWhoWeAreItemDTO": {
+      "UpdateVenueDTO": {
         "type": "object",
-        "required": [
-          "title",
-          "description"
-        ],
         "properties": {
-          "description": {
-            "type": "string"
-          },
-          "image_uuid": {
+          "address": {
             "type": [
               "string",
               "null"
+            ]
+          },
+          "area_sqm": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "average_check": {
+            "type": [
+              "integer",
+              "null"
             ],
-            "format": "uuid"
+            "format": "int32"
+          },
+          "banquet_price_from": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "capacity_banquet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_buffet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_theater": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "coordinates_lat": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "coordinates_lng": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "corkage_fee_desc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "corkage_fee_has": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "cuisines": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "description_html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "equipment": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "features": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "feed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "gallery_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "halls": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "halls_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "has_online_tour": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "menu_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "menu_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_distance_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "metro_distance_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_line_color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_station": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parking": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price_level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pricing_table": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rating_reviews_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "rating_score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "rent_price_hour": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "reviews": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rider_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rooms": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "services": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtitle": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "venue_types": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "video_tour_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekdays": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekends": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -10878,22 +12432,352 @@
           "in_moderation"
         ]
       },
-      "WhoWeAreItemDTO": {
+      "Value": {},
+      "Venue": {
         "type": "object",
         "required": [
+          "id",
+          "slug",
           "title",
-          "description",
-          "image"
+          "address",
+          "city",
+          "status",
+          "created_at",
+          "updated_at"
         ],
         "properties": {
-          "description": {
+          "address": {
             "type": "string"
           },
-          "image": {
-            "$ref": "#/components/schemas/MediaDTO"
+          "area_sqm": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "average_check": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "banquet_price_from": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "capacity_banquet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_buffet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capacity_theater": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": "string"
+          },
+          "coordinates_lat": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "coordinates_lng": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "corkage_fee_desc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "corkage_fee_has": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cuisines": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "description_html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "equipment": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "features": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "feed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "gallery_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "halls": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "halls_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "has_online_tour": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "menu_photos": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "menu_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_distance_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "metro_distance_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_line_color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metro_station": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parking": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price_level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pricing_table": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rating_reviews_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "rating_score": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "rent_price_hour": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "reviews": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "rider_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rooms": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Value"
+              }
+            ]
+          },
+          "services": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "title": {
             "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "venue_types": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "video_tour_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekdays": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "working_hours_weekends": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }
@@ -10921,8 +12805,8 @@
       "description": "Auth"
     },
     {
-      "name": "About",
-      "description": "About platform information"
+      "name": "Home",
+      "description": "Home page information and management"
     },
     {
       "name": "Media",
@@ -10959,10 +12843,6 @@
     {
       "name": "Redirects",
       "description": "URL Redirects (301/302) management"
-    },
-    {
-      "name": "Platforms",
-      "description": "Platforms information"
     },
     {
       "name": "System",

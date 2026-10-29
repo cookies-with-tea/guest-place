@@ -3,8 +3,8 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use sqlx::{Postgres, QueryBuilder};
 use serde_json::Value;
+use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -16,6 +16,7 @@ use super::model::{
     CreateSchemaDTO, EntryFilterQuery, FieldDefinition, FieldType, UpdateContentEntryDTO,
     UpdateSchemaDTO,
 };
+use super::translation_refs::sync_refs;
 
 #[utoipa::path(
     get,
@@ -317,7 +318,11 @@ pub async fn delete_schema(
 
 // --- Entry Handlers ---
 
-async fn validate_entry_data(pool: &sqlx::Pool<sqlx::Postgres>, fields: &[FieldDefinition], data: &serde_json::Value) -> Result<(), String> {
+async fn validate_entry_data(
+    pool: &sqlx::Pool<sqlx::Postgres>,
+    fields: &[FieldDefinition],
+    data: &serde_json::Value,
+) -> Result<(), String> {
     let obj = data.as_object().ok_or("Data must be a JSON object")?;
 
     for field in fields {
@@ -354,41 +359,58 @@ async fn validate_entry_data(pool: &sqlx::Pool<sqlx::Postgres>, fields: &[FieldD
                         if let Some(relation_to) = &field.relation_to {
                             let uuids = if field.multiple {
                                 val.as_array()
-                                    .ok_or_else(|| format!("Field '{}' must be an array of UUIDs", field.label))?
+                                    .ok_or_else(|| {
+                                        format!("Field '{}' must be an array of UUIDs", field.label)
+                                    })?
                                     .iter()
-                                    .map(|v| v.as_str().ok_or_else(|| format!("Invalid UUID in field '{}'", field.label)))
+                                    .map(|v| {
+                                        v.as_str().ok_or_else(|| {
+                                            format!("Invalid UUID in field '{}'", field.label)
+                                        })
+                                    })
                                     .collect::<Result<Vec<&str>, String>>()?
                             } else {
-                                vec![val.as_str().ok_or_else(|| format!("Field '{}' must be a UUID string", field.label))?]
+                                vec![val.as_str().ok_or_else(|| {
+                                    format!("Field '{}' must be a UUID string", field.label)
+                                })?]
                             };
 
                             for uuid_str in uuids {
-                                let uuid = Uuid::parse_str(uuid_str)
-                                    .map_err(|_| format!("Invalid UUID format in field '{}'", field.label))?;
-                                
+                                let uuid = Uuid::parse_str(uuid_str).map_err(|_| {
+                                    format!("Invalid UUID format in field '{}'", field.label)
+                                })?;
+
                                 // Check if entry exists in the target schema (using slug)
                                 let exists = sqlx::query_scalar::<_, bool>(
                                     "SELECT EXISTS(
                                         SELECT 1 FROM content_entries e 
                                         JOIN content_schemas s ON e.schema_id = s.id 
                                         WHERE e.id = $1 AND s.slug = $2
-                                    )"
+                                    )",
                                 )
                                 .bind(uuid)
                                 .bind(relation_to)
                                 .fetch_one(pool)
                                 .await
-                                .map_err(|e| format!("Database error validating relation: {}", e))?;
+                                .map_err(|e| {
+                                    format!("Database error validating relation: {}", e)
+                                })?;
 
                                 if !exists {
-                                    return Err(format!("Related entry {} not found in schema '{}'", uuid, relation_to));
+                                    return Err(format!(
+                                        "Related entry {} not found in schema '{}'",
+                                        uuid, relation_to
+                                    ));
                                 }
                             }
                         }
                     }
                     FieldType::Repeater => {
                         if !val.is_array() {
-                            return Err(format!("Field '{}' must be an array of items", field.label));
+                            return Err(format!(
+                                "Field '{}' must be an array of items",
+                                field.label
+                            ));
                         }
                     }
                     FieldType::Group => {
@@ -406,7 +428,10 @@ async fn validate_entry_data(pool: &sqlx::Pool<sqlx::Postgres>, fields: &[FieldD
                     }
                     FieldType::Link => {
                         if !val.is_object() && !val.is_string() {
-                            return Err(format!("Field '{}' must be a link object or URL string", field.label));
+                            return Err(format!(
+                                "Field '{}' must be a link object or URL string",
+                                field.label
+                            ));
                         }
                     }
                     _ => {
@@ -553,16 +578,18 @@ pub async fn create_entry(
     }
 
     // 2. Validate data
-    validate_entry_data(&state.pool, &schema.fields, &payload.data).await.map_err(|e| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(ApiResponse::<()> {
-                data: None,
-                errors: None,
-                messages: Some(vec![e]),
-            }),
-        )
-    })?;
+    validate_entry_data(&state.pool, &schema.fields, &payload.data)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec![e]),
+                }),
+            )
+        })?;
 
     // 3. Insert entry
     let status = payload.status.unwrap_or(ContentEntryStatus::Draft);
@@ -593,6 +620,13 @@ pub async fn create_entry(
             messages: Some(vec!["Database error".to_string()]),
         }))
     })?;
+
+    if let Err(e) = sync_refs(&state.pool, entry.id, &entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            entry.id, e
+        );
+    }
 
     Ok(Json(ApiResponse {
         data: Some(entry),
@@ -716,16 +750,18 @@ pub async fn update_entry(
                     )
                 })?;
 
-        validate_entry_data(&state.pool, &schema.fields, data).await.map_err(|e| {
-            (
-                StatusCode::BAD_REQUEST,
-                Json(ApiResponse::<()> {
-                    data: None,
-                    errors: None,
-                    messages: Some(vec![e]),
-                }),
-            )
-        })?;
+        validate_entry_data(&state.pool, &schema.fields, data)
+            .await
+            .map_err(|e| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(ApiResponse::<()> {
+                        data: None,
+                        errors: None,
+                        messages: Some(vec![e]),
+                    }),
+                )
+            })?;
     }
 
     // 2. Save current version before update
@@ -836,6 +872,13 @@ pub async fn update_entry(
             }),
         )
     })?;
+
+    if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            updated_entry.id, e
+        );
+    }
 
     Ok(Json(ApiResponse {
         data: Some(updated_entry),
@@ -990,6 +1033,13 @@ pub async fn rollback_entry_version(
             data: None, errors: None, messages: Some(vec!["Database error during rollback".to_string()]),
         }))
     })?;
+
+    if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            updated_entry.id, e
+        );
+    }
 
     Ok(Json(ApiResponse {
         data: Some(updated_entry),

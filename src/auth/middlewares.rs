@@ -25,8 +25,11 @@ pub async fn auth_middleware(
         .and_then(|h| h.to_str().ok());
 
     let token = if let Some(header_value) = auth_header {
+        #[cfg(feature = "test-auth")]
         if header_value == "TestBearer" {
-            // Bypass for integration tests
+            // Bypass for integration tests only — this whole branch is compiled
+            // out unless built with `--features test-auth` (never set in a
+            // normal `cargo build`/`cargo build --release`, see Cargo.toml).
             request.extensions_mut().insert(crate::auth::dto::Claims {
                 sub: uuid::Uuid::nil(),
                 exp: 0,

@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 default-run = "guest-place"
 
+[features]
+# Enables the `Authorization: TestBearer` auth-bypass used by integration tests.
+# Never enabled in a normal `cargo build`/`cargo build --release` — only via
+# `cargo test --features test-auth` (see Makefile's test-server target).
+test-auth = []
+
 [dependencies]
 axum = { version = "0.8.1", features = ["multipart", "macros"] }
 tower = { version = "0.5", features = ["util"] }
@@ -46,6 +52,7 @@ redis = { version = "0.25.3", features = ["tokio-comp", "aio"] }
 deadpool-redis = "0.15.0"
 blurhash = "0.2.3"
 kamadak-exif = "0.6.1"
+tower_governor = { version = "0.8.0", default-features = false, features = ["axum"] }
 
 [dev-dependencies]
 axum-test = "20.0.0"

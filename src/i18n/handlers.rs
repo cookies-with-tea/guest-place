@@ -2,7 +2,7 @@ use crate::{
     core::{dto::ApiResponse, response::into_api_response},
     i18n::dto::{
         CreateNamespaceDTO, LanguageDTO, NamespaceDTO, TranslationDTO, TranslationInput,
-        TranslationVersionDTO,
+        TranslationRefDTO, TranslationVersionDTO,
     },
     AppState,
 };
@@ -151,6 +151,7 @@ use crate::core::dto::{ApiPaginationDTO, ApiResponseWithPagination, PaginationDT
         (status = 200, description = "Translations loaded", body = ApiResponseWithPagination<TranslationDTO>),
         (status = 500, description = "Database error")
     ),
+    operation_id = "get_all_translations",
     tag = "I18n"
 )]
 pub async fn get_all(
@@ -247,6 +248,7 @@ pub async fn get_all(
         (status = 200, description = "Translation deleted"),
         (status = 500, description = "Database error")
     ),
+    operation_id = "delete_translation_by_key_locale",
     tag = "I18n"
 )]
 pub async fn delete_one(
@@ -518,9 +520,12 @@ pub async fn delete_namespace(
         .await;
 
     match result {
-        Ok(res) if res.rows_affected() > 0 => {
-            into_api_response(StatusCode::OK, None, None, Some(vec!["Namespace deleted".to_string()]))
-        }
+        Ok(res) if res.rows_affected() > 0 => into_api_response(
+            StatusCode::OK,
+            None,
+            None,
+            Some(vec!["Namespace deleted".to_string()]),
+        ),
         _ => into_api_response(
             StatusCode::NOT_FOUND,
             None,
@@ -677,6 +682,57 @@ pub async fn rollback(
     )
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/i18n/{key}/refs",
+    params(
+        ("key" = String, Path, description = "Translation key")
+    ),
+    responses(
+        (status = 200, description = "Content entries/fields referencing this key", body = ApiResponse<Vec<TranslationRefDTO>>),
+        (status = 500, description = "Database error")
+    ),
+    tag = "I18n"
+)]
+pub async fn get_refs(
+    State(state): State<Arc<AppState>>,
+    Path(key): Path<String>,
+) -> Result<
+    Json<ApiResponse<Vec<TranslationRefDTO>>>,
+    (StatusCode, Json<ApiResponse<Vec<TranslationRefDTO>>>),
+> {
+    match sqlx::query_as::<_, TranslationRefDTO>(
+        r#"
+        SELECT
+            r.content_entry_id,
+            e.slug AS entry_slug,
+            r.field_path,
+            s.name AS schema_name,
+            s.slug AS schema_slug
+        FROM content_translation_refs r
+        JOIN content_entries e ON e.id = r.content_entry_id
+        JOIN content_schemas s ON s.id = e.schema_id
+        WHERE r.translation_key = $1
+        ORDER BY s.name ASC, e.slug ASC, r.field_path ASC
+        "#,
+    )
+    .bind(&key)
+    .fetch_all(&state.pool)
+    .await
+    {
+        Ok(refs) => into_api_response(StatusCode::OK, Some(refs), None, None),
+        Err(e) => {
+            eprintln!("DB error in get_refs: {}", e);
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                None,
+                Some(vec!["Failed to load references".to_string()]),
+            )
+        }
+    }
+}
+
 pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/languages", get(get_languages))
@@ -689,6 +745,7 @@ pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", post(create_or_update))
         .route("/{key}/{locale}", delete(delete_one))
+        .route("/{key}/refs", get(get_refs))
         .route("/versions/{key}/{locale}", get(get_versions))
         .route("/versions/{version_id}/rollback", post(rollback))
         .route("/namespaces", post(create_namespace))

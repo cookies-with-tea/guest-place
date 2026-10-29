@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use utoipa::ToSchema;
 
-
 #[derive(Deserialize, ToSchema)]
 pub struct CreateTranslationDTO {
     pub key: String,
@@ -60,4 +59,16 @@ pub struct CreateNamespaceDTO {
 pub struct LanguageDTO {
     pub code: String,
     pub name: String,
+}
+
+/// One content entry/field that references a translation key (see
+/// content_translation_refs, synced from admin-panel/packages/i18n's tag format
+/// and the TranslationKeyMark Tiptap mark by server/src/content/translation_refs.rs).
+#[derive(Serialize, ToSchema, FromRow)]
+pub struct TranslationRefDTO {
+    pub content_entry_id: uuid::Uuid,
+    pub entry_slug: String,
+    pub field_path: String,
+    pub schema_name: String,
+    pub schema_slug: String,
 }

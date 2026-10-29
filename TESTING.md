@@ -27,12 +27,14 @@ Located in the `tests/` directory. These tests spin up a mock server using `axum
 **Run command**:
 
 ```bash
-cargo test --test <test_name>
+cargo test --features test-auth --test <test_name>
 ```
 
 ## Auth Bypass (Testing Feature)
 
 For integration tests, a special mechanism is implemented to bypass database-backed token validation.
+It only exists when the crate is built with the `test-auth` Cargo feature (see `Cargo.toml`) — a plain
+`cargo build` / `cargo build --release` never enables it, so it cannot ship to production.
 
 To authorize a request in tests without a real token, add the following header:
 `Authorization: TestBearer`

@@ -58,6 +58,7 @@ use utoipa::{
     guest_place::i18n::handlers::get_by_dict_key,
     guest_place::i18n::handlers::get_languages,
     guest_place::i18n::handlers::get_namespaces,
+    guest_place::i18n::handlers::get_refs,
     guest_place::mfe::handlers::get_manifest,
     guest_place::mfe::handlers::get_all,
     guest_place::mfe::handlers::create,
@@ -77,12 +78,6 @@ use utoipa::{
     guest_place::content::handlers::delete_entry,
     guest_place::content::handlers::get_entry_versions,
     guest_place::content::handlers::rollback_entry_version,
-    guest_place::about::handlers::get_about,
-    guest_place::about::handlers::update_about,
-    guest_place::guests::handlers::get_guests,
-    guest_place::guests::handlers::update_guests,
-    guest_place::platforms::handlers::get_platforms,
-    guest_place::platforms::handlers::update_platforms,
     guest_place::monitoring::handlers::get_health,
     guest_place::monitoring::handlers::get_stats_stream,
     guest_place::analytics::handlers::start_session,
@@ -130,7 +125,6 @@ use utoipa::{
   tags(
         (name = "Auth", description = "Auth"),
         (name = "Home", description = "Home page information and management"),
-        (name = "About", description = "About platform information"),
         (name = "Media", description = "Media"),
         (name = "User", description = "User"),
         (name = "I18n", description = "Translations management"),
@@ -140,7 +134,6 @@ use utoipa::{
         (name = "Pages", description = "Page constructor and block types management"),
         (name = "Menus", description = "Site Navigation Menus management"),
         (name = "Redirects", description = "URL Redirects (301/302) management"),
-        (name = "Platforms", description = "Platforms information"),
         (name = "System", description = "System monitoring and orchestration"),
         (name = "Analytics", description = "Website behavior analytics"),
   ),
@@ -166,7 +159,6 @@ use utoipa::{
         guest_place::auth::dto::RegisterRequestDTO,
         guest_place::auth::dto::AuthResponseDTO,
         guest_place::auth::dto::AuthRefreshTokenDTO,
-        guest_place::about::dto::AboutResponseDTO,
         guest_place::content::model::ContentSchema,
         guest_place::content::model::CreateSchemaDTO,
         guest_place::content::model::UpdateSchemaDTO,
@@ -198,15 +190,9 @@ use utoipa::{
         guest_place::i18n::dto::LanguageDTO,
         guest_place::i18n::dto::TranslationDTO,
         guest_place::i18n::dto::CreateTranslationDTO,
+        guest_place::i18n::dto::TranslationRefDTO,
         guest_place::features::FeatureFlag,
         guest_place::features::FeatureFlagsUpdate,
-        guest_place::guests::dto::GuestsResponseDTO,
-        guest_place::guests::dto::UpdateGuestsDTO,
-        guest_place::guests::dto::GuestOpportunityItemDTO,
-        guest_place::guests::dto::InteractionCardDTO,
-        guest_place::guests::dto::SearchPromoDTO,
-        guest_place::guests::dto::AdditionalServiceDTO,
-        guest_place::platforms::dto::PlatformsResponseDTO,
         guest_place::user::dto::ChangePasswordDTO,
         guest_place::core::dto::PaginationDTO,
         guest_place::monitoring::handlers::HealthStatus,
@@ -259,8 +245,14 @@ async fn main() {
     if args.contains(&"--export-openapi".to_string()) {
         let openapi = ApiDoc::openapi();
         let json = openapi.to_pretty_json().unwrap();
-        std::fs::write("openapi.json", json).expect("Unable to write openapi.json");
-        println!("OpenAPI spec exported to openapi.json");
+        // Absolute, CARGO_MANIFEST_DIR-anchored path: `cargo run --manifest-path server/Cargo.toml`
+        // from the repo root (as the Makefile's `generate-api` target does) runs with CWD at the
+        // repo root, so a relative "openapi.json" previously landed next to the repo root instead
+        // of in server/ — silently leaving admin-panel's `pnpm generate:api` (which reads
+        // server/openapi.json) stuck on a stale spec.
+        let out_path = concat!(env!("CARGO_MANIFEST_DIR"), "/openapi.json");
+        std::fs::write(out_path, json).expect("Unable to write openapi.json");
+        println!("OpenAPI spec exported to {out_path}");
         return;
     }
 
@@ -389,7 +381,13 @@ async fn main() {
         eprintln!("[Init] Superadmin initialization failed: {}", e);
     }
 
-    axum::serve(listener, router.into_make_service())
-        .await
-        .expect("Error");
+    // with_connect_info: lets the auth rate limiter (SmartIpKeyExtractor) fall back to the
+    // real peer IP when the request carries no X-Forwarded-For/X-Real-IP/Forwarded header
+    // (i.e. when the server isn't sitting behind a reverse proxy).
+    axum::serve(
+        listener,
+        router.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .expect("Error");
 }
