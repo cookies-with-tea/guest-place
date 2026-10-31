@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { UiModal } from '@admin-panel/ui'
 
-import { useMedia } from '#entities/media'
+import { MEDIA_QUERY_KEY, uploadFileInChunks, useMedia } from '#entities/media'
 
 import { useImageCrop } from '../composables/useImageCrop'
 import { useMediaUploadSubmit } from '../composables/useMediaUploadSubmit'

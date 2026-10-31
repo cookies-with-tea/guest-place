@@ -36,7 +36,6 @@ export function getPackageJson(name) {
 			'@vitejs/plugin-vue': '^6.0.1',
 			typescript: '^5.9.3',
 			vite: '^7.1.7',
-			'vue-tsc': '^3.1.0',
 		},
 	}
 }

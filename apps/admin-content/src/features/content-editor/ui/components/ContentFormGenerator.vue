@@ -20,9 +20,11 @@
 </template>
 
 <script setup lang="ts">
+import { reactive, ref } from 'vue'
 import type { FieldDefinition } from '@admin-panel/lib'
 import { ContentFormGenerator as ContentFormGeneratorBase } from '@admin-panel/ui'
 
+import TiptapEditor from './TiptapEditor.vue'
 import UiRelationPicker from './UiRelationPicker.vue'
 
 const modelValue = defineModel<Record<string, any>>({ required: true, default: () => ({}) })

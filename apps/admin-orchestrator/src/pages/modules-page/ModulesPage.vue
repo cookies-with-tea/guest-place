@@ -54,7 +54,7 @@ watch(
 )
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .modules-page {
 	padding: 0;
 }

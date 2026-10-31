@@ -7,6 +7,7 @@
 			@go-to-docs="goToDocs"
 		/>
 
+		<!-- Main Content Area -->
 		<div class="page-content">
 			<!-- Loading State -->
 			<div v-if="entry.isLoading" class="loading-state glass-card">

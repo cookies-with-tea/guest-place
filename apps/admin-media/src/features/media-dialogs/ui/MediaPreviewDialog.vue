@@ -81,4 +81,19 @@ const preview = useMediaPreview()
 .download-link {
 	text-decoration: none;
 }
+
+.preview-pdf {
+	width: 100%;
+	height: 100%;
+	min-height: 420px;
+	border: none;
+	background: #fff;
+}
+
+.cdn-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
 </style>

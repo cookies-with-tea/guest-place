@@ -51,6 +51,8 @@ const {
 	pagination,
 	isLoading,
 	isFetching,
+	folders,
+	batchMove,
 	setPage,
 	setLimit,
 	setSort,

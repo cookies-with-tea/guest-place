@@ -3262,6 +3262,15 @@ export interface operations {
 					'application/json': components['schemas']['ApiResponse_AuthResponseDTO']
 				}
 			}
+			/** @description Слишком много неудачных попыток входа */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_AuthResponseDTO']
+				}
+			}
 			/** @description Ошибка базы данных */
 			500: {
 				headers: {
