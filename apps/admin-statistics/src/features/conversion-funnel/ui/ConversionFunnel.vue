@@ -91,7 +91,7 @@ onMounted(loadData)
 	justify-content: space-between;
 	border: 1px solid var(--gp-glass-border);
 	border-radius: 8px;
-	background: var(--gp-bg-page);
+	background: var(--bg-page);
 	transition: all 0.3s ease;
 	padding: 16px;
 

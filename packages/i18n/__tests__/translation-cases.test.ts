@@ -367,4 +367,81 @@ describe('All Translation Cases & Parser Suite', () => {
 			expect(roundtrip).toBe(template)
 		})
 	})
+
+	describe('5. Translation key, non-translatable and currency extensions', () => {
+		it('parses a {key:...} span as a tag whose name carries the key', () => {
+			const text = 'Цена: {key:catalog.price_label}Стоимость{/key:catalog.price_label} за штуку'
+			const nodes = parseTranslation(text)
+
+			expect(nodes[1]).toEqual({
+				type: 'tag',
+				name: 'key:catalog.price_label',
+				children: [{ type: 'text', name: 'text', content: 'Стоимость' }],
+			})
+
+			expect(serializeTranslation(nodes)).toBe(text)
+		})
+
+		it('parses a {nontranslatable} span', () => {
+			const text = 'Бренд {nontranslatable}GuestPlace{/nontranslatable} навсегда'
+			const nodes = parseTranslation(text)
+
+			expect(nodes[1]).toEqual({
+				type: 'tag',
+				name: 'nontranslatable',
+				children: [{ type: 'text', name: 'text', content: 'GuestPlace' }],
+			})
+
+			expect(serializeTranslation(nodes)).toBe(text)
+		})
+
+		it('parses a {currency:...} slot (self-closing, carries the amount in its name)', () => {
+			const text = 'Итого: {currency:1990.5}'
+			const nodes = parseTranslation(text)
+
+			expect(nodes[1]).toEqual({ type: 'slot', name: 'currency:1990.5' })
+
+			expect(serializeTranslation(nodes)).toBe(text)
+		})
+
+		it('converts a translation-key span to HTML and back', () => {
+			const template = 'Цена: {key:catalog.price_label}Стоимость{/key:catalog.price_label} за штуку'
+			const html = translationToHtml(template)
+
+			expect(html).toContain('class="gp-i18n-key"')
+
+			expect(html).toContain('data-i18n-key="catalog.price_label"')
+
+			expect(html).toContain('>Стоимость<')
+
+			expect(htmlToTranslation(html)).toBe(template)
+		})
+
+		it('converts a non-translatable span to HTML and back', () => {
+			const template = 'Бренд {nontranslatable}GuestPlace{/nontranslatable} навсегда'
+			const html = translationToHtml(template)
+
+			expect(html).toContain('class="gp-i18n-literal"')
+
+			expect(htmlToTranslation(html)).toBe(template)
+		})
+
+		it('converts a currency slot to HTML and back', () => {
+			const template = 'Итого: {currency:1990.5}'
+			const html = translationToHtml(template)
+
+			expect(html).toContain('class="gp-currency-chip"')
+
+			expect(html).toContain('data-slot="currency:1990.5"')
+
+			expect(htmlToTranslation(html)).toBe(template)
+		})
+
+		it('validates well-formed key/nontranslatable/currency templates', () => {
+			const text =
+				'Цена {key:catalog.price_label}товара{/key:catalog.price_label}: {currency:1990.5}, {nontranslatable}GuestPlace{/nontranslatable}'
+
+			expect(validateTranslation(text).isValid).toBe(true)
+		})
+	})
 })

@@ -90,8 +90,11 @@ export function createConfig(options: CreateConfigOptions) {
 					remotes,
 					shared: {
 						...shared,
-						'@admin-panel/ui': { singleton: true },
-						'@admin-panel/lib': { singleton: true },
+						// `singleton` is a real, documented option this plugin reads at runtime, but it's
+						// commented out of @originjs/vite-plugin-federation@1.4.1's own SharedConfig type —
+						// an upstream typing gap, not a mistake here.
+						'@admin-panel/ui': { singleton: true } as any,
+						'@admin-panel/lib': { singleton: true } as any,
 					},
 				}),
 				viteCompression({

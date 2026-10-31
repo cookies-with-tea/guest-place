@@ -233,8 +233,8 @@ onMounted(() => {
 	}
 
 	.preview-video {
-		object-fit: cover;
 		background: #000;
+		object-fit: cover;
 	}
 
 	.preview-pdf-box {
@@ -242,14 +242,14 @@ onMounted(() => {
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		background: rgba(239, 68, 68, 0.08);
-		border: 1px dashed rgba(239, 68, 68, 0.3);
+		border: 1px dashed rgb(239, 68, 68, 0.3);
 		border-radius: 8px;
+		background: rgb(239, 68, 68, 0.08);
 		gap: 8px;
 
 		.pdf-label {
-			font-size: 13px;
 			font-weight: 500;
+			font-size: 13px;
 			color: var(--gp-text-secondary);
 		}
 	}

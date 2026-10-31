@@ -432,12 +432,12 @@ const getIcon = (item: any) => {
 .item-parent {
 	font-weight: 500;
 	font-size: 11px;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 }
 
 .item-separator {
 	font-size: 10px;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 	opacity: 0.5;
 }
 

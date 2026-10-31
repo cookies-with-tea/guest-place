@@ -5,8 +5,10 @@
 		"@admin-panel/lib": "workspace:*",
 		"@admin-panel/ui": "workspace:*",
 		"@tanstack/vue-query": "^5.92.1",
+		"echarts": "^6.1.0",
 		"pinia": "^2.1.7",
-		"vue": "^3.5.22"
+		"vue": "^3.5.22",
+		"vue-echarts": "^8.2.0"
 	},
 	"devDependencies": {
 		"@admin-panel/stylelint-config": "workspace:*",
@@ -22,7 +24,7 @@
 		"npm-run-all2": "^8.0.4",
 		"serve": "^14.2.5",
 		"storybook": "9.1.15",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
 	},
@@ -39,7 +41,8 @@
 		"preview-storybook": "serve storybook-static",
 		"storybook": "storybook dev -p 6006",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
-		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache"
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

@@ -83,7 +83,7 @@ const option = computed(() => ({
 			type: 'line',
 			smooth: true,
 			data: trafficData.value.sessions,
-			itemStyle: { color: '#42b883' },
+			itemStyle: { color: '#7c3aed' },
 			areaStyle: {
 				color: {
 					type: 'linear',
@@ -92,8 +92,8 @@ const option = computed(() => ({
 					x2: 0,
 					y2: 1,
 					colorStops: [
-						{ offset: 0, color: 'rgba(66, 184, 131, 0.3)' },
-						{ offset: 1, color: 'rgba(66, 184, 131, 0)' },
+						{ offset: 0, color: 'rgba(124, 58, 237, 0.3)' },
+						{ offset: 1, color: 'rgba(124, 58, 237, 0)' },
 					],
 				},
 			},

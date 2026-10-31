@@ -140,7 +140,7 @@ onMounted(loadFlags)
 	border-radius: 4px;
 	font-family: monospace;
 	font-size: 0.9em;
-	background: var(--gp-glass-hover);
+	background: var(--gp-bg-glass-hover);
 	padding: 2px 6px;
 }
 

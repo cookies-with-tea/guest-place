@@ -19,6 +19,7 @@ export interface FieldDefinition {
 	fieldType: FieldType
 	required: boolean
 	multiple?: boolean
+	multiline?: boolean // Text fields: render as textarea instead of single-line input
 	relationTo?: string
 	fields?: FieldDefinition[] // nested fields for repeater and group
 	defaultValue?: any

@@ -821,13 +821,13 @@ onBeforeUnmount(() => {
 <style scoped>
 .tiptap-editor {
 	--tiptap-border: var(--border-color, #e2e8f0);
-	--tiptap-bg: var(--bg-surface, #ffffff);
+	--tiptap-bg: var(--bg-surface, #fff);
 	--tiptap-toolbar-bg: var(--bg-card, #f8fafc);
 	--tiptap-text: var(--text-primary, #1e293b);
 	--tiptap-muted: var(--text-muted, #94a3b8);
 	--tiptap-active-bg: var(--gp-accent, #6366f1);
-	--tiptap-active-text: #ffffff;
-	--tiptap-btn-hover: rgba(99, 102, 241, 0.1);
+	--tiptap-active-text: #fff;
+	--tiptap-btn-hover: rgb(99, 102, 241, 0.1);
 	--tiptap-radius: 12px;
 
 	display: flex;
@@ -843,21 +843,21 @@ onBeforeUnmount(() => {
 
 .tiptap-editor.is-focused {
 	border-color: var(--tiptap-active-bg);
-	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+	box-shadow: 0 0 0 3px rgb(99, 102, 241, 0.15);
 }
 
 .tiptap-editor.is-dark {
-	--tiptap-border: rgba(255, 255, 255, 0.12);
-	--tiptap-bg: rgba(15, 23, 42, 0.6);
-	--tiptap-toolbar-bg: rgba(15, 23, 42, 0.8);
+	--tiptap-border: rgb(255, 255, 255, 0.12);
+	--tiptap-bg: rgb(15, 23, 42, 0.6);
+	--tiptap-toolbar-bg: rgb(15, 23, 42, 0.8);
 	--tiptap-text: #e2e8f0;
 	--tiptap-muted: #64748b;
-	--tiptap-btn-hover: rgba(99, 102, 241, 0.15);
+	--tiptap-btn-hover: rgb(99, 102, 241, 0.15);
 }
 
 .tiptap-editor.is-disabled {
-	opacity: 0.6;
 	pointer-events: none;
+	opacity: 0.6;
 }
 
 /* Toolbar */
@@ -865,10 +865,10 @@ onBeforeUnmount(() => {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 2px;
-	padding: 8px 12px;
-	background: var(--tiptap-toolbar-bg);
 	border-bottom: 1px solid var(--tiptap-border);
+	background: var(--tiptap-toolbar-bg);
+	padding: 8px 12px;
+	gap: 2px;
 }
 
 .toolbar-group {
@@ -880,9 +880,9 @@ onBeforeUnmount(() => {
 .toolbar-divider {
 	width: 1px;
 	height: 20px;
+	flex-shrink: 0;
 	background: var(--tiptap-border);
 	margin: 0 6px;
-	flex-shrink: 0;
 }
 
 .toolbar-spacer {
@@ -890,78 +890,78 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-btn {
+	width: 30px;
+	height: 28px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 30px;
-	height: 28px;
-	padding: 0;
 	border: none;
 	border-radius: 6px;
-	background: transparent;
 	color: var(--tiptap-muted);
-	cursor: pointer;
+	background: transparent;
 	transition:
 		background 0.15s ease,
 		color 0.15s ease;
+	cursor: pointer;
+	padding: 0;
 }
 
 .toolbar-btn--text {
 	width: auto;
-	padding: 0 8px;
-	font-size: 11px;
 	font-weight: 700;
+	font-size: 11px;
 	letter-spacing: 0.02em;
+	padding: 0 8px;
 }
 
 .toolbar-btn:hover:not(:disabled) {
-	background: var(--tiptap-btn-hover);
 	color: var(--tiptap-text);
+	background: var(--tiptap-btn-hover);
 }
 
 .toolbar-btn.is-active {
-	background: var(--tiptap-active-bg);
 	color: var(--tiptap-active-text);
+	background: var(--tiptap-active-bg);
 }
 
 .toolbar-btn:disabled {
-	opacity: 0.3;
 	cursor: not-allowed;
+	opacity: 0.3;
 }
 
 /* Link dialog */
 .link-dialog {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 8px 12px;
-	background: var(--tiptap-toolbar-bg);
 	border-bottom: 1px solid var(--tiptap-border);
-	animation: slideDown 0.15s ease;
+	background: var(--tiptap-toolbar-bg);
+	animation: slide-down 0.15s ease;
+	padding: 8px 12px;
+	gap: 8px;
 }
 
-@keyframes slideDown {
+@keyframes slide-down {
 	from {
-		opacity: 0;
 		transform: translateY(-4px);
+		opacity: 0;
 	}
 
 	to {
-		opacity: 1;
 		transform: translateY(0);
+		opacity: 1;
 	}
 }
 
 .link-input {
-	flex: 1;
 	height: 30px;
-	padding: 0 10px;
+	flex: 1;
+	outline: none;
 	border: 1px solid var(--tiptap-border);
 	border-radius: 6px;
-	background: var(--tiptap-bg);
-	color: var(--tiptap-text);
 	font-size: 13px;
-	outline: none;
+	color: var(--tiptap-text);
+	background: var(--tiptap-bg);
+	padding: 0 10px;
 
 	&:focus {
 		border-color: var(--tiptap-active-bg);
@@ -971,13 +971,13 @@ onBeforeUnmount(() => {
 .link-confirm-btn,
 .link-cancel-btn {
 	height: 30px;
-	padding: 0 12px;
 	border: none;
 	border-radius: 6px;
-	font-size: 13px;
 	font-weight: 500;
-	cursor: pointer;
+	font-size: 13px;
 	transition: opacity 0.15s ease;
+	cursor: pointer;
+	padding: 0 12px;
 
 	&:hover {
 		opacity: 0.85;
@@ -985,64 +985,64 @@ onBeforeUnmount(() => {
 }
 
 .link-confirm-btn {
-	background: var(--tiptap-active-bg);
 	color: #fff;
+	background: var(--tiptap-active-bg);
 }
 
 .link-cancel-btn {
-	background: var(--tiptap-border);
 	color: var(--tiptap-text);
+	background: var(--tiptap-border);
 }
 
 /* Char count */
 .char-count {
 	font-size: 11px;
-	color: var(--tiptap-muted);
 	white-space: nowrap;
+	color: var(--tiptap-muted);
 }
 
 /* Editor content */
 .tiptap-content {
-	flex: 1;
 	min-height: 220px;
-	padding: 16px 20px;
-	color: var(--tiptap-text);
+	flex: 1;
 	font-size: 14px;
 	line-height: 1.7;
+	color: var(--tiptap-text);
 	cursor: text;
+	padding: 16px 20px;
 }
 
 :deep(.tiptap) {
-	outline: none;
 	min-height: 200px;
+	outline: none;
 
 	/* Placeholder */
 	p.is-editor-empty:first-child::before {
-		color: var(--tiptap-muted);
 		content: attr(data-placeholder);
-		float: left;
 		height: 0;
+		float: left;
+		color: var(--tiptap-muted);
 		pointer-events: none;
 	}
 
 	/* Headings */
 	h1 {
-		font-size: 1.8em;
 		font-weight: 700;
-		margin: 0.5em 0 0.3em;
+		font-size: 1.8em;
 		line-height: 1.3;
+		margin: 0.5em 0 0.3em;
 	}
 
 	h2 {
-		font-size: 1.4em;
 		font-weight: 700;
-		margin: 0.5em 0 0.3em;
+		font-size: 1.4em;
 		line-height: 1.3;
+		margin: 0.5em 0 0.3em;
 	}
 
 	h3 {
-		font-size: 1.15em;
 		font-weight: 600;
+		font-size: 1.15em;
 		margin: 0.5em 0 0.3em;
 	}
 
@@ -1064,54 +1064,54 @@ onBeforeUnmount(() => {
 
 	/* Blockquote */
 	blockquote {
-		margin: 0.6em 0;
-		padding-left: 16px;
 		border-left: 3px solid var(--tiptap-active-bg);
-		color: var(--tiptap-muted);
 		font-style: italic;
+		color: var(--tiptap-muted);
+		padding-left: 16px;
+		margin: 0.6em 0;
 	}
 
 	/* Code inline */
 	code {
-		padding: 2px 6px;
 		border-radius: 4px;
-		background: rgba(99, 102, 241, 0.12);
-		color: #6366f1;
 		font-family: 'JetBrains Mono', 'Fira Code', monospace;
 		font-size: 0.88em;
+		color: #6366f1;
+		background: rgb(99, 102, 241, 0.12);
+		padding: 2px 6px;
 	}
 
 	/* Code block */
 	pre {
-		margin: 0.6em 0;
-		padding: 12px 16px;
 		border-radius: 8px;
-		background: #0f172a;
 		color: #e2e8f0;
+		background: #0f172a;
+		padding: 12px 16px;
+		margin: 0.6em 0;
 		overflow-x: auto;
 
 		code {
-			padding: 0;
-			background: transparent;
-			color: inherit;
 			font-size: 13px;
+			color: inherit;
+			background: transparent;
+			padding: 0;
 		}
 	}
 
 	/* Highlight */
 	mark {
 		border-radius: 3px;
-		background: rgba(250, 204, 21, 0.4);
 		color: inherit;
+		background: rgb(250, 204, 21, 0.4);
 		padding: 1px 2px;
 	}
 
 	/* Link */
 	a {
-		color: #6366f1;
 		text-decoration: underline;
-		text-underline-offset: 2px;
+		color: #6366f1;
 		cursor: pointer;
+		text-underline-offset: 2px;
 
 		&:hover {
 			opacity: 0.8;
@@ -1127,7 +1127,7 @@ onBeforeUnmount(() => {
 
 	/* Selection */
 	::selection {
-		background: rgba(99, 102, 241, 0.25);
+		background: rgb(99, 102, 241, 0.25);
 	}
 }
 </style>

@@ -18,7 +18,7 @@ export const snakeToCamel = <T extends Record<string, any>>(data: T): CamelCased
 		if (Object.prototype.hasOwnProperty.call(data, key)) {
 			// Only convert underscores that are preceded by a character (ignore leading underscores)
 			const camelKey = toCamel(key)
-			let value = data[key]
+			let value: any = data[key]
 
 			// Special case: convert values of 'name' and 'slug' to camelCase for frontend consistency
 			if (typeof value === 'string' && (camelKey === 'name' || camelKey === 'slug')) {
@@ -51,7 +51,7 @@ export const camelToSnake = <T extends Record<string, any>>(data: T): SnakeCased
 			const baseKey = key.startsWith('_') ? key.slice(1) : key
 			const snakeKey = toSnake(baseKey)
 			const finalKey = key.startsWith('_') ? `_${snakeKey}` : snakeKey
-			let value = data[key]
+			let value: any = data[key]
 
 			// Special case: convert values of 'name' and 'slug' back to snake_case for backend
 			if (typeof value === 'string' && (key === 'name' || key === 'slug')) {

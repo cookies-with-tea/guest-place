@@ -23,21 +23,9 @@ export const APPS_PORTS = {
 		preview: 3005,
 		dev: 4178,
 	},
-	about: {
-		preview: 3006,
-		dev: 4179,
-	},
 	content: {
 		preview: 3007,
 		dev: 4180,
-	},
-	guests: {
-		preview: 3008,
-		dev: 4181,
-	},
-	platforms: {
-		preview: 3009,
-		dev: 4182,
 	},
 	profile: {
 		preview: 3010,

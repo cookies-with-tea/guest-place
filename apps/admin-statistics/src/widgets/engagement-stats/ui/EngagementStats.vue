@@ -81,7 +81,7 @@ const option = computed(() => ({
 			type: 'bar',
 			data: engagement.value.map((v) => v.views),
 			itemStyle: {
-				color: '#42b883',
+				color: '#7c3aed',
 				borderRadius: [0, 4, 4, 0],
 			},
 		},

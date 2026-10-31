@@ -9,24 +9,24 @@
 /** Critical CSS token that must be applied before first paint to prevent FOUC */
 const CRITICAL_CSS = `
   :root {
-    --gp-bg-main: #0a0b10;
-    --gp-bg-surface: #161b22;
-    --gp-bg-element: #1f242c;
-    --gp-primary: #42b883;
-    --gp-primary-hover: #3fb27d;
-    --gp-primary-light: rgba(66, 184, 131, 0.2);
-    --gp-primary-light-5: rgba(66, 184, 131, 0.5);
-    --gp-primary-light-7: rgba(66, 184, 131, 0.7);
+    --gp-bg-main: #0b1120;
+    --gp-bg-surface: #131a2e;
+    --gp-bg-element: #1a2240;
+    --gp-primary: #a78bfa;
+    --gp-primary-hover: #c4b5fd;
+    --gp-primary-light: rgba(167, 139, 250, 0.18);
+    --gp-primary-light-5: rgba(167, 139, 250, 0.5);
+    --gp-primary-light-7: rgba(167, 139, 250, 0.7);
     --gp-text-main: #f0f6fc;
     --gp-text-secondary: #8b949e;
     --gp-text-disabled: #484f58;
     --gp-border-color: #30363d;
     --gp-border-color-hover: rgba(255,255,255,0.2);
-    --gp-bg-glass: rgba(255,255,255,0.03);
-    --gp-bg-glass-hover: rgba(255,255,255,0.06);
-    --gp-glass-blur: 16px;
+    --gp-bg-glass: #131a2e;
+    --gp-bg-glass-hover: #1a2240;
+    --gp-glass-blur: 0px;
     --gp-glass-border: rgba(255,255,255,0.08);
-    --gp-glass-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+    --gp-glass-shadow: 0 8px 32px 0 rgba(0,0,0,0.45);
     --gp-radius-sm: 16px;
     --gp-radius-md: 24px;
     --gp-radius-lg: 32px;
@@ -42,10 +42,15 @@ const CRITICAL_CSS = `
     --gp-text-disabled: #8c959f;
     --gp-border-color: #d0d7de;
     --gp-border-color-hover: rgba(0,0,0,0.1);
-    --gp-bg-glass: rgba(255,255,255,0.6);
-    --gp-bg-glass-hover: rgba(255,255,255,0.8);
-    --gp-glass-border: rgba(0,0,0,0.05);
-    --gp-glass-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --gp-primary: #7c3aed;
+    --gp-primary-hover: #6d28d9;
+    --gp-primary-light: rgba(124, 58, 237, 0.12);
+    --gp-primary-light-5: rgba(124, 58, 237, 0.5);
+    --gp-primary-light-7: rgba(124, 58, 237, 0.7);
+    --gp-bg-glass: #fff;
+    --gp-bg-glass-hover: #f9f8fd;
+    --gp-glass-border: #ece9f7;
+    --gp-glass-shadow: 0 4px 20px 0 rgba(124, 58, 237, 0.08);
   }
   /* Anti-FOUC: hide body until styles are applied */
   body { opacity: 0; transition: opacity 0.15s ease; }
@@ -74,7 +79,7 @@ export function initUiStyles() {
 	criticalStyle.id = 'gp-critical'
 
 	// Load persisted theme settings
-	const savedAccent = localStorage.getItem('gp-theme-accent-color') || '#42b883'
+	const savedAccent = localStorage.getItem('gp-theme-accent-color') || '#7c3aed'
 	const savedBlur = localStorage.getItem('gp-theme-glass-blur') || '16'
 
 	const themedCss = CRITICAL_CSS.replace(/--gp-primary:\s*[^;]+;/, `--gp-primary: ${savedAccent};`)

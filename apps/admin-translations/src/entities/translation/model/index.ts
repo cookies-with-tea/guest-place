@@ -18,4 +18,13 @@ export interface Pagination {
 	total: number
 }
 
+/** One content entry/field referencing this translation key (see content_translation_refs). */
+export interface TranslationRef {
+	contentEntryId: string
+	entrySlug: string
+	fieldPath: string
+	schemaName: string
+	schemaSlug: string
+}
+
 export const TRANSLATIONS_QUERY_KEY = 'translations'

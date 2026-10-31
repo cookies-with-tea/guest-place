@@ -4,22 +4,6 @@
  */
 
 export interface paths {
-	'/api/v1/about': {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		get: operations['get_about']
-		put: operations['update_about']
-		post?: never
-		delete?: never
-		options?: never
-		head?: never
-		patch?: never
-		trace?: never
-	}
 	'/api/v1/analytics/engagement': {
 		parameters: {
 			query?: never
@@ -244,6 +228,54 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/block-types': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_block_types']
+		put?: never
+		post: operations['create_block_type']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/block-types/sync': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['sync_block_types']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/block-types/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		delete: operations['delete_block_type']
+		options?: never
+		head?: never
+		patch: operations['update_block_type']
+		trace?: never
+	}
 	'/api/v1/content/entries': {
 		parameters: {
 			query?: never
@@ -372,15 +404,15 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
-	'/api/v1/guests': {
+	'/api/v1/home': {
 		parameters: {
 			query?: never
 			header?: never
 			path?: never
 			cookie?: never
 		}
-		get: operations['get_guests']
-		put: operations['update_guests']
+		get: operations['get_home']
+		put: operations['update_home']
 		post?: never
 		delete?: never
 		options?: never
@@ -395,7 +427,7 @@ export interface paths {
 			path?: never
 			cookie?: never
 		}
-		get: operations['get_all']
+		get: operations['get_all_translations']
 		put?: never
 		post: operations['create_or_update']
 		delete?: never
@@ -452,6 +484,22 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/i18n/{key}/refs': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_refs']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/api/v1/i18n/{key}/{locale}': {
 		parameters: {
 			query?: never
@@ -462,7 +510,7 @@ export interface paths {
 		get?: never
 		put?: never
 		post?: never
-		delete: operations['delete_one']
+		delete: operations['delete_translation_by_key_locale']
 		options?: never
 		head?: never
 		patch?: never
@@ -500,6 +548,70 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/media/batch/move': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post: operations['batch_move_media']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/config': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_media_config']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/folders': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_media_folders']
+		put?: never
+		post: operations['create_media_folder']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/folders/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put: operations['update_media_folder']
+		post?: never
+		delete: operations['delete_media_folder']
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
 	'/api/v1/media/optimize/bulk': {
 		parameters: {
 			query?: never
@@ -510,6 +622,22 @@ export interface paths {
 		get?: never
 		put?: never
 		post: operations['bulk_optimize_media']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/media/tags': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_media_tags']
+		put?: never
+		post?: never
 		delete?: never
 		options?: never
 		head?: never
@@ -612,6 +740,54 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/media/{uuid}/variants/{size}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_media_variant']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/menus': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_menus']
+		put?: never
+		post: operations['create_menu']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/menus/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_menu_by_location']
+		put?: never
+		post?: never
+		delete: operations['delete_menu']
+		options?: never
+		head?: never
+		patch: operations['update_menu']
+		trace?: never
+	}
 	'/api/v1/mfe': {
 		parameters: {
 			query?: never
@@ -619,9 +795,9 @@ export interface paths {
 			path?: never
 			cookie?: never
 		}
-		get: operations['get_all']
+		get: operations['get_all_mfes']
 		put?: never
-		post: operations['create']
+		post: operations['create_mfe']
 		delete?: never
 		options?: never
 		head?: never
@@ -652,28 +828,108 @@ export interface paths {
 			cookie?: never
 		}
 		get?: never
-		put: operations['update']
+		put: operations['update_mfe']
 		post?: never
-		delete: operations['delete_one']
+		delete: operations['delete_mfe_by_id']
 		options?: never
 		head?: never
 		patch?: never
 		trace?: never
 	}
-	'/api/v1/platforms': {
+	'/api/v1/pages': {
 		parameters: {
 			query?: never
 			header?: never
 			path?: never
 			cookie?: never
 		}
-		get: operations['get_platforms']
-		put: operations['update_platforms']
+		get: operations['get_pages']
+		put?: never
+		post: operations['create_page']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/pages/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_page']
+		put?: never
+		post?: never
+		delete: operations['delete_page']
+		options?: never
+		head?: never
+		patch: operations['update_page']
+		trace?: never
+	}
+	'/api/v1/pages/{id}/breadcrumbs': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_page_breadcrumbs']
+		put?: never
 		post?: never
 		delete?: never
 		options?: never
 		head?: never
 		patch?: never
+		trace?: never
+	}
+	'/api/v1/redirects': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_redirects']
+		put?: never
+		post: operations['create_redirect']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/redirects/check': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['check_redirect']
+		put?: never
+		post?: never
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/redirects/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get?: never
+		put?: never
+		post?: never
+		delete: operations['delete_redirect']
+		options?: never
+		head?: never
+		patch: operations['update_redirect']
 		trace?: never
 	}
 	'/api/v1/system/alert': {
@@ -788,43 +1044,46 @@ export interface paths {
 		patch?: never
 		trace?: never
 	}
+	'/api/v1/venues': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_venues']
+		put?: never
+		post: operations['create_venue']
+		delete?: never
+		options?: never
+		head?: never
+		patch?: never
+		trace?: never
+	}
+	'/api/v1/venues/{id}': {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		get: operations['get_venue_by_id_or_slug']
+		put?: never
+		post?: never
+		delete: operations['delete_venue']
+		options?: never
+		head?: never
+		patch: operations['update_venue']
+		trace?: never
+	}
 }
 export type webhooks = Record<string, never>
 export interface components {
 	schemas: {
-		AboutResponseDTO: {
-			description: string
-			hero_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			leadership: components['schemas']['LeadershipDTO']
-			leadership_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			leadership_guide_uuid?: string | null
-			news: components['schemas']['NewsDTO']
-			news_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			news_guide_uuid?: string | null
-			opportunities: components['schemas']['OpportunitiesDTO']
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			who_we_are: components['schemas']['WhoWeAreItemDTO'][]
-			who_we_are_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			who_we_are_guide_uuid?: string | null
-		}
 		AcquireLockRequest: {
 			force?: boolean | null
 			user_id: string
 			user_name: string
-		}
-		AdditionalServiceDTO: {
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			text: string
 		}
 		AnalyticsSummaryDto: {
 			/** Format: int64 */
@@ -849,11 +1108,15 @@ export interface components {
 				alt?: string | null
 				blurhash?: string | null
 				category?: string | null
+				cdnUrl?: string | null
+				contentHash?: string | null
 				/** Format: date-time */
 				createdAt: string
 				dominantColor?: string | null
 				exif?: unknown
 				extension?: string | null
+				/** Format: uuid */
+				folderId?: string | null
 				/** Format: int32 */
 				height?: number | null
 				mediaType: components['schemas']['MediaType']
@@ -887,6 +1150,73 @@ export interface components {
 			}[]
 			pagination: components['schemas']['PaginationDTO']
 		}
+		ApiPaginationDTO_Venue: {
+			items: {
+				address: string
+				area_sqm?: string | null
+				/** Format: int32 */
+				average_check?: number | null
+				/** Format: int32 */
+				banquet_price_from?: number | null
+				capacity_banquet?: string | null
+				capacity_buffet?: string | null
+				capacity_theater?: string | null
+				city: string
+				/** Format: double */
+				coordinates_lat?: number | null
+				/** Format: double */
+				coordinates_lng?: number | null
+				corkage_fee_desc?: string | null
+				corkage_fee_has?: boolean | null
+				/** Format: date-time */
+				created_at: string
+				cuisines?: string[] | null
+				description_html?: string | null
+				equipment?: string[] | null
+				faq?: null | components['schemas']['Value']
+				features?: string[] | null
+				feed?: null | components['schemas']['Value']
+				gallery_photos?: string[] | null
+				halls?: null | components['schemas']['Value']
+				/** Format: int32 */
+				halls_count?: number | null
+				has_online_tour?: boolean | null
+				/** Format: uuid */
+				id: string
+				menu_photos?: string[] | null
+				menu_url?: string | null
+				/** Format: int32 */
+				metro_distance_minutes?: number | null
+				metro_distance_text?: string | null
+				metro_line_color?: string | null
+				metro_station?: string | null
+				parking?: string | null
+				phone?: string | null
+				price_level?: string | null
+				pricing_table?: null | components['schemas']['Value']
+				/** Format: int32 */
+				rating_reviews_count?: number | null
+				/** Format: double */
+				rating_score?: number | null
+				/** Format: int32 */
+				rent_price_hour?: number | null
+				reviews?: null | components['schemas']['Value']
+				rider_url?: string | null
+				rooms?: null | components['schemas']['Value']
+				services?: string[] | null
+				slug: string
+				status: string
+				subtitle?: string | null
+				title: string
+				/** Format: date-time */
+				updated_at: string
+				venue_types?: string[] | null
+				video_tour_url?: string | null
+				working_hours_weekdays?: string | null
+				working_hours_weekends?: string | null
+			}[]
+			pagination: components['schemas']['PaginationDTO']
+		}
 		ApiResponseWithPagination_MediaItemDTO: {
 			data?: null | components['schemas']['ApiPaginationDTO_MediaItemDTO']
 			errors?: {
@@ -901,30 +1231,8 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
-		ApiResponse_AboutResponseDTO: {
-			data?: {
-				description: string
-				hero_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				hero_guide_uuid?: string | null
-				leadership: components['schemas']['LeadershipDTO']
-				leadership_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				leadership_guide_uuid?: string | null
-				news: components['schemas']['NewsDTO']
-				news_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				news_guide_uuid?: string | null
-				opportunities: components['schemas']['OpportunitiesDTO']
-				opportunities_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
-				title: string
-				who_we_are: components['schemas']['WhoWeAreItemDTO'][]
-				who_we_are_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				who_we_are_guide_uuid?: string | null
-			}
+		ApiResponseWithPagination_Venue: {
+			data?: null | components['schemas']['ApiPaginationDTO_Venue']
 			errors?: {
 				[key: string]: string[]
 			} | null
@@ -968,6 +1276,38 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_BlockType: {
+			data?: {
+				category?: string | null
+				/** Format: date-time */
+				created_at: string
+				description?: string | null
+				icon?: string | null
+				/** Format: uuid */
+				id: string
+				name: string
+				schema: Record<string, never>
+				slug: string
+				/** Format: date-time */
+				updated_at: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_CheckRedirectResponse: {
+			data?: {
+				matched: boolean
+				/** Format: int32 */
+				status_code?: number | null
+				target_path?: string | null
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_ChunkStatusResponse: {
 			data?: {
 				is_complete: boolean
@@ -1004,6 +1344,10 @@ export interface components {
 				i18n: Record<string, never>
 				/** Format: uuid */
 				id: string
+				/** Format: date-time */
+				published_at?: string | null
+				/** Format: uuid */
+				published_by?: string | null
 				/** Format: uuid */
 				schema_id: string
 				slug: string
@@ -1034,27 +1378,31 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
-		ApiResponse_GuestsResponseDTO: {
+		ApiResponse_HomeResponseDTO: {
 			data?: {
-				additional_services: components['schemas']['AdditionalServiceDTO'][]
-				additional_services_guide?: null | components['schemas']['MediaDTO']
+				banner_guide?: null | components['schemas']['MediaDTO']
 				/** Format: uuid */
-				additional_services_guide_uuid?: string | null
+				banner_guide_uuid?: string | null
+				banner_text: string
+				banner_title: string
+				categories: components['schemas']['HomeCategoryDTO'][]
+				categories_title: string
 				hero_guide?: null | components['schemas']['MediaDTO']
 				/** Format: uuid */
 				hero_guide_uuid?: string | null
-				interaction_cards: components['schemas']['InteractionCardDTO'][]
-				interaction_cards_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				interaction_cards_guide_uuid?: string | null
-				opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-				opportunities_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
-				search_promo: components['schemas']['SearchPromoDTO']
-				search_promo_guide?: null | components['schemas']['MediaDTO']
-				/** Format: uuid */
-				search_promo_guide_uuid?: string | null
+				hero_list_button_text: string
+				hero_map_button_text: string
+				interactions: components['schemas']['HomeInteractionItemDTO'][]
+				interactions_title: string
+				latest_section_button_link: string
+				latest_section_button_text: string
+				latest_section_title: string
+				latest_venues: components['schemas']['Venue'][]
+				popular_section_button_link: string
+				popular_section_button_text: string
+				popular_section_title: string
+				popular_venues: components['schemas']['Venue'][]
+				subtitle: string
 				title: string
 			}
 			errors?: {
@@ -1086,16 +1434,50 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_MediaConfigDTO: {
+			data?: {
+				cdnUrl?: string | null
+				/** Format: int64 */
+				maxQuota: number
+				publicUrl: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_MediaFolderDTO: {
+			data?: {
+				color?: string | null
+				/** Format: date-time */
+				createdAt: string
+				/** Format: uuid */
+				id: string
+				/** Format: int64 */
+				itemCount?: number | null
+				name: string
+				/** Format: uuid */
+				parentId?: string | null
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_MediaItemDTO: {
 			data?: {
 				alt?: string | null
 				blurhash?: string | null
 				category?: string | null
+				cdnUrl?: string | null
+				contentHash?: string | null
 				/** Format: date-time */
 				createdAt: string
 				dominantColor?: string | null
 				exif?: unknown
 				extension?: string | null
+				/** Format: uuid */
+				folderId?: string | null
 				/** Format: int32 */
 				height?: number | null
 				mediaType: components['schemas']['MediaType']
@@ -1118,21 +1500,63 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
-		ApiResponse_PlatformsResponseDTO: {
+		ApiResponse_Menu: {
 			data?: {
-				description: string
-				hero_guide?: null | components['schemas']['MediaDTO']
+				/** Format: date-time */
+				created_at: string
 				/** Format: uuid */
-				hero_guide_uuid?: string | null
-				opportunities: components['schemas']['OpportunitiesDTO']
-				opportunities_guide?: null | components['schemas']['MediaDTO']
+				id: string
+				items: Record<string, never>
+				location: string
+				name: string
+				/** Format: date-time */
+				updated_at: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Page: {
+			data?: {
+				blocks: Record<string, never>
+				/** Format: date-time */
+				created_at: string
 				/** Format: uuid */
-				opportunities_guide_uuid?: string | null
+				id: string
+				/** Format: uuid */
+				parent_id?: string | null
+				/** Format: date-time */
+				published_at?: string | null
+				/** Format: uuid */
+				published_by?: string | null
+				seo: Record<string, never>
+				slug: string
+				status: string
 				title: string
-				tools_and_services: components['schemas']['ToolsAndServicesDTO']
-				tools_guide?: null | components['schemas']['MediaDTO']
+				/** Format: date-time */
+				updated_at: string
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Redirect: {
+			data?: {
+				/** Format: date-time */
+				created_at: string
+				/** Format: int32 */
+				hits: number
 				/** Format: uuid */
-				tools_guide_uuid?: string | null
+				id: string
+				is_active: boolean
+				source_path: string
+				/** Format: int32 */
+				status_code: number
+				target_path: string
+				/** Format: date-time */
+				updated_at: string
 			}
 			errors?: {
 				[key: string]: string[]
@@ -1194,6 +1618,38 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_BlockType: {
+			data?: {
+				category?: string | null
+				/** Format: date-time */
+				created_at: string
+				description?: string | null
+				icon?: string | null
+				/** Format: uuid */
+				id: string
+				name: string
+				schema: Record<string, never>
+				slug: string
+				/** Format: date-time */
+				updated_at: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_BreadcrumbItem: {
+			data?: {
+				/** Format: uuid */
+				id: string
+				slug: string
+				title: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_Vec_CohortRowDto: {
 			data?: {
 				cohort_month: string
@@ -1214,6 +1670,10 @@ export interface components {
 				i18n: Record<string, never>
 				/** Format: uuid */
 				id: string
+				/** Format: date-time */
+				published_at?: string | null
+				/** Format: uuid */
+				published_by?: string | null
 				/** Format: uuid */
 				schema_id: string
 				slug: string
@@ -1301,16 +1761,38 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_MediaFolderDTO: {
+			data?: {
+				color?: string | null
+				/** Format: date-time */
+				createdAt: string
+				/** Format: uuid */
+				id: string
+				/** Format: int64 */
+				itemCount?: number | null
+				name: string
+				/** Format: uuid */
+				parentId?: string | null
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_Vec_MediaItemDTO: {
 			data?: {
 				alt?: string | null
 				blurhash?: string | null
 				category?: string | null
+				cdnUrl?: string | null
+				contentHash?: string | null
 				/** Format: date-time */
 				createdAt: string
 				dominantColor?: string | null
 				exif?: unknown
 				extension?: string | null
+				/** Format: uuid */
+				folderId?: string | null
 				/** Format: int32 */
 				height?: number | null
 				mediaType: components['schemas']['MediaType']
@@ -1327,6 +1809,34 @@ export interface components {
 				variants?: unknown
 				/** Format: int32 */
 				width?: number | null
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_MediaTagCountDTO: {
+			data?: {
+				/** Format: int64 */
+				count: number
+				tag: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_Menu: {
+			data?: {
+				/** Format: date-time */
+				created_at: string
+				/** Format: uuid */
+				id: string
+				items: Record<string, never>
+				location: string
+				name: string
+				/** Format: date-time */
+				updated_at: string
 			}[]
 			errors?: {
 				[key: string]: string[]
@@ -1376,6 +1886,52 @@ export interface components {
 			} | null
 			messages?: string[] | null
 		}
+		ApiResponse_Vec_Page: {
+			data?: {
+				blocks: Record<string, never>
+				/** Format: date-time */
+				created_at: string
+				/** Format: uuid */
+				id: string
+				/** Format: uuid */
+				parent_id?: string | null
+				/** Format: date-time */
+				published_at?: string | null
+				/** Format: uuid */
+				published_by?: string | null
+				seo: Record<string, never>
+				slug: string
+				status: string
+				title: string
+				/** Format: date-time */
+				updated_at: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_Redirect: {
+			data?: {
+				/** Format: date-time */
+				created_at: string
+				/** Format: int32 */
+				hits: number
+				/** Format: uuid */
+				id: string
+				is_active: boolean
+				source_path: string
+				/** Format: int32 */
+				status_code: number
+				target_path: string
+				/** Format: date-time */
+				updated_at: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
 		ApiResponse_Vec_ReferralDto: {
 			data?: {
 				/** Format: int64 */
@@ -1384,6 +1940,105 @@ export interface components {
 				percentage: number
 				source: string
 			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Vec_TranslationRefDTO: {
+			data?: {
+				/** Format: uuid */
+				content_entry_id: string
+				entry_slug: string
+				field_path: string
+				schema_name: string
+				schema_slug: string
+			}[]
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_Venue: {
+			data?: {
+				address: string
+				area_sqm?: string | null
+				/** Format: int32 */
+				average_check?: number | null
+				/** Format: int32 */
+				banquet_price_from?: number | null
+				capacity_banquet?: string | null
+				capacity_buffet?: string | null
+				capacity_theater?: string | null
+				city: string
+				/** Format: double */
+				coordinates_lat?: number | null
+				/** Format: double */
+				coordinates_lng?: number | null
+				corkage_fee_desc?: string | null
+				corkage_fee_has?: boolean | null
+				/** Format: date-time */
+				created_at: string
+				cuisines?: string[] | null
+				description_html?: string | null
+				equipment?: string[] | null
+				faq?: null | components['schemas']['Value']
+				features?: string[] | null
+				feed?: null | components['schemas']['Value']
+				gallery_photos?: string[] | null
+				halls?: null | components['schemas']['Value']
+				/** Format: int32 */
+				halls_count?: number | null
+				has_online_tour?: boolean | null
+				/** Format: uuid */
+				id: string
+				menu_photos?: string[] | null
+				menu_url?: string | null
+				/** Format: int32 */
+				metro_distance_minutes?: number | null
+				metro_distance_text?: string | null
+				metro_line_color?: string | null
+				metro_station?: string | null
+				parking?: string | null
+				phone?: string | null
+				price_level?: string | null
+				pricing_table?: null | components['schemas']['Value']
+				/** Format: int32 */
+				rating_reviews_count?: number | null
+				/** Format: double */
+				rating_score?: number | null
+				/** Format: int32 */
+				rent_price_hour?: number | null
+				reviews?: null | components['schemas']['Value']
+				rider_url?: string | null
+				rooms?: null | components['schemas']['Value']
+				services?: string[] | null
+				slug: string
+				status: string
+				subtitle?: string | null
+				title: string
+				/** Format: date-time */
+				updated_at: string
+				venue_types?: string[] | null
+				video_tour_url?: string | null
+				working_hours_weekdays?: string | null
+				working_hours_weekends?: string | null
+			}
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_bool: {
+			data?: boolean
+			errors?: {
+				[key: string]: string[]
+			} | null
+			messages?: string[] | null
+		}
+		ApiResponse_u64: {
+			/** Format: int64 */
+			data?: number
 			errors?: {
 				[key: string]: string[]
 			} | null
@@ -1404,6 +2059,31 @@ export interface components {
 			refresh_expires_in: number
 			refresh_token: string
 		}
+		BatchMoveMediaDTO: {
+			/** Format: uuid */
+			folderId?: string | null
+			uuids: string[]
+		}
+		BlockType: {
+			category?: string | null
+			/** Format: date-time */
+			created_at: string
+			description?: string | null
+			icon?: string | null
+			/** Format: uuid */
+			id: string
+			name: string
+			schema: Record<string, never>
+			slug: string
+			/** Format: date-time */
+			updated_at: string
+		}
+		BreadcrumbItem: {
+			/** Format: uuid */
+			id: string
+			slug: string
+			title: string
+		}
 		BulkOptimizeMediaDTO: {
 			uuids: string[]
 		}
@@ -1413,6 +2093,12 @@ export interface components {
 		}
 		CheckEmailCodeDTO: {
 			key: string
+		}
+		CheckRedirectResponse: {
+			matched: boolean
+			/** Format: int32 */
+			status_code?: number | null
+			target_path?: string | null
 		}
 		ChunkStatusResponse: {
 			is_complete: boolean
@@ -1443,6 +2129,10 @@ export interface components {
 			i18n: Record<string, never>
 			/** Format: uuid */
 			id: string
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
 			/** Format: uuid */
 			schema_id: string
 			slug: string
@@ -1479,23 +2169,48 @@ export interface components {
 			/** Format: date-time */
 			updated_at: string
 		}
+		CreateBlockTypeDTO: {
+			category?: string | null
+			description?: string | null
+			icon?: string | null
+			name: string
+			schema: unknown
+			slug: string
+		}
 		CreateContentEntryDTO: {
 			data: unknown
 			i18n?: unknown
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
 			/** Format: uuid */
 			schema_id: string
 			slug: string
 			status?: null | components['schemas']['ContentEntryStatus']
+		}
+		CreateFolderDTO: {
+			color?: string | null
+			name: string
+			/** Format: uuid */
+			parentId?: string | null
 		}
 		CreateMediaDTO: {
 			alt?: string | null
 			category?: string | null
 			/** Format: binary */
 			file: string
+			/** Format: uuid */
+			folder_id?: string | null
 			name?: string | null
 			source?: string | null
 			tags?: string[] | null
 			title?: string | null
+		}
+		CreateMenuDTO: {
+			items?: unknown
+			location: string
+			name: string
 		}
 		CreateMfeDto: {
 			category?: string | null
@@ -1509,6 +2224,26 @@ export interface components {
 			scope: string
 			url: string
 			version?: string | null
+		}
+		CreatePageDTO: {
+			blocks?: unknown
+			/** Format: uuid */
+			parent_id?: string | null
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
+			seo?: unknown
+			slug: string
+			status?: string | null
+			title: string
+		}
+		CreateRedirectDTO: {
+			is_active?: boolean | null
+			source_path: string
+			/** Format: int32 */
+			status_code?: number | null
+			target_path: string
 		}
 		CreateSchemaDTO: {
 			fields: components['schemas']['FieldDefinition'][]
@@ -1539,6 +2274,64 @@ export interface components {
 			status?: null | components['schemas']['UserStatus']
 			street?: string | null
 		}
+		CreateVenueDTO: {
+			address: string
+			area_sqm?: string | null
+			/** Format: int32 */
+			average_check?: number | null
+			/** Format: int32 */
+			banquet_price_from?: number | null
+			capacity_banquet?: string | null
+			capacity_buffet?: string | null
+			capacity_theater?: string | null
+			city?: string | null
+			/** Format: double */
+			coordinates_lat?: number | null
+			/** Format: double */
+			coordinates_lng?: number | null
+			corkage_fee_desc?: string | null
+			corkage_fee_has?: boolean | null
+			cuisines?: string[] | null
+			description_html?: string | null
+			equipment?: string[] | null
+			faq?: null | components['schemas']['Value']
+			features?: string[] | null
+			feed?: null | components['schemas']['Value']
+			gallery_photos?: string[] | null
+			halls?: null | components['schemas']['Value']
+			/** Format: int32 */
+			halls_count?: number | null
+			has_online_tour?: boolean | null
+			menu_photos?: string[] | null
+			menu_url?: string | null
+			/** Format: int32 */
+			metro_distance_minutes?: number | null
+			metro_distance_text?: string | null
+			metro_line_color?: string | null
+			metro_station?: string | null
+			parking?: string | null
+			phone?: string | null
+			price_level?: string | null
+			pricing_table?: null | components['schemas']['Value']
+			/** Format: int32 */
+			rating_reviews_count?: number | null
+			/** Format: double */
+			rating_score?: number | null
+			/** Format: int32 */
+			rent_price_hour?: number | null
+			reviews?: null | components['schemas']['Value']
+			rider_url?: string | null
+			rooms?: null | components['schemas']['Value']
+			services?: string[] | null
+			slug: string
+			status?: string | null
+			subtitle?: string | null
+			title: string
+			venue_types?: string[] | null
+			video_tour_url?: string | null
+			working_hours_weekdays?: string | null
+			working_hours_weekends?: string | null
+		}
 		EngagementStatsDto: {
 			/** Format: int64 */
 			clicks: number
@@ -1560,6 +2353,7 @@ export interface components {
 		}
 		FieldDefinition: {
 			field_type: components['schemas']['FieldType']
+			fields?: Record<string, never>[] | null
 			label: string
 			multiple?: boolean
 			name: string
@@ -1567,7 +2361,19 @@ export interface components {
 			required?: boolean
 		}
 		/** @enum {string} */
-		FieldType: 'text' | 'rich_text' | 'number' | 'boolean' | 'media' | 'date' | 'relation'
+		FieldType:
+			| 'text'
+			| 'rich_text'
+			| 'number'
+			| 'boolean'
+			| 'media'
+			| 'date'
+			| 'relation'
+			| 'repeater'
+			| 'group'
+			| 'json'
+			| 'color'
+			| 'link'
 		FunnelStepDto: {
 			/** Format: int64 */
 			count: number
@@ -1575,41 +2381,61 @@ export interface components {
 			/** Format: float */
 			percentage: number
 		}
-		GuestOpportunityItemDTO: {
-			button_text: string
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			items: string[]
-			link: string
-			title: string
-		}
-		GuestsResponseDTO: {
-			additional_services: components['schemas']['AdditionalServiceDTO'][]
-			additional_services_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			additional_services_guide_uuid?: string | null
-			hero_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			interaction_cards: components['schemas']['InteractionCardDTO'][]
-			interaction_cards_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			interaction_cards_guide_uuid?: string | null
-			opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			search_promo: components['schemas']['SearchPromoDTO']
-			search_promo_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			search_promo_guide_uuid?: string | null
-			title: string
-		}
 		HealthStatus: {
 			db: string
 			redis: string
 			status: string
+		}
+		HomeCategoryDTO: {
+			icon?: null | components['schemas']['MediaDTO']
+			/** Format: uuid */
+			icon_uuid?: string | null
+			/** Format: int32 */
+			id?: number | null
+			link: string
+			slug: string
+			/** Format: int32 */
+			sort_order: number
+			title: string
+		}
+		HomeInteractionItemDTO: {
+			button_text: string
+			/** Format: int32 */
+			id?: number | null
+			is_accent: boolean
+			link: string
+			/** Format: int32 */
+			sort_order: number
+			/** Format: int32 */
+			step_number: number
+			text: string
+			title: string
+		}
+		HomeResponseDTO: {
+			banner_guide?: null | components['schemas']['MediaDTO']
+			/** Format: uuid */
+			banner_guide_uuid?: string | null
+			banner_text: string
+			banner_title: string
+			categories: components['schemas']['HomeCategoryDTO'][]
+			categories_title: string
+			hero_guide?: null | components['schemas']['MediaDTO']
+			/** Format: uuid */
+			hero_guide_uuid?: string | null
+			hero_list_button_text: string
+			hero_map_button_text: string
+			interactions: components['schemas']['HomeInteractionItemDTO'][]
+			interactions_title: string
+			latest_section_button_link: string
+			latest_section_button_text: string
+			latest_section_title: string
+			latest_venues: components['schemas']['Venue'][]
+			popular_section_button_link: string
+			popular_section_button_text: string
+			popular_section_title: string
+			popular_venues: components['schemas']['Venue'][]
+			subtitle: string
+			title: string
 		}
 		InitChunkUploadDTO: {
 			alt?: string | null
@@ -1618,6 +2444,8 @@ export interface components {
 			chunk_size: number
 			convert_to_webp?: boolean | null
 			filename: string
+			/** Format: uuid */
+			folder_id?: string | null
 			source?: string | null
 			tags?: string[] | null
 			title?: string | null
@@ -1632,28 +2460,9 @@ export interface components {
 			/** Format: uuid */
 			upload_id: string
 		}
-		InteractionCardDTO: {
-			button_text: string
-			icon?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			icon_uuid?: string | null
-			link: string
-			text: string
-			title: string
-		}
 		LanguageDTO: {
 			code: string
 			name: string
-		}
-		LeadershipDTO: {
-			description: string
-			items: components['schemas']['LeadershipItemDTO'][]
-			logo: components['schemas']['MediaDTO']
-			title: string
-		}
-		LeadershipItemDTO: {
-			icon: components['schemas']['MediaDTO']
-			text: string
 		}
 		LockInfo: {
 			entity_id: string
@@ -1670,6 +2479,12 @@ export interface components {
 		ManifestDto: {
 			remotes: components['schemas']['RemoteDto'][]
 		}
+		MediaConfigDTO: {
+			cdnUrl?: string | null
+			/** Format: int64 */
+			maxQuota: number
+			publicUrl: string
+		}
 		MediaDTO: {
 			alt?: string | null
 			title?: string | null
@@ -1679,6 +2494,7 @@ export interface components {
 			category?: string | null
 			date_from?: string | null
 			date_to?: string | null
+			folder_id?: string | null
 			/** Format: int32 */
 			limit?: number | null
 			/** Format: int64 */
@@ -1694,15 +2510,31 @@ export interface components {
 			source?: string | null
 			tags?: string | null
 		}
+		MediaFolderDTO: {
+			color?: string | null
+			/** Format: date-time */
+			createdAt: string
+			/** Format: uuid */
+			id: string
+			/** Format: int64 */
+			itemCount?: number | null
+			name: string
+			/** Format: uuid */
+			parentId?: string | null
+		}
 		MediaItemDTO: {
 			alt?: string | null
 			blurhash?: string | null
 			category?: string | null
+			cdnUrl?: string | null
+			contentHash?: string | null
 			/** Format: date-time */
 			createdAt: string
 			dominantColor?: string | null
 			exif?: unknown
 			extension?: string | null
+			/** Format: uuid */
+			folderId?: string | null
 			/** Format: int32 */
 			height?: number | null
 			mediaType: components['schemas']['MediaType']
@@ -1719,6 +2551,11 @@ export interface components {
 			variants?: unknown
 			/** Format: int32 */
 			width?: number | null
+		}
+		MediaTagCountDTO: {
+			/** Format: int64 */
+			count: number
+			tag: string
 		}
 		/** @enum {string} */
 		MediaType: 'image' | 'video' | 'icon' | 'document' | 'archive' | 'other'
@@ -1738,6 +2575,17 @@ export interface components {
 			medium?: null | components['schemas']['MediaVariantDTO']
 			original?: null | components['schemas']['MediaVariantDTO']
 			thumbnail?: null | components['schemas']['MediaVariantDTO']
+		}
+		Menu: {
+			/** Format: date-time */
+			created_at: string
+			/** Format: uuid */
+			id: string
+			items: Record<string, never>
+			location: string
+			name: string
+			/** Format: date-time */
+			updated_at: string
 		}
 		Mfe: {
 			category: string
@@ -1770,24 +2618,24 @@ export interface components {
 			/** Format: date-time */
 			updated_at: string
 		}
-		NewsDTO: {
-			items: components['schemas']['NewsItemDTO'][]
+		Page: {
+			blocks: Record<string, never>
+			/** Format: date-time */
+			created_at: string
+			/** Format: uuid */
+			id: string
+			/** Format: uuid */
+			parent_id?: string | null
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
+			seo: Record<string, never>
+			slug: string
+			status: string
 			title: string
-		}
-		NewsItemDTO: {
-			icon: components['schemas']['MediaDTO']
-			text: string
-		}
-		OpportunitiesDTO: {
-			items: components['schemas']['OpportunityItemDTO'][]
-			title: string
-		}
-		OpportunityItemDTO: {
-			button_text: string
-			icon: components['schemas']['MediaDTO']
-			items: string[]
-			link: string
-			title: string
+			/** Format: date-time */
+			updated_at: string
 		}
 		PaginationDTO: {
 			/** Format: int32 */
@@ -1799,20 +2647,20 @@ export interface components {
 			/** Format: int32 */
 			total_pages?: number | null
 		}
-		PlatformsResponseDTO: {
-			description: string
-			hero_guide?: null | components['schemas']['MediaDTO']
+		Redirect: {
+			/** Format: date-time */
+			created_at: string
+			/** Format: int32 */
+			hits: number
 			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			opportunities: components['schemas']['OpportunitiesDTO']
-			opportunities_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			tools_and_services: components['schemas']['ToolsAndServicesDTO']
-			tools_guide?: null | components['schemas']['MediaDTO']
-			/** Format: uuid */
-			tools_guide_uuid?: string | null
+			id: string
+			is_active: boolean
+			source_path: string
+			/** Format: int32 */
+			status_code: number
+			target_path: string
+			/** Format: date-time */
+			updated_at: string
 		}
 		ReferralDto: {
 			/** Format: int64 */
@@ -1837,10 +2685,6 @@ export interface components {
 			url: string
 			version?: string | null
 		}
-		SearchPromoDTO: {
-			description: string
-			title: string
-		}
 		SendAlertDTO: {
 			level?: string | null
 			message: string
@@ -1858,14 +2702,16 @@ export interface components {
 			/** Format: uuid */
 			visitor_id: string
 		}
-		ToolItemDTO: {
-			text: string
-			title: string
+		SyncBlockTypeItem: {
+			category?: string | null
+			description?: string | null
+			icon?: string | null
+			name: string
+			schema: unknown
+			slug: string
 		}
-		ToolsAndServicesDTO: {
-			items: components['schemas']['ToolItemDTO'][]
-			logo: components['schemas']['MediaDTO']
-			title: string
+		SyncBlockTypesDTO: {
+			blocks: components['schemas']['SyncBlockTypeItem'][]
 		}
 		TrackEventDto: {
 			entity_id?: string | null
@@ -1893,64 +2739,102 @@ export interface components {
 			value: string
 		}
 		TranslationInput: components['schemas']['CreateTranslationDTO'] | components['schemas']['CreateTranslationDTO'][]
-		UpdateAboutDTO: {
-			description: string
+		/**
+		 * @description One content entry/field that references a translation key (see
+		 *     content_translation_refs, synced from admin-panel/packages/i18n's tag format
+		 *     and the TranslationKeyMark Tiptap mark by server/src/content/translation_refs.rs).
+		 */
+		TranslationRefDTO: {
 			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			leadership_description: string
-			/** Format: uuid */
-			leadership_guide_uuid?: string | null
-			leadership_items: components['schemas']['UpdateLeadershipItemDTO'][]
-			/** Format: uuid */
-			leadership_logo_uuid?: string | null
-			leadership_title: string
-			/** Format: uuid */
-			news_guide_uuid?: string | null
-			news_items: components['schemas']['UpdateNewsItemDTO'][]
-			news_title: string
-			opportunities: components['schemas']['UpdateOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			who_we_are: components['schemas']['UpdateWhoWeAreItemDTO'][]
-			/** Format: uuid */
-			who_we_are_guide_uuid?: string | null
+			content_entry_id: string
+			entry_slug: string
+			field_path: string
+			schema_name: string
+			schema_slug: string
+		}
+		UpdateBlockTypeDTO: {
+			category?: string | null
+			description?: string | null
+			icon?: string | null
+			name?: string | null
+			schema?: unknown
 		}
 		UpdateContentEntryDTO: {
 			data?: unknown
 			i18n?: unknown
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
 			slug?: string | null
 			status?: null | components['schemas']['ContentEntryStatus']
 		}
-		UpdateGuestsDTO: {
-			additional_services: components['schemas']['AdditionalServiceDTO'][]
+		UpdateFolderDTO: {
+			color?: string | null
+			name?: string | null
 			/** Format: uuid */
-			additional_services_guide_uuid?: string | null
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			interaction_cards: components['schemas']['InteractionCardDTO'][]
-			/** Format: uuid */
-			interaction_cards_guide_uuid?: string | null
-			opportunities: components['schemas']['GuestOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			search_promo: components['schemas']['SearchPromoDTO']
-			/** Format: uuid */
-			search_promo_guide_uuid?: string | null
-			title: string
+			parentId?: string | null
 		}
-		UpdateLeadershipItemDTO: {
+		UpdateHomeCategoryDTO: {
 			/** Format: uuid */
 			icon_uuid?: string | null
+			/** Format: int32 */
+			id?: number | null
+			link: string
+			slug: string
+			/** Format: int32 */
+			sort_order?: number | null
+			title: string
+		}
+		UpdateHomeDTO: {
+			/** Format: uuid */
+			banner_guide_uuid?: string | null
+			banner_text?: string | null
+			banner_title?: string | null
+			categories?: components['schemas']['UpdateHomeCategoryDTO'][] | null
+			categories_title?: string | null
+			/** Format: uuid */
+			hero_guide_uuid?: string | null
+			hero_list_button_text?: string | null
+			hero_map_button_text?: string | null
+			interactions?: components['schemas']['UpdateHomeInteractionDTO'][] | null
+			interactions_title?: string | null
+			latest_section_button_link?: string | null
+			latest_section_button_text?: string | null
+			latest_section_title?: string | null
+			popular_section_button_link?: string | null
+			popular_section_button_text?: string | null
+			popular_section_title?: string | null
+			subtitle?: string | null
+			title?: string | null
+		}
+		UpdateHomeInteractionDTO: {
+			button_text: string
+			/** Format: int32 */
+			id?: number | null
+			is_accent?: boolean | null
+			link: string
+			/** Format: int32 */
+			sort_order?: number | null
+			/** Format: int32 */
+			step_number: number
 			text: string
+			title: string
 		}
 		UpdateMediaDTO: {
 			alt?: string | null
 			category?: string | null
 			extension?: string | null
+			/** Format: uuid */
+			folderId?: string | null
 			name?: string | null
 			tags?: string[] | null
 			title?: string | null
+		}
+		UpdateMenuDTO: {
+			items?: unknown
+			location?: string | null
+			name?: string | null
 		}
 		UpdateMfeDto: {
 			category?: string | null
@@ -1965,43 +2849,32 @@ export interface components {
 			url?: string | null
 			version?: string | null
 		}
-		UpdateNewsItemDTO: {
+		UpdatePageDTO: {
+			blocks?: unknown
+			clear_parent?: boolean | null
 			/** Format: uuid */
-			icon_uuid?: string | null
-			text: string
+			parent_id?: string | null
+			/** Format: date-time */
+			published_at?: string | null
+			/** Format: uuid */
+			published_by?: string | null
+			seo?: unknown
+			slug?: string | null
+			status?: string | null
+			title?: string | null
 		}
-		UpdateOpportunityItemDTO: {
-			button_text: string
-			/** Format: uuid */
-			icon_uuid?: string | null
-			items: string[]
-			link: string
-			title: string
-		}
-		UpdatePlatformsDTO: {
-			description: string
-			/** Format: uuid */
-			hero_guide_uuid?: string | null
-			opportunities: components['schemas']['UpdateOpportunityItemDTO'][]
-			/** Format: uuid */
-			opportunities_guide_uuid?: string | null
-			title: string
-			/** Format: uuid */
-			tools_guide_uuid?: string | null
-			tools_items: components['schemas']['UpdateToolItemDTO'][]
-			/** Format: uuid */
-			tools_logo_uuid?: string | null
-			tools_title: string
+		UpdateRedirectDTO: {
+			is_active?: boolean | null
+			source_path?: string | null
+			/** Format: int32 */
+			status_code?: number | null
+			target_path?: string | null
 		}
 		UpdateSchemaDTO: {
 			fields?: components['schemas']['FieldDefinition'][] | null
 			is_singleton?: boolean | null
 			name?: string | null
 			slug?: string | null
-		}
-		UpdateToolItemDTO: {
-			text: string
-			title: string
 		}
 		UpdateUserDTO: {
 			avatar?: string | null
@@ -2020,11 +2893,63 @@ export interface components {
 			status?: null | components['schemas']['UserStatus']
 			street?: string | null
 		}
-		UpdateWhoWeAreItemDTO: {
-			description: string
-			/** Format: uuid */
-			image_uuid?: string | null
-			title: string
+		UpdateVenueDTO: {
+			address?: string | null
+			area_sqm?: string | null
+			/** Format: int32 */
+			average_check?: number | null
+			/** Format: int32 */
+			banquet_price_from?: number | null
+			capacity_banquet?: string | null
+			capacity_buffet?: string | null
+			capacity_theater?: string | null
+			city?: string | null
+			/** Format: double */
+			coordinates_lat?: number | null
+			/** Format: double */
+			coordinates_lng?: number | null
+			corkage_fee_desc?: string | null
+			corkage_fee_has?: boolean | null
+			cuisines?: string[] | null
+			description_html?: string | null
+			equipment?: string[] | null
+			faq?: null | components['schemas']['Value']
+			features?: string[] | null
+			feed?: null | components['schemas']['Value']
+			gallery_photos?: string[] | null
+			halls?: null | components['schemas']['Value']
+			/** Format: int32 */
+			halls_count?: number | null
+			has_online_tour?: boolean | null
+			menu_photos?: string[] | null
+			menu_url?: string | null
+			/** Format: int32 */
+			metro_distance_minutes?: number | null
+			metro_distance_text?: string | null
+			metro_line_color?: string | null
+			metro_station?: string | null
+			parking?: string | null
+			phone?: string | null
+			price_level?: string | null
+			pricing_table?: null | components['schemas']['Value']
+			/** Format: int32 */
+			rating_reviews_count?: number | null
+			/** Format: double */
+			rating_score?: number | null
+			/** Format: int32 */
+			rent_price_hour?: number | null
+			reviews?: null | components['schemas']['Value']
+			rider_url?: string | null
+			rooms?: null | components['schemas']['Value']
+			services?: string[] | null
+			slug?: string | null
+			status?: string | null
+			subtitle?: string | null
+			title?: string | null
+			venue_types?: string[] | null
+			video_tour_url?: string | null
+			working_hours_weekdays?: string | null
+			working_hours_weekends?: string | null
 		}
 		UserResponseDTO: {
 			avatar?: string | null
@@ -2051,10 +2976,70 @@ export interface components {
 		UserRole: 'superadmin' | 'admin' | 'editor' | 'user'
 		/** @enum {string} */
 		UserStatus: 'active' | 'inactive' | 'in_moderation'
-		WhoWeAreItemDTO: {
-			description: string
-			image: components['schemas']['MediaDTO']
+		Value: unknown
+		Venue: {
+			address: string
+			area_sqm?: string | null
+			/** Format: int32 */
+			average_check?: number | null
+			/** Format: int32 */
+			banquet_price_from?: number | null
+			capacity_banquet?: string | null
+			capacity_buffet?: string | null
+			capacity_theater?: string | null
+			city: string
+			/** Format: double */
+			coordinates_lat?: number | null
+			/** Format: double */
+			coordinates_lng?: number | null
+			corkage_fee_desc?: string | null
+			corkage_fee_has?: boolean | null
+			/** Format: date-time */
+			created_at: string
+			cuisines?: string[] | null
+			description_html?: string | null
+			equipment?: string[] | null
+			faq?: null | components['schemas']['Value']
+			features?: string[] | null
+			feed?: null | components['schemas']['Value']
+			gallery_photos?: string[] | null
+			halls?: null | components['schemas']['Value']
+			/** Format: int32 */
+			halls_count?: number | null
+			has_online_tour?: boolean | null
+			/** Format: uuid */
+			id: string
+			menu_photos?: string[] | null
+			menu_url?: string | null
+			/** Format: int32 */
+			metro_distance_minutes?: number | null
+			metro_distance_text?: string | null
+			metro_line_color?: string | null
+			metro_station?: string | null
+			parking?: string | null
+			phone?: string | null
+			price_level?: string | null
+			pricing_table?: null | components['schemas']['Value']
+			/** Format: int32 */
+			rating_reviews_count?: number | null
+			/** Format: double */
+			rating_score?: number | null
+			/** Format: int32 */
+			rent_price_hour?: number | null
+			reviews?: null | components['schemas']['Value']
+			rider_url?: string | null
+			rooms?: null | components['schemas']['Value']
+			services?: string[] | null
+			slug: string
+			status: string
+			subtitle?: string | null
 			title: string
+			/** Format: date-time */
+			updated_at: string
+			venue_types?: string[] | null
+			video_tour_url?: string | null
+			working_hours_weekdays?: string | null
+			working_hours_weekends?: string | null
 		}
 	}
 	responses: never
@@ -2065,70 +3050,6 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-	get_about: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody?: never
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_AboutResponseDTO']
-				}
-			}
-		}
-	}
-	update_about: {
-		parameters: {
-			query?: never
-			header?: never
-			path?: never
-			cookie?: never
-		}
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateAboutDTO']
-			}
-		}
-		responses: {
-			/** @description About page updated */
-			200: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-			/** @description Database error */
-			500: {
-				headers: {
-					[name: string]: unknown
-				}
-				content?: never
-			}
-		}
-	}
 	get_engagement_stats: {
 		parameters: {
 			query?: {
@@ -2341,6 +3262,15 @@ export interface operations {
 					'application/json': components['schemas']['ApiResponse_AuthResponseDTO']
 				}
 			}
+			/** @description Слишком много неудачных попыток входа */
+			429: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_AuthResponseDTO']
+				}
+			}
 			/** @description Ошибка базы данных */
 			500: {
 				headers: {
@@ -2361,7 +3291,7 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['AuthResponseDTO']
+				'application/json': components['schemas']['AuthRefreshTokenDTO']
 			}
 		}
 		responses: {
@@ -2537,6 +3467,182 @@ export interface operations {
 				content?: never
 			}
 			/** @description Ошибка сервера */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_block_types: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_BlockType']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	create_block_type: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateBlockTypeDTO']
+			}
+		}
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_BlockType']
+				}
+			}
+			/** @description Bad Request */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	sync_block_types: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SyncBlockTypesDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_BlockType']
+				}
+			}
+			/** @description Bad Request */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_block_type: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Block Type ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Value']
+				}
+			}
+			/** @description Block type not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_block_type: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Block Type ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateBlockTypeDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_BlockType']
+				}
+			}
+			/** @description Block type not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
 			500: {
 				headers: {
 					[name: string]: unknown
@@ -3103,7 +4209,7 @@ export interface operations {
 			}
 		}
 	}
-	get_guests: {
+	get_home: {
 		parameters: {
 			query?: never
 			header?: never
@@ -3117,7 +4223,7 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['ApiResponse_GuestsResponseDTO']
+					'application/json': components['schemas']['ApiResponse_HomeResponseDTO']
 				}
 			}
 			500: {
@@ -3125,12 +4231,12 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['ApiResponse_GuestsResponseDTO']
+					'application/json': components['schemas']['ApiResponse_HomeResponseDTO']
 				}
 			}
 		}
 	}
-	update_guests: {
+	update_home: {
 		parameters: {
 			query?: never
 			header?: never
@@ -3139,27 +4245,37 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['UpdateGuestsDTO']
+				'application/json': components['schemas']['UpdateHomeDTO']
 			}
 		}
 		responses: {
-			/** @description Guests page updated */
 			200: {
 				headers: {
 					[name: string]: unknown
 				}
-				content?: never
+				content: {
+					'application/json': components['schemas']['ApiResponse_HomeResponseDTO']
+				}
 			}
-			/** @description Database error */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_HomeResponseDTO']
+				}
+			}
 			500: {
 				headers: {
 					[name: string]: unknown
 				}
-				content?: never
+				content: {
+					'application/json': components['schemas']['ApiResponse_HomeResponseDTO']
+				}
 			}
 		}
 	}
-	get_all: {
+	get_all_translations: {
 		parameters: {
 			query: {
 				/** @description Locale code, e.g. 'en', 'ru' */
@@ -3310,7 +4426,37 @@ export interface operations {
 			}
 		}
 	}
-	delete_one: {
+	get_refs: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Translation key */
+				key: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Content entries/fields referencing this key */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_TranslationRefDTO']
+				}
+			}
+			/** @description Database error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_translation_by_key_locale: {
 		parameters: {
 			query?: never
 			header?: never
@@ -3535,6 +4681,198 @@ export interface operations {
 			}
 		}
 	}
+	batch_move_media: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BatchMoveMediaDTO']
+			}
+		}
+		responses: {
+			/** @description Media items moved successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_u64']
+				}
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_media_config: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Media service configuration including CDN prefix */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_MediaConfigDTO']
+				}
+			}
+		}
+	}
+	get_media_folders: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description List of media folders with item counts */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_MediaFolderDTO']
+				}
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	create_media_folder: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateFolderDTO']
+			}
+		}
+		responses: {
+			/** @description Folder created successfully */
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_MediaFolderDTO']
+				}
+			}
+			/** @description Invalid folder payload */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_media_folder: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateFolderDTO']
+			}
+		}
+		responses: {
+			/** @description Folder updated successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_MediaFolderDTO']
+				}
+			}
+			/** @description Folder not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_media_folder: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Folder deleted successfully */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_bool']
+				}
+			}
+			/** @description Folder not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal server error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
 	bulk_optimize_media: {
 		parameters: {
 			query?: never
@@ -3558,6 +4896,33 @@ export interface operations {
 				}
 			}
 			/** @description Optimization error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_media_tags: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description List of all media tags with usage count */
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_MediaTagCountDTO']
+				}
+			}
+			/** @description Internal server error */
 			500: {
 				headers: {
 					[name: string]: unknown
@@ -3873,7 +5238,226 @@ export interface operations {
 			}
 		}
 	}
-	get_all: {
+	get_media_variant: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Media UUID */
+				uuid: string
+				/** @description Variant size: thumbnail, medium, large, original */
+				size: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			/** @description Redirect to variant URL */
+			307: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Invalid variant size */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Media not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_menus: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_Menu']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	create_menu: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateMenuDTO']
+			}
+		}
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Menu']
+				}
+			}
+			/** @description Bad Request */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_menu_by_location: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Menu identifier (ID or location slug like header, footer, sidebar) */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Menu']
+				}
+			}
+			/** @description Menu not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_menu: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Menu ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Value']
+				}
+			}
+			/** @description Menu not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_menu: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Menu ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateMenuDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Menu']
+				}
+			}
+			/** @description Menu not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_all_mfes: {
 		parameters: {
 			query?: never
 			header?: never
@@ -3900,7 +5484,7 @@ export interface operations {
 			}
 		}
 	}
-	create: {
+	create_mfe: {
 		parameters: {
 			query?: never
 			header?: never
@@ -3963,7 +5547,7 @@ export interface operations {
 			}
 		}
 	}
-	update: {
+	update_mfe: {
 		parameters: {
 			query?: never
 			header?: never
@@ -4002,7 +5586,7 @@ export interface operations {
 			}
 		}
 	}
-	delete_one: {
+	delete_mfe_by_id: {
 		parameters: {
 			query?: never
 			header?: never
@@ -4037,7 +5621,222 @@ export interface operations {
 			}
 		}
 	}
-	get_platforms: {
+	get_pages: {
+		parameters: {
+			query?: {
+				status?: string | null
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_Page']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	create_page: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreatePageDTO']
+			}
+		}
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Page']
+				}
+			}
+			/** @description Bad Request */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_page: {
+		parameters: {
+			query?: {
+				preview?: boolean | null
+			}
+			header?: never
+			path: {
+				/** @description Page ID or slug */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Page']
+				}
+			}
+			/** @description Page not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_page: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Page ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Value']
+				}
+			}
+			/** @description Page not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_page: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Page ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdatePageDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Page']
+				}
+			}
+			/** @description Page not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_page_breadcrumbs: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Page ID or slug */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Vec_BreadcrumbItem']
+				}
+			}
+			/** @description Page not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_redirects: {
 		parameters: {
 			query?: never
 			header?: never
@@ -4051,28 +5850,19 @@ export interface operations {
 					[name: string]: unknown
 				}
 				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
+					'application/json': components['schemas']['ApiResponse_Vec_Redirect']
 				}
 			}
-			404: {
-				headers: {
-					[name: string]: unknown
-				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
-				}
-			}
+			/** @description Internal Server Error */
 			500: {
 				headers: {
 					[name: string]: unknown
 				}
-				content: {
-					'application/json': components['schemas']['ApiResponse_PlatformsResponseDTO']
-				}
+				content?: never
 			}
 		}
 	}
-	update_platforms: {
+	create_redirect: {
 		parameters: {
 			query?: never
 			header?: never
@@ -4081,18 +5871,130 @@ export interface operations {
 		}
 		requestBody: {
 			content: {
-				'application/json': components['schemas']['UpdatePlatformsDTO']
+				'application/json': components['schemas']['CreateRedirectDTO']
 			}
 		}
 		responses: {
-			/** @description Platforms page updated */
-			200: {
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Redirect']
+				}
+			}
+			/** @description Bad Request */
+			400: {
 				headers: {
 					[name: string]: unknown
 				}
 				content?: never
 			}
-			/** @description Database error */
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	check_redirect: {
+		parameters: {
+			query: {
+				path: string
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_CheckRedirectResponse']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_redirect: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Redirect ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Value']
+				}
+			}
+			/** @description Redirect not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_redirect: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Redirect ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateRedirectDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Redirect']
+				}
+			}
+			/** @description Redirect not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
 			500: {
 				headers: {
 					[name: string]: unknown
@@ -4393,6 +6295,212 @@ export interface operations {
 				content?: never
 			}
 			/** @description Ошибка базы данных */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_venues: {
+		parameters: {
+			query?: {
+				/** @description Search query for title, address, or metro */
+				search?: string
+				/** @description Status filter (e.g. published, draft, all) */
+				status?: string
+				/** @description Comma-separated venue types (e.g. 'Банкетный зал,Лофт') */
+				venue_types?: string
+				/** @description Comma-separated features (e.g. 'Летняя веранда,Парковая зона') */
+				features?: string
+				/** @description City filter (e.g. 'Москва') */
+				city?: string
+				/** @description Metro station name filter */
+				metro_station?: string
+				/** @description Minimum price/average check */
+				min_price?: number
+				/** @description Maximum price/average check */
+				max_price?: number
+				/** @description Minimum capacity */
+				min_capacity?: number
+				/** @description Maximum capacity */
+				max_capacity?: number
+				/** @description Filter venues with online 3D tour */
+				has_online_tour?: boolean
+				/** @description Sort field ('created_at', 'average_check', 'rating_score', 'title') */
+				sort_by?: string
+				/** @description Sort order ('asc' or 'desc') */
+				sort_order?: string
+				/** @description Page number (1-based, default: 1) */
+				page?: number
+				/** @description Items per page (default: 10, max: 100) */
+				limit?: number
+			}
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponseWithPagination_Venue']
+				}
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	create_venue: {
+		parameters: {
+			query?: never
+			header?: never
+			path?: never
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateVenueDTO']
+			}
+		}
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Venue']
+				}
+			}
+			/** @description Invalid payload */
+			400: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	get_venue_by_id_or_slug: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Venue ID (UUID) or unique slug */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Venue']
+				}
+			}
+			/** @description Venue not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	delete_venue: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Venue ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody?: never
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_bool']
+				}
+			}
+			/** @description Venue not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
+			500: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+		}
+	}
+	update_venue: {
+		parameters: {
+			query?: never
+			header?: never
+			path: {
+				/** @description Venue ID */
+				id: string
+			}
+			cookie?: never
+		}
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateVenueDTO']
+			}
+		}
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown
+				}
+				content: {
+					'application/json': components['schemas']['ApiResponse_Venue']
+				}
+			}
+			/** @description Venue not found */
+			404: {
+				headers: {
+					[name: string]: unknown
+				}
+				content?: never
+			}
+			/** @description Internal Server Error */
 			500: {
 				headers: {
 					[name: string]: unknown

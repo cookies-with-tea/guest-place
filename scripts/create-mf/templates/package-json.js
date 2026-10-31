@@ -8,6 +8,7 @@ export function getPackageJson(name) {
 			dev: 'vite',
 			build: 'tsc -b && vite build',
 			preview: 'vite preview',
+			'type-check': 'vue-tsc --build',
 			'test:unit': 'vitest run',
 			oxlint: 'oxlint',
 			'oxlint:fix': 'oxlint --fix',
@@ -33,7 +34,7 @@ export function getPackageJson(name) {
 			'@admin-panel/typescript-config': 'workspace:*',
 			'@types/node': '^24.9.2',
 			'@vitejs/plugin-vue': '^6.0.1',
-			typescript: '^7.0.2',
+			typescript: '^5.9.3',
 			vite: '^7.1.7',
 		},
 	}

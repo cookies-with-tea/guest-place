@@ -5,6 +5,7 @@ export interface SearchResult {
 	category: string
 	path: string
 	icon?: string
+	parent?: string
 	metadata?: Record<string, any>
 }
 

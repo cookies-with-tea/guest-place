@@ -30,7 +30,7 @@
 		"sass": "^1.93.2",
 		"start-server-and-test": "^2.1.2",
 		"stylelint": "^16.25.0",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7",
 		"vite-plugin-vue-devtools": "^8.0.2",
 		"vitest": "^3.2.4",

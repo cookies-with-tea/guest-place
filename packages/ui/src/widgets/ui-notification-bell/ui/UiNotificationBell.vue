@@ -149,14 +149,14 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 }
 
 .bell-btn {
-	border-color: var(--gp-border-color, rgba(255, 255, 255, 0.12));
+	border-color: var(--gp-border-color, rgb(255, 255, 255, 0.12));
 	color: var(--gp-text-secondary, #94a3b8);
 	background: transparent;
 	transition: all 0.2s ease;
 
 	&:hover {
 		color: var(--gp-primary, #6366f1);
-		background: var(--gp-bg-glass-hover, rgba(255, 255, 255, 0.06));
+		background: var(--gp-bg-glass-hover, rgb(255, 255, 255, 0.06));
 	}
 
 	&.has-unread {
@@ -165,22 +165,22 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 }
 
 .connection-dot {
-	position: absolute;
-	bottom: 0;
 	right: 0;
+	bottom: 0;
 	width: 8px;
 	height: 8px;
-	border-radius: 50%;
+	position: absolute;
 	border: 1.5px solid var(--gp-bg-main, #0f172a);
+	border-radius: 50%;
 
 	&.connected {
+		box-shadow: 0 0 6px rgb(16, 185, 129, 0.8);
 		background: #10b981;
-		box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
 	}
 
 	&.connecting {
+		box-shadow: 0 0 6px rgb(245, 158, 11, 0.8);
 		background: #f59e0b;
-		box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
 	}
 
 	&.disconnected {
@@ -189,17 +189,17 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 }
 
 .notifications-panel {
+	max-height: 420px;
 	display: flex;
 	flex-direction: column;
-	max-height: 420px;
 }
 
 .panel-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	border-bottom: 1px solid var(--gp-border-color, rgb(255, 255, 255, 0.08));
 	padding-bottom: 12px;
-	border-bottom: 1px solid var(--gp-border-color, rgba(255, 255, 255, 0.08));
 
 	&__left {
 		display: flex;
@@ -223,11 +223,11 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 .status-indicator {
 	display: inline-flex;
 	align-items: center;
-	gap: 5px;
-	font-size: 0.72rem;
-	padding: 2px 7px;
 	border-radius: 999px;
 	font-weight: 500;
+	font-size: 0.72rem;
+	padding: 2px 7px;
+	gap: 5px;
 
 	.pulse-dot {
 		width: 6px;
@@ -237,16 +237,18 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 
 	&.connected {
 		color: #10b981;
-		background: rgba(16, 185, 129, 0.12);
+		background: rgb(16, 185, 129, 0.12);
+
 		.pulse-dot {
-			background: #10b981;
 			box-shadow: 0 0 5px #10b981;
+			background: #10b981;
 		}
 	}
 
 	&.connecting {
 		color: #f59e0b;
-		background: rgba(245, 158, 11, 0.12);
+		background: rgb(245, 158, 11, 0.12);
+
 		.pulse-dot {
 			background: #f59e0b;
 		}
@@ -254,7 +256,8 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 
 	&.disconnected {
 		color: #94a3b8;
-		background: rgba(148, 163, 184, 0.12);
+		background: rgb(148, 163, 184, 0.12);
+
 		.pulse-dot {
 			background: #94a3b8;
 		}
@@ -266,9 +269,9 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 36px 16px;
 	text-align: center;
 	color: var(--gp-text-secondary, #94a3b8);
+	padding: 36px 16px;
 
 	.empty-icon {
 		font-size: 2rem;
@@ -278,8 +281,8 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 
 	p {
 		font-weight: 500;
-		margin: 0 0 4px;
 		color: var(--gp-text-main, #f8fafc);
+		margin: 0 0 4px;
 	}
 
 	span {
@@ -289,70 +292,70 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 }
 
 .notifications-list {
+	max-height: 340px;
 	display: flex;
 	flex-direction: column;
-	overflow-y: auto;
-	max-height: 340px;
 	padding-top: 6px;
+	overflow-y: auto;
 }
 
 .notification-item {
 	position: relative;
 	display: flex;
 	align-items: flex-start;
-	gap: 12px;
-	padding: 10px 12px;
 	border-radius: 8px;
-	cursor: pointer;
 	transition: background 0.15s ease;
+	cursor: pointer;
+	padding: 10px 12px;
+	gap: 12px;
 
 	&:hover {
-		background: var(--gp-bg-glass-hover, rgba(255, 255, 255, 0.05));
+		background: var(--gp-bg-glass-hover, rgb(255, 255, 255, 0.05));
 	}
 
 	&.is-unread {
-		background: rgba(99, 102, 241, 0.06);
+		background: rgb(99, 102, 241, 0.06);
 
 		&:hover {
-			background: rgba(99, 102, 241, 0.1);
+			background: rgb(99, 102, 241, 0.1);
 		}
 	}
 }
 
 .item-icon {
-	flex-shrink: 0;
 	width: 32px;
 	height: 32px;
-	border-radius: 8px;
 	display: flex;
+	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
+	border-radius: 8px;
 	font-size: 1rem;
 
 	&.guest_registered {
 		color: #10b981;
-		background: rgba(16, 185, 129, 0.12);
+		background: rgb(16, 185, 129, 0.12);
 	}
 
 	&.media_uploaded {
 		color: #3b82f6;
-		background: rgba(59, 130, 246, 0.12);
+		background: rgb(59, 130, 246, 0.12);
 	}
 
 	&.system_alert {
 		color: #f59e0b;
-		background: rgba(245, 158, 11, 0.12);
+		background: rgb(245, 158, 11, 0.12);
 	}
 
 	&.content_updated {
 		color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.12);
+		background: rgb(139, 92, 246, 0.12);
 	}
 }
 
 .item-body {
-	flex: 1;
 	min-width: 0;
+	flex: 1;
 }
 
 .item-title-row {
@@ -363,39 +366,39 @@ const handleNotificationClick = (item: IRealtimeNotification) => {
 }
 
 .item-title {
-	font-size: 0.85rem;
 	font-weight: 600;
+	font-size: 0.85rem;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 	color: var(--gp-text-main, #f8fafc);
 	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 .item-time {
+	flex-shrink: 0;
 	font-size: 0.72rem;
 	color: var(--gp-text-secondary, #94a3b8);
-	flex-shrink: 0;
 	margin-left: 8px;
 }
 
 .item-message {
-	font-size: 0.8rem;
-	margin: 0;
-	color: var(--gp-text-secondary, #94a3b8);
-	line-height: 1.35;
 	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
+	font-size: 0.8rem;
+	line-height: 1.35;
+	color: var(--gp-text-secondary, #94a3b8);
+	margin: 0;
 	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
 }
 
 .unread-dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
-	background: var(--gp-primary, #6366f1);
-	position: absolute;
 	top: 14px;
 	right: 8px;
+	width: 7px;
+	height: 7px;
+	position: absolute;
+	border-radius: 50%;
+	background: var(--gp-primary, #6366f1);
 }
 </style>

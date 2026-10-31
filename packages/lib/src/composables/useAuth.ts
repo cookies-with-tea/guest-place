@@ -17,7 +17,6 @@ export interface IAuthUser {
 
 export interface IAuthTokens {
 	accessToken: string
-	refreshToken: string
 }
 
 function getStoredUser(): IAuthUser | null {
@@ -32,22 +31,19 @@ function getStoredUser(): IAuthUser | null {
 
 const user = ref<IAuthUser | null>(getStoredUser())
 const accessToken = ref<string | null>(isBrowser ? localStorage.getItem('gp_access_token') : null)
-const refreshToken = ref<string | null>(isBrowser ? localStorage.getItem('gp_refresh_token') : null)
 
 export function useAuth() {
 	const isAuthenticated = computed(() => !!accessToken.value)
 
 	const isAdmin = computed(() => user.value?.role === 'admin')
 
+	// refresh_token больше не проходит через JS: сервер выставляет его как HttpOnly-cookie
+	// (см. server/src/auth/cookies.rs) — читать и хранить его здесь уже нельзя и не нужно.
 	const setTokens = (tokens: IAuthTokens) => {
 		accessToken.value = tokens.accessToken
 
-		refreshToken.value = tokens.refreshToken
-
 		if (isBrowser) {
 			localStorage.setItem('gp_access_token', tokens.accessToken)
-
-			localStorage.setItem('gp_refresh_token', tokens.refreshToken)
 		}
 	}
 
@@ -56,12 +52,8 @@ export function useAuth() {
 
 		accessToken.value = null
 
-		refreshToken.value = null
-
 		if (isBrowser) {
 			localStorage.removeItem('gp_access_token')
-
-			localStorage.removeItem('gp_refresh_token')
 
 			const notCanceled = dispatch(GP_EVENTS.UNAUTHORIZED, {
 				pathname: window.location.pathname,
@@ -83,7 +75,6 @@ export function useAuth() {
 	return {
 		user,
 		accessToken,
-		refreshToken,
 		isAuthenticated,
 		isAdmin,
 		setTokens,

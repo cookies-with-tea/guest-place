@@ -1,12 +1,9 @@
 export function getMainTs(name) {
-	return `import { app } from './app'
-import { initRouter } from './app/router'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+	const mfName = name.replace(/^admin-/, '')
+	const mountId = `__MF_${mfName.toUpperCase().replace(/-/g, '_')}__`
 
-const router = await initRouter(app)
-app.use(router).use(ElementPlus)
+	return `import { app } from '#app/index'
 
-app.mount('#app')
+app.mount('#${mountId}')
 `
 }

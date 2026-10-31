@@ -182,6 +182,7 @@ const routesToSidebar = (groups: any[]) => {
 				title: processed.title || group.title,
 				path: processed.path,
 				icon: group.icon,
+				mfeName: group.name,
 				children: processed.children,
 			}
 		}
@@ -189,6 +190,7 @@ const routesToSidebar = (groups: any[]) => {
 		return {
 			title: group.title,
 			icon: group.icon,
+			mfeName: group.name,
 			children: visibleRoutes.map((r: any) => processRoute(r, group.config)),
 		}
 	})

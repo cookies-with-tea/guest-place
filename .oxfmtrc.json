@@ -22,6 +22,7 @@
 		"stylelint_output.txt",
 		"*.html",
 		"pnpm-lock.yaml",
-		"**/sprite/sprite.ts"
+		"**/sprite/sprite.ts",
+		"**/*.{png,jpg,jpeg,gif,webp,svg,ico,pdf,woff,woff2,ttf,eot}"
 	]
 }

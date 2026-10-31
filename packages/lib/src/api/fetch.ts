@@ -53,6 +53,12 @@ export const createApi = (entityName: string) => {
 				body,
 				params,
 				responseType: 'json',
+				// credentials: 'include' — refresh_token больше не приходит в теле ответа
+				// (server/src/auth/cookies.rs переносит его в HttpOnly-cookie), браузер должен
+				// слать эту cookie и на /refresh, и на /logout даже когда админка и сервер на
+				// разных портах в dev (localhost:4173 -> localhost:8000 — разные origin, но
+				// credentials: 'include' всё равно нужен явно).
+				credentials: 'include',
 				headers: {
 					...options?.headers,
 					Authorization: token ? `Bearer ${token}` : '',
@@ -62,7 +68,7 @@ export const createApi = (entityName: string) => {
 			return snakeToCamel(response) as IResponse<CamelCasedProperties<T>>
 		} catch (error: any) {
 			const errors = error.data?.errors ? snakeToCamel(error.data.errors) : {}
-			const messages = error.data?.messages ? snakeToCamel(error.data.messages) : []
+			const messages = error.data?.messages ? (snakeToCamel(error.data.messages) as string[]) : []
 
 			if (error.statusCode === 401 || error.statusCode === 403) {
 				if (isBrowser) {

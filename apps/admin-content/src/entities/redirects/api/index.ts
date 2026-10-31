@@ -2,33 +2,33 @@ import { createApi } from '@admin-panel/lib'
 
 export interface RedirectItem {
 	id: string
-	source_path: string
-	target_path: string
-	status_code: number
-	is_active: boolean
+	sourcePath: string
+	targetPath: string
+	statusCode: number
+	isActive: boolean
 	hits: number
-	created_at: string
-	updated_at: string
+	createdAt: string
+	updatedAt: string
 }
 
 export interface CreateRedirectDTO {
-	source_path: string
-	target_path: string
-	status_code?: number
-	is_active?: boolean
+	sourcePath: string
+	targetPath: string
+	statusCode?: number
+	isActive?: boolean
 }
 
 export interface UpdateRedirectDTO {
-	source_path?: string
-	target_path?: string
-	status_code?: number
-	is_active?: boolean
+	sourcePath?: string
+	targetPath?: string
+	statusCode?: number
+	isActive?: boolean
 }
 
 export interface CheckRedirectResponse {
 	matched: boolean
-	target_path?: string
-	status_code?: number
+	targetPath?: string
+	statusCode?: number
 }
 
 const { fetchData: fetchRedirects } = createApi('redirects')

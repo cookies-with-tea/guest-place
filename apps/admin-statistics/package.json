@@ -17,7 +17,7 @@
 		"@admin-panel/typescript-config": "workspace:*",
 		"@types/node": "^24.9.2",
 		"npm-run-all2": "^8.0.4",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7",
 		"vue-tsc": "^3.1.0"
 	},
@@ -37,7 +37,8 @@
 		"test:coverage": "vitest run --coverage --passWithNoTests",
 		"test:e2e": "start-server-and-test 'vite dev' http://localhost:4174 'cypress run --e2e'",
 		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4174 'cypress open --e2e'",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

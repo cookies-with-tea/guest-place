@@ -139,7 +139,7 @@ onMounted(async () => {
 	font-size: 11px;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	color: var(--gp-text-muted);
+	color: var(--text-muted);
 	padding: 8px 12px 4px;
 }
 
@@ -167,7 +167,7 @@ onMounted(async () => {
 
 	&:hover {
 		color: var(--gp-primary);
-		background: var(--gp-primary-light-9);
+		background: var(--gp-primary-light);
 	}
 
 	&.is-active {

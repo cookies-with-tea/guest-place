@@ -20,7 +20,7 @@
 		"@vue/test-utils": "^2.4.6",
 		"jsdom": "^27.0.0",
 		"npm-run-all2": "^8.0.4",
-		"typescript": "^7.0.2",
+		"typescript": "^5.9.3",
 		"vite": "^7.1.7",
 		"vitest": "^3.2.4",
 		"vue-tsc": "^3.1.0"
@@ -38,7 +38,8 @@
 		"preview": "vite preview",
 		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
 		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
-		"test:unit": "vitest --passWithNoTests"
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
 	},
 	"type": "module"
 }

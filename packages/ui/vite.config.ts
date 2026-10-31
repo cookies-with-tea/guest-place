@@ -32,6 +32,8 @@ export default defineConfig({
 				'@admin-panel/i18n',
 				'@tanstack/vue-query',
 				'@element-plus/icons-vue',
+				'echarts',
+				'vue-echarts',
 			],
 			output: {
 				globals: {
@@ -40,6 +42,8 @@ export default defineConfig({
 					'element-plus': 'ElementPlus',
 					'@admin-panel/lib': 'GpLib',
 					'@admin-panel/i18n': 'GpI18n',
+					echarts: 'echarts',
+					'vue-echarts': 'VueECharts',
 				},
 			},
 		},

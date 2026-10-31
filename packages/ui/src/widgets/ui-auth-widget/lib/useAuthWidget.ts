@@ -83,7 +83,6 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 			if (response.data) {
 				setTokens({
 					accessToken: response.data.accessToken,
-					refreshToken: response.data.refreshToken,
 				})
 
 				// Optional: fetch user profile here
