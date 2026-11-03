@@ -1,0 +1,38 @@
+name: Check API Drift
+
+# Regenerates server/openapi.json and admin-panel/packages/lib/src/api/types.ts from the
+# current server code and fails if that differs from what's committed — see
+# `check-api-drift` in the root Makefile for the full explanation. Needed both repos
+# (server + admin-panel) checked out together, which only became possible for CI once
+# they were consolidated onto this branch (IMPROVEMENTS.md section 0).
+
+on:
+  push:
+    branches: [main, main-v2]
+  pull_request:
+    branches: [main, main-v2]
+
+jobs:
+  check-api-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: admin-panel/pnpm-lock.yaml
+
+      - name: Install admin-panel dependencies
+        working-directory: admin-panel
+        run: pnpm install --frozen-lockfile
+
+      - name: Check API drift
+        run: make check-api-drift

@@ -5,7 +5,7 @@
 // process is up and serving, it is not a deep health check) or a timeout is hit.
 // Exits 0 only if all three respond; always tears every process/container back down.
 import { spawn, execSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -107,18 +107,29 @@ async function main() {
 	}
 	log('SMOKE', '✅ Postgres ready.')
 
+	// client/ still lives on its own branch (not yet folded into this one — see
+	// IMPROVEMENTS.md section 0), so it won't exist in every checkout of this branch.
+	// Skip it gracefully rather than failing the whole smoke test over a directory that
+	// isn't expected to be there yet; this starts covering it automatically once it is.
+	const clientDir = path.join(rootDir, 'client')
+	const hasClient = existsSync(clientDir)
+
 	spawnService('SERVER', 'cargo', ['run', '--bin', 'guest-place'], path.join(rootDir, 'server'))
 	spawnService('ADMIN', 'pnpm', ['dev:shell'], path.join(rootDir, 'admin-panel'))
-	spawnService('CLIENT', 'pnpm', ['dev'], path.join(rootDir, 'client'))
+	if (hasClient) {
+		spawnService('CLIENT', 'pnpm', ['dev'], clientDir)
+	} else {
+		log('CLIENT', 'skipped — client/ not present on this branch yet')
+	}
 
 	const [serverOk, adminOk, clientOk] = await Promise.all([
 		waitForHttp('SERVER', `http://localhost:${SERVER_PORT}/`, 120_000),
 		waitForHttp('ADMIN', `http://localhost:${ADMIN_PORT}/`, 180_000),
-		waitForHttp('CLIENT', `http://localhost:${CLIENT_PORT}/`, 180_000),
+		hasClient ? waitForHttp('CLIENT', `http://localhost:${CLIENT_PORT}/`, 180_000) : Promise.resolve(true),
 	])
 
 	const allOk = serverOk && adminOk && clientOk
-	log('SMOKE', allOk ? '✅ All three services are up.' : '❌ One or more services failed to start.')
+	log('SMOKE', allOk ? '✅ All expected services are up.' : '❌ One or more services failed to start.')
 	exitCode = allOk ? 0 : 1
 	cleanup()
 }

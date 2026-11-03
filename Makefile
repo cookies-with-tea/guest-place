@@ -56,9 +56,8 @@ generate-api:
 	cd admin-panel && pnpm generate:api
 
 # Regenerates server/openapi.json and admin-panel/packages/lib/src/api/types.ts from the
-# current server code, then fails (via `git diff --exit-code`, in each file's own repo —
-# server/ and admin-panel/ are separate git checkouts) if that changes anything already
-# committed. Catches exactly the drift class that stayed invisible for a long time: a
+# current server code, then fails (via `git diff --exit-code`) if that changes anything
+# already committed. Catches exactly the drift class that stayed invisible for a long time: a
 # server route/DTO changed without re-running `make generate-api`, so admin-panel's
 # generated types quietly described an API that no longer matched the server.
 check-api-drift: generate-api
