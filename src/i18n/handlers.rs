@@ -1,8 +1,8 @@
 use crate::{
     core::{dto::ApiResponse, response::into_api_response},
     i18n::dto::{
-        CreateNamespaceDTO, LanguageDTO, NamespaceDTO, TranslationDTO, TranslationInput,
-        TranslationRefDTO, TranslationVersionDTO,
+        CreateNamespaceDTO, CreateTranslationDTO, LanguageDTO, NamespaceDTO, TranslationDTO,
+        TranslationInput, TranslationRefDTO, TranslationVersionDTO,
     },
     AppState,
 };
@@ -50,72 +50,121 @@ pub async fn create_or_update(
         )
     })?;
 
-    for dto in dtos {
-        // 1. Get current value to save as version if it exists
-        let current: Option<(String,)> =
-            sqlx::query_as("SELECT value FROM i18n_translations WHERE key = $1 AND locale = $2")
-                .bind(&dto.key)
-                .bind(&dto.locale)
-                .fetch_optional(&mut *tx)
-                .await
-                .map_err(|e| {
-                    eprintln!("DB error fetching current translation: {}", e);
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        into_api_response_internal("Failed to save versions".to_string()),
-                    )
-                })?;
+    let keys: Vec<String> = dtos.iter().map(|d| d.key.clone()).collect();
+    let locales: Vec<String> = dtos.iter().map(|d| d.locale.clone()).collect();
 
-        if let Some((old_value,)) = current {
-            if old_value != dto.value {
-                let next_version: i32 = sqlx::query_scalar(
-                    "SELECT COALESCE(MAX(version_number), 0) + 1 FROM i18n_translation_versions WHERE key = $1 AND locale = $2"
-                )
-                .bind(&dto.key)
-                .bind(&dto.locale)
-                .fetch_one(&mut *tx)
-                .await
-                .map_err(|e| {
-                    eprintln!("DB error calculating version: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("Failed to calculate version".to_string()))
-                })?;
-
-                sqlx::query(
-                    "INSERT INTO i18n_translation_versions (key, locale, value, version_number) VALUES ($1, $2, $3, $4)"
-                )
-                .bind(&dto.key)
-                .bind(&dto.locale)
-                .bind(&old_value)
-                .bind(next_version)
-                .execute(&mut *tx)
-                .await
-                .map_err(|e| {
-                    eprintln!("DB error saving translation version: {}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, into_api_response_internal("Failed to save translation version".to_string()))
-                })?;
-            }
-        }
-
-        if let Err(e) = sqlx::query(
-            r#"
-            INSERT INTO i18n_translations (key, locale, value)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (key, locale)
-            DO UPDATE SET value = $3, updated_at = NOW()
-            "#,
+    // 1. Fetch current values for the whole batch in one query instead of one SELECT per item
+    let current_rows: Vec<(String, String, String)> = sqlx::query_as(
+        "SELECT key, locale, value FROM i18n_translations
+         WHERE (key, locale) IN (SELECT * FROM unnest($1::text[], $2::text[]))",
+    )
+    .bind(&keys)
+    .bind(&locales)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|e| {
+        eprintln!("DB error fetching current translations: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            into_api_response_internal("Failed to save versions".to_string()),
         )
-        .bind(&dto.key)
-        .bind(&dto.locale)
-        .bind(&dto.value)
+    })?;
+    let current_map: HashMap<(String, String), String> = current_rows
+        .into_iter()
+        .map(|(k, l, v)| ((k, l), v))
+        .collect();
+
+    let changed: Vec<&CreateTranslationDTO> = dtos
+        .iter()
+        .filter(|dto| {
+            current_map
+                .get(&(dto.key.clone(), dto.locale.clone()))
+                .is_some_and(|old_value| old_value != &dto.value)
+        })
+        .collect();
+
+    if !changed.is_empty() {
+        let changed_keys: Vec<&str> = changed.iter().map(|d| d.key.as_str()).collect();
+        let changed_locales: Vec<&str> = changed.iter().map(|d| d.locale.as_str()).collect();
+
+        // 2. Fetch the next version number per (key, locale) in one query instead of one SELECT per item
+        let next_versions: Vec<(String, String, i32)> = sqlx::query_as(
+            "SELECT key, locale, COALESCE(MAX(version_number), 0) + 1 AS next_version
+             FROM i18n_translation_versions
+             WHERE (key, locale) IN (SELECT * FROM unnest($1::text[], $2::text[]))
+             GROUP BY key, locale",
+        )
+        .bind(&changed_keys)
+        .bind(&changed_locales)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(|e| {
+            eprintln!("DB error calculating versions: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                into_api_response_internal("Failed to calculate version".to_string()),
+            )
+        })?;
+        let next_version_map: HashMap<(String, String), i32> = next_versions
+            .into_iter()
+            .map(|(k, l, v)| ((k, l), v))
+            .collect();
+
+        let version_keys: Vec<&str> = changed.iter().map(|d| d.key.as_str()).collect();
+        let version_locales: Vec<&str> = changed.iter().map(|d| d.locale.as_str()).collect();
+        let version_values: Vec<&str> = changed
+            .iter()
+            .map(|d| current_map[&(d.key.clone(), d.locale.clone())].as_str())
+            .collect();
+        let version_numbers: Vec<i32> = changed
+            .iter()
+            .map(|d| {
+                *next_version_map
+                    .get(&(d.key.clone(), d.locale.clone()))
+                    .unwrap_or(&1)
+            })
+            .collect();
+
+        // 3. Insert all translation versions in one query instead of one INSERT per item
+        sqlx::query(
+            "INSERT INTO i18n_translation_versions (key, locale, value, version_number)
+             SELECT * FROM unnest($1::text[], $2::text[], $3::text[], $4::int4[])",
+        )
+        .bind(&version_keys)
+        .bind(&version_locales)
+        .bind(&version_values)
+        .bind(&version_numbers)
         .execute(&mut *tx)
         .await
-        {
-            eprintln!("DB error: {}", e);
-            return Err((
+        .map_err(|e| {
+            eprintln!("DB error saving translation versions: {}", e);
+            (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                into_api_response_internal("Failed to save one or more translations".to_string()),
-            ));
-        }
+                into_api_response_internal("Failed to save translation version".to_string()),
+            )
+        })?;
+    }
+
+    let values: Vec<&str> = dtos.iter().map(|d| d.value.as_str()).collect();
+
+    // 4. Upsert the whole batch in one query instead of one INSERT per item
+    if let Err(e) = sqlx::query(
+        "INSERT INTO i18n_translations (key, locale, value)
+         SELECT * FROM unnest($1::text[], $2::text[], $3::text[])
+         ON CONFLICT (key, locale)
+         DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()",
+    )
+    .bind(&keys)
+    .bind(&locales)
+    .bind(&values)
+    .execute(&mut *tx)
+    .await
+    {
+        eprintln!("DB error: {}", e);
+        return Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            into_api_response_internal("Failed to save one or more translations".to_string()),
+        ));
     }
 
     if let Err(e) = tx.commit().await {
@@ -136,6 +185,7 @@ pub async fn create_or_update(
 }
 
 use crate::core::dto::{ApiPaginationDTO, ApiResponseWithPagination, PaginationDTO};
+use crate::core::utils::DEFAULT_PAGE_LIMIT;
 
 #[utoipa::path(
     get,
@@ -172,7 +222,7 @@ pub async fn get_all(
     let limit = params
         .get("limit")
         .and_then(|l| l.parse::<i32>().ok())
-        .unwrap_or(10);
+        .unwrap_or(DEFAULT_PAGE_LIMIT);
     let offset = ((page - 1) * limit) as i64;
 
     let search = params

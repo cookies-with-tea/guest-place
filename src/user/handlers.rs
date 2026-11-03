@@ -1,5 +1,6 @@
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
+use crate::core::utils::DEFAULT_PAGE_LIMIT;
 use crate::user::dto::{
     ChangePasswordDTO, CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
     UserResponseDTO, UserRole, UserStatus,
@@ -236,7 +237,7 @@ pub async fn get_all(
     (StatusCode, Json<ApiResponseWithPagination<UserResponseDTO>>),
 > {
     let page = filter.page.unwrap_or(1);
-    let limit = filter.limit.unwrap_or(10);
+    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT);
     let offset = (page - 1) * limit;
 
     // Build WHERE clause

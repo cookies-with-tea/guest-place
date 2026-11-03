@@ -287,7 +287,7 @@ async fn main() {
         .expect("SMTP_FROM or MAIL_FROM must be set");
 
     let i18n = I18nService::new(pool.clone());
-    let media_storage = Arc::new(StorageService::new("uploads"));
+    let media_storage = Arc::new(StorageService::new(config.upload_dir.clone()));
 
     let redis_pool = create_redis_pool(&config);
     let redis = Arc::new(RedisService::new(redis_pool));
@@ -297,7 +297,7 @@ async fn main() {
     let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
         pool.clone(),
         bus.clone(),
-        "uploads".to_string(),
+        config.upload_dir.clone(),
         config.public_url.clone(),
     ));
 
@@ -366,6 +366,8 @@ async fn main() {
         .run(&pool.clone())
         .await
         .expect("Failed to run migrations");
+
+    guest_place::auth::handlers::spawn_expired_refresh_token_cleanup(pool.clone());
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
         .await

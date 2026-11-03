@@ -10,6 +10,7 @@ use crate::media::dto::{
 };
 use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
+use crate::core::utils::DEFAULT_PAGE_LIMIT;
 use serde_json::json;
 use crate::AppState;
 use axum::{
@@ -352,7 +353,7 @@ pub async fn get_all(
     Query(filter): Query<MediaFilterQuery>,
 ) -> Result<Json<ApiResponseWithPagination<MediaItemDTO>>, (StatusCode, Json<ApiResponseWithPagination<MediaItemDTO>>)> {
     let page = filter.page.unwrap_or(1);
-    let limit = filter.limit.unwrap_or(10);
+    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT);
     let offset = (page - 1) * limit;
 
     // 1. Build COUNT query
@@ -892,7 +893,7 @@ pub async fn delete_one(
                 .await;
             match result {
                 Ok(_) => {
-                    let variants_dir = std::path::Path::new("uploads").join("variants").join(uuid.to_string());
+                    let variants_dir = std::path::Path::new(&state.config.upload_dir).join("variants").join(uuid.to_string());
                     let _ = tokio::fs::remove_dir_all(&variants_dir).await;
 
                     let msg = state.i18n.t("media.delete_success", &locale).await;
@@ -1139,7 +1140,7 @@ pub async fn init_chunk_upload(
         }
     }
 
-    let chunk_manager = ChunkManager::new("uploads");
+    let chunk_manager = ChunkManager::new(&state.config.upload_dir);
     match chunk_manager.init_session(payload).await {
         Ok(resp) => {
             into_api_response(StatusCode::OK, Some(resp), None, None)
@@ -1188,7 +1189,7 @@ pub async fn upload_chunk(
         );
     }
 
-    let chunk_manager = ChunkManager::new("uploads");
+    let chunk_manager = ChunkManager::new(&state.config.upload_dir);
     match chunk_manager.save_chunk(&upload_id, chunk_index, &body).await {
         Ok(res) => {
             into_api_response(StatusCode::OK, Some(res), None, None)
@@ -1219,15 +1220,15 @@ pub async fn upload_chunk(
     operation_id = "get_chunk_status"
 )]
 pub async fn get_chunk_status(
-    State(_state): State<Arc<AppState>>,
+    State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Path(upload_id): Path<Uuid>,
 ) -> Result<Json<ApiResponse<ChunkStatusResponse>>, (StatusCode, Json<ApiResponse<ChunkStatusResponse>>)> {
-    let chunk_manager = ChunkManager::new("uploads");
+    let chunk_manager = ChunkManager::new(&state.config.upload_dir);
     match chunk_manager.get_status(&upload_id).await {
         Ok(res) => into_api_response(StatusCode::OK, Some(res), None, None),
         Err(e) => {
-            let msg = _state.i18n.t("media.not_found", &locale).await;
+            let msg = state.i18n.t("media.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
                 None,
@@ -1258,7 +1259,7 @@ pub async fn complete_chunk_upload(
     Extension(locale): Extension<String>,
     Path(upload_id): Path<Uuid>,
 ) -> Result<Json<ApiResponse<MediaItemDTO>>, (StatusCode, Json<ApiResponse<MediaItemDTO>>)> {
-    let chunk_manager = ChunkManager::new("uploads");
+    let chunk_manager = ChunkManager::new(&state.config.upload_dir);
     let (assembled_data, meta) = match chunk_manager.assemble(&upload_id).await {
         Ok(res) => res,
         Err(e) => {
@@ -1461,19 +1462,24 @@ pub async fn optimize_bulk(
     Extension(locale): Extension<String>,
     Json(payload): Json<BulkOptimizeMediaDTO>,
 ) -> Result<Json<ApiResponse<Vec<MediaItemDTO>>>, (StatusCode, Json<ApiResponse<Vec<MediaItemDTO>>>)> {
-    let mut optimized_items = Vec::new();
+    let mut succeeded_uuids = Vec::new();
     for uuid in payload.uuids {
         if state.media_optimizer.reoptimize_by_uuid(uuid).await.is_ok() {
-            if let Ok(Some(item)) = sqlx::query_as::<_, MediaItemFromDb>(
-                "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = $1"
-            )
-            .bind(uuid)
-            .fetch_optional(&state.pool)
-            .await {
-                optimized_items.push(to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url));
-            }
+            succeeded_uuids.push(uuid);
         }
     }
+
+    // Re-fetch all successfully optimized rows in one query instead of one SELECT per uuid
+    let optimized_items = sqlx::query_as::<_, MediaItemFromDb>(
+        "SELECT uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash FROM media WHERE uuid = ANY($1)"
+    )
+    .bind(&succeeded_uuids)
+    .fetch_all(&state.pool)
+    .await
+    .unwrap_or_default()
+    .into_iter()
+    .map(|item| to_dto(item, state.config.cdn_url.as_deref(), &state.config.public_url))
+    .collect::<Vec<_>>();
 
     let msg = state.i18n.t("media.fetch_success", &locale).await;
     into_api_response(StatusCode::OK, Some(optimized_items), None, Some(vec![msg]))
@@ -1538,7 +1544,7 @@ pub async fn get_variant(
         )),
     };
 
-    let variant_file = std::path::Path::new("uploads")
+    let variant_file = std::path::Path::new(&state.config.upload_dir)
         .join("variants")
         .join(uuid.to_string())
         .join(format!("{}.webp", size));

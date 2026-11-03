@@ -13,6 +13,7 @@ pub struct AppConfig {
     pub redis_password: Option<String>,
     pub media_quota_limit: i64,
     pub cdn_url: Option<String>,
+    pub upload_dir: String,
 }
 
 impl AppConfig {
@@ -49,6 +50,8 @@ impl AppConfig {
             .map(|s| s.trim().trim_end_matches('/').to_string())
             .filter(|s| !s.is_empty());
 
+        let upload_dir = env::var("UPLOAD_DIR").unwrap_or_else(|_| "uploads".to_string());
+
         AppConfig {
             app_host,
             app_port,
@@ -59,6 +62,7 @@ impl AppConfig {
             redis_password,
             media_quota_limit,
             cdn_url,
+            upload_dir,
         }
     }
 }

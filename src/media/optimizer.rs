@@ -8,6 +8,10 @@ use crate::core::bus::{RealtimeBus, SystemEvent};
 use crate::media::dto::{MediaVariantDTO, MediaVariantsDTO};
 use tracing::{error, info};
 
+const THUMBNAIL_MAX_PX: u32 = 256;
+const MEDIUM_MAX_PX: u32 = 800;
+const LARGE_MAX_PX: u32 = 1600;
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct OptimizationResult {
     pub width: u32,
@@ -186,21 +190,21 @@ pub fn generate_variants_sync(
         })
     };
 
-    // 2. Thumbnail (max 256x256)
-    let thumb_img = img.thumbnail(256, 256);
+    // 2. Thumbnail (max THUMBNAIL_MAX_PX x THUMBNAIL_MAX_PX)
+    let thumb_img = img.thumbnail(THUMBNAIL_MAX_PX, THUMBNAIL_MAX_PX);
     let thumbnail = save_variant("thumbnail", &thumb_img)?;
 
-    // 3. Medium (max 800x800)
-    let medium_img = if orig_width > 800 || orig_height > 800 {
-        img.thumbnail(800, 800)
+    // 3. Medium (max MEDIUM_MAX_PX x MEDIUM_MAX_PX)
+    let medium_img = if orig_width > MEDIUM_MAX_PX || orig_height > MEDIUM_MAX_PX {
+        img.thumbnail(MEDIUM_MAX_PX, MEDIUM_MAX_PX)
     } else {
         img.clone()
     };
     let medium = save_variant("medium", &medium_img)?;
 
-    // 4. Large (max 1600x1600)
-    let large_img = if orig_width > 1600 || orig_height > 1600 {
-        img.thumbnail(1600, 1600)
+    // 4. Large (max LARGE_MAX_PX x LARGE_MAX_PX)
+    let large_img = if orig_width > LARGE_MAX_PX || orig_height > LARGE_MAX_PX {
+        img.thumbnail(LARGE_MAX_PX, LARGE_MAX_PX)
     } else {
         img.clone()
     };

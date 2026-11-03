@@ -76,7 +76,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest(
             "/uploads",
             Router::new()
-                .fallback_service(ServeDir::new("uploads"))
+                .fallback_service(ServeDir::new(state.config.upload_dir.clone()))
                 .layer(tower_http::set_header::SetResponseHeaderLayer::overriding(
                     axum::http::header::CACHE_CONTROL,
                     axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),

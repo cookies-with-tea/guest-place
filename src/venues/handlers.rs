@@ -12,6 +12,7 @@ use uuid::Uuid;
 
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::error_map;
+use crate::core::utils::DEFAULT_PAGE_LIMIT;
 use crate::AppState;
 
 use super::model::{CreateVenueDTO, UpdateVenueDTO, Venue};
@@ -411,7 +412,7 @@ pub async fn get_venues(
     Query(query): Query<VenuesQuery>,
 ) -> Result<Json<ApiResponseWithPagination<Venue>>, (StatusCode, Json<ApiResponseWithPagination<Venue>>)> {
     let page = query.page.unwrap_or(1).max(1);
-    let limit = query.limit.unwrap_or(10).clamp(1, 100);
+    let limit = query.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, 100);
     let offset = query
         .offset
         .unwrap_or_else(|| ((page - 1) as i64) * (limit as i64));

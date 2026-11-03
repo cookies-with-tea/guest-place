@@ -586,6 +586,23 @@ async fn logout_other_devices(
 }
 
 
+/// Фоновая задача, удаляющая истёкшие refresh-токены — таблица `refresh_token`
+/// никогда не чистится сама и иначе растёт бессрочно.
+pub fn spawn_expired_refresh_token_cleanup(pool: sqlx::Pool<sqlx::Postgres>) {
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(3600));
+        loop {
+            interval.tick().await;
+            if let Err(e) = sqlx::query("DELETE FROM refresh_token WHERE expires_at < NOW()")
+                .execute(&pool)
+                .await
+            {
+                tracing::error!("Failed to clean up expired refresh tokens: {e}");
+            }
+        }
+    });
+}
+
 /// Rate limiting на `/login` и `/register` — защита от брутфорса пароля и спама
 /// регистраций/писем. Ключ — IP из `X-Forwarded-For`/`X-Real-IP`/`Forwarded` (если сервер
 /// стоит за реверс-прокси), иначе peer IP самого TCP-соединения (см. `main.rs`,
