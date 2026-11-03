@@ -1,19 +1,14 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { ElNotification } from 'element-plus'
 import { isBrowser } from '../utils'
-import { GP_EVENTS } from '../constants'
+import { GP_EVENTS, REALTIME_EVENTS } from '../constants'
 import { useEvents } from './useEvents'
+
+type RealtimeEventType = (typeof REALTIME_EVENTS)[keyof typeof REALTIME_EVENTS]
 
 export interface IRealtimeNotification {
 	id: string
-	type:
-		| 'guest_registered'
-		| 'media_uploaded'
-		| 'entity_locked'
-		| 'entity_unlocked'
-		| 'system_alert'
-		| 'content_updated'
-		| 'info'
+	type: RealtimeEventType | 'info'
 	title: string
 	message: string
 	timestamp: string
@@ -76,7 +71,7 @@ export function useRealtimeNotifications() {
 			ElNotification({
 				title: newNotif.title,
 				message: newNotif.message,
-				type: newNotif.type === 'system_alert' ? 'warning' : 'info',
+				type: newNotif.type === REALTIME_EVENTS.SYSTEM_ALERT ? 'warning' : 'info',
 				duration: 4500,
 				position: 'bottom-right',
 			})
@@ -135,12 +130,12 @@ export function useRealtimeNotifications() {
 				}
 			}
 
-			es.addEventListener('guest_registered', (e) => {
+			es.addEventListener(REALTIME_EVENTS.GUEST_REGISTERED, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
 					addNotification({
-						type: 'guest_registered',
+						type: REALTIME_EVENTS.GUEST_REGISTERED,
 						title: 'Новый гость',
 						message: `${payload.name || payload.email || 'Гость'} зарегистрировался на платформе`,
 						timestamp: payload.created_at || new Date().toISOString(),
@@ -152,12 +147,12 @@ export function useRealtimeNotifications() {
 				}
 			})
 
-			es.addEventListener('media_uploaded', (e) => {
+			es.addEventListener(REALTIME_EVENTS.MEDIA_UPLOADED, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
 					addNotification({
-						type: 'media_uploaded',
+						type: REALTIME_EVENTS.MEDIA_UPLOADED,
 						title: 'Медиафайл загружен',
 						message: `Файл «${payload.name}» успешно загружен в медиатеку`,
 						timestamp: new Date().toISOString(),
@@ -169,7 +164,7 @@ export function useRealtimeNotifications() {
 				}
 			})
 
-			es.addEventListener('entity_locked', (e) => {
+			es.addEventListener(REALTIME_EVENTS.ENTITY_LOCKED, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
@@ -179,7 +174,7 @@ export function useRealtimeNotifications() {
 				}
 			})
 
-			es.addEventListener('entity_unlocked', (e) => {
+			es.addEventListener(REALTIME_EVENTS.ENTITY_UNLOCKED, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
@@ -189,12 +184,12 @@ export function useRealtimeNotifications() {
 				}
 			})
 
-			es.addEventListener('system_alert', (e) => {
+			es.addEventListener(REALTIME_EVENTS.SYSTEM_ALERT, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
 					addNotification({
-						type: 'system_alert',
+						type: REALTIME_EVENTS.SYSTEM_ALERT,
 						title: payload.title || 'Системное оповещение',
 						message: payload.message || '',
 						timestamp: payload.timestamp || new Date().toISOString(),
@@ -205,12 +200,12 @@ export function useRealtimeNotifications() {
 				}
 			})
 
-			es.addEventListener('content_updated', (e) => {
+			es.addEventListener(REALTIME_EVENTS.CONTENT_UPDATED, (e) => {
 				try {
 					const data = JSON.parse(e.data)
 					const payload = data.payload || data
 					addNotification({
-						type: 'content_updated',
+						type: REALTIME_EVENTS.CONTENT_UPDATED,
 						title: 'Контент обновлён',
 						message: `Схема «${payload.schema}» обновлена`,
 						timestamp: new Date().toISOString(),

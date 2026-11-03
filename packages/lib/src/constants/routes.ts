@@ -2,35 +2,37 @@
 
 export const ROUTES = {
 	users: {
+		title: 'menu.users',
 		icon: 'User',
 		list: {
 			name: 'UsersPage',
-			title: 'general.users',
+			title: 'menu.users',
 		},
 		rights: {
 			name: 'RightsPage',
-			title: 'general.rights',
+			title: 'general.access_control',
 		},
 	},
 	translations: {
 		name: 'TranslationsPage',
-		title: 'general.translations',
+		title: 'menu.translations',
 		icon: 'ChatDotRound',
 	},
 	media: {
 		name: 'MediaPage',
-		title: 'general.media',
+		title: 'menu.media',
 		icon: 'Picture',
 	},
 	orchestrator: {
+		title: 'menu.orchestrator',
 		icon: 'Coordinate',
 		list: {
 			name: 'OrchestratorPage',
-			title: 'general.orchestrator',
+			title: 'menu.orchestrator',
 		},
 		features: {
 			name: 'FeaturesPage',
-			title: 'general.features',
+			title: 'menu.features',
 		},
 	},
 	content: {
@@ -38,24 +40,19 @@ export const ROUTES = {
 		title: 'menu.schemas',
 		icon: 'Document',
 	},
-	about: {
-		name: 'AboutPage',
-		title: 'general.about',
-		icon: 'InfoFilled',
-	},
 	platforms: {
 		name: 'PlatformsPage',
 		title: 'menu.platforms',
 		icon: 'Place',
 	},
-	guests: {
-		name: 'GuestsPage',
-		title: 'general.guests',
-		icon: 'UserFilled',
+	statistics: {
+		name: 'StatisticsDashboard',
+		title: 'menu.dashboard',
+		icon: 'TrendCharts',
 	},
 	profile: {
 		name: 'ProfilePage',
-		title: 'general.profile',
+		title: 'menu.profile',
 		icon: 'User',
 	},
 } as const

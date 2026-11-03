@@ -1,26 +1,28 @@
 <template>
 	<div class="ui-table">
-		<el-table
-			v-loading="loading"
-			v-bind="$attrs"
-			:data="computedData"
-			border
-			stripe
-			row-key="id"
-			fit
-			highlight-current-row
-			style="width: 100%"
-		>
-			<!-- Декларативные колонки -->
-			<template v-if="columns && columns.length">
-				<UiTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />
-			</template>
+		<div class="ui-table__scroll">
+			<el-table
+				v-loading="loading"
+				v-bind="$attrs"
+				:data="computedData"
+				border
+				stripe
+				row-key="id"
+				:fit="false"
+				highlight-current-row
+				style="width: 100%"
+			>
+				<!-- Декларативные колонки -->
+				<template v-if="columns && columns.length">
+					<UiTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />
+				</template>
 
-			<!-- Прямой проброс всех слотов -->
-			<template v-for="(_, name) in $slots" #[name]="slotData">
-				<slot :name="name" v-bind="slotData || {}" />
-			</template>
-		</el-table>
+				<!-- Прямой проброс всех слотов -->
+				<template v-for="(_, name) in $slots" #[name]="slotData">
+					<slot :name="name" v-bind="slotData || {}" />
+				</template>
+			</el-table>
+		</div>
 
 		<!-- Пагинация -->
 		<div v-if="total !== undefined" class="ui-table__pagination">
@@ -98,6 +100,21 @@ defineOptions({
 	box-shadow: var(--shadow-sm);
 	background-color: var(--bg-card) !important;
 	overflow: hidden;
+}
+
+/* With `fit="false"` the table can render wider than its container when columns need more
+   room — this wrapper turns that into a horizontal scrollbar instead of clipped/overlapping
+   columns on narrow viewports (e.g. when the sidebar's secondary column is also open).
+   `.el-table` itself defaults to `overflow: hidden` (for its own rounded corners) and
+   relies on its own internal custom scrollbar for horizontal scroll, which stays hidden
+   until hovered/dragged — overriding it to `visible` here lets the overflow reach this
+   wrapper instead, which gives a plain, always-available native scrollbar. */
+.ui-table__scroll {
+	overflow-x: auto;
+
+	:deep(.el-table) {
+		overflow: visible;
+	}
 }
 
 :deep(.el-table) {

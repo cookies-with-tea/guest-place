@@ -1,8 +1,6 @@
 <template>
 	<div id="__MF_USERS_PAGE__" class="users-page">
-		<h1>{{ t('users.title') }}</h1>
-		<div style="display: none"> useI18n().t(): {{ t('platforms.tools.title') }} </div>
-		<div style="display: none"> $T(): {{ $T('platforms.tools.title') }} </div>
+		<h1>{{ t('menu.users') }}</h1>
 		<UsersFilters />
 		<UsersTable />
 		<UsersUpdateModal />

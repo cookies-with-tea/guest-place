@@ -3,14 +3,15 @@
 		class="ui-sidebar"
 		:class="{
 			'is-collapsed': isCollapsed,
+			'is-primary-collapsed': primaryCollapsed,
 			'is-simple': simple,
 			'has-secondary': !simple && !isCollapsed && activeSubMenu,
 		}"
 	>
 		<!-- Primary / Simple Column -->
 		<div class="sidebar-primary glass-panel">
-			<div class="sidebar-header" :class="{ 'is-collapsed': isCollapsed }">
-				<h2 v-show="!isCollapsed" class="logo-text">GUEST PLACE</h2>
+			<div class="sidebar-header" :class="{ 'is-collapsed': primaryCollapsed }">
+				<h2 v-show="!primaryCollapsed" class="logo-text">GUEST PLACE</h2>
 				<el-tooltip :content="isCollapsed ? 'Expand' : 'Collapse'" placement="right" :show-after="400">
 					<div class="collapse-trigger" @click="toggleCollapse">
 						<ElIcon><Expand v-if="isCollapsed" /><Fold v-else /></ElIcon>
@@ -24,12 +25,12 @@
 					:key="ctx"
 					:content="t(`shell.${ctx}`)"
 					placement="right"
-					:disabled="!isCollapsed"
+					:disabled="!primaryCollapsed"
 					:show-after="400"
 				>
 					<div class="context-item" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">
 						<ElIcon><component :is="ctx === 'system' ? 'Setting' : 'EditPen'" /></ElIcon>
-						<span v-show="!isCollapsed" class="label">{{ t(`shell.${ctx}`) }}</span>
+						<span v-show="!primaryCollapsed" class="label">{{ t(`shell.${ctx}`) }}</span>
 					</div>
 				</el-tooltip>
 			</div>
@@ -38,7 +39,7 @@
 				<template v-for="item in sidebarData" :key="item.title">
 					<!-- Simple Mode with Children -->
 					<template v-if="simple && item.children">
-						<div v-show="!isCollapsed" class="menu-group-title">
+						<div v-show="!primaryCollapsed" class="menu-group-title">
 							{{ t(item.title) }}
 							<UiInfoButton v-if="mfeHelp(item)" v-bind="mfeHelp(item)!" />
 						</div>
@@ -49,10 +50,10 @@
 							:to="child.path || '/'"
 							custom
 						>
-							<el-tooltip :content="t(child.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+							<el-tooltip :content="t(child.title)" placement="right" :disabled="!primaryCollapsed" :show-after="400">
 								<div class="menu-item" :class="{ active: isActive }" @click="navigate">
 									<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
-									<span v-show="!isCollapsed" class="label">{{ t(child.title) }}</span>
+									<span v-show="!primaryCollapsed" class="label">{{ t(child.title) }}</span>
 								</div>
 							</el-tooltip>
 						</router-link>
@@ -65,28 +66,28 @@
 						:to="item.path || '/'"
 						custom
 					>
-						<el-tooltip :content="t(item.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+						<el-tooltip :content="t(item.title)" placement="right" :disabled="!primaryCollapsed" :show-after="400">
 							<div
 								class="menu-item"
 								:class="{ active: item.path === '/' ? isExactActive : isActive }"
 								@click="navigate"
 							>
 								<ElIcon v-if="item.icon"><component :is="getIcon(item.icon)" /></ElIcon>
-								<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
-								<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
+								<span v-show="!primaryCollapsed" class="label">{{ t(item.title) }}</span>
+								<UiInfoButton v-if="!primaryCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
 							</div>
 						</el-tooltip>
 					</router-link>
 
 					<!-- Group Item (Two-column mode) -->
-					<el-tooltip v-else :content="t(item.title)" placement="right" :disabled="!isCollapsed" :show-after="400">
+					<el-tooltip v-else :content="t(item.title)" placement="right" :disabled="!primaryCollapsed" :show-after="400">
 						<div class="menu-item" :class="{ active: isItemActive(item) }" @click="handlePrimaryClick(item)">
 							<div class="item-main">
 								<ElIcon><component :is="getIcon(item.icon)" /></ElIcon>
-								<span v-show="!isCollapsed" class="label">{{ t(item.title) }}</span>
-								<UiInfoButton v-if="!isCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
+								<span v-show="!primaryCollapsed" class="label">{{ t(item.title) }}</span>
+								<UiInfoButton v-if="!primaryCollapsed && mfeHelp(item)" v-bind="mfeHelp(item)!" />
 							</div>
-							<ElIcon v-show="!isCollapsed" class="arrow"><ArrowRight /></ElIcon>
+							<ElIcon v-show="!primaryCollapsed" class="arrow"><ArrowRight /></ElIcon>
 						</div>
 					</el-tooltip>
 				</template>
@@ -164,6 +165,12 @@ const activeSubMenu = computed(() => {
 	return sidebarData.value.find((item) => item.title === selectedPrimaryTitle.value && item.children)
 })
 
+// While the secondary column is open, the primary column auto-collapses to its icon-only
+// width (64px) regardless of the user's own collapse preference — otherwise both columns
+// expanded at once eat up to 440px of a 1024px viewport. It reverts to `isCollapsed` as
+// soon as the secondary column closes.
+const primaryCollapsed = computed(() => isCollapsed.value || !!activeSubMenu.value)
+
 const isItemActive = (item: ISidebarItem) => {
 	// 1. Exact path match
 	if (item.path && item.path !== '/') {
@@ -191,6 +198,9 @@ const handlePrimaryClick = (item: ISidebarItem) => {
 	if (item.children) {
 		selectedPrimaryTitle.value = item.title
 
+		// The secondary column only renders while `isCollapsed` (the user's own manual
+		// preference) is false — unblock it here. `primaryCollapsed` keeps the primary
+		// column visually compact regardless, so this no longer re-expands it to 240px.
 		if (isCollapsed.value) toggleCollapse()
 	} else if (item.path) {
 		selectedPrimaryTitle.value = null
@@ -245,8 +255,11 @@ watch(
 	width: 64px;
 }
 
+/* The primary column auto-collapses to 64px while the secondary column is open (see
+   `primaryCollapsed` in the script), so the two columns together top out at 264px
+   instead of 240 (expanded primary) + 200 = 440px. */
 .ui-sidebar.has-secondary {
-	width: 440px;
+	width: 264px;
 }
 
 .ui-sidebar:not(.is-simple, .is-collapsed, .has-secondary) {
@@ -266,7 +279,7 @@ watch(
 	z-index: 2;
 }
 
-.ui-sidebar:not(.is-collapsed) .sidebar-primary {
+.ui-sidebar:not(.is-primary-collapsed) .sidebar-primary {
 	width: 240px;
 }
 

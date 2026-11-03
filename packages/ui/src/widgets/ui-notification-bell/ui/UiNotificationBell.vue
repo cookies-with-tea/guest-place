@@ -50,10 +50,10 @@
 						@click="handleNotificationClick(item)"
 					>
 						<div class="item-icon" :class="item.type">
-							<el-icon v-if="item.type === 'guest_registered'"><User /></el-icon>
-							<el-icon v-else-if="item.type === 'media_uploaded'"><Picture /></el-icon>
-							<el-icon v-else-if="item.type === 'system_alert'"><Warning /></el-icon>
-							<el-icon v-else-if="item.type === 'content_updated'"><Document /></el-icon>
+							<el-icon v-if="item.type === REALTIME_EVENTS.GUEST_REGISTERED"><User /></el-icon>
+							<el-icon v-else-if="item.type === REALTIME_EVENTS.MEDIA_UPLOADED"><Picture /></el-icon>
+							<el-icon v-else-if="item.type === REALTIME_EVENTS.SYSTEM_ALERT"><Warning /></el-icon>
+							<el-icon v-else-if="item.type === REALTIME_EVENTS.CONTENT_UPDATED"><Document /></el-icon>
 							<el-icon v-else><Bell /></el-icon>
 						</div>
 
@@ -77,7 +77,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Bell, Document, Picture, User, Warning } from '@element-plus/icons-vue'
-import { useRealtimeNotifications, type IRealtimeNotification } from '@admin-panel/lib'
+import { REALTIME_EVENTS, useRealtimeNotifications, type IRealtimeNotification } from '@admin-panel/lib'
 
 const router = useRouter()
 const popoverVisible = ref(false)

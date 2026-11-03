@@ -20,15 +20,29 @@ const loadRemoteRoutes = async (app: any) => {
 	const sidebarGroups: any[] = []
 	disabledRoutesSet.clear()
 
-	const addPrefixToRoute = (route: any, prefix: string): any => {
-		const { path, ...rest } = route
+	const addPrefixedPath = (path: string, prefix: string): string => {
 		const basePath = path === '/' ? '' : path
 		const separator = basePath && !basePath.startsWith('/') ? '/' : ''
-		const newPath = `${prefix}${separator}${basePath}`
+		return `${prefix}${separator}${basePath}`
+	}
 
-		const modifiedRoute = {
+	const addPrefixToRoute = (route: any, prefix: string): any => {
+		const { path, redirect, ...rest } = route
+		const newPath = addPrefixedPath(path, prefix)
+
+		const modifiedRoute: any = {
 			...rest,
 			path: newPath,
+		}
+
+		// A string `redirect` is relative to the MFE's own root, same as `path` — it must
+		// get the same prefix, otherwise it stays a literal path in the SHELL's router
+		// (e.g. `redirect: '/'` meant as "redirect to my own root" ends up redirecting to
+		// the shell's `/` instead of `/<mfe>`).
+		if (typeof redirect === 'string') {
+			modifiedRoute.redirect = addPrefixedPath(redirect, prefix)
+		} else if (redirect !== undefined) {
+			modifiedRoute.redirect = redirect
 		}
 
 		if (Array.isArray(route.children)) {
@@ -228,7 +242,7 @@ export const initRouter = async (app: any) => {
 					{
 						name: 'Main',
 						path: '/',
-						component: () => import('#pages/main-page'),
+						redirect: '/statistics',
 					},
 					...remoteRoutes,
 				],
