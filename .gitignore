@@ -20,9 +20,9 @@ playwright-report/
 test-results/
 coverage/
 
-# Subprojects (each tracked in its own git branch)
-/admin-panel/
+# Subprojects: server/ and admin-panel/ are now tracked directly on this
+# branch (see IMPROVEMENTS.md section 0). client/ is still tracked on its
+# own branch (client-update) until that work is ready to fold in too.
 /client/
-/server/
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
