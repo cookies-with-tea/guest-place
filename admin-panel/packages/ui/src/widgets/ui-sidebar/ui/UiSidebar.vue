@@ -129,7 +129,6 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
-import { MFE_HELP } from '@admin-panel/lib'
 import * as Icons from '@element-plus/icons-vue'
 import { ArrowRight, CircleCheckFilled, Close, Expand, Fold } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
@@ -211,7 +210,20 @@ const handlePrimaryClick = (item: ISidebarItem) => {
 
 const getIcon = (name?: string) => (name && (Icons as any)[name]) || Icons.Menu
 
-const mfeHelp = (item: ISidebarItem) => (item.mfeName ? MFE_HELP[item.mfeName] : undefined)
+// "mfeHelp.<name>.title"/"...description" — seeded i18n keys (migration
+// 20261103040000_mfe_help_translations), editable from Admin → Translations instead of
+// a code-level dict (see IMPROVEMENTS.md section 5). Falls back to returning the key
+// itself (t()'s own fallback) for an MFE that was never seeded, same as everywhere else.
+const MFE_HELP_NAMES = new Set(['content', 'media', 'translations', 'users', 'statistics', 'orchestrator', 'profile'])
+
+const mfeHelp = (item: ISidebarItem) => {
+	if (!item.mfeName || !MFE_HELP_NAMES.has(item.mfeName)) return undefined
+
+	return {
+		title: t(`mfeHelp.${item.mfeName}.title`),
+		description: t(`mfeHelp.${item.mfeName}.description`),
+	}
+}
 
 watch(
 	() => route.path,

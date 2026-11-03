@@ -24,6 +24,8 @@ app.use(i18nPlugin)
 
 loadDict('general')
 
+loadDict('menu')
+
 app.use(VueQueryPlugin).use(router).use(ElementPlus)
 
 export { app }

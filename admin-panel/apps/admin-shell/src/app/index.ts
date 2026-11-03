@@ -83,6 +83,14 @@ await loadDict('shell')
 
 await loadDict('platforms')
 
+// Every sidebar item's title comes from a `menu.*` key, and the per-MFE info-button
+// tooltip from `mfeHelp.*` (see IMPROVEMENTS.md sections 1/5) — nothing ever loaded
+// either namespace, so the whole sidebar has been showing raw `menu.users` etc. keys
+// instead of translated text in every environment where the API/DB actually answers.
+await loadDict('menu')
+
+await loadDict('mfeHelp')
+
 const router = await initRouter(app)
 
 on(GP_EVENTS.UNAUTHORIZED, (e: any) => {

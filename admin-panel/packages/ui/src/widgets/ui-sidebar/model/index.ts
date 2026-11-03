@@ -2,7 +2,7 @@ export interface ISidebarItem {
 	title: string
 	path?: string
 	icon?: string
-	/** Module federation `name` МФ — ключ для справки "что это и зачем" (MFE_HELP) */
+	/** Module federation `name` МФ — ключ для справки "что это и зачем" (i18n-ключи `mfeHelp.<name>.*`) */
 	mfeName?: string
 	children?: ISidebarItem[]
 	meta?: {
