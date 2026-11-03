@@ -2,6 +2,7 @@
 	"name": "admin-statistics",
 	"version": "0.0.0",
 	"dependencies": {
+		"@admin-panel/i18n": "workspace:*",
 		"@admin-panel/lib": "workspace:*",
 		"@admin-panel/ui": "workspace:*",
 		"@tanstack/vue-query": "^5.92.1",

@@ -540,6 +540,9 @@ importers:
 
   apps/admin-statistics:
     dependencies:
+      '@admin-panel/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@admin-panel/lib':
         specifier: workspace:*
         version: link:../../packages/lib

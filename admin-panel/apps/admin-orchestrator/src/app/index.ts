@@ -5,6 +5,18 @@ if (typeof window !== 'undefined') {
 
 import { createApp } from 'vue'
 
+import { i18nPlugin, initI18n, useI18n } from '@admin-panel/i18n'
+
 import App from './App.vue'
 
+initI18n({ apiBase: '' })
+
 export const app = createApp(App)
+
+app.use(i18nPlugin)
+
+const { loadDict } = useI18n()
+
+loadDict('general')
+
+loadDict('orchestrator')
