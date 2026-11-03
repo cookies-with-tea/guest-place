@@ -52,7 +52,7 @@
 					</div>
 
 					<div class="bottom-buttons">
-						<el-button plain :icon="Close" @click="router.push('/pages')"> Отмена </el-button>
+						<el-button plain :icon="Close" @click="router.push({ name: 'PageList' })"> Отмена </el-button>
 						<el-button type="primary" size="large" :icon="Check" :loading="homeForm.saving" @click="handleSave">
 							Сохранить изменения
 						</el-button>

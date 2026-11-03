@@ -43,11 +43,7 @@ export function useSchemaList(router: Router) {
 	}
 
 	function goToDocs() {
-		try {
-			router.push({ name: 'ContentDocs' })
-		} catch {
-			router.push('/docs')
-		}
+		router.push({ name: 'ContentDocs' })
 	}
 
 	return reactive({ schemas, loading, apiFetch, fetchSchemas, deleteSchema, goToEntries, goToDocs })

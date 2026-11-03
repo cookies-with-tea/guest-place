@@ -11,8 +11,8 @@
 			</p>
 		</div>
 		<div class="page-header__actions">
-			<el-button plain :icon="Grid" @click="router.push('/pages')"> Страницы сайта </el-button>
-			<el-button plain :icon="Compass" @click="router.push('/menus')"> Меню сайта </el-button>
+			<el-button plain :icon="Grid" @click="router.push({ name: 'PageList' })"> Страницы сайта </el-button>
+			<el-button plain :icon="Compass" @click="router.push({ name: 'MenusPage' })"> Меню сайта </el-button>
 			<el-button type="primary" :icon="Plus" @click="redirects.openCreateDialog"> Создать редирект </el-button>
 		</div>
 	</div>

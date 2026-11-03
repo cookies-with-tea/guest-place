@@ -1,7 +1,7 @@
 <template>
 	<header class="editor-topbar">
 		<div class="editor-topbar__left">
-			<el-button plain @click="router.push('/pages')"> ← К страницам </el-button>
+			<el-button plain @click="router.push({ name: 'PageList' })"> ← К страницам </el-button>
 			<span class="live-pill"
 				><el-icon class="live-pill__icon"><Lightning /></el-icon> LIVE РЕДАКТОР</span
 			>

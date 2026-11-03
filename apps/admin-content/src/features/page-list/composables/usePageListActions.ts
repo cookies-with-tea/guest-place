@@ -25,7 +25,7 @@ export function usePageListActions(pagesAndSchemas: PagesAndSchemas, router: Rou
 
 	async function handleEditSchemaPage(item: any) {
 		if (item.slug === 'page_home') {
-			router.push('/home')
+			router.push({ name: 'HomePageEditor' })
 			return
 		}
 

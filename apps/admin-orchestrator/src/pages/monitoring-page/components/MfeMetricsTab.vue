@@ -19,7 +19,7 @@
 									size="small"
 									type="primary"
 									plain
-									@click="$router.push({ path: '/modules', query: { edit: m.id } })"
+									@click="$router.push({ name: 'OrchestratorModules', query: { edit: m.id } })"
 								>
 									<el-icon><EditPen /></el-icon>
 								</el-button>

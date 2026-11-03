@@ -12,9 +12,11 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button plain :icon="OfficeBuilding" @click="router.push('/venues')"> Площадки </el-button>
-				<el-button plain :icon="Grid" @click="router.push('/pages')"> Страницы сайта </el-button>
-				<el-button plain :icon="Switch" @click="router.push('/redirects')"> Редиректы (301/302) </el-button>
+				<el-button plain :icon="OfficeBuilding" @click="router.push({ name: 'VenuesPage' })"> Площадки </el-button>
+				<el-button plain :icon="Grid" @click="router.push({ name: 'PageList' })"> Страницы сайта </el-button>
+				<el-button plain :icon="Switch" @click="router.push({ name: 'RedirectsPage' })">
+					Редиректы (301/302)
+				</el-button>
 				<el-button plain :icon="Plus" @click="createMenuDialog.open"> Новое меню </el-button>
 				<el-button
 					type="primary"

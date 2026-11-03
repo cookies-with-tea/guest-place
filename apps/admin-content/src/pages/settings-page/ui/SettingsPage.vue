@@ -27,6 +27,8 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { ROUTES } from '@admin-panel/lib'
+
 import { useGlobalSettingsEntry } from '../composables/useGlobalSettingsEntry'
 import SettingsOnboarding from './components/SettingsOnboarding.vue'
 import SettingsPageHeader from './components/SettingsPageHeader.vue'
@@ -36,16 +38,16 @@ const router = useRouter()
 
 const entry = useGlobalSettingsEntry()
 
+// Named navigation instead of a literal path: the shell prefixes every route's `path`
+// with `/content` but leaves `name` untouched, so a path like '/content' or '/docs' is
+// only correct in one of the two contexts this MFE can run in (standalone dev vs. hosted
+// in the shell) — by name it resolves correctly in both, no `isShell` branch needed.
 const goToSchemas = () => {
-	const isShell = window.location.pathname.startsWith('/content')
-
-	router.push(isShell ? '/content' : '/')
+	router.push({ name: ROUTES.content.name })
 }
 
 const goToDocs = () => {
-	const isShell = window.location.pathname.startsWith('/content')
-
-	router.push(isShell ? '/content/docs' : '/docs')
+	router.push({ name: 'ContentDocs' })
 }
 
 onMounted(entry.fetchData)

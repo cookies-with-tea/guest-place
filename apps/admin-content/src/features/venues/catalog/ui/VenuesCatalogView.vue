@@ -11,9 +11,9 @@
 				</p>
 			</div>
 			<div class="page-header__actions">
-				<el-button :icon="Grid" plain @click="router.push('/pages')">Страницы сайта</el-button>
-				<el-button :icon="Compass" plain @click="router.push('/menus')">Меню и навигация</el-button>
-				<el-button :icon="Switch" plain @click="router.push('/redirects')">Редиректы</el-button>
+				<el-button :icon="Grid" plain @click="router.push({ name: 'PageList' })">Страницы сайта</el-button>
+				<el-button :icon="Compass" plain @click="router.push({ name: 'MenusPage' })">Меню и навигация</el-button>
+				<el-button :icon="Switch" plain @click="router.push({ name: 'RedirectsPage' })">Редиректы</el-button>
 				<el-button type="primary" :icon="Plus" @click="emit('create')"> + Добавить площадку </el-button>
 			</div>
 		</div>

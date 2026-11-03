@@ -51,6 +51,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { ROUTES } from '@admin-panel/lib'
 import { Back, Plus } from '@element-plus/icons-vue'
 
 import DocsLivePreviewTab from './tabs/DocsLivePreviewTab.vue'
@@ -63,11 +64,11 @@ const router = useRouter()
 const activeTab = ref('overview')
 
 const goBack = () => {
-	router.push('/content')
+	router.push({ name: ROUTES.content.name })
 }
 
 const goToCreateSchema = () => {
-	router.push({ path: '/content', query: { create: 'true' } })
+	router.push({ name: ROUTES.content.name, query: { create: 'true' } })
 }
 </script>
 
