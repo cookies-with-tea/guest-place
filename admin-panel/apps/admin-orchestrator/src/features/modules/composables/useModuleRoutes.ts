@@ -5,7 +5,14 @@ import { ElMessage } from 'element-plus'
 
 import { mfeApi } from '#entities/mfe'
 
-/** Known sidebar routes per MFE, used to pre-populate the per-route enable/disable drawer. */
+/**
+ * Fallback sidebar routes per MFE, used to pre-populate the per-route enable/disable
+ * drawer (and the topology chart — see TopologyPage.vue) for an MFE that hasn't had
+ * `config.subRoutes` seeded/edited yet. Once `microfrontends.config.subRoutes` has a
+ * value (seeded by migration `20261103030000_mfe_sub_routes`, editable the same way
+ * `disabledRoutes`/`titleKey` already are), that takes priority — this is now only the
+ * generic default for a freshly-registered MFE nobody has configured.
+ */
 const KNOWN_MFE_ROUTES: Record<string, { path: string; title: string }[]> = {
 	orchestrator: [
 		{ path: '/orchestrator', title: 'Топология системы' },
@@ -39,7 +46,11 @@ export const useModuleRoutes = () => {
 		if (!activeMfe.value) return []
 
 		const mfeName = activeMfe.value.name
-		const known = KNOWN_MFE_ROUTES[mfeName] || [{ path: `/${mfeName}`, title: activeMfe.value.displayName }]
+		const configured = activeMfe.value.config?.subRoutes as { path: string; title: string }[] | undefined
+		const known =
+			configured && configured.length > 0
+				? configured
+				: KNOWN_MFE_ROUTES[mfeName] || [{ path: `/${mfeName}`, title: activeMfe.value.displayName }]
 
 		// Include any existing disabled routes that aren't in the known list
 		const allPaths = new Set(known.map((k) => k.path))

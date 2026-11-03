@@ -32,7 +32,7 @@
 			<div class="legend-item">
 				<span class="legend-dot route"></span>
 				<span>Sub-route</span>
-				<el-tag size="small" type="info">6</el-tag>
+				<el-tag size="small" type="info">{{ routeCount }}</el-tag>
 			</div>
 			<div class="legend-item">
 				<span class="legend-dot package"></span>
@@ -118,31 +118,22 @@ const chartData = computed(() => {
 
 		links.push({ source: mId, target: '@admin-panel/ui', value: 1 })
 
-		// Sub-routes for specific MFEs
-		if (m.name === 'users') {
-			// TODO: Подгружать с API
-			const userRoutes = ['Users List', 'Rights Management']
+		// Sub-routes for this MFE — loaded from its own registry row (`config.subRoutes`,
+		// the same admin-editable field the routes drawer uses — see Orchestrator →
+		// Modules → per-MFE route list), not hardcoded per MFE name here anymore.
+		const subRoutes = (m.config?.subRoutes as { path: string; title: string }[] | undefined) || []
 
-			userRoutes.forEach((r) => {
-				nodes.push({ id: r, group: 3, type: 'route', status: 'online' })
+		subRoutes.forEach((r) => {
+			nodes.push({ id: r.title, group: 3, type: 'route', status: 'online' })
 
-				links.push({ source: mId, target: r, value: 1 })
-			})
-		}
-
-		if (m.name === 'orchestrator') {
-			const orchRoutes = ['Monitoring', 'Logs', 'Topology', 'Modules']
-
-			orchRoutes.forEach((r) => {
-				nodes.push({ id: r, group: 3, type: 'route', status: 'online' })
-
-				links.push({ source: mId, target: r, value: 1 })
-			})
-		}
+			links.push({ source: mId, target: r.title, value: 1 })
+		})
 	})
 
 	return { nodes, links }
 })
+
+const routeCount = computed(() => chartData.value.nodes.filter((n: any) => n.type === 'route').length)
 </script>
 
 <style scoped>

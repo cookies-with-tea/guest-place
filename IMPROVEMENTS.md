@@ -200,9 +200,29 @@
       применяется и `config.titleKey` корректно проставляется для всех 7
       MFE. `pnpm type-check` на `admin-orchestrator`/`admin-shell`/
       `@admin-panel/lib` — чисто.
-- [ ] `apps/admin-orchestrator/src/pages/topology-page/TopologyPage.vue:123`
-      — `// TODO: Подгружать с API` — см. ниже в этом же разделе, сделано
-      отдельным пунктом (добавлен новый backend-эндпоинт).
+- [x] `apps/admin-orchestrator/src/pages/topology-page/TopologyPage.vue:123`
+      — `// TODO: Подгружать с API`. Решил не заводить отдельный
+      backend-эндпоинт — переиспользовал тот же механизм, что и в пункте
+      выше: `config.subRoutes` ([{path, title}]) на той же
+      `microfrontends`-записи, тот же `mfeApi` (уже дёргается через
+      `useMfe()`/`GET /api/v1/mfe`, так что "подгружать с API" в самом
+      буквальном смысле уже выполняется). Попутно обнаружил третью копию
+      той же проблемы: `useModuleRoutes.ts`'s `KNOWN_MFE_ROUTES`
+      (хардкод для drawer'а "включить/выключить пункт меню") дублировал
+      РОВНО тот же список routes/titles, что и хардкод в
+      `TopologyPage.vue` для users/orchestrator — свёл оба потребителя
+      на один источник (`config.subRoutes`), `KNOWN_MFE_ROUTES` остался
+      только как дефолт для MFE, которому ещё не засеяли/не настроили
+      `subRoutes`. `TopologyPage.vue`: убрал `if (m.name === 'users')`/
+      `if (m.name === 'orchestrator')` спецкейсы, генерик-цикл по
+      `m.config?.subRoutes` для ЛЮБОГО MFE; счётчик "Sub-route" в
+      легенде (был захардкожен `6`) теперь тоже считается от реальных
+      данных графа. Миграция `20261103030000_mfe_sub_routes` засеяла
+      `subRoutes` тем же списком, что раньше был в `KNOWN_MFE_ROUTES`
+      (ничего не меняется визуально по умолчанию). Проверено живым
+      Postgres — `config` после миграции содержит и `titleKey`, и
+      `subRoutes` одновременно (не затирают друг друга — не-деструктивный
+      jsonb-merge). `pnpm type-check` на `admin-orchestrator` — чисто.
 
 ---
 
