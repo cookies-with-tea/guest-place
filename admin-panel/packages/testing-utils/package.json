@@ -1,0 +1,15 @@
+{
+	"name": "@admin-panel/testing-utils",
+	"version": "0.0.0",
+	"dependencies": {
+		"@playwright/test": "^1.50.1"
+	},
+	"main": "./src/index.ts",
+	"private": true,
+	"scripts": {
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix"
+	},
+	"type": "module",
+	"types": "./src/index.ts"
+}

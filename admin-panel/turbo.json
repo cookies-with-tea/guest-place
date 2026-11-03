@@ -1,0 +1,60 @@
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"tasks": {
+		"build": {
+			"inputs": ["$TURBO_DEFAULT$", ".env*", "vite.config.ts"],
+			"outputs": ["dist/**", "storybook-static/**", "stats.html"],
+			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"check-size": {
+			"dependsOn": ["build"],
+			"cache": true
+		},
+		"dev": {
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"dependsOn": ["^build"],
+			"cache": false,
+			"persistent": true
+		},
+		"preview": {
+			"inputs": ["dist/**"],
+			"outputs": [],
+			"dependsOn": ["build"],
+			"cache": false
+		},
+		"lint": {
+			"outputs": []
+		},
+		"lint:fix": {
+			"outputs": [],
+			"cache": false
+		},
+		"type-check": {
+			"outputs": [],
+			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"clean": {
+			"cache": false
+		},
+		"storybook": {
+			"cache": false,
+			"persistent": true
+		},
+		"preview-storybook": {
+			"dependsOn": ["^build"],
+			"cache": false
+		},
+		"test:unit": {
+			"inputs": ["$TURBO_DEFAULT$"],
+			"outputs": [],
+			"cache": true
+		},
+		"test:coverage": {
+			"inputs": ["$TURBO_DEFAULT$"],
+			"outputs": ["coverage/**"],
+			"cache": true
+		}
+	}
+}

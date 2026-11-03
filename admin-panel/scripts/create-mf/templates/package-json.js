@@ -1,0 +1,41 @@
+export function getPackageJson(name) {
+	return {
+		name: name,
+		private: true,
+		version: '0.0.0',
+		type: 'module',
+		scripts: {
+			dev: 'vite',
+			build: 'tsc -b && vite build',
+			preview: 'vite preview',
+			'type-check': 'vue-tsc --build',
+			'test:unit': 'vitest run',
+			oxlint: 'oxlint',
+			'oxlint:fix': 'oxlint --fix',
+			oxfmt: 'oxfmt',
+			'oxfmt:check': 'oxfmt --check',
+			stylelint: 'stylelint "**/*.{vue,css,scss,postcss}"',
+			'stylelint:fix': 'stylelint "**/*.{vue,css,scss,postcss}" --fix',
+			lint: 'pnpm oxlint && pnpm stylelint && pnpm oxfmt:check',
+			'lint:fix': 'pnpm oxlint:fix && pnpm stylelint:fix && pnpm oxfmt',
+		},
+		dependencies: {
+			'@admin-panel/i18n': 'workspace:*',
+			'@admin-panel/lib': 'workspace:*',
+			'@admin-panel/ui': 'workspace:*',
+			'@element-plus/icons-vue': '^2.3.2',
+			'@tanstack/vue-query': '^5.92.1',
+			vue: '^3.5.22',
+			'vue-router': '^4.5.1',
+			'element-plus': '^2.13.0',
+		},
+		devDependencies: {
+			'@admin-panel/stylelint-config': 'workspace:*',
+			'@admin-panel/typescript-config': 'workspace:*',
+			'@types/node': '^24.9.2',
+			'@vitejs/plugin-vue': '^6.0.1',
+			typescript: '^5.9.3',
+			vite: '^7.1.7',
+		},
+	}
+}

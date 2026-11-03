@@ -1,0 +1,28 @@
+$fonts-path: '../fonts';
+
+/* Dark Theme Variables */
+$gp-bg: #0a0b10 !default;
+$gp-surface: #161b22 !default;
+$gp-bg-2: #1f242c !default;
+$gp-border: #30363d !default;
+$gp-primary: #7c3aed !default;
+
+$gp-text: #f0f6fc !default;
+$gp-text-secondary: #8b949e !default;
+$gp-text-disabled: #484f58 !default;
+
+/* Light Theme Variables */
+$gp-bg-light: #f6f8fa !default;
+$gp-surface-light: #fff !default;
+$gp-bg-2-light: #f3f4f6 !default;
+$gp-border-light: #d0d7de !default;
+
+$gp-text-light: #1f2328 !default;
+$gp-text-secondary-light: #656d76 !default;
+$gp-text-disabled-light: #8c959f !default;
+
+$breakpoints: (
+	desk: 1920,
+	tab: 1440,
+	mobi: 568,
+);

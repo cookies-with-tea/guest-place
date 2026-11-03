@@ -1,0 +1,310 @@
+/* ----------------------------------------------------------
+   Page Transitions: fade-transform
+   ---------------------------------------------------------- */
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+	transition:
+		opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+		transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-transform-enter-from {
+	transform: translateY(12px);
+	opacity: 0;
+}
+
+.fade-transform-leave-to {
+	transform: translateY(-8px);
+	opacity: 0;
+}
+
+/* Slide-in from right (for sub-pages/drawers) */
+.slide-right-enter-active,
+.slide-right-leave-active {
+	transition:
+		opacity 0.3s ease,
+		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right-enter-from {
+	transform: translateX(20px);
+	opacity: 0;
+}
+
+.slide-right-leave-to {
+	transform: translateX(-20px);
+	opacity: 0;
+}
+
+/* Fade only (for dialogs, overlays) */
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
+
+/* Blur & Fade (Premium look) */
+.blur-fade-enter-active,
+.blur-fade-leave-active {
+	transition:
+		opacity 0.4s ease,
+		filter 0.4s ease,
+		transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.blur-fade-enter-from {
+	filter: blur(10px);
+	transform: scale(0.98);
+	opacity: 0;
+}
+
+.blur-fade-leave-to {
+	filter: blur(4px);
+	transform: scale(1.02);
+	opacity: 0;
+}
+
+/* Scale In (Subtle) */
+.scale-in-enter-active,
+.scale-in-leave-active {
+	transition:
+		opacity 0.3s ease,
+		transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.scale-in-enter-from {
+	transform: scale(0.9);
+	opacity: 0;
+}
+
+.scale-in-leave-to {
+	transform: scale(1.1);
+	opacity: 0;
+}
+
+/* ----------------------------------------------------------
+   Skeleton Loading
+   ---------------------------------------------------------- */
+@keyframes gp-shimmer {
+	0% {
+		background-position: -400px 0;
+	}
+
+	100% {
+		background-position: 400px 0;
+	}
+}
+
+.skeleton {
+	border-radius: 8px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+}
+
+.skeleton-text {
+	height: 1em;
+	border-radius: 4px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	margin-bottom: 0.5em;
+}
+
+.skeleton-title {
+	width: 60%;
+	height: 1.5em;
+	border-radius: 6px;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	margin-bottom: 1em;
+}
+
+.skeleton-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+}
+
+.skeleton-card {
+	border: 1px solid var(--gp-glass-border);
+	border-radius: var(--gp-radius-md);
+	background: linear-gradient(90deg, var(--gp-bg-glass) 25%, var(--gp-bg-glass-hover) 50%, var(--gp-bg-glass) 75%);
+	background-size: 800px 100%;
+	animation: gp-shimmer 1.6s infinite linear;
+	padding: 20px;
+}
+
+/* ----------------------------------------------------------
+   Advanced Micro-interactions
+   ---------------------------------------------------------- */
+
+/* Hover Lift Effect */
+.hover-lift {
+	transition:
+		transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+		box-shadow 0.3s ease;
+
+	&:hover {
+		box-shadow: 0 12px 24px rgb(0, 0, 0, 0.2);
+		transform: translateY(-4px) scale(1.01);
+	}
+}
+
+/* Staggered List Animation */
+@keyframes gp-list-in {
+	0% {
+		filter: blur(4px);
+		transform: translateY(15px);
+		opacity: 0;
+	}
+
+	100% {
+		filter: blur(0);
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.stagger-list {
+	> * {
+		animation: gp-list-in 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+		opacity: 0;
+	}
+
+	@for $i from 1 through 15 {
+		> *:nth-child(#{$i}) {
+			animation-delay: #{$i * 0.08}s;
+		}
+	}
+}
+
+/* Table Row Transitions */
+.el-table__row {
+	transition:
+		transform 0.3s ease,
+		background-color 0.3s ease,
+		opacity 0.3s ease;
+
+	&:hover {
+		transform: scale(1.005);
+		z-index: 1;
+	}
+}
+
+/* Smooth Height Transition */
+.expand-enter-active,
+.expand-leave-active {
+	transition: all 0.3s ease-in-out;
+	overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+	max-height: 0;
+	opacity: 0;
+}
+
+/* Pulse glow for primary actions */
+@keyframes gp-pulse-glow {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 var(--gp-primary-light);
+	}
+
+	50% {
+		box-shadow: 0 0 0 8px transparent;
+	}
+}
+
+.pulse-glow {
+	animation: gp-pulse-glow 2s infinite;
+}
+
+/* Online indicator pulse */
+@keyframes gp-status-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	50% {
+		transform: scale(1.4);
+		opacity: 0.5;
+	}
+}
+
+.status-dot {
+	width: 8px;
+	height: 8px;
+	display: inline-block;
+	border-radius: 50%;
+
+	&.is-online {
+		background: var(--gp-primary);
+		animation: gp-status-pulse 2s infinite;
+	}
+
+	&.is-offline {
+		background: var(--gp-text-disabled);
+	}
+
+	&.is-warning {
+		background: #f59e0b;
+		animation: gp-status-pulse 2s infinite;
+	}
+}
+
+/* Float animation (ambient orbs, reused from MainLayout) */
+@keyframes float {
+	0% {
+		transform: translate(0, 0) scale(1);
+	}
+
+	100% {
+		transform: translate(-50px, 50px) scale(1.1);
+	}
+}
+
+/* Spin (loading indicator) */
+@keyframes gp-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.spin {
+	animation: gp-spin 1s linear infinite;
+}
+
+/* ----------------------------------------------------------
+   Skeleton Loading Enhancements
+   ---------------------------------------------------------- */
+
+.skeleton-pulse {
+	animation: gp-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes gp-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.5;
+	}
+}

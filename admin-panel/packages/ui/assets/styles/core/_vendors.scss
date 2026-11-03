@@ -1,0 +1,295 @@
+@use '../variables' as *;
+
+:root,
+html.dark,
+html.light {
+	/* Element Plus Root Color Hacks (Replacing Blue with VP Green) */
+	--el-color-primary: var(--gp-primary) !important;
+	--el-color-primary-light-3: var(--gp-primary-light) !important;
+	--el-color-primary-light-5: var(--gp-primary-light-5) !important;
+	--el-color-primary-light-7: var(--gp-primary-light-7) !important;
+	--el-color-primary-light-8: var(--gp-bg-glass) !important;
+	--el-color-primary-light-9: var(--gp-bg-glass) !important;
+	--el-color-primary-dark-2: var(--gp-primary-hover) !important;
+
+	/* Typography Variables Overrides */
+	--el-font-family: 'Inter', sans-serif !important;
+}
+
+/* Glass Cards */
+.el-card {
+	--el-card-bg-color: var(--gp-bg-glass) !important;
+	--el-card-border-color: var(--gp-glass-border);
+	--el-card-border-radius: var(--gp-radius-md);
+
+	border: 1px solid var(--gp-glass-border) !important;
+	box-shadow: var(--gp-glass-shadow) !important;
+	backdrop-filter: blur(16px);
+}
+
+.el-card__header {
+	border-bottom: 1px solid var(--gp-glass-border) !important;
+	font-weight: 600;
+	color: var(--gp-text-main);
+}
+
+/* Global Tables */
+.el-table {
+	--el-table-bg-color: transparent !important;
+	--el-table-tr-bg-color: transparent !important;
+	--el-table-header-bg-color: transparent !important;
+	--el-table-border: none !important;
+	--el-table-border-color: transparent !important;
+	--el-table-text-color: var(--gp-text-main);
+	--el-table-header-text-color: var(--gp-text-secondary);
+	--el-table-row-hover-bg-color: var(--gp-bg-glass-hover);
+
+	background-color: transparent !important;
+}
+
+.el-table th.el-table__cell,
+.el-table td.el-table__cell {
+	border-bottom: 1px solid var(--gp-glass-border) !important;
+	padding: 12px 0;
+}
+
+.el-table::before {
+	display: none; /* Hide bottom border */
+}
+
+p {
+	margin-bottom: 1em;
+}
+
+/* Glass Buttons (Glass Pills) */
+.el-button {
+	--el-border-radius-base: 8px; /* Standard rounded buttons */
+
+	border: 1px solid var(--gp-glass-border) !important;
+	font-weight: 500;
+	letter-spacing: 0.3px;
+	color: var(--gp-text-main) !important;
+	background: var(--gp-bg-glass) !important;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	padding: 12px 24px;
+	backdrop-filter: blur(8px);
+}
+
+.el-button:hover {
+	box-shadow: var(--gp-glass-shadow);
+	background: var(--gp-bg-glass-hover) !important;
+	transform: translateY(-2px);
+}
+
+.el-button--primary {
+	border: none !important;
+	box-shadow: 0 4px 16px var(--gp-primary-light);
+	color: var(--gp-white) !important;
+	background: var(--gp-primary) !important;
+}
+
+.el-button--primary:hover {
+	box-shadow: 0 6px 20px var(--gp-primary-light);
+	background: var(--gp-primary-hover) !important;
+}
+
+.el-button--danger {
+	border: none !important;
+	box-shadow: 0 4px 16px rgb(255, 95, 95, 0.3);
+	color: var(--gp-white) !important;
+	background: #ff5f5f !important;
+}
+
+.el-button--danger:hover {
+	box-shadow: 0 6px 20px rgb(255, 95, 95, 0.4);
+	background: #ff4747 !important;
+}
+
+/* Inputs Styles */
+.el-input,
+.el-select {
+	--el-input-border-radius: var(--gp-radius-md);
+	--el-select-border-radius: var(--gp-radius-md);
+}
+
+.el-input__wrapper,
+.el-select__wrapper {
+	border: 1px solid var(--gp-glass-border-inner) !important;
+	box-shadow: 0 0 0 1px var(--gp-glass-border) inset !important;
+	background: var(--gp-glass-gradient) !important;
+	background-color: var(--gp-bg-glass) !important;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	backdrop-filter: blur(var(--gp-glass-blur));
+
+	.el-select__caret,
+	.el-input__icon {
+		color: var(--gp-text-secondary) !important;
+		transition: transform 0.3s ease;
+	}
+
+	.el-select__placeholder {
+		color: var(--gp-text-main) !important;
+	}
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused {
+	box-shadow:
+		0 0 0 1px var(--gp-primary) inset,
+		0 8px 16px -4px var(--gp-primary-light) !important;
+	background: var(--gp-bg-glass-hover) !important;
+	transform: translateY(-1px);
+
+	.el-select__caret,
+	.el-input__icon {
+		color: var(--gp-primary) !important;
+	}
+}
+
+/* Modals (Glassmorphism) */
+.el-dialog {
+	border: 1px solid var(--gp-glass-border) !important;
+	border-radius: var(--gp-radius-md) !important;
+	box-shadow: var(--gp-glass-shadow) !important;
+	background: var(--gp-bg-glass) !important;
+	backdrop-filter: blur(20px) !important;
+}
+
+.el-dialog__title {
+	font-weight: 600;
+	color: var(--gp-text-main) !important;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+	color: var(--gp-text-secondary) !important;
+}
+
+.el-dialog__headerbtn:hover .el-dialog__close {
+	color: var(--gp-text-main) !important;
+}
+
+.el-table,
+.el-table__inner-wrapper,
+.el-table__body-wrapper,
+.el-table__header-wrapper,
+.el-table tr,
+.el-table th,
+.el-table td,
+.el-table th.el-table__cell,
+.el-table td.el-table__cell {
+	border-top: none !important;
+	border-right: none !important;
+	border-left: none !important;
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
+.el-table__inner-wrapper::before,
+.el-table__border-left-patch,
+.el-table::before,
+.el-table::after {
+	display: none !important;
+}
+
+.el-table td.el-table__cell,
+.el-table th.el-table__cell.is-leaf {
+	border-bottom: 1px solid var(--gp-glass-border) !important;
+}
+
+.el-table tbody tr:hover > td.el-table__cell {
+	background-color: var(--gp-bg-glass-hover) !important;
+	backdrop-filter: blur(5px);
+}
+
+/* Poppers (Selects, Dropdowns, Tooltips) */
+body .el-popper.is-light,
+body .el-popper.is-dark,
+.el-popper.is-light,
+.el-popper.is-dark {
+	border: 1px solid var(--gp-glass-border) !important;
+	border-radius: 12px !important;
+	box-shadow: var(--gp-glass-shadow) !important;
+	color: var(--gp-text-main) !important;
+	background: var(--gp-bg-glass) !important;
+	backdrop-filter: blur(25px) !important;
+
+	.el-popper__arrow::before {
+		border: 1px solid var(--gp-glass-border) !important;
+		background: var(--gp-bg-glass) !important;
+		visibility: visible !important;
+	}
+}
+
+.el-select-dropdown,
+.el-select-dropdown__wrap,
+.el-select-dropdown__list {
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
+.el-select-dropdown__item {
+	border-radius: 8px;
+	color: var(--gp-text-main);
+	transition: all 0.2s;
+	margin: 2px 8px;
+
+	&.is-hovering,
+	&:hover {
+		background-color: var(--gp-bg-glass-hover) !important;
+	}
+
+	&.is-selected {
+		font-weight: 600;
+		color: var(--gp-primary);
+		background-color: rgb(66, 184, 131, 0.1) !important;
+	}
+}
+
+.el-dropdown-menu {
+	background: transparent !important;
+	padding: 8px !important;
+
+	&__item {
+		border-radius: 8px;
+		color: var(--gp-text-main) !important;
+		margin: 2px 0;
+
+		&:hover {
+			color: var(--gp-primary) !important;
+			background-color: var(--gp-bg-glass-hover) !important;
+		}
+	}
+}
+
+/* Global Pagination (Glassmorphism) */
+.el-pagination {
+	--el-pagination-bg-color: transparent;
+	--el-pagination-hover-color: var(--gp-primary);
+	--el-pagination-button-bg-color: transparent;
+	--el-pagination-item-bg-color: transparent;
+
+	.el-pager li {
+		border-radius: 8px;
+		background: transparent !important;
+		transition: all 0.2s;
+
+		&:hover:not(.is-active) {
+			color: var(--gp-primary) !important;
+			background: var(--gp-bg-glass-hover) !important;
+		}
+
+		&.is-active {
+			color: #fff !important;
+			background-color: var(--gp-primary) !important;
+		}
+	}
+
+	button {
+		border-radius: 8px;
+		background: transparent !important;
+
+		&:hover {
+			background: var(--gp-bg-glass-hover) !important;
+		}
+	}
+}

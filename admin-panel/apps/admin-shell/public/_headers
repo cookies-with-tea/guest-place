@@ -1,0 +1,22 @@
+# Global Cache rules
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Immutable assets (Vite hashed files)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Shared modules (Vite hashed files)
+/shared/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Federation Entry Points (SHOULD NOT BE CACHED PERMANENTLY)
+/remoteEntry.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Manifests
+/manifest.json
+  Cache-Control: public, max-age=0, must-revalidate

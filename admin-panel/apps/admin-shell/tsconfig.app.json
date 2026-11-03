@@ -1,0 +1,35 @@
+{
+	"extends": "../../packages/typescript-config/vue.json",
+	"include": ["env.d.ts", "src/**/*", "src/**/*.vue", "e2e/**/*", "playwright.config.ts"],
+	"exclude": ["src/**/__tests__/**/*", "node_modules"],
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+		"resolveJsonModule": true,
+		"target": "esnext",
+		"module": "esnext",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"newLine": "lf",
+		"jsx": "preserve",
+		"strict": true,
+		"moduleResolution": "bundler",
+		"paths": {
+			"@/*": ["./src/*"],
+			"~/*": ["./src/*"],
+			"@core/*": ["./core/*"],
+			"@root/*": ["./*"],
+			"#app/*": ["./src/app/*"],
+			"#pages/*": ["./src/pages/*"],
+			"#widgets/*": ["./src/widgets/*"],
+			"#features/*": ["./src/features/*"],
+			"#entities/*": ["./src/entities/*"],
+			"#shared/*": ["./src/shared/*"]
+		},
+		"rootDirs": ["./*"],
+		"typeRoots": ["./types", "node_modules/@types"],
+		"types": ["node"],
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	}
+}

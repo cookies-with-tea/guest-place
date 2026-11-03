@@ -1,0 +1,29 @@
+{
+	"name": "@admin-panel/stylelint-config",
+	"version": "1.0.0",
+	"dependencies": {
+		"@stylistic/stylelint-plugin": "^4.0.0",
+		"@tanstack/vue-query": "^5.92.1",
+		"pinia": "^2.1.7",
+		"postcss-html": "^1.8.0",
+		"postcss-scss": "^4.0.9",
+		"stylelint-config-recess-order": "^7.4.0",
+		"stylelint-config-recommended-vue": "^1.6.1",
+		"stylelint-config-standard-scss": "^16.0.0",
+		"stylelint-order": "^7.0.0",
+		"stylelint-scss": "^6.12.1"
+	},
+	"exports": {
+		".": "./index.js"
+	},
+	"main": "index.js",
+	"peerDependencies": {
+		"stylelint": "^16.0.0"
+	},
+	"private": true,
+	"scripts": {
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix"
+	},
+	"type": "module"
+}

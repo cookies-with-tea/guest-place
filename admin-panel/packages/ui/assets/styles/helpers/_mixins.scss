@@ -1,0 +1,24 @@
+@mixin hover {
+	@media (hover: hover), all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+		/* stylelint-disable nesting-selector-no-missing-scoping-root */
+		&:hover {
+			@content;
+		}
+		/* stylelint-enable nesting-selector-no-missing-scoping-root */
+	}
+}
+
+@mixin truncate($lines: 3, $truncation-boundary: 100%, $display: -webkit-box) {
+	max-width: $truncation-boundary;
+	display: $display;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: $lines;
+}
+
+@mixin generate-css-vars($colors) {
+	@each $name, $value in $colors {
+		--#{$name}: #{$value};
+	}
+}

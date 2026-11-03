@@ -1,0 +1,5 @@
+@use 'index' as ui;
+
+// Heavy library styles
+@use 'element-plus/dist/index' as ep;
+@use 'element-plus/theme-chalk/dark/css-vars' as ep-dark;

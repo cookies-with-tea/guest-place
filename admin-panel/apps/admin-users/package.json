@@ -1,0 +1,47 @@
+{
+	"name": "admin-users",
+	"version": "0.0.0",
+	"dependencies": {
+		"@admin-panel/i18n": "workspace:*",
+		"@admin-panel/lib": "workspace:*",
+		"@admin-panel/ui": "workspace:*",
+		"@element-plus/icons-vue": "^2.3.2",
+		"@tanstack/vue-query": "^5.92.1",
+		"element-plus": "^2.13.0",
+		"pinia": "^2.1.7",
+		"vue": "^3.5.22",
+		"vue-router": "^4.5.1"
+	},
+	"devDependencies": {
+		"@admin-panel/stylelint-config": "workspace:*",
+		"@admin-panel/typescript-config": "workspace:*",
+		"@types/node": "^24.9.2",
+		"@vitejs/plugin-vue": "^6.0.1",
+		"@vue/test-utils": "^2.4.6",
+		"jsdom": "^27.0.0",
+		"npm-run-all2": "^8.0.4",
+		"typescript": "^5.9.3",
+		"vite": "^7.1.7",
+		"vitest": "^3.2.4",
+		"vue-tsc": "^3.1.0"
+	},
+	"private": true,
+	"scripts": {
+		"build": "tsc -b && vite build",
+		"dev": "vite",
+		"lint": "run-p oxlint stylelint oxfmt:check",
+		"lint:fix": "run-p oxlint:fix stylelint:fix oxfmt",
+		"oxfmt": "oxfmt",
+		"oxfmt:check": "oxfmt --check",
+		"oxlint": "oxlint",
+		"oxlint:fix": "oxlint --fix",
+		"preview": "vite preview",
+		"stylelint": "stylelint \"**/*.{vue,css,scss,postcss}\" --cache",
+		"stylelint:fix": "stylelint \"**/*.{vue,css,scss,postcss}\" --fix --cache",
+		"test:e2e": "start-server-and-test 'vite dev' http://localhost:4176 'cypress run --e2e'",
+		"test:e2e:dev": "start-server-and-test 'vite dev' http://localhost:4176 'cypress open --e2e'",
+		"test:unit": "vitest --passWithNoTests",
+		"type-check": "vue-tsc --build"
+	},
+	"type": "module"
+}

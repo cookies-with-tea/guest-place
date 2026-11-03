@@ -1,0 +1,5 @@
+@use '../variables' as *;
+@use '../helpers' as h;
+
+@include h.addFont('Inter', 'Regular');
+@include h.addFont('Inter', 'ExtraBold');

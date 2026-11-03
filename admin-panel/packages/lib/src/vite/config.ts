@@ -1,0 +1,218 @@
+import federation from '@originjs/vite-plugin-federation'
+import vue from '@vitejs/plugin-vue'
+import { defu } from 'defu'
+import { builtinModules } from 'node:module'
+import { resolve } from 'node:path'
+import { visualizer } from 'rollup-plugin-visualizer'
+import { loadEnv } from 'vite'
+import viteCompression from 'vite-plugin-compression'
+import { defineConfig, type ViteUserConfig } from 'vitest/config'
+
+import { APPS_PORTS } from '../constants/ports'
+
+export interface CreateConfigOptions {
+	name: string
+	displayName: string
+	shared?: string[] | Record<string, any>
+	exposes?: Record<string, string>
+	remotes?: Record<string, string>
+	overrides?: ViteUserConfig
+	plugins?: any[]
+	serverPort?: number
+	previewPort?: number
+	root?: string
+}
+
+export function createConfig(options: CreateConfigOptions) {
+	const {
+		name,
+		displayName,
+		shared = {
+			vue: { singleton: true },
+			'vue-router': { singleton: true },
+			'element-plus': { singleton: true },
+			pinia: { singleton: true },
+			'@tanstack/vue-query': { singleton: true },
+			'@admin-panel/i18n': { singleton: true },
+		},
+		exposes,
+		remotes,
+		overrides = {},
+		plugins = [],
+		serverPort,
+		previewPort,
+		root: rootOption,
+	} = options
+
+	return defineConfig(({ mode, command }) => {
+		const appDir = rootOption || process.cwd()
+		const rootDir = resolve(appDir, '../../')
+		const env = loadEnv(mode, rootDir)
+
+		const portConfig = APPS_PORTS[name as keyof typeof APPS_PORTS]
+		const isProduction = mode === 'production' || command === 'build'
+		const apiTarget = env.VITE_API_BASE || env.VITE_BASE_URL || 'http://localhost:8000'
+
+		const baseConfig: ViteUserConfig = {
+			root: appDir,
+			base: '/', // Keep base as / but override URLs for built assets
+			plugins: [
+				vue(),
+				{
+					name: 'gp-css-externalizer',
+					enforce: 'pre',
+					resolveId(id) {
+						// If we are NOT the shell, we skip bundling heavy global styles
+						// because they are already provided by the host (Shell).
+						const isHeavyStyle =
+							(id.includes('element-plus') && (id.endsWith('.css') || id.includes('/style/'))) ||
+							id.endsWith('bundle.scss')
+
+						const isShellLike = name === 'shell' || name === 'orchestrator'
+						const isStandalone = !!process.env.VITE_STANDALONE || command === 'serve'
+
+						if (!isShellLike && isHeavyStyle && !isStandalone) {
+							return '\0virtual:gp-empty.css'
+						}
+					},
+					load(id) {
+						if (id === '\0virtual:gp-empty.css') {
+							return '/* Stripped in MFE mode to prevent duplication */'
+						}
+					},
+				},
+				federation({
+					name,
+					filename: 'remoteEntry.js',
+					exposes: exposes || {
+						[`./${displayName.replace(/\s+/g, '')}Routes`]: './src/app/router/index.ts',
+					},
+					remotes,
+					shared: {
+						...shared,
+						// `singleton` is a real, documented option this plugin reads at runtime, but it's
+						// commented out of @originjs/vite-plugin-federation@1.4.1's own SharedConfig type —
+						// an upstream typing gap, not a mistake here.
+						'@admin-panel/ui': { singleton: true } as any,
+						'@admin-panel/lib': { singleton: true } as any,
+					},
+				}),
+				viteCompression({
+					verbose: true,
+					disable: false,
+					threshold: 1024,
+					algorithm: 'gzip',
+					ext: '.gz',
+				}),
+				visualizer({
+					open: false,
+					filename: 'stats.html',
+					gzipSize: true,
+					brotliSize: true,
+				}),
+				...plugins,
+			],
+			experimental: {
+				renderBuiltUrl(filename) {
+					if (isProduction && name !== 'shell' && portConfig) {
+						return `http://localhost:${(portConfig as any).preview}/${filename}`
+					}
+				},
+			},
+			resolve: {
+				alias: {
+					'@': resolve(appDir, 'src'),
+					'#app': resolve(appDir, 'src/app'),
+					'#pages': resolve(appDir, 'src/pages'),
+					'#widgets': resolve(appDir, 'src/widgets'),
+					'#features': resolve(appDir, 'src/features'),
+					'#entities': resolve(appDir, 'src/entities'),
+					'#shared': resolve(appDir, 'src/shared'),
+					styles: resolve(appDir, 'src/app/assets/styles'),
+				},
+				dedupe: ['vue', 'element-plus', 'pinia', 'vue-router', '@tanstack/vue-query'],
+			},
+			build: {
+				target: 'esnext',
+				minify: false,
+				cssCodeSplit: true, // Enable code splitting for better performance
+				rollupOptions: {
+					external: [
+						'vue',
+						'vue-router',
+						'element-plus',
+						'pinia',
+						'@admin-panel/ui',
+						'@admin-panel/lib',
+						'@tanstack/vue-query',
+						'@admin-panel/i18n',
+						'fsevents',
+						...builtinModules,
+						...builtinModules.map((m) => `node:${m}`),
+					],
+					output: {
+						// Ensure clean chunk names for federation
+						chunkFileNames: 'assets/[name]-[hash].js',
+						entryFileNames: 'assets/[name].js',
+					},
+				},
+			},
+			server: {
+				port: serverPort || portConfig?.dev,
+				cors: true,
+				proxy: {
+					'/api': {
+						target: apiTarget,
+						changeOrigin: true,
+						secure: false,
+						// Ensure SSE works by disabling buffering
+						configure: (proxy) => {
+							proxy.on('proxyRes', (proxyRes, req) => {
+								// For SSE, we want to ensure no buffering
+								if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
+									proxyRes.headers['cache-control'] = 'no-cache'
+
+									proxyRes.headers['connection'] = 'keep-alive'
+								}
+							})
+						},
+					},
+				},
+			},
+			preview: {
+				port: previewPort || portConfig?.preview,
+				proxy: {
+					'/api': {
+						target: apiTarget,
+						changeOrigin: true,
+						secure: false,
+						configure: (proxy) => {
+							proxy.on('proxyRes', (proxyRes, req) => {
+								if (req.url?.includes('/logs') || req.url?.includes('/stats/stream')) {
+									proxyRes.headers['cache-control'] = 'no-cache'
+
+									proxyRes.headers['connection'] = 'keep-alive'
+								}
+							})
+						},
+					},
+				},
+			},
+			test: {
+				globals: true,
+				environment: 'jsdom',
+				setupFiles: [],
+				include: ['src/__tests__/**/*.{test,spec}.{ts,js,tsx,jsx}'],
+				coverage: {
+					provider: 'v8',
+					reporter: ['text', 'json', 'html'],
+					include: ['src/**/*.{ts,vue}'],
+					all: true,
+					exclude: ['node_modules/', 'src/__tests__/**', '**/*.d.ts', 'vite.config.ts', 'dist/**'],
+				},
+			},
+		}
+
+		return defu(overrides, baseConfig)
+	})
+}
