@@ -1,0 +1,395 @@
+use axum::http::HeaderValue;
+use guest_place::core::app::AppConfig;
+use guest_place::core::db::{create_pool, create_redis_pool};
+use guest_place::core::redis::RedisService;
+use guest_place::features::FeatureFlagService;
+use guest_place::i18n::I18nService;
+use guest_place::media::quota::QuotaService;
+use guest_place::media::storage::StorageService;
+use guest_place::{create_router, AppState};
+use std::env;
+use std::sync::Arc;
+use std::time::Duration;
+use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
+use utoipa::{
+    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
+    Modify, OpenApi,
+};
+
+#[derive(OpenApi)]
+#[openapi(
+  security(("bearer_auth" = [])),
+  paths(
+    guest_place::auth::handlers::login,
+    guest_place::auth::handlers::logout,
+    guest_place::auth::handlers::refresh,
+    guest_place::auth::handlers::register,
+    guest_place::auth::handlers::check_register_key,
+    guest_place::auth::handlers::logout_other_devices,
+    guest_place::user::handlers::create,
+    guest_place::user::handlers::get_one,
+    guest_place::user::handlers::delete_one,
+    guest_place::user::handlers::get_me,
+    guest_place::user::handlers::update_me,
+    guest_place::user::handlers::change_password,
+    guest_place::media::handlers::create,
+    guest_place::media::handlers::init_chunk_upload,
+    guest_place::media::handlers::upload_chunk,
+    guest_place::media::handlers::get_chunk_status,
+    guest_place::media::handlers::complete_chunk_upload,
+    guest_place::media::handlers::optimize_one,
+    guest_place::media::handlers::optimize_bulk,
+    guest_place::media::handlers::get_all,
+    guest_place::media::handlers::get_one,
+    guest_place::media::handlers::update,
+    guest_place::media::handlers::delete_one,
+    guest_place::media::handlers::delete_all,
+    guest_place::media::handlers::get_variant,
+    guest_place::media::folders::get_folders,
+    guest_place::media::folders::create_folder,
+    guest_place::media::folders::update_folder,
+    guest_place::media::folders::delete_folder,
+    guest_place::media::folders::batch_move_media,
+    guest_place::media::folders::get_media_tags,
+    guest_place::media::folders::get_media_config,
+    guest_place::i18n::handlers::create_or_update,
+    guest_place::i18n::handlers::get_all,
+    guest_place::i18n::handlers::delete_one,
+    guest_place::i18n::handlers::get_by_dict_key,
+    guest_place::i18n::handlers::get_languages,
+    guest_place::i18n::handlers::get_namespaces,
+    guest_place::i18n::handlers::get_refs,
+    guest_place::mfe::handlers::get_manifest,
+    guest_place::mfe::handlers::get_all,
+    guest_place::mfe::handlers::create,
+    guest_place::mfe::handlers::update,
+    guest_place::mfe::handlers::delete_one,
+    guest_place::features::handlers::get_features,
+    guest_place::features::handlers::update_features,
+    guest_place::content::handlers::get_schemas,
+    guest_place::content::handlers::create_schema,
+    guest_place::content::handlers::get_schema,
+    guest_place::content::handlers::update_schema,
+    guest_place::content::handlers::delete_schema,
+    guest_place::content::handlers::get_entries,
+    guest_place::content::handlers::create_entry,
+    guest_place::content::handlers::get_entry,
+    guest_place::content::handlers::update_entry,
+    guest_place::content::handlers::delete_entry,
+    guest_place::content::handlers::get_entry_versions,
+    guest_place::content::handlers::rollback_entry_version,
+    guest_place::monitoring::handlers::get_health,
+    guest_place::monitoring::handlers::get_stats_stream,
+    guest_place::analytics::handlers::start_session,
+    guest_place::analytics::handlers::track_event,
+    guest_place::analytics::handlers::get_traffic_stats,
+    guest_place::analytics::handlers::get_engagement_stats,
+    guest_place::analytics::handlers::get_summary_stats,
+    guest_place::analytics::handlers::get_referral_stats,
+    guest_place::analytics::handlers::get_funnel_stats,
+    guest_place::analytics::handlers::get_retention_stats,
+    guest_place::monitoring::handlers::send_system_alert,
+    guest_place::core::lock::get_lock_status,
+    guest_place::core::lock::acquire_lock,
+    guest_place::core::lock::release_lock,
+    guest_place::pages::handlers::get_pages,
+    guest_place::pages::handlers::get_page,
+    guest_place::pages::handlers::create_page,
+    guest_place::pages::handlers::update_page,
+    guest_place::pages::handlers::delete_page,
+    guest_place::pages::handlers::get_page_breadcrumbs,
+    guest_place::pages::handlers::get_block_types,
+    guest_place::pages::handlers::create_block_type,
+    guest_place::pages::handlers::update_block_type,
+    guest_place::pages::handlers::delete_block_type,
+    guest_place::pages::handlers::sync_block_types,
+    guest_place::menus::handlers::get_menus,
+    guest_place::menus::handlers::get_menu_by_location,
+    guest_place::menus::handlers::create_menu,
+    guest_place::menus::handlers::update_menu,
+    guest_place::menus::handlers::delete_menu,
+    guest_place::redirects::handlers::get_redirects,
+    guest_place::redirects::handlers::check_redirect,
+    guest_place::redirects::handlers::create_redirect,
+    guest_place::redirects::handlers::update_redirect,
+    guest_place::redirects::handlers::delete_redirect,
+    guest_place::venues::handlers::get_venues,
+    guest_place::venues::handlers::get_venue_by_id_or_slug,
+    guest_place::venues::handlers::create_venue,
+    guest_place::venues::handlers::update_venue,
+    guest_place::venues::handlers::delete_venue,
+    guest_place::home::handlers::get_home,
+    guest_place::home::handlers::update_home,
+  ),
+  modifiers(&SecurityAddon),
+  tags(
+        (name = "Auth", description = "Auth"),
+        (name = "Home", description = "Home page information and management"),
+        (name = "Media", description = "Media"),
+        (name = "User", description = "User"),
+        (name = "I18n", description = "Translations management"),
+        (name = "MFE", description = "Microfrontends management"),
+        (name = "Features", description = "Feature Flags management"),
+        (name = "Content", description = "Dynamic Content Management"),
+        (name = "Pages", description = "Page constructor and block types management"),
+        (name = "Menus", description = "Site Navigation Menus management"),
+        (name = "Redirects", description = "URL Redirects (301/302) management"),
+        (name = "System", description = "System monitoring and orchestration"),
+        (name = "Analytics", description = "Website behavior analytics"),
+  ),
+  components(
+    schemas(
+        guest_place::pages::model::Page,
+        guest_place::pages::model::CreatePageDTO,
+        guest_place::pages::model::UpdatePageDTO,
+        guest_place::pages::model::BreadcrumbItem,
+        guest_place::pages::model::BlockType,
+        guest_place::pages::model::CreateBlockTypeDTO,
+        guest_place::pages::model::UpdateBlockTypeDTO,
+        guest_place::pages::model::SyncBlockTypeItem,
+        guest_place::pages::model::SyncBlockTypesDTO,
+        guest_place::menus::model::Menu,
+        guest_place::menus::model::CreateMenuDTO,
+        guest_place::menus::model::UpdateMenuDTO,
+        guest_place::redirects::model::Redirect,
+        guest_place::redirects::model::CreateRedirectDTO,
+        guest_place::redirects::model::UpdateRedirectDTO,
+        guest_place::redirects::model::CheckRedirectResponse,
+        guest_place::auth::dto::AuthRequestDTO,
+        guest_place::auth::dto::RegisterRequestDTO,
+        guest_place::auth::dto::AuthResponseDTO,
+        guest_place::auth::dto::AuthRefreshTokenDTO,
+        guest_place::content::model::ContentSchema,
+        guest_place::content::model::CreateSchemaDTO,
+        guest_place::content::model::UpdateSchemaDTO,
+        guest_place::content::model::FieldDefinition,
+        guest_place::content::model::FieldType,
+        guest_place::content::model::ContentEntry,
+        guest_place::content::model::ContentEntryVersion,
+        guest_place::content::model::ContentEntryStatus,
+        guest_place::content::model::CreateContentEntryDTO,
+        guest_place::content::model::UpdateContentEntryDTO,
+        guest_place::content::model::EntryFilterQuery,
+        guest_place::media::dto::MediaItemDTO,
+        guest_place::media::dto::MediaVariantDTO,
+        guest_place::media::dto::MediaVariantsDTO,
+        guest_place::media::dto::BulkOptimizeMediaDTO,
+        guest_place::media::dto::UpdateMediaDTO,
+        guest_place::media::dto::MediaType,
+        guest_place::media::dto::MediaFilterQuery,
+        guest_place::media::dto::MediaFolderDTO,
+        guest_place::media::dto::CreateFolderDTO,
+        guest_place::media::dto::UpdateFolderDTO,
+        guest_place::media::dto::BatchMoveMediaDTO,
+        guest_place::media::dto::MediaTagCountDTO,
+        guest_place::media::dto::MediaConfigDTO,
+        guest_place::media::chunk::InitChunkUploadDTO,
+        guest_place::media::chunk::InitChunkUploadResponse,
+        guest_place::media::chunk::ChunkStatusResponse,
+        guest_place::media::chunk::ChunkUploadResultDTO,
+        guest_place::i18n::dto::LanguageDTO,
+        guest_place::i18n::dto::TranslationDTO,
+        guest_place::i18n::dto::CreateTranslationDTO,
+        guest_place::i18n::dto::TranslationRefDTO,
+        guest_place::features::FeatureFlag,
+        guest_place::features::FeatureFlagsUpdate,
+        guest_place::user::dto::ChangePasswordDTO,
+        guest_place::core::dto::PaginationDTO,
+        guest_place::monitoring::handlers::HealthStatus,
+        guest_place::analytics::dto::TrackEventDto,
+        guest_place::analytics::dto::StartSessionDto,
+        guest_place::analytics::dto::SessionResponseDto,
+        guest_place::analytics::dto::TrafficStatsDto,
+        guest_place::analytics::dto::EngagementStatsDto,
+        guest_place::analytics::dto::FunnelStepDto,
+        guest_place::analytics::dto::CohortRowDto,
+        guest_place::analytics::dto::ReferralDto,
+        guest_place::analytics::dto::AnalyticsSummaryDto,
+        guest_place::monitoring::handlers::SendAlertDTO,
+        guest_place::core::lock::LockInfo,
+        guest_place::core::lock::LockStatusResponse,
+        guest_place::core::lock::AcquireLockRequest,
+        guest_place::home::dto::HomeResponseDTO,
+        guest_place::home::dto::HomeCategoryDTO,
+        guest_place::home::dto::HomeInteractionItemDTO,
+        guest_place::home::dto::UpdateHomeDTO,
+    )
+  )
+)]
+struct ApiDoc;
+
+struct SecurityAddon;
+
+impl Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "api_key",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("gp_apikey"))),
+            );
+            components.add_security_scheme(
+                "bearer_auth",
+                SecurityScheme::Http(
+                    utoipa::openapi::security::HttpBuilder::new()
+                        .scheme(utoipa::openapi::security::HttpAuthScheme::Bearer)
+                        .build(),
+                ),
+            );
+        }
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.contains(&"--export-openapi".to_string()) {
+        let openapi = ApiDoc::openapi();
+        let json = openapi.to_pretty_json().unwrap();
+        // Absolute, CARGO_MANIFEST_DIR-anchored path: `cargo run --manifest-path server/Cargo.toml`
+        // from the repo root (as the Makefile's `generate-api` target does) runs with CWD at the
+        // repo root, so a relative "openapi.json" previously landed next to the repo root instead
+        // of in server/ — silently leaving admin-panel's `pnpm generate:api` (which reads
+        // server/openapi.json) stuck on a stale spec.
+        let out_path = concat!(env!("CARGO_MANIFEST_DIR"), "/openapi.json");
+        std::fs::write(out_path, json).expect("Unable to write openapi.json");
+        println!("OpenAPI spec exported to {out_path}");
+        return;
+    }
+
+    match dotenv::dotenv() {
+        Ok(path) => println!("[dotenv] Loaded env from: {:?}", path),
+        Err(e) => eprintln!("[dotenv] Error loading .env: {:?}", e),
+    }
+
+    let (log_tx, _) = tokio::sync::broadcast::channel(100);
+    let log_layer = guest_place::monitoring::service::LogBroadcastLayer { tx: log_tx.clone() };
+
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(log_layer)
+        .init();
+
+    let config = AppConfig::new();
+    let pool = create_pool(&config).await;
+    let app_host = config.app_host.clone();
+    let app_port = config.app_port.clone();
+
+    let smtp_host = std::env::var("SMTP_HOST").expect("SMTP_HOST must be set");
+    let smtp_port: u16 = std::env::var("SMTP_PORT")
+        .unwrap_or("587".to_string())
+        .parse()
+        .expect("Invalid SMTP_PORT");
+    let smtp_username = std::env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
+    let smtp_password = std::env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
+    let smtp_from = std::env::var("SMTP_FROM")
+        .or_else(|_| std::env::var("MAIL_FROM"))
+        .expect("SMTP_FROM or MAIL_FROM must be set");
+
+    let i18n = I18nService::new(pool.clone());
+    let media_storage = Arc::new(StorageService::new(config.upload_dir.clone()));
+
+    let redis_pool = create_redis_pool(&config);
+    let redis = Arc::new(RedisService::new(redis_pool));
+    let features = Arc::new(FeatureFlagService::new(pool.clone(), redis.clone()));
+    let media_quota = Arc::new(QuotaService::new(pool.clone(), config.media_quota_limit));
+    let bus = Arc::new(guest_place::core::bus::RealtimeBus::new(1024));
+    let media_optimizer = Arc::new(guest_place::media::optimizer::MediaOptimizer::new(
+        pool.clone(),
+        bus.clone(),
+        config.upload_dir.clone(),
+        config.public_url.clone(),
+    ));
+
+    let mut plugin_manager = guest_place::core::plugin::PluginManager::new();
+    plugin_manager.register(guest_place::features::hello_plugin::HelloPlugin);
+
+    let shared_state = Arc::new(AppState {
+        pool: pool.clone(),
+        config: config.clone(),
+        i18n,
+        media_storage: media_storage.clone(),
+        redis,
+        features,
+        media_quota,
+        media_optimizer,
+        frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
+        smtp_host,
+        smtp_port,
+        smtp_username,
+        smtp_password,
+        smtp_from,
+        log_tx,
+        bus,
+    });
+
+    let cors = {
+        let allowed_origins: Vec<String> = std::env::var("CORS_ALLOWED_ORIGINS")
+            .unwrap_or_default()
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_lowercase())
+            .collect();
+
+        CorsLayer::new()
+            .allow_origin(AllowOrigin::predicate(move |origin: &HeaderValue, _| {
+                if let Ok(origin_str) = origin.to_str() {
+                    allowed_origins
+                        .iter()
+                        .any(|o| o == &origin_str.to_lowercase())
+                } else {
+                    false
+                }
+            }))
+            .allow_methods(AllowMethods::list(vec![
+                axum::http::Method::GET,
+                axum::http::Method::POST,
+                axum::http::Method::PUT,
+                axum::http::Method::PATCH,
+                axum::http::Method::DELETE,
+                axum::http::Method::OPTIONS,
+            ]))
+            .allow_headers(AllowHeaders::list(vec![
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+                axum::http::header::ACCEPT_LANGUAGE,
+            ]))
+            .allow_credentials(true)
+            .max_age(Duration::from_secs(3600))
+    };
+
+    let router = create_router(shared_state.clone(), ApiDoc::openapi(), cors);
+    let router = plugin_manager.setup_plugins(shared_state.clone(), router);
+
+    sqlx::migrate!()
+        .run(&pool.clone())
+        .await
+        .expect("Failed to run migrations");
+
+    guest_place::auth::handlers::spawn_expired_refresh_token_cleanup(pool.clone());
+
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
+        .await
+        .unwrap();
+
+    println!("Server is running at http://{}:{}/", app_host, app_port);
+    println!(
+        "Swagger is running at http://{}:{}/docs",
+        app_host, app_port
+    );
+
+    if let Err(e) = guest_place::auth::init::init_superadmin(shared_state.clone()).await {
+        eprintln!("[Init] Superadmin initialization failed: {}", e);
+    }
+
+    // with_connect_info: lets the auth rate limiter (SmartIpKeyExtractor) fall back to the
+    // real peer IP when the request carries no X-Forwarded-For/X-Real-IP/Forwarded header
+    // (i.e. when the server isn't sitting behind a reverse proxy).
+    axum::serve(
+        listener,
+        router.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .expect("Error");
+}

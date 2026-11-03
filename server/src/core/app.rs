@@ -1,0 +1,68 @@
+use crate::core::DatabaseConfig;
+use std::env;
+use std::net::IpAddr;
+
+#[derive(Clone, Debug)]
+pub struct AppConfig {
+    pub app_host: IpAddr,
+    pub app_port: u16,
+    pub db_config: DatabaseConfig,
+    pub public_url: String,
+    pub redis_host: String,
+    pub redis_port: u16,
+    pub redis_password: Option<String>,
+    pub media_quota_limit: i64,
+    pub cdn_url: Option<String>,
+    pub upload_dir: String,
+}
+
+impl AppConfig {
+    pub fn new() -> Self {
+        let app_host_str = env::var("APP_HOST").expect("APP_HOST must be set");
+        let app_host = app_host_str
+            .parse()
+            .expect("APP_HOST is not a valid IP address");
+
+        let app_port_str = env::var("APP_PORT").expect("APP_PORT must be set");
+        let app_port = app_port_str
+            .parse()
+            .expect("APP_PORT is not a valid port number");
+
+        let db_config = DatabaseConfig::new();
+
+        let public_url = env::var("PUBLIC_URL")
+            .unwrap_or_else(|_| format!("http://{}:{}", app_host_str, app_port_str));
+
+        let redis_host = env::var("REDIS_HOST").unwrap_or_else(|_| "localhost".to_string());
+        let redis_port = env::var("REDIS_PORT")
+            .unwrap_or_else(|_| "6379".to_string())
+            .parse()
+            .expect("REDIS_PORT is not a valid port number");
+        let redis_password = env::var("REDIS_PASSWORD").ok().filter(|s| !s.is_empty());
+
+        let media_quota_limit = env::var("MEDIA_QUOTA_LIMIT")
+            .unwrap_or_else(|_| (1024 * 1024 * 1024).to_string()) // 1GB default
+            .parse()
+            .expect("MEDIA_QUOTA_LIMIT is not a valid number");
+
+        let cdn_url = env::var("CDN_URL")
+            .ok()
+            .map(|s| s.trim().trim_end_matches('/').to_string())
+            .filter(|s| !s.is_empty());
+
+        let upload_dir = env::var("UPLOAD_DIR").unwrap_or_else(|_| "uploads".to_string());
+
+        AppConfig {
+            app_host,
+            app_port,
+            db_config,
+            public_url,
+            redis_host,
+            redis_port,
+            redis_password,
+            media_quota_limit,
+            cdn_url,
+            upload_dir,
+        }
+    }
+}

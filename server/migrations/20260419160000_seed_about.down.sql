@@ -1,0 +1,3 @@
+-- No-op for down migration as we want to keep the record once it exists,
+-- or we can DELETE it if we want to be clean.
+-- DELETE FROM about WHERE id = 1;

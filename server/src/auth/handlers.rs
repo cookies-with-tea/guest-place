@@ -1,0 +1,674 @@
+use crate::auth::cookies;
+use crate::auth::dto::{
+    AuthRefreshTokenDTO, AuthRequestDTO, AuthResponseDTO, CheckEmailCodeDTO, Claims,
+    RegisterRequestDTO,
+};
+use crate::core::dto::ApiResponse;
+use crate::core::response::{error_map, into_api_response};
+use crate::mailer::handlers::send_email;
+use crate::user::dto::User;
+use crate::user::utils::validate_email;
+use crate::AppState;
+use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
+use axum::routing::post;
+use axum::Router;
+use axum::{extract::Extension, extract::State, http::StatusCode, Json};
+use chrono::{Duration, Utc};
+use jsonwebtoken::{encode, EncodingKey, Header};
+use sqlx::{query_as, Row};
+use std::env;
+use std::sync::Arc;
+use tokio::task;
+use tower_governor::{governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor, GovernorLayer};
+use uuid::Uuid;
+
+pub fn verify_password(password: &str, hash: &str) -> bool {
+    // A malformed/corrupted hash in the DB must fail the login, not panic the request thread.
+    let Ok(parsed_hash) = PasswordHash::new(hash) else {
+        return false;
+    };
+    Argon2::default()
+        .verify_password(password.as_bytes(), &parsed_hash)
+        .is_ok()
+}
+
+fn generate_token(user_id: Uuid, role: String, permissions: Vec<String>, expires_in_minutes: i64) -> (String, i64) {
+    // .env is loaded once at process startup (see main.rs); no need to reload it on every call.
+    let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+
+    let expires_in_seconds = expires_in_minutes * 60;
+    let expiration = Utc::now() + Duration::seconds(expires_in_seconds);
+
+    let claims = Claims {
+        sub: user_id,
+        role,
+        permissions,
+        exp: expiration.timestamp() as usize,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(secret.as_bytes()),
+    )
+    .unwrap();
+
+    (token, expires_in_minutes)
+}
+
+pub fn generate_access_token(user_id: Uuid, role: String, permissions: Vec<String>) -> (String, i64) {
+    let minutes = env::var("ACCESS_TOKEN_LIFETIME_MINUTES")
+        .unwrap_or_else(|_| "10".to_string())
+        .parse()
+        .expect("ACCESS_TOKEN_LIFETIME_MINUTES must be a valid integer");
+    generate_token(user_id, role, permissions, minutes)
+}
+
+pub fn generate_refresh_token(user_id: Uuid, role: String, permissions: Vec<String>) -> (String, i64) {
+    let minutes = env::var("REFRESH_TOKEN_TTL_MINUTES")
+        .unwrap_or_else(|_| "1440".to_string())
+        .parse::<i64>()
+        .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer");
+    generate_token(user_id, role, permissions, minutes)
+}
+
+fn get_refresh_token_ttl_minutes() -> i32 {
+    env::var("REFRESH_TOKEN_TTL_MINUTES")
+        .unwrap_or_else(|_| "1440".to_string())
+        .parse()
+        .expect("REFRESH_TOKEN_TTL_MINUTES must be a valid integer")
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register",
+    request_body = RegisterRequestDTO,
+    responses(
+        (status = 201, description = "Письмо отправлено"),
+        (status = 400, description = "Некорректный email"),
+        (status = 409, description = "Email уже используется"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn register(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<RegisterRequestDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    if !validate_email(&payload.email) {
+        let msg = state.i18n.t("user.email_invalid", &locale).await;
+        return into_api_response(
+            StatusCode::BAD_REQUEST,
+            None,
+            Some(error_map(&"email".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let token = Uuid::new_v4().to_string();
+    let expires_at = Utc::now() + Duration::hours(24);
+
+    let result = sqlx::query(
+        "INSERT INTO pending_registrations (email, token, expires_at) \
+         VALUES ($1, $2, $3) \
+         ON CONFLICT (email) DO UPDATE \
+         SET token = $2, expires_at = $3",
+    )
+    .bind(&payload.email)
+    .bind(&token)
+    .bind(expires_at)
+    .execute(&state.pool)
+    .await;
+
+    match result {
+        Ok(_) => {
+            let value = state.clone();
+            let email_result = task::spawn_blocking(move || {
+                send_email(
+                    payload.email.clone(),
+                    token.clone(),
+                    value.frontend_url.clone(),
+                    value.smtp_host.clone(),
+                    value.smtp_port,
+                    value.smtp_username.clone(),
+                    value.smtp_password.clone(),
+                    value.smtp_from.clone(),
+                )
+            })
+            .await
+            .unwrap_or_else(|_| Err("Panic during email sending".into()));
+
+            if let Err(_e) = email_result {
+                let msg = state.i18n.t("general.email_failed", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"email".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+
+            let msg = state.i18n.t("auth.register.check_email", &locale).await;
+            into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
+        }
+        Err(sqlx::Error::Database(ref e)) if e.code() == Some("23505".into()) => {
+            let msg = state.i18n.t("auth.register.email_exists", &locale).await;
+            into_api_response(
+                StatusCode::CONFLICT,
+                None,
+                Some(error_map(&"email".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+        Err(_) => {
+            let msg = state.i18n.t("general.db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map(&"database".to_string(), &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/register/key",
+    request_body = CheckEmailCodeDTO,
+    responses(
+        (status = 200, description = "Код действителен"),
+        (status = 400, description = "Некорректный код"),
+        (status = 404, description = "Код не найден или истёк"),
+        (status = 500, description = "Ошибка сервера")
+    ),
+    tag = "Auth"
+)]
+pub async fn check_register_key(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<CheckEmailCodeDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let row =
+        match sqlx::query("SELECT email, expires_at FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .fetch_optional(&state.pool)
+            .await
+        {
+            Ok(Some(row)) => row,
+            Ok(None) => {
+                let msg = state.i18n.t("auth.register.code_not_found", &locale).await;
+                return into_api_response(
+                    StatusCode::NOT_FOUND,
+                    None,
+                    Some(error_map(&"code".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+            Err(_) => {
+                let msg = state.i18n.t("general.db_error", &locale).await;
+                return into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map(&"database".to_string(), &msg)),
+                    Some(vec![msg]),
+                );
+            }
+        };
+
+    let expires_at: chrono::DateTime<chrono::Utc> = row.get("expires_at");
+
+    if Utc::now() > expires_at {
+        let _ = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+            .bind(&payload.key)
+            .execute(&state.pool)
+            .await;
+
+        let msg = state.i18n.t("auth.register.code_expired", &locale).await;
+        return into_api_response(
+            StatusCode::NOT_FOUND,
+            None,
+            Some(error_map(&"code".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let delete_result = sqlx::query("DELETE FROM pending_registrations WHERE token = $1")
+        .bind(&payload.key)
+        .execute(&state.pool)
+        .await;
+
+    if let Err(_) = delete_result {
+        let msg = state.i18n.t("general.db_error", &locale).await;
+        return into_api_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            None,
+            Some(error_map(&"database".to_string(), &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let msg = state.i18n.t("auth.register.code_valid", &locale).await;
+    into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+}
+
+// Лимит попыток логина по аккаунту (email), поверх IP-based rate limiting на весь
+// /login (см. router()): IP-лимит обходится ботнетом/множеством прокси, лимит по
+// конкретному аккаунту — нет. Redis, не БД: это временный счётчик злоупотреблений,
+// а не постоянные данные пользователя.
+const MAX_LOGIN_ATTEMPTS: i64 = 5;
+const LOGIN_LOCKOUT_WINDOW_SECONDS: i64 = 15 * 60;
+
+fn login_attempts_key(email: &str) -> String {
+    format!("login_attempts:{}", email.trim().to_lowercase())
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/login",
+    request_body = AuthRequestDTO,
+    responses(
+        (status = 200, description = "Успешно", body = ApiResponse<AuthResponseDTO>),
+        (status = 401, description = "Неверные учетные данные", body = ApiResponse<AuthResponseDTO>),
+        (status = 429, description = "Слишком много неудачных попыток входа", body = ApiResponse<AuthResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<AuthResponseDTO>)
+    ),
+    tag = "Auth"
+)]
+pub async fn login(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<AuthRequestDTO>,
+) -> Result<Json<ApiResponse<AuthResponseDTO>>, (StatusCode, Json<ApiResponse<AuthResponseDTO>>)> {
+    let attempts_key = login_attempts_key(&payload.email);
+    let attempts = state.redis.get::<i64>(&attempts_key).await.unwrap_or(None).unwrap_or(0);
+
+    if attempts >= MAX_LOGIN_ATTEMPTS {
+        let msg = state.i18n.t("auth.too_many_attempts", &locale).await;
+        return into_api_response(
+            StatusCode::TOO_MANY_REQUESTS,
+            None,
+            Some(error_map("auth", &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let user = match query_as::<_, User>("SELECT * FROM guest_user WHERE email = $1")
+        .bind(&payload.email)
+        .fetch_optional(&state.pool)
+        .await
+    {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            let _ = state
+                .redis
+                .increment_with_ttl(&attempts_key, LOGIN_LOCKOUT_WINDOW_SECONDS)
+                .await;
+            let msg = state.i18n.t("auth.invalid_credentials", &locale).await;
+            return into_api_response(
+                StatusCode::UNAUTHORIZED,
+                None,
+                Some(error_map("auth", &msg)),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("auth.database_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    if !verify_password(&payload.password, &user.password_hash) {
+        let _ = state
+            .redis
+            .increment_with_ttl(&attempts_key, LOGIN_LOCKOUT_WINDOW_SECONDS)
+            .await;
+        let msg = state.i18n.t("auth.invalid_credentials", &locale).await;
+        return into_api_response(
+            StatusCode::UNAUTHORIZED,
+            None,
+            Some(error_map("auth", &msg)),
+            Some(vec![msg]),
+        );
+    }
+
+    let _ = state.redis.delete(&attempts_key).await;
+
+    let role_str = match serde_json::to_value(&user.role) {
+        Ok(v) => v.as_str().unwrap_or("user").to_string(),
+        Err(e) => {
+            eprintln!("Serialization error: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::Json(ApiResponse {
+                    data: None::<AuthResponseDTO>,
+                    errors: None,
+                    messages: Some(vec!["Internal Server Error".to_string()]),
+                }),
+            ));
+        }
+    };
+
+    let permissions = match sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1")
+        .bind(&user.role)
+        .fetch_all(&state.pool)
+        .await
+    {
+        Ok(rows) => rows.iter().map(|r| r.get::<String, _>(0)).collect(),
+        Err(_) => vec![],
+    };
+
+    let (access_token, access_expires_in) = generate_access_token(user.uuid, role_str.clone(), permissions.clone());
+    let (refresh_token, refresh_expires_in) = generate_refresh_token(user.uuid, role_str, permissions);
+
+    let _ = sqlx::query(
+        "INSERT INTO refresh_token (user_id, token, expires_at) \
+         VALUES ($1, $2, NOW() + INTERVAL '1 minute' * $3)",
+    )
+    .bind(user.uuid)
+    .bind(&refresh_token)
+    .bind(get_refresh_token_ttl_minutes())
+    .execute(&state.pool)
+    .await;
+
+    into_api_response(
+        StatusCode::OK,
+        Some(AuthResponseDTO {
+            access_token,
+            access_expires_in,
+            refresh_token,
+            refresh_expires_in,
+        }),
+        None,
+        Some(vec![state.i18n.t("auth.login_success", &locale).await]),
+    )
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/refresh",
+    request_body = AuthRefreshTokenDTO,
+    responses(
+        (status = 200, description = "Успешное обновление токена", body = ApiResponse<AuthResponseDTO>),
+        (status = 401, description = "Refresh-токен недействителен или истек", body = ApiResponse<AuthResponseDTO>),
+        (status = 500, description = "Ошибка базы данных", body = ApiResponse<AuthResponseDTO>)
+    ),
+    tag = "Auth"
+)]
+pub async fn refresh(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<AuthRefreshTokenDTO>,
+) -> Result<Json<ApiResponse<AuthResponseDTO>>, (StatusCode, Json<ApiResponse<AuthResponseDTO>>)> {
+    let result =
+        sqlx::query("SELECT user_id FROM refresh_token WHERE token = $1 AND expires_at > NOW()")
+            .bind(&payload.refresh_token)
+            .fetch_optional(&state.pool)
+            .await;
+
+    let user_id = match result {
+        Ok(Some(row)) => row.get("user_id"),
+        Ok(None) => {
+            let msg = state
+                .i18n
+                .t("auth.refresh_invalid_or_expired", &locale)
+                .await;
+            return into_api_response(
+                StatusCode::UNAUTHORIZED,
+                None,
+                Some(error_map("refresh_token", &msg)),
+                Some(vec![msg]),
+            );
+        }
+        Err(_) => {
+            let msg = state.i18n.t("auth.refresh_db_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let user = match query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
+        .bind(user_id)
+        .fetch_one(&state.pool)
+        .await
+    {
+        Ok(user) => user,
+        Err(_) => {
+            let msg = state.i18n.t("auth.database_error", &locale).await;
+            return into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            );
+        }
+    };
+
+    let role_str = match serde_json::to_value(&user.role) {
+        Ok(v) => v.as_str().unwrap_or("user").to_string(),
+        Err(e) => {
+            eprintln!("Serialization error: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::Json(ApiResponse {
+                    data: None::<AuthResponseDTO>,
+                    errors: None,
+                    messages: Some(vec!["Internal Server Error".to_string()]),
+                }),
+            ));
+        }
+    };
+
+    let permissions = match sqlx::query("SELECT permission_id FROM roles_permissions WHERE role = $1")
+        .bind(&user.role)
+        .fetch_all(&state.pool)
+        .await
+    {
+        Ok(rows) => rows.iter().map(|r| r.get::<String, _>(0)).collect(),
+        Err(_) => vec![],
+    };
+
+    let (new_access_token, access_expires_in) = generate_access_token(user_id, role_str.clone(), permissions.clone());
+    let (new_refresh_token, refresh_expires_in) = generate_refresh_token(user_id, role_str, permissions);
+
+    let _ = sqlx::query(
+        "UPDATE refresh_token SET token = $1, expires_at = NOW() + INTERVAL '1 minute' * $2 WHERE user_id = $3"
+    )
+    .bind(&new_refresh_token)
+    .bind(get_refresh_token_ttl_minutes())
+    .bind(user_id)
+    .execute(&state.pool)
+    .await;
+
+    into_api_response(
+        StatusCode::OK,
+        Some(AuthResponseDTO {
+            access_token: new_access_token,
+            access_expires_in,
+            refresh_token: new_refresh_token,
+            refresh_expires_in,
+        }),
+        None,
+        Some(vec![state.i18n.t("auth.refresh_success", &locale).await]),
+    )
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/logout",
+    request_body = AuthRefreshTokenDTO,
+    responses(
+        (status = 200, description = "Успешный выход"),
+        (status = 500, description = "Ошибка базы данных")
+    ),
+    tag = "Auth"
+)]
+async fn logout(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Json(payload): Json<AuthRefreshTokenDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM refresh_token WHERE token = $1")
+        .bind(&payload.refresh_token)
+        .execute(&state.pool)
+        .await;
+
+    match result {
+        Ok(_) => into_api_response(
+            StatusCode::OK,
+            None,
+            None,
+            Some(vec![state.i18n.t("auth.logout_success", &locale).await]),
+        ),
+        Err(_) => {
+            let msg = state.i18n.t("auth.logout_db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/logout/other",
+    request_body = AuthRefreshTokenDTO,
+    responses(
+        (status = 200, description = "Другие сессии завершены"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Ошибка базы данных")
+    ),
+    tag = "Auth",
+    operation_id = "logout_other_devices",
+    security(("bearer_auth" = []))
+)]
+async fn logout_other_devices(
+    State(state): State<Arc<AppState>>,
+    Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
+    Json(payload): Json<AuthRefreshTokenDTO>,
+) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM refresh_token WHERE user_id = $1 AND token != $2")
+        .bind(claims.sub)
+        .bind(&payload.refresh_token)
+        .execute(&state.pool)
+        .await;
+
+    match result {
+        Ok(_) => {
+            let msg = state.i18n.t("auth.logout_other_success", &locale).await;
+            into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
+        }
+        Err(_) => {
+            let msg = state.i18n.t("auth.logout_db_error", &locale).await;
+            into_api_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                None,
+                Some(error_map("database", &msg)),
+                Some(vec![msg]),
+            )
+        }
+    }
+}
+
+
+/// Фоновая задача, удаляющая истёкшие refresh-токены — таблица `refresh_token`
+/// никогда не чистится сама и иначе растёт бессрочно.
+pub fn spawn_expired_refresh_token_cleanup(pool: sqlx::Pool<sqlx::Postgres>) {
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(3600));
+        loop {
+            interval.tick().await;
+            if let Err(e) = sqlx::query("DELETE FROM refresh_token WHERE expires_at < NOW()")
+                .execute(&pool)
+                .await
+            {
+                tracing::error!("Failed to clean up expired refresh tokens: {e}");
+            }
+        }
+    });
+}
+
+/// Rate limiting на `/login` и `/register` — защита от брутфорса пароля и спама
+/// регистраций/писем. Ключ — IP из `X-Forwarded-For`/`X-Real-IP`/`Forwarded` (если сервер
+/// стоит за реверс-прокси), иначе peer IP самого TCP-соединения (см. `main.rs`,
+/// `into_make_service_with_connect_info`). `/logout` и `/refresh` не лимитируются — туда
+/// можно попасть только с уже выданным токеном, здесь важнее не мешать легитимным клиентам.
+pub fn router() -> Router<Arc<AppState>> {
+    let login_governor = GovernorConfigBuilder::default()
+        .key_extractor(SmartIpKeyExtractor)
+        .per_second(10)
+        .burst_size(5)
+        .finish()
+        .expect("invalid login rate-limiter config");
+    let login_limiter = login_governor.limiter().clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(300));
+        loop {
+            interval.tick().await;
+            login_limiter.retain_recent();
+        }
+    });
+
+    let register_governor = GovernorConfigBuilder::default()
+        .key_extractor(SmartIpKeyExtractor)
+        .per_second(30)
+        .burst_size(3)
+        .finish()
+        .expect("invalid register rate-limiter config");
+    let register_limiter = register_governor.limiter().clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(300));
+        loop {
+            interval.tick().await;
+            register_limiter.retain_recent();
+        }
+    });
+
+    let login_route = Router::new()
+        .route("/login", post(login))
+        .layer(axum::middleware::from_fn(cookies::login_cookie_bridge))
+        .layer(GovernorLayer::new(login_governor));
+
+    let register_route = Router::new()
+        .route("/register", post(register))
+        .layer(GovernorLayer::new(register_governor));
+
+    // /refresh и /logout больше не ждут refresh_token в теле запроса — он читается из
+    // HttpOnly-cookie `gp_refresh_token`, подставляется в тело middleware-ом
+    // (см. auth::cookies), а handlers ниже остаются ровно такими, какими были.
+    let refresh_route = Router::new()
+        .route("/refresh", post(refresh))
+        .layer(axum::middleware::from_fn(cookies::refresh_cookie_bridge));
+
+    let logout_route = Router::new()
+        .route("/logout", post(logout))
+        .layer(axum::middleware::from_fn(cookies::logout_cookie_bridge));
+
+    Router::new()
+        .merge(login_route)
+        .merge(register_route)
+        .merge(refresh_route)
+        .merge(logout_route)
+        .route("/register/key", post(check_register_key))
+}
+
+pub fn protected_router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/logout/other", post(logout_other_devices))
+        .layer(axum::middleware::from_fn(cookies::inject_refresh_token_from_cookie))
+}

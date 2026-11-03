@@ -1,0 +1,1181 @@
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    Json,
+};
+use serde_json::Value;
+use sqlx::{Postgres, QueryBuilder};
+use std::sync::Arc;
+use uuid::Uuid;
+
+use crate::core::dto::ApiResponse;
+use crate::AppState;
+
+use super::model::{
+    ContentEntry, ContentEntryStatus, ContentEntryVersion, ContentSchema, CreateContentEntryDTO,
+    CreateSchemaDTO, EntryFilterQuery, FieldDefinition, FieldType, UpdateContentEntryDTO,
+    UpdateSchemaDTO,
+};
+use super::translation_refs::sync_refs;
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/schemas",
+    responses(
+        (status = 200, body = ApiResponse<Vec<ContentSchema>>),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    security(("bearer_auth" = []))
+)]
+pub async fn get_schemas(
+    State(state): State<Arc<AppState>>,
+) -> Result<Json<ApiResponse<Vec<ContentSchema>>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let schemas = sqlx::query_as::<_, ContentSchema>(
+        "SELECT * FROM content_schemas ORDER BY created_at DESC",
+    )
+    .fetch_all(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?;
+
+    Ok(Json(ApiResponse {
+        data: Some(schemas),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/content/schemas",
+    request_body = CreateSchemaDTO,
+    responses(
+        (status = 201, body = ApiResponse<ContentSchema>),
+        (status = 400, description = "Bad Request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    security(("bearer_auth" = []))
+)]
+pub async fn create_schema(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<CreateSchemaDTO>,
+) -> Result<Json<ApiResponse<ContentSchema>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut fields = payload.fields;
+    for field in &mut fields {
+        field.name = to_snake_case(&field.name);
+    }
+    let slug = payload.slug.clone();
+
+    let schema = sqlx::query_as::<_, ContentSchema>(
+        "INSERT INTO content_schemas (name, slug, fields, is_singleton) VALUES ($1, $2, $3, $4) RETURNING *"
+    )
+    .bind(payload.name)
+    .bind(payload.slug)
+    .bind(sqlx::types::Json(fields))
+    .bind(payload.is_singleton)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| {
+        let err_str = e.to_string();
+        if err_str.contains("unique constraint") || err_str.contains("duplicate key") {
+            return (StatusCode::CONFLICT, Json(ApiResponse::<()> {
+                data: None, errors: None, messages: Some(vec![format!("Схема с идентификатором '{}' уже существует", slug)]),
+            }));
+        }
+        eprintln!("Database error: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+            data: None, errors: None, messages: Some(vec![format!("Database error: {}", e)]),
+        }))
+    })?;
+
+    Ok(Json(ApiResponse {
+        data: Some(schema),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/schemas/{id}",
+    responses(
+        (status = 200, body = ApiResponse<ContentSchema>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Schema ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn get_schema(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ApiResponse<ContentSchema>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let schema = sqlx::query_as::<_, ContentSchema>("SELECT * FROM content_schemas WHERE id = $1")
+        .bind(id)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    match schema {
+        Some(schema) => Ok(Json(ApiResponse {
+            data: Some(schema),
+            errors: None,
+            messages: None,
+        })),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Schema not found".to_string()]),
+            }),
+        )),
+    }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/content/schemas/{id}",
+    request_body = UpdateSchemaDTO,
+    responses(
+        (status = 200, body = ApiResponse<ContentSchema>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Schema ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn update_schema(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+    Json(payload): Json<UpdateSchemaDTO>,
+) -> Result<Json<ApiResponse<ContentSchema>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut query = String::from("UPDATE content_schemas SET ");
+    let mut parts = Vec::new();
+    let mut arg_index = 1;
+
+    if payload.name.is_some() {
+        parts.push(format!("name = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.slug.is_some() {
+        parts.push(format!("slug = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.fields.is_some() {
+        parts.push(format!("fields = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.is_singleton.is_some() {
+        parts.push(format!("is_singleton = ${}", arg_index));
+        arg_index += 1;
+    }
+
+    if parts.is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["No fields to update".to_string()]),
+            }),
+        ));
+    }
+
+    query.push_str(&parts.join(", "));
+    query.push_str(&format!(
+        ", updated_at = NOW() WHERE id = ${} RETURNING *",
+        arg_index
+    ));
+
+    let mut sql_query = sqlx::query_as::<_, ContentSchema>(&query);
+    if let Some(name) = payload.name {
+        sql_query = sql_query.bind(name);
+    }
+    if let Some(mut fields) = payload.fields {
+        for field in &mut fields {
+            field.name = to_snake_case(&field.name);
+        }
+        sql_query = sql_query.bind(sqlx::types::Json(fields));
+    }
+    if let Some(is_singleton) = payload.is_singleton {
+        sql_query = sql_query.bind(is_singleton);
+    }
+    sql_query = sql_query.bind(id);
+
+    let schema = sql_query.fetch_optional(&state.pool).await.map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?;
+
+    match schema {
+        Some(schema) => Ok(Json(ApiResponse {
+            data: Some(schema),
+            errors: None,
+            messages: None,
+        })),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Schema not found".to_string()]),
+            }),
+        )),
+    }
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/content/schemas/{id}",
+    responses(
+        (status = 200, body = ApiResponse<Value>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Schema ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn delete_schema(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM content_schemas WHERE id = $1")
+        .bind(id)
+        .execute(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    if result.rows_affected() == 0 {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Schema not found".to_string()]),
+            }),
+        ));
+    }
+
+    Ok(Json(ApiResponse {
+        data: Some(serde_json::json!({ "success": true })),
+        errors: None,
+        messages: None,
+    }))
+}
+
+// --- Entry Handlers ---
+
+async fn validate_entry_data(
+    pool: &sqlx::Pool<sqlx::Postgres>,
+    fields: &[FieldDefinition],
+    data: &serde_json::Value,
+) -> Result<(), String> {
+    let obj = data.as_object().ok_or("Data must be a JSON object")?;
+
+    for field in fields {
+        let mut value = obj.get(&field.name);
+
+        // If not found by exact name, try snake_case version (for compatibility)
+        if value.is_none() {
+            let snake_name = to_snake_case(&field.name);
+            if snake_name != field.name {
+                value = obj.get(&snake_name);
+            }
+        }
+
+        if field.required && (value.is_none() || value.unwrap().is_null()) {
+            return Err(format!("Field '{}' is required", field.label));
+        }
+
+        if let Some(val) = value {
+            if !val.is_null() {
+                // Basic type validation
+                match field.field_type {
+                    FieldType::Number => {
+                        if !val.is_number() {
+                            return Err(format!("Field '{}' must be a number", field.label));
+                        }
+                    }
+                    FieldType::Boolean => {
+                        if !val.is_boolean() {
+                            return Err(format!("Field '{}' must be a boolean", field.label));
+                        }
+                    }
+                    FieldType::Relation => {
+                        // Validate relation existence
+                        if let Some(relation_to) = &field.relation_to {
+                            let uuids = if field.multiple {
+                                val.as_array()
+                                    .ok_or_else(|| {
+                                        format!("Field '{}' must be an array of UUIDs", field.label)
+                                    })?
+                                    .iter()
+                                    .map(|v| {
+                                        v.as_str().ok_or_else(|| {
+                                            format!("Invalid UUID in field '{}'", field.label)
+                                        })
+                                    })
+                                    .collect::<Result<Vec<&str>, String>>()?
+                            } else {
+                                vec![val.as_str().ok_or_else(|| {
+                                    format!("Field '{}' must be a UUID string", field.label)
+                                })?]
+                            };
+
+                            for uuid_str in uuids {
+                                let uuid = Uuid::parse_str(uuid_str).map_err(|_| {
+                                    format!("Invalid UUID format in field '{}'", field.label)
+                                })?;
+
+                                // Check if entry exists in the target schema (using slug)
+                                let exists = sqlx::query_scalar::<_, bool>(
+                                    "SELECT EXISTS(
+                                        SELECT 1 FROM content_entries e 
+                                        JOIN content_schemas s ON e.schema_id = s.id 
+                                        WHERE e.id = $1 AND s.slug = $2
+                                    )",
+                                )
+                                .bind(uuid)
+                                .bind(relation_to)
+                                .fetch_one(pool)
+                                .await
+                                .map_err(|e| {
+                                    format!("Database error validating relation: {}", e)
+                                })?;
+
+                                if !exists {
+                                    return Err(format!(
+                                        "Related entry {} not found in schema '{}'",
+                                        uuid, relation_to
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                    FieldType::Repeater => {
+                        if !val.is_array() {
+                            return Err(format!(
+                                "Field '{}' must be an array of items",
+                                field.label
+                            ));
+                        }
+                    }
+                    FieldType::Group => {
+                        if !val.is_object() {
+                            return Err(format!("Field '{}' must be an object", field.label));
+                        }
+                    }
+                    FieldType::Json => {
+                        // Any valid JSON value is accepted
+                    }
+                    FieldType::Color => {
+                        if !val.is_string() {
+                            return Err(format!("Field '{}' must be a color string", field.label));
+                        }
+                    }
+                    FieldType::Link => {
+                        if !val.is_object() && !val.is_string() {
+                            return Err(format!(
+                                "Field '{}' must be a link object or URL string",
+                                field.label
+                            ));
+                        }
+                    }
+                    _ => {
+                        if !val.is_string() && !val.is_object() && !val.is_array() {
+                            return Err(format!("Field '{}' has invalid type", field.label));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/schemas/{schema_id}/entries",
+    responses(
+        (status = 200, body = ApiResponse<Vec<ContentEntry>>),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("schema_id" = Uuid, Path, description = "Schema ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn get_entries(
+    State(state): State<Arc<AppState>>,
+    Path(schema_id): Path<Uuid>,
+    Query(filter): Query<EntryFilterQuery>,
+) -> Result<Json<ApiResponse<Vec<ContentEntry>>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let mut query_builder: QueryBuilder<Postgres> =
+        QueryBuilder::new("SELECT * FROM content_entries WHERE schema_id = ");
+    query_builder.push_bind(schema_id);
+
+    if let Some(search) = &filter.search {
+        query_builder.push(" AND (slug ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(" OR data::text ILIKE ");
+        query_builder.push_bind(format!("%{}%", search));
+        query_builder.push(")");
+    }
+
+    query_builder.push(" ORDER BY created_at DESC");
+
+    let entries = query_builder
+        .build_query_as::<ContentEntry>()
+        .fetch_all(&state.pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    Ok(Json(ApiResponse {
+        data: Some(entries),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/content/entries",
+    request_body = CreateContentEntryDTO,
+    responses(
+        (status = 201, body = ApiResponse<ContentEntry>),
+        (status = 400, description = "Bad Request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    security(("bearer_auth" = []))
+)]
+pub async fn create_entry(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<CreateContentEntryDTO>,
+) -> Result<Json<ApiResponse<ContentEntry>>, (StatusCode, Json<ApiResponse<()>>)> {
+    // 1. Get schema to validate data
+    let schema = sqlx::query_as::<_, ContentSchema>("SELECT * FROM content_schemas WHERE id = $1")
+        .bind(payload.schema_id)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?
+        .ok_or((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Schema not found".to_string()]),
+            }),
+        ))?;
+
+    // 1.5 Check singleton constraint
+    if schema.is_singleton {
+        let count: (i64,) =
+            sqlx::query_as("SELECT COUNT(*) FROM content_entries WHERE schema_id = $1")
+                .bind(payload.schema_id)
+                .fetch_one(&state.pool)
+                .await
+                .map_err(|_| {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ApiResponse::<()> {
+                            data: None,
+                            errors: None,
+                            messages: Some(vec!["Database error checking singleton".to_string()]),
+                        }),
+                    )
+                })?;
+
+        if count.0 > 0 {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec![
+                        "This schema is a singleton and already has an entry. Use update instead."
+                            .to_string(),
+                    ]),
+                }),
+            ));
+        }
+    }
+
+    // 2. Validate data
+    validate_entry_data(&state.pool, &schema.fields, &payload.data)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec![e]),
+                }),
+            )
+        })?;
+
+    // 3. Insert entry
+    let status = payload.status.unwrap_or(ContentEntryStatus::Draft);
+    let i18n = payload.i18n.unwrap_or(serde_json::json!({}));
+    let published_at = if status == ContentEntryStatus::Published {
+        payload.published_at.or_else(|| Some(chrono::Utc::now()))
+    } else {
+        payload.published_at
+    };
+
+    let entry = sqlx::query_as::<_, ContentEntry>(
+        "INSERT INTO content_entries (schema_id, slug, data, status, i18n, published_at, published_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"
+    )
+    .bind(payload.schema_id)
+    .bind(&payload.slug)
+    .bind(sqlx::types::Json(payload.data))
+    .bind(status)
+    .bind(sqlx::types::Json(i18n))
+    .bind(published_at)
+    .bind(payload.published_by)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+            data: None,
+            errors: None,
+            messages: Some(vec!["Database error".to_string()]),
+        }))
+    })?;
+
+    if let Err(e) = sync_refs(&state.pool, entry.id, &entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            entry.id, e
+        );
+    }
+
+    Ok(Json(ApiResponse {
+        data: Some(entry),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/entries/{id}",
+    responses(
+        (status = 200, body = ApiResponse<ContentEntry>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Entry ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn get_entry(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ApiResponse<ContentEntry>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let entry = sqlx::query_as::<_, ContentEntry>("SELECT * FROM content_entries WHERE id = $1")
+        .bind(id)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    match entry {
+        Some(entry) => Ok(Json(ApiResponse {
+            data: Some(entry),
+            errors: None,
+            messages: None,
+        })),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Entry not found".to_string()]),
+            }),
+        )),
+    }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/content/entries/{id}",
+    request_body = UpdateContentEntryDTO,
+    responses(
+        (status = 200, body = ApiResponse<ContentEntry>),
+        (status = 400, description = "Bad Request"),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Entry ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn update_entry(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+    Json(payload): Json<UpdateContentEntryDTO>,
+) -> Result<Json<ApiResponse<ContentEntry>>, (StatusCode, Json<ApiResponse<()>>)> {
+    println!("[Backend] update_entry payload for {}: {:?}", id, payload);
+    // 1. Get existing entry and schema for validation
+    let entry = sqlx::query_as::<_, ContentEntry>("SELECT * FROM content_entries WHERE id = $1")
+        .bind(id)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?
+        .ok_or((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Entry not found".to_string()]),
+            }),
+        ))?;
+
+    if let Some(ref data) = payload.data {
+        let schema =
+            sqlx::query_as::<_, ContentSchema>("SELECT * FROM content_schemas WHERE id = $1")
+                .bind(entry.schema_id)
+                .fetch_one(&state.pool)
+                .await
+                .map_err(|_| {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ApiResponse::<()> {
+                            data: None,
+                            errors: None,
+                            messages: Some(vec!["Database error".to_string()]),
+                        }),
+                    )
+                })?;
+
+        validate_entry_data(&state.pool, &schema.fields, data)
+            .await
+            .map_err(|e| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(ApiResponse::<()> {
+                        data: None,
+                        errors: None,
+                        messages: Some(vec![e]),
+                    }),
+                )
+            })?;
+    }
+
+    // 2. Save current version before update
+    let next_version_number = sqlx::query_scalar::<_, i32>(
+        "SELECT COALESCE(MAX(version_number), 0) + 1 FROM content_entry_versions WHERE entry_id = $1"
+    )
+    .bind(id)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+        data: None, errors: None, messages: Some(vec!["Error calculating version number".to_string()]),
+    })))?;
+
+    sqlx::query(
+        "INSERT INTO content_entry_versions (entry_id, data, i18n, version_number) VALUES ($1, $2, $3, $4)"
+    )
+    .bind(id)
+    .bind(&entry.data)
+    .bind(&entry.i18n)
+    .bind(next_version_number)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Error saving version: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+            data: None, errors: None, messages: Some(vec!["Failed to save entry version".to_string()]),
+        }))
+    })?;
+
+    // 3. Dynamic Update
+    let mut query = String::from("UPDATE content_entries SET ");
+    let mut parts = Vec::new();
+    let mut arg_index = 1;
+
+    if payload.slug.is_some() {
+        parts.push(format!("slug = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.data.is_some() {
+        parts.push(format!("data = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.status.is_some() {
+        parts.push(format!("status = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.i18n.is_some() {
+        parts.push(format!("i18n = ${}", arg_index));
+        arg_index += 1;
+    }
+    if payload.published_at.is_some() {
+        parts.push(format!("published_at = ${}", arg_index));
+        arg_index += 1;
+    } else if payload.status == Some(ContentEntryStatus::Published) {
+        parts.push("published_at = COALESCE(published_at, NOW())".to_string());
+    }
+    if payload.published_by.is_some() {
+        parts.push(format!("published_by = ${}", arg_index));
+        arg_index += 1;
+    }
+
+    if parts.is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["No fields to update".to_string()]),
+            }),
+        ));
+    }
+
+    query.push_str(&parts.join(", "));
+    query.push_str(&format!(
+        ", updated_at = NOW() WHERE id = ${} RETURNING *",
+        arg_index
+    ));
+
+    let mut sql_query = sqlx::query_as::<_, ContentEntry>(&query);
+    if let Some(slug) = payload.slug {
+        sql_query = sql_query.bind(slug);
+    }
+    if let Some(data) = payload.data {
+        sql_query = sql_query.bind(sqlx::types::Json(data));
+    }
+    if let Some(status) = payload.status {
+        sql_query = sql_query.bind(status);
+    }
+    if let Some(i18n) = payload.i18n {
+        sql_query = sql_query.bind(sqlx::types::Json(i18n));
+    }
+    if let Some(published_at) = payload.published_at {
+        sql_query = sql_query.bind(published_at);
+    }
+    if let Some(published_by) = payload.published_by {
+        sql_query = sql_query.bind(published_by);
+    }
+    sql_query = sql_query.bind(id);
+
+    let updated_entry = sql_query.fetch_one(&state.pool).await.map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?;
+
+    if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            updated_entry.id, e
+        );
+    }
+
+    Ok(Json(ApiResponse {
+        data: Some(updated_entry),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/entries/{id}/versions",
+    responses(
+        (status = 200, body = ApiResponse<Vec<ContentEntryVersion>>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Entry ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn get_entry_versions(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ApiResponse<Vec<ContentEntryVersion>>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let versions = sqlx::query_as::<_, ContentEntryVersion>(
+        "SELECT * FROM content_entry_versions WHERE entry_id = $1 ORDER BY version_number DESC",
+    )
+    .bind(id)
+    .fetch_all(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?;
+
+    Ok(Json(ApiResponse {
+        data: Some(versions),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/content/entries/{id}/versions/{version_id}/rollback",
+    responses(
+        (status = 200, body = ApiResponse<ContentEntry>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Entry ID"),
+        ("version_id" = Uuid, Path, description = "Version ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn rollback_entry_version(
+    State(state): State<Arc<AppState>>,
+    Path((id, version_id)): Path<(Uuid, Uuid)>,
+) -> Result<Json<ApiResponse<ContentEntry>>, (StatusCode, Json<ApiResponse<()>>)> {
+    // 1. Get version data
+    let version = sqlx::query_as::<_, ContentEntryVersion>(
+        "SELECT * FROM content_entry_versions WHERE id = $1 AND entry_id = $2",
+    )
+    .bind(version_id)
+    .bind(id)
+    .fetch_optional(&state.pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?
+    .ok_or((
+        StatusCode::NOT_FOUND,
+        Json(ApiResponse::<()> {
+            data: None,
+            errors: None,
+            messages: Some(vec!["Version not found".to_string()]),
+        }),
+    ))?;
+
+    // 2. Create a new version of current state before rollback
+    let entry = sqlx::query_as::<_, ContentEntry>("SELECT * FROM content_entries WHERE id = $1")
+        .bind(id)
+        .fetch_one(&state.pool)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    let next_version_number = sqlx::query_scalar::<_, i32>(
+        "SELECT COALESCE(MAX(version_number), 0) + 1 FROM content_entry_versions WHERE entry_id = $1"
+    )
+    .bind(id)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+        data: None, errors: None, messages: Some(vec!["Error calculating version number".to_string()]),
+    })))?;
+
+    sqlx::query(
+        "INSERT INTO content_entry_versions (entry_id, data, i18n, version_number, comment) VALUES ($1, $2, $3, $4, $5)"
+    )
+    .bind(id)
+    .bind(&entry.data)
+    .bind(&entry.i18n)
+    .bind(next_version_number)
+    .bind(format!("Auto-save before rollback to version #{}", version.version_number))
+    .execute(&state.pool)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+        data: None, errors: None, messages: Some(vec!["Failed to save pre-rollback version".to_string()]),
+    })))?;
+
+    // 3. Perform rollback
+    let updated_entry = sqlx::query_as::<_, ContentEntry>(
+        "UPDATE content_entries SET data = $1, i18n = $2, updated_at = NOW() WHERE id = $3 RETURNING *"
+    )
+    .bind(&version.data)
+    .bind(&version.i18n)
+    .bind(id)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error during rollback: {}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
+            data: None, errors: None, messages: Some(vec!["Database error during rollback".to_string()]),
+        }))
+    })?;
+
+    if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
+        eprintln!(
+            "Failed to sync translation refs for entry {}: {}",
+            updated_entry.id, e
+        );
+    }
+
+    Ok(Json(ApiResponse {
+        data: Some(updated_entry),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/v1/content/entries/{id}",
+    responses(
+        (status = 200, body = ApiResponse<Value>),
+        (status = 404, description = "Not Found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("id" = Uuid, Path, description = "Entry ID")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn delete_entry(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ApiResponse<serde_json::Value>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let result = sqlx::query("DELETE FROM content_entries WHERE id = $1")
+        .bind(id)
+        .execute(&state.pool)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::<()> {
+                    data: None,
+                    errors: None,
+                    messages: Some(vec!["Database error".to_string()]),
+                }),
+            )
+        })?;
+
+    if result.rows_affected() == 0 {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Entry not found".to_string()]),
+            }),
+        ));
+    }
+
+    Ok(Json(ApiResponse {
+        data: Some(serde_json::json!({ "success": true })),
+        errors: None,
+        messages: None,
+    }))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v1/content/schemas/by-identifier/{identifier}",
+    responses(
+        (status = 200, body = ApiResponse<ContentSchema>),
+        (status = 404, description = "Not Found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Content",
+    params(
+        ("identifier" = String, Path, description = "Schema identifier")
+    ),
+    security(("bearer_auth" = []))
+)]
+pub async fn get_schema_by_identifier(
+    State(state): State<Arc<AppState>>,
+    Path(identifier): Path<String>,
+) -> Result<Json<ApiResponse<ContentSchema>>, (StatusCode, Json<ApiResponse<()>>)> {
+    let normalized_slug = to_snake_case(&identifier);
+
+    // Try exact slug match, then UUID match, then normalized slug match
+    let schema = sqlx::query_as::<_, ContentSchema>(
+        "SELECT * FROM content_schemas WHERE slug = $1 OR id::text = $1 OR slug = $2",
+    )
+    .bind(&identifier)
+    .bind(&normalized_slug)
+    .fetch_optional(&state.pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Database error".to_string()]),
+            }),
+        )
+    })?;
+
+    match schema {
+        Some(schema) => Ok(Json(ApiResponse {
+            data: Some(schema),
+            errors: None,
+            messages: None,
+        })),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["Schema not found".to_string()]),
+            }),
+        )),
+    }
+}
+fn to_snake_case(s: &str) -> String {
+    let mut result = String::new();
+    let mut last_was_underscore = false;
+
+    for (i, c) in s.chars().enumerate() {
+        if c.is_alphanumeric() {
+            if c.is_uppercase() {
+                if i > 0 && !last_was_underscore {
+                    result.push('_');
+                }
+                result.push(c.to_lowercase().next().unwrap());
+                last_was_underscore = false;
+            } else {
+                result.push(c);
+                last_was_underscore = false;
+            }
+        } else if i > 0 && !last_was_underscore {
+            result.push('_');
+            last_was_underscore = true;
+        }
+    }
+    result.trim_matches('_').to_string()
+}
