@@ -26,6 +26,8 @@ loadDict('general')
 
 loadDict('menu')
 
+loadDict('profile')
+
 app.use(VueQueryPlugin).use(router).use(ElementPlus)
 
 export { app }

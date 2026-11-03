@@ -28,6 +28,8 @@ loadDict('platforms')
 
 loadDict('menu')
 
+loadDict('translations')
+
 app.use(VueQueryPlugin).use(router).use(ElementPlus)
 
 export { app }
