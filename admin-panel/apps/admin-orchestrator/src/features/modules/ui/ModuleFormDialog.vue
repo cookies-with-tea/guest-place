@@ -35,6 +35,11 @@
 				</el-col>
 			</el-row>
 
+			<el-form-item label="Заголовок в сайдбаре (ключ перевода)">
+				<el-input v-model="mfe.form.config.titleKey" placeholder="напр. menu.users" />
+			</el-form-item>
+			<p class="form-hint">Опционально — если пусто, используется значение по умолчанию из кода.</p>
+
 			<el-row :gutter="16">
 				<el-col :span="8">
 					<el-form-item label="Icon (Element Plus)">
@@ -96,3 +101,11 @@ defineProps<{
 
 const getIcon = (name: string) => (Icons as any)[name] || Icons.Menu
 </script>
+
+<style scoped>
+.form-hint {
+	font-size: 0.8rem;
+	color: var(--gp-text-secondary);
+	margin: -12px 0 16px;
+}
+</style>

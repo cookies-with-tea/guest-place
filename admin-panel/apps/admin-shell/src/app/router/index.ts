@@ -120,8 +120,11 @@ const loadRemoteRoutes = async (app: any) => {
 					routes: modifiedRoutes,
 					sidebarGroup: {
 						name: remote.name,
-						title: routeConfig?.title || `general.${remote.name}`,
-						icon: routeConfig?.icon || remote.icon || 'Menu',
+						// `remote.config.titleKey` is admin-editable (Orchestrator → Modules), and wins
+						// once set; `routeConfig?.title` is just the code-level default for MFEs nobody
+						// has customized yet — see IMPROVEMENTS.md section 4.
+						title: remote.config?.titleKey || routeConfig?.title || `general.${remote.name}`,
+						icon: remote.icon || routeConfig?.icon || 'Menu',
 						category: remote.category,
 						routes: modifiedRoutes,
 						config: remote.config,
@@ -136,8 +139,8 @@ const loadRemoteRoutes = async (app: any) => {
 					routes: [fallbackRoute],
 					sidebarGroup: {
 						name: remote.name,
-						title: routeConfig?.title || remote.displayName || `general.${remote.name}`,
-						icon: routeConfig?.icon || remote.icon || 'Menu',
+						title: remote.config?.titleKey || routeConfig?.title || remote.displayName || `general.${remote.name}`,
+						icon: remote.icon || routeConfig?.icon || 'Menu',
 						category: remote.category,
 						routes: [{ path: `/${remote.name}`, meta: { title: remote.displayName || remote.name } }],
 						config: remote.config,

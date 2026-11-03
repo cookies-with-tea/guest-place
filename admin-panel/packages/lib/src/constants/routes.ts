@@ -1,5 +1,9 @@
-// TODO: Переписать на подрузку из админки
-
+// Defaults only — the sidebar group `title`/`icon` an MFE actually ends up showing can be
+// overridden per-MFE from the admin UI (Orchestrator → Modules → "Заголовок в сайдбаре" /
+// "Icon"), stored in `microfrontends.config.titleKey` / `microfrontends.icon` and read by
+// admin-shell's `loadRemoteRoutes()`. These are just what a freshly-registered MFE shows
+// before anyone customizes it, plus the route `name`s each MFE's own router relies on
+// (those stay code-level — they're wiring, not display content).
 export const ROUTES = {
 	users: {
 		title: 'menu.users',
@@ -39,11 +43,6 @@ export const ROUTES = {
 		name: 'SchemaBuilder',
 		title: 'menu.schemas',
 		icon: 'Document',
-	},
-	platforms: {
-		name: 'PlatformsPage',
-		title: 'menu.platforms',
-		icon: 'Place',
 	},
 	statistics: {
 		name: 'StatisticsDashboard',

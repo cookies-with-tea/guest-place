@@ -23,6 +23,12 @@ export const useMfe = () => {
 		category: 'system',
 		orderIndex: 0,
 		enabled: true,
+		// `config` carries free-form per-MFE settings — `disabledRoutes` (set via the
+		// routes drawer) and `titleKey` (the sidebar group's i18n key, read by
+		// admin-shell's loadRemoteRoutes — see IMPROVEMENTS.md section 4). Must stay a
+		// plain object here (not undefined) so `form.config.titleKey` has somewhere to
+		// write to from the create dialog too, not just edit.
+		config: {} as Record<string, any>,
 	})
 
 	// === Queries ===
@@ -113,6 +119,7 @@ export const useMfe = () => {
 			category: 'system',
 			orderIndex: 0,
 			enabled: true,
+			config: {},
 		})
 
 		dialogVisible.value = true
@@ -121,7 +128,7 @@ export const useMfe = () => {
 	const handleEdit = (row: any) => {
 		isEdit.value = true
 
-		Object.assign(form, row)
+		Object.assign(form, row, { config: { ...(row.config || {}) } })
 
 		dialogVisible.value = true
 	}

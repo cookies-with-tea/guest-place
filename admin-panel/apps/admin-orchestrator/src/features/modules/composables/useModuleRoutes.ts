@@ -21,9 +21,6 @@ const KNOWN_MFE_ROUTES: Record<string, { path: string; title: string }[]> = {
 	content: [{ path: '/content', title: 'Схемы контента' }],
 	translations: [{ path: '/translations', title: 'Переводы интерфейса' }],
 	media: [{ path: '/media', title: 'Медиабиблиотека' }],
-	about: [{ path: '/about', title: 'О нас' }],
-	guests: [{ path: '/guests', title: 'Гости и предложения' }],
-	platforms: [{ path: '/platforms', title: 'Платформы и интеграции' }],
 	profile: [{ path: '/profile', title: 'Профиль' }],
 	statistics: [{ path: '/statistics', title: 'Аналитика и статистика' }],
 }
