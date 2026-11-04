@@ -58,8 +58,26 @@ import { computed, defineAsyncComponent } from 'vue'
 import * as Icons from '@element-plus/icons-vue'
 
 import { useMfe } from '#entities/mfe'
+import { routes as orchestratorRoutes } from '#app/router'
 
 const MfeStatsChart = defineAsyncComponent(() => import('./MfeStatsChart.vue'))
+
+// Решено (архитектурно, см. IMPROVEMENTS.md §4): не делать отдельный backend-эндпоинт
+// для этого графа — у него и так нет источника данных "топология" как таковой, это
+// визуализация существующей структуры. Для orchestrator sub-routes берём реальные
+// заголовки из его собственного роутера (один источник правды, не дублируем руками —
+// раньше тут был хардкод ['Monitoring', 'Logs', 'Topology', 'Modules'], который не
+// совпадал ни по составу, ни по языку с `meta.title` в router/index.ts). Для users —
+// кросс-MFE импорт чужого роутера нарушил бы независимость federation-модулей, а
+// ROUTES.users.*.title — это i18n-ключ, не готовый текст, и в orchestrator i18n
+// намеренно не подключён (см. IMPROVEMENTS.md §1 — это отдельный, не сделанный в этом
+// проходе объём работы). Оставляем как есть: маленькая, явно задокументированная
+// витрина для графа, а не выдаваемая за динамическую.
+const ORCHESTRATOR_SUB_ROUTES = (orchestratorRoutes[0]?.children || [])
+	.map((r) => r.meta?.title)
+	.filter((title): title is string => typeof title === 'string')
+
+const USER_SUB_ROUTES = ['Users List', 'Rights Management']
 
 const { microfrontends, isLoading } = useMfe()
 
@@ -120,10 +138,7 @@ const chartData = computed(() => {
 
 		// Sub-routes for specific MFEs
 		if (m.name === 'users') {
-			// TODO: Подгружать с API
-			const userRoutes = ['Users List', 'Rights Management']
-
-			userRoutes.forEach((r) => {
+			USER_SUB_ROUTES.forEach((r) => {
 				nodes.push({ id: r, group: 3, type: 'route', status: 'online' })
 
 				links.push({ source: mId, target: r, value: 1 })
@@ -131,9 +146,7 @@ const chartData = computed(() => {
 		}
 
 		if (m.name === 'orchestrator') {
-			const orchRoutes = ['Monitoring', 'Logs', 'Topology', 'Modules']
-
-			orchRoutes.forEach((r) => {
+			ORCHESTRATOR_SUB_ROUTES.forEach((r) => {
 				nodes.push({ id: r, group: 3, type: 'route', status: 'online' })
 
 				links.push({ source: mId, target: r, value: 1 })
