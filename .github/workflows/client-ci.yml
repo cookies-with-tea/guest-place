@@ -1,0 +1,44 @@
+name: Client CI
+
+# Moved here from client/.github/workflows/lint.yml as part of folding the stable
+# client branch into main (see IMPROVEMENTS.md section 0) — GitHub Actions only
+# discovers workflows under .github/workflows/ at the branch root, and client/ is
+# now a subdirectory of this branch rather than a branch of its own.
+
+on:
+  push:
+    branches: [main, main-v2]
+    paths: ['client/**']
+  pull_request:
+    branches: [main, main-v2]
+    paths: ['client/**']
+
+defaults:
+  run:
+    working-directory: client
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: client/.nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.6
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linters
+        run: pnpm lint
+
+      - name: Run type check
+        run: pnpm type-check

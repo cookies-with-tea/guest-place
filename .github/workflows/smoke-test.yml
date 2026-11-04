@@ -1,10 +1,11 @@
 name: Smoke Test
 
 # Brings up db/redis (Docker) and the dev services natively (server, admin-panel's
-# admin-shell — client/ isn't on this branch yet, see IMPROVEMENTS.md section 0) and
-# checks each one actually answers HTTP. See `smoke-test` in the root Makefile and
-# scripts/smoke-test.mjs for the full explanation. This only became wireable once
-# server/ and admin-panel/ lived on the same branch as each other.
+# admin-shell, client) and checks each one actually answers HTTP. See `smoke-test`
+# in the root Makefile and scripts/smoke-test.mjs for the full explanation. This
+# only became wireable once server/, admin-panel/ and client/ lived on the same
+# branch as each other (see IMPROVEMENTS.md section 0) — client/ here tracks the
+# stable `client` branch, not `client-update`, which stays separate for now.
 
 on:
   push:
@@ -28,7 +29,9 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: admin-panel/pnpm-lock.yaml
+          cache-dependency-path: |
+            admin-panel/pnpm-lock.yaml
+            client/pnpm-lock.yaml
 
       # Dummy, non-secret values — this never sends real email or talks to anything
       # outside this job's own Docker containers.
@@ -68,6 +71,10 @@ jobs:
 
       - name: Install admin-panel dependencies
         working-directory: admin-panel
+        run: pnpm install --frozen-lockfile
+
+      - name: Install client dependencies
+        working-directory: client
         run: pnpm install --frozen-lockfile
 
       - name: Run smoke test
