@@ -339,28 +339,78 @@
 Замерено сборкой (`pnpm --filter admin-content build`, реальные цифры,
 не оценка на глаз):
 
-- [ ] **Шаренные Module Federation singleton-чанки — главный рычаг**:
-      `__federation_shared_element-plus` — **2.2 МБ** (486 КБ gzip),
-      `__federation_shared_@admin-panel/ui` — **1.66 МБ** (371 КБ gzip).
-      Проверил источник: **каждое** приложение (`admin-content`,
+- [x] **Шаренные Module Federation singleton-чанки — главный рычаг**:
+      `__federation_shared_element-plus` был **2.2 МБ** (486 КБ gzip) —
+      причина подтверждена (см. ниже), исправлено. `__federation_shared_@admin-panel/ui`
+      остаётся **1.66 МБ** (371 КБ gzip) — проверил состав чанка
+      (`grep -c echarts/zrender` по собранному файлу): вес почти
+      целиком даёт `echarts`/`zrender` (используются в `UiAreaChart`,
+      `UiSparkline`), не Element Plus — отдельная, не связанная с этим
+      пунктом задача, не трогал.
+
+      **Что сделано**: во всех 7 приложениях (`admin-content`,
       `admin-media`, `admin-orchestrator`, `admin-profile`, `admin-shell`,
-      `admin-translations`, `admin-users`) делает
-      `import ElementPlus from 'element-plus'; app.use(ElementPlus)` —
-      глобальная регистрация ВСЕХ компонентов библиотеки сразу, именно
-      это и гарантирует полный вес в шаренном чанке. `unplugin-element-plus`
-      (уже в зависимостях `packages/lib`) здесь **не поможет** — он
-      умеет только добавлять CSS-импорт к уже существующим именованным
-      импортам (`import { ElButton } from 'element-plus'`), а не убирать
-      глобальную регистрацию и не сканировать шаблоны на `<el-xxx>` тэги.
-      Правильный путь — `unplugin-vue-components` + `ElementPlusResolver`
-      (автоимпорт по тэгам в шаблоне) взамен `app.use(ElementPlus)` во
-      всех 7 приложениях, плюс отдельная проверка директив (`v-loading`)
-      и singleton-API (`ElMessage`, `ElNotification`), которые резолвер
-      не покрывает автоматически. Это правка с большим блэст-радиусом
-      (каждый `<el-*>` тэг в каждом MFE) и без живого визуального
-      прогона по всем страницам — не делал её в этом проходе: риск тихо
-      сломать UI выше, чем у остальных пунктов списка. Нужна отдельная
-      задача с полной визуальной регрессией.
+      `admin-translations`, `admin-users`) убран
+      `import ElementPlus from 'element-plus'; app.use(ElementPlus)`.
+      Вместо глобальной регистрации — `unplugin-vue-components` +
+      `ElementPlusResolver` (`importStyle: false`, т.к. полный CSS уже
+      грузится отдельно через `packages/ui/assets/styles/bundle.scss` →
+      `initUiStyles()`/`inject-styles`, дублировать не нужно) подключены
+      **один раз** в общей фабрике `packages/lib/src/vite/config.ts`
+      (`createConfig`), которую используют все приложения — отдельно
+      каждое приложение не трогал. `dts` указывает на
+      `<app>/src/components.d.ts` (генерируется автоматически, добавлено
+      в `.gitignore`), чтобы `vue-tsc` видел автоимпортированные
+      компоненты в шаблонах.
+
+      **`admin-shell`** — отдельный случай: там `import * as elementPlus
+      from 'element-plus'` используется не для регистрации, а для ручного
+      заполнения `__federation_shared__` (shared scope для динамических
+      remote-модулей) — этот импорт оставлен как есть, убран только
+      отдельный `import ElementPlus from 'element-plus'` и `.use(ElementPlus)`.
+
+      **Директивы** (`v-loading` — 14 файлов, `ElInfiniteScroll`,
+      `ElPopover`) — проверил исходники `unplugin-vue-components@32.1.0`
+      (та версия, что реально стоит в `node_modules`): `ElementPlusResolver`
+      по умолчанию (`directives: true`) резолвит и компоненты, и
+      директивы — живым тестом резолвера (`resolver.resolve('Loading')`)
+      подтвердил, что `v-loading` резолвится корректно.
+
+      **Singleton API** (`ElMessage`/`ElMessageBox`/`ElNotification`) —
+      прошёлся по всем ~35 местам использования: везде уже явный
+      именованный импорт (`import { ElMessage } from 'element-plus'`),
+      ни одного места на глобальных `this.$message`/`app.config.globalProperties`
+      не нашёл — эти вызовы не зависят от глобальной регистрации и не
+      затронуты.
+
+      **Динамические компоненты** — отдельно проверил на `:is="..."`/
+      `h(ElXxx)`/`resolveComponent('el...')` паттерны (резолвер их не
+      видит, т.к. работает по статическому разбору тегов в шаблоне) —
+      таких мест в коде нет.
+
+      **Проверено**:
+      - `pnpm --filter @admin-panel/lib build` — пересборка общего пакета
+        (апп резолвят `@admin-panel/lib/vite` из `dist`, не из `src`).
+      - Живой `admin-users` dev-сервер (`localhost:4176`) — страница
+        логина рендерится корректно, в DOM присутствуют настоящие классы
+        `el-form`/`el-input`/`el-button`/`el-link` (проверено через
+        `document.querySelectorAll('[class*="el-"]')`), в консоли нет
+        предупреждений `Failed to resolve component` (500-ки — это
+        отсутствие бэкенда, к делу не относится).
+      - `vite build` для всех 7 приложений — ни одной ошибки/warning.
+        `__federation_shared_element-plus` после сборки — **~12 КБ**
+        (3.85 КБ gzip) **во всех 7 приложениях** вместо 2.2 МБ — т.е.
+        падение ~99%.
+      - `oxlint` по изменённым файлам — чисто.
+      - `vitest` для `admin-shell` (включая `mfeFallback.spec.ts`,
+        который монтирует компонент с `global: { plugins: [ElementPlus] }`
+        напрямую через `@vue/test-utils`, в обход нашего изменения) и
+        `admin-translations` — все тесты зелёные.
+      - `vue-tsc --build` для `admin-translations` — ровно те же 4
+        ошибки типов, что и на оригинальном коде (сравнил через `git
+        stash`/`git stash pop`): предсуществующий косяк с типом
+        `DefaultRow` в обработчиках `el-table`, к этой правке не
+        относится, не трогал.
 - [x] **`RichTextFullEditor.vue` (Tiptap-редактор) — 1 МБ (237 КБ gzip)
       отдельным чанком** — проверил `useRichTextEditor.ts`: все 7
       `@tiptap/extension-*` + `@tiptap/starter-kit` передаются в
