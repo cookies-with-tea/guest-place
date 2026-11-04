@@ -43,17 +43,32 @@
 
 			<el-table-column label="Активен" width="100" align="center">
 				<template #default="{ row }">
-					<el-switch v-model="row.isActive" @change="(val: boolean) => redirects.toggleActive(row, val)" />
+					<el-switch
+						v-model="row.isActive"
+						@change="(val) => redirects.toggleActive(row as RedirectItem, val as boolean)"
+					/>
 				</template>
 			</el-table-column>
 
 			<el-table-column label="Действия" width="220" align="right">
 				<template #default="{ row }">
-					<el-button size="small" plain type="info" :icon="Lightning" @click="redirects.testRedirect(row)">
+					<el-button
+						size="small"
+						plain
+						type="info"
+						:icon="Lightning"
+						@click="redirects.testRedirect(row as RedirectItem)"
+					>
 						Проверить
 					</el-button>
-					<el-button size="small" plain @click="redirects.openEditDialog(row)"> Изменить </el-button>
-					<el-button size="small" plain type="danger" :icon="Close" @click="redirects.confirmDelete(row)" />
+					<el-button size="small" plain @click="redirects.openEditDialog(row as RedirectItem)"> Изменить </el-button>
+					<el-button
+						size="small"
+						plain
+						type="danger"
+						:icon="Close"
+						@click="redirects.confirmDelete(row as RedirectItem)"
+					/>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -62,6 +77,8 @@
 
 <script setup lang="ts">
 import { Close, DocumentCopy, Lightning, Right, View } from '@element-plus/icons-vue'
+
+import type { RedirectItem } from '#entities/redirects'
 
 import type { RedirectsData } from '../../composables/useRedirectsData'
 

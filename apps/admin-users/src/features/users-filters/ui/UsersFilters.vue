@@ -7,7 +7,7 @@
 					<p>Filter and manage your platform users</p>
 				</div>
 				<div class="header-actions">
-					<el-button :icon="PlusIcon" type="primary" @click="openAddModal">Add user</el-button>
+					<el-button :icon="PlusIcon" type="primary" @click="openAddModal()">Add user</el-button>
 				</div>
 			</div>
 

@@ -26,7 +26,7 @@
 					placeholder="Target Folder (Root)"
 					:disabled="!settings.isApplyToAll"
 				>
-					<el-option :value="null" label="Root (No folder)">
+					<el-option :value="null as unknown as string" label="Root (No folder)">
 						<div class="folder-option">
 							<el-icon class="folder-option-icon"><Folder /></el-icon>
 							<span>Root (No folder)</span>

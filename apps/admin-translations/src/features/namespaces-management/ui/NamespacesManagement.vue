@@ -25,7 +25,14 @@
 				<template #default="{ row }">
 					<div class="action-buttons">
 						<el-tooltip content="Edit Namespace" placement="top">
-							<el-button circle plain size="small" type="primary" :icon="Edit" @click="openEditDialog(row)" />
+							<el-button
+								circle
+								plain
+								size="small"
+								type="primary"
+								:icon="Edit"
+								@click="openEditDialog(row as Namespace)"
+							/>
 						</el-tooltip>
 						<el-tooltip content="Delete Namespace" placement="top">
 							<el-button circle plain size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />

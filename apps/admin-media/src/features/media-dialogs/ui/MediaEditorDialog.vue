@@ -29,7 +29,7 @@
 				<div class="editor-controls">
 					<div class="control-group">
 						<span class="label">Aspect Ratio</span>
-						<el-radio-group v-model="aspectRatio" size="small" @change="handleRatioChange">
+						<el-radio-group v-model="aspectRatio" size="small" @change="(val) => handleRatioChange(val as string)">
 							<el-radio-button label="Free" value="free" />
 							<el-radio-button label="1:1" value="1:1" />
 							<el-radio-button label="4:3" value="4:3" />
