@@ -3,7 +3,6 @@ import '@admin-panel/ui/inject-styles'
 import { createApp } from 'vue'
 
 import { initUiStyles } from '@admin-panel/ui'
-import ElementPlus from 'element-plus'
 
 import App from './App.vue'
 import { router } from './router'
@@ -24,6 +23,6 @@ app.use(i18nPlugin)
 
 loadDict('general')
 
-app.use(VueQueryPlugin).use(router).use(ElementPlus)
+app.use(VueQueryPlugin).use(router)
 
 export { app }

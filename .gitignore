@@ -24,4 +24,5 @@ public/dist
 playwright-report
 test-results
 *.tsbuildinfo
-stats.html
+stats.html
+**/components.d.ts

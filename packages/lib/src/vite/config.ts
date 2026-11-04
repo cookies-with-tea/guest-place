@@ -6,6 +6,8 @@ import { resolve } from 'node:path'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { loadEnv } from 'vite'
 import viteCompression from 'vite-plugin-compression'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { defineConfig, type ViteUserConfig } from 'vitest/config'
 
 import { APPS_PORTS } from '../constants/ports'
@@ -58,6 +60,10 @@ export function createConfig(options: CreateConfigOptions) {
 			base: '/', // Keep base as / but override URLs for built assets
 			plugins: [
 				vue(),
+				Components({
+					resolvers: [ElementPlusResolver({ importStyle: false })],
+					dts: resolve(appDir, 'src/components.d.ts'),
+				}),
 				{
 					name: 'gp-css-externalizer',
 					enforce: 'pre',
