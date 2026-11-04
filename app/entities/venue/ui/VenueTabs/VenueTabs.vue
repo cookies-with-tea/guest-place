@@ -217,8 +217,8 @@
             type="button"
             class="venue-tabs__slider-arrow venue-tabs__slider-arrow--prev"
             :disabled="menuSlideIndex === 0"
-            @click="prevMenuSlide"
             aria-label="Предыдущее фото"
+            @click="prevMenuSlide"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
@@ -244,8 +244,8 @@
             type="button"
             class="venue-tabs__slider-arrow venue-tabs__slider-arrow--next"
             :disabled="menuSlideIndex >= maxMenuSlideIndex"
-            @click="nextMenuSlide"
             aria-label="Следующее фото"
+            @click="nextMenuSlide"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -457,11 +457,13 @@ const tabsList: { key: VenueActiveTabType; label: string }[] = [
 
 const handleTabChange = (tab: VenueActiveTabType) => {
   activeTab.value = tab
+
   emit('tab-change', tab)
 }
 
 const formatPrice = (price?: number): string => {
   if (!price) return '0'
+
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
@@ -470,18 +472,25 @@ const formatPrice = (price?: number): string => {
 // -------------------------------------------------------------
 const handleDownload = (type: 'menu' | 'rider') => {
   const customUrl = type === 'menu' ? props.venue.menuUrl : props.venue.riderUrl
+
   if (customUrl && customUrl.startsWith('http') && !customUrl.includes('example.com')) {
     window.open(customUrl, '_blank')
+
     return
   }
+
   const fileName = type === 'menu' ? `${props.venue.slug || 'venue'}-menu.pdf` : `${props.venue.slug || 'venue'}-rider.pdf`
   const dummyContent = `Guest&Place: ${type.toUpperCase()} for ${props.venue.title}`
   const blob = new Blob([dummyContent], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
+
   a.href = url
+
   a.download = fileName
+
   a.click()
+
   URL.revokeObjectURL(url)
 }
 
@@ -574,6 +583,7 @@ const hasMoreFeed = computed(() => {
 
 const toggleLike = (id: string) => {
   likedMap.value[id] = !likedMap.value[id]
+
   emit('like-feed', id)
 }
 

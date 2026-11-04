@@ -10,7 +10,6 @@ const typedIconPluginConfig = typedIconPlugin({
 })
 
 export default defineNuxtConfig({
-  ssr: false,
   srcDir: 'app', // ← основная папка с app.vue, pages и т.д.
   dir: {
     plugins: 'app/plugins', // ← относительно srcDir
@@ -21,9 +20,6 @@ export default defineNuxtConfig({
   imports: {
     scan: false,
     autoImport: false,
-  },
-  experimental: {
-    appManifest: false,
   },
   svgo: {
     defaultImport: 'component',
@@ -45,28 +41,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       env: {
-        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000',
+        NUXT_BACKEND_BASE_URI: process.env.NUXT_BACKEND_BASE_URI,
       },
-    },
-  },
-  nitro: {
-    devProxy: {
-      '/api': {
-        target: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api',
-        changeOrigin: true,
-      },
-      '/sitemap.xml': {
-        target: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/sitemap.xml',
-        changeOrigin: true,
-      },
-    },
-  },
-  routeRules: {
-    '/api/**': {
-      proxy: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/api/**',
-    },
-    '/sitemap.xml': {
-      proxy: (process.env.NUXT_BACKEND_BASE_URI || 'http://localhost:8000') + '/sitemap.xml',
     },
   },
   build: {

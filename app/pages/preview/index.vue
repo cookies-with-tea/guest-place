@@ -122,11 +122,13 @@ const schema = ref<any>(null)
 
 const lastUpdatedFormatted = computed(() => {
   if (!lastUpdated.value) return ''
+
   return lastUpdated.value.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 })
 
 const seoUrl = computed(() => {
   const baseUrl = window.location.origin
+
   return `${baseUrl}/${schema.value?.slug || ''}`
 })
 
@@ -136,6 +138,7 @@ const sendReadySignal = () => {
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'PREVIEW_READY' }, '*')
     }
+
     if (window.opener) {
       window.opener.postMessage({ type: 'PREVIEW_READY' }, '*')
     }
@@ -153,14 +156,17 @@ const fetchFallbackData = async () => {
   try {
     const backendUrl = (window as any).__NUXT__?.config?.public?.env?.NUXT_BACKEND_BASE_URI || 'http://localhost:8000'
     const schemaRes = await fetch(`${backendUrl}/api/v1/content/schemas/${schemaSlug}`).then((r) => r.json())
+
     if (schemaRes?.data) {
       schema.value = schemaRes.data
     }
 
     if (entryId && entryId !== 'new') {
       const entryRes = await fetch(`${backendUrl}/api/v1/content/entries/${entryId}`).then((r) => r.json())
+
       if (entryRes?.data) {
         data.value = entryRes.data.data || {}
+
         if (entryRes.data.seo) seo.value = entryRes.data.seo
       }
     }
@@ -177,9 +183,11 @@ const handleMessage = (event: MessageEvent) => {
   if (event.data?.type !== 'CMS_PREVIEW_DATA') return
 
   const payload = event.data.payload
+
   if (!payload) return
 
   isReceiving.value = true
+
   lastUpdated.value = new Date()
 
   if (payload.data) data.value = payload.data
@@ -198,15 +206,20 @@ const getTitle = () => {
   if (!schema.value?.fields) return 'Preview'
   // Try to find a "title", "name", "heading" field
   const titleFieldNames = ['title', 'name', 'heading', 'label', 'subject']
+
   for (const name of titleFieldNames) {
     const field = schema.value.fields.find((f: any) => f.name === name)
+
     if (field && data.value[name]) return data.value[name]
   }
+
   // Fallback: first text field
   const firstTextField = schema.value.fields.find((f: any) => f.fieldType === 'Text')
+
   if (firstTextField && data.value[firstTextField.name]) {
     return data.value[firstTextField.name]
   }
+
   return schema.value.name || 'Preview'
 }
 
@@ -214,26 +227,31 @@ const resolveMediaUrl = (url: string) => {
   if (!url) return ''
   if (url.startsWith('http')) return url
   const backendUrl = (window as any).__NUXT__?.config?.public?.env?.NUXT_BACKEND_BASE_URI || 'http://localhost:8000'
+
   return `${backendUrl}${url}`
 }
 
 const isImageUrl = (url: string) => {
   if (!url) return false
+
   return /\.(jpg|jpeg|png|gif|webp|avif|svg)(\?.*)?$/i.test(url)
 }
 
 const getFileName = (url: string) => {
   if (!url) return 'File'
+
   return url.split('/').pop() || 'File'
 }
 
 onMounted(() => {
   window.addEventListener('message', handleMessage)
+
   // Signal readiness immediately
   sendReadySignal()
 
   // Retry signal after short delay to catch late parent listeners
   setTimeout(sendReadySignal, 300)
+
   setTimeout(sendReadySignal, 800)
 
   // If still not ready after 1.2s (e.g. opened standalone in new tab), load from API:

@@ -38,6 +38,7 @@ const props = defineProps<{
 
 const isReversed = computed(() => {
 	const pos = (props.data.image_position || '').toLowerCase()
+
 	return pos === 'left'
 })
 
@@ -47,13 +48,16 @@ const imageUrl = computed(() => {
 
 const sanitizedText = computed(() => {
 	const raw = props.data.text || ''
+
 	if (!raw) {
 		return '<p>Соединяем гостей и площадки, создавая простоту и прозрачность отношений.</p>'
 	}
+
 	// If plain text without tags, wrap in <p>
 	if (!raw.includes('<p>') && !raw.includes('<div>')) {
 		return `<p>${raw.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
 	}
+
 	return raw
 })
 </script>

@@ -125,6 +125,7 @@ import {
   VenueCardSmall,
 } from '#entities/venue'
 import { UiIcon } from '#shared/ui'
+import { preloadContentTranslations, resolveContentTree } from '#shared/lib/composables'
 
 const route = useRoute()
 const slug = (route.params.slug as string) || 'loft-forest-hall'
@@ -138,8 +139,13 @@ const isFavorite = ref(Boolean(venue.value.isFavorite))
 const loadVenue = async () => {
   try {
     const fetched = await venueApi.getVenueBySlug(slug)
+
     if (fetched) {
-      venue.value = fetched
+      // Resolve translation keys/currency admins attached via UiRichTextField (admin-panel)
+      // before the title/description render, so guests never see raw {key:...}/data-i18n-key markup.
+      await preloadContentTranslations(fetched)
+
+      venue.value = resolveContentTree(fetched)
     }
   } catch (e) {
     console.warn('Failed to load venue from API:', e)
@@ -147,8 +153,11 @@ const loadVenue = async () => {
 
   try {
     const nearby = await venueApi.getNearbyVenues(slug)
+
     if (nearby && nearby.length > 0) {
-      nearbyVenues.value = nearby
+      await preloadContentTranslations(nearby)
+
+      nearbyVenues.value = resolveContentTree(nearby)
     }
   } catch (e) {
     console.warn('Failed to load nearby venues:', e)
@@ -164,6 +173,7 @@ const onMessage = (event: MessageEvent) => {
 
 onMounted(() => {
   loadVenue()
+
   window.addEventListener('message', onMessage)
 })
 
@@ -187,6 +197,7 @@ const handleShare = async () => {
     }
   } else {
     await navigator.clipboard.writeText(window.location.href)
+
     alert('Ссылка скопирована в буфер обмена!')
   }
 }

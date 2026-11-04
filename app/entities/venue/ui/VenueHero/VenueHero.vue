@@ -195,11 +195,13 @@ const handleSelectPhoto = (index: number) => {
 
 const handlePrevPhoto = () => {
   const total = props.venue.gallery.photos.length
+
   activePhotoIndex.value = (activePhotoIndex.value - 1 + total) % total
 }
 
 const handleNextPhoto = () => {
   const total = props.venue.gallery.photos.length
+
   activePhotoIndex.value = (activePhotoIndex.value + 1) % total
 }
 

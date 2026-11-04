@@ -415,52 +415,67 @@ const { data, isPreview, isConnectedToCms } = useCmsPage('page_about', defaultAb
 // Parsers for hero title
 const heroTitlePrefix = computed(() => {
 	const raw = data.hero_title || 'О платформе Guest & Place'
+
 	if (raw.toLowerCase().includes('guest')) {
 		return raw.split(/guest/i)[0]
 	}
+
 	return 'О платформе '
 })
 
 const heroTitleAccent = computed(() => {
 	const raw = data.hero_title || 'О платформе Guest & Place'
+
 	if (raw.toLowerCase().includes('guest')) {
 		const match = raw.match(/guest.*/i)
+
 		return match ? match[0] : 'Guest & Place'
 	}
+
 	return 'Guest & Place'
 })
 
 // Parsers for subtitle lines
 const heroSubtitleLines = computed(() => {
 	const raw = data.hero_subtitle || ''
+
 	if (Array.isArray(raw)) return raw
+
 	return String(raw).split('\n').filter(Boolean)
 })
 
 // Parsers for bullet points (handles either array or multiline string from textarea)
 const guestFeaturesList = computed(() => {
 	const raw = data.guest_features || data.guest_bullets || data.guestFeatures || data.guestBullets
+
 	if (Array.isArray(raw)) return raw
 	if (typeof raw === 'string') return raw.split('\n').map((s) => s.trim()).filter(Boolean)
+
 	return defaultAboutData.guest_features
 })
 
 const placeFeaturesList = computed(() => {
 	const raw = data.place_features || data.place_bullets || data.placeFeatures || data.placeBullets
+
 	if (Array.isArray(raw)) return raw
 	if (typeof raw === 'string') return raw.split('\n').map((s) => s.trim()).filter(Boolean)
+
 	return defaultAboutData.place_features
 })
 
 const missionHtml = computed(() => {
 	const raw = data.mission_text
+
 	if (raw && (raw.includes('<p>') || raw.includes('<div>'))) return raw
+
 	return `<p>${raw || defaultAboutData.mission_text}</p>`
 })
 
 const historyHtml = computed(() => {
 	const raw = data.history_text
+
 	if (raw && (raw.includes('<p>') || raw.includes('<div>'))) return raw
+
 	return `<p>${raw || defaultAboutData.history_text}</p>`
 })
 </script>

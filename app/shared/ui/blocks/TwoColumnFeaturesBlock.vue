@@ -84,21 +84,26 @@ const props = defineProps<{
 function parseItems(items?: string | string[]): string[] {
 	if (!items) return []
 	if (Array.isArray(items)) return items
+
 	if (typeof items === 'string') {
 		try {
 			const parsed = JSON.parse(items)
+
 			if (Array.isArray(parsed)) return parsed
 		} catch {
 			// Plain text with newlines
 			return items.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean)
 		}
 	}
+
 	return []
 }
 
 const leftItems = computed(() => {
 	const parsed = parseItems(props.data.left_items)
+
 	if (parsed.length) return parsed
+
 	return [
 		'Прямая связь с площадкой в режиме реального времени',
 		'Актуальная информация, меню, цены, свободные даты',
@@ -111,7 +116,9 @@ const leftItems = computed(() => {
 
 const rightItems = computed(() => {
 	const parsed = parseItems(props.data.right_items)
+
 	if (parsed.length) return parsed
+
 	return [
 		'Чаты, видео-встречи с клиентами',
 		'Онлайн-показ площадки',

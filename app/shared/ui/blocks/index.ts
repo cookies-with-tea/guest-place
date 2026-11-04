@@ -11,6 +11,9 @@ import CardGridBlock from './CardGridBlock.vue'
 import InfoBannerBlock from './InfoBannerBlock.vue'
 import WireframeBlock from './WireframeBlock.vue'
 
+// 7. Video Embed Block
+import VideoBlock from './VideoBlock.vue'
+
 // 0. Wireframe / Placeholder Block (for rapid prototyping before real components)
 registerCmsBlock({
 	type: 'wireframe',
@@ -140,9 +143,6 @@ registerCmsBlock({
 	],
 	component: InfoBannerBlock,
 })
-
-// 7. Video Embed Block
-import VideoBlock from './VideoBlock.vue'
 
 registerCmsBlock({
 	type: 'video_embed',

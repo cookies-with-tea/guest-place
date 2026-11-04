@@ -27,10 +27,11 @@ export const mapServerDtoToVenue = (v: VenueServerDto): VenueType => {
           }
         : undefined,
       coordinates:
-        v.coordinatesLat != null && v.coordinatesLng != null
+        (v.coordinatesLat ?? (v as any).coordinates_lat) != null &&
+        (v.coordinatesLng ?? (v as any).coordinates_lng) != null
           ? {
-              lat: v.coordinatesLat,
-              lng: v.coordinatesLng,
+              lat: Number(v.coordinatesLat ?? (v as any).coordinates_lat),
+              lng: Number(v.coordinatesLng ?? (v as any).coordinates_lng),
             }
           : undefined,
     },
@@ -90,9 +91,11 @@ export const getVenueBySlug = async (slug: string): Promise<VenueType> => {
       method: 'GET',
     })
     const v = res.data
+
     if (v) {
       return mapServerDtoToVenue(v)
     }
+
     return MOCK_VENUE_FOREST_HALL
   } catch {
     return MOCK_VENUE_FOREST_HALL
@@ -100,6 +103,7 @@ export const getVenueBySlug = async (slug: string): Promise<VenueType> => {
 }
 
 export interface VenuesQueryParams {
+  ids?: string | string[]
   search?: string
   status?: string
   venueTypes?: string | string[]
@@ -113,6 +117,10 @@ export interface VenuesQueryParams {
   minPrice?: number
   maxPrice?: number
   priceLevel?: string
+  minLat?: number
+  maxLat?: number
+  minLng?: number
+  maxLng?: number
   hasOnlineTour?: boolean
   sortBy?: string
   sortOrder?: 'asc' | 'desc' | 'ASC' | 'DESC'
@@ -134,24 +142,40 @@ export interface VenuesListResponse {
 export const getVenues = async (params?: VenuesQueryParams): Promise<VenuesListResponse> => {
   try {
     const query = new URLSearchParams()
+
+    if (params?.ids) {
+      const idsStr = Array.isArray(params.ids) ? params.ids.join(',') : params.ids
+
+      query.append('ids', idsStr)
+    }
+
     if (params?.search) query.append('search', params.search)
     if (params?.status) query.append('status', params.status)
+
     if (params?.venueTypes) {
       const vt = Array.isArray(params.venueTypes) ? params.venueTypes.join(',') : params.venueTypes
+
       query.append('venue_types', vt)
     }
+
     if (params?.features) {
       const ft = Array.isArray(params.features) ? params.features.join(',') : params.features
+
       query.append('features', ft)
     }
+
     if (params?.cuisines) {
       const c = Array.isArray(params.cuisines) ? params.cuisines.join(',') : params.cuisines
+
       query.append('cuisines', c)
     }
+
     if (params?.services) {
       const s = Array.isArray(params.services) ? params.services.join(',') : params.services
+
       query.append('services', s)
     }
+
     if (params?.city) query.append('city', params.city)
     if (params?.metroStation) query.append('metro_station', params.metroStation)
     if (params?.minCapacity != null) query.append('min_capacity', String(params.minCapacity))
@@ -159,6 +183,10 @@ export const getVenues = async (params?: VenuesQueryParams): Promise<VenuesListR
     if (params?.minPrice != null) query.append('min_price', String(params.minPrice))
     if (params?.maxPrice != null) query.append('max_price', String(params.maxPrice))
     if (params?.priceLevel) query.append('price_level', params.priceLevel)
+    if (params?.minLat != null) query.append('min_lat', String(params.minLat))
+    if (params?.maxLat != null) query.append('max_lat', String(params.maxLat))
+    if (params?.minLng != null) query.append('min_lng', String(params.minLng))
+    if (params?.maxLng != null) query.append('max_lng', String(params.maxLng))
     if (params?.hasOnlineTour != null) query.append('has_online_tour', String(params.hasOnlineTour))
     if (params?.sortBy) query.append('sort_by', params.sortBy)
     if (params?.sortOrder) query.append('sort_order', params.sortOrder)
@@ -196,6 +224,7 @@ export const getVenues = async (params?: VenuesQueryParams): Promise<VenuesListR
     }
   } catch (error) {
     console.error('Failed to get venues:', error)
+
     return {
       items: [MOCK_VENUE_FOREST_HALL],
       pagination: {
@@ -245,6 +274,7 @@ export const getNearbyVenues = async (currentVenueId?: string): Promise<VenuePre
         .filter((item) => item.id !== currentVenueId && item.slug !== currentVenueId)
         .map(mapVenueToPreview)
     }
+
     return MOCK_NEARBY_VENUES.filter((item) => item.id !== currentVenueId)
   } catch {
     return MOCK_NEARBY_VENUES.filter((item) => item.id !== currentVenueId)
@@ -257,9 +287,28 @@ export const toggleVenueFavorite = async (venueId: string): Promise<{ isFavorite
       `/api/v1/venues/${venueId}/favorite`,
       { method: 'POST' }
     )
+
     return res.data
   } catch {
     return { isFavorite: true }
+  }
+}
+
+export const createVenueRequest = async (payload: Record<string, any>): Promise<any> => {
+  try {
+    const res = await fetchData<any>('/api/v1/venues', {
+      method: 'POST',
+      body: payload,
+    })
+
+    return res.data
+  } catch (err) {
+    console.warn('[createVenueRequest] Server request failed, returning optimistic mock response', err)
+
+    return {
+      success: true,
+      data: payload,
+    }
   }
 }
 
@@ -268,5 +317,6 @@ export const venueApi = {
   getVenues,
   getNearbyVenues,
   toggleVenueFavorite,
+  createVenueRequest,
 }
 

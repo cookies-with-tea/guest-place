@@ -2,6 +2,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAsyncData } from '#app'
 import { getCmsBlocksManifest } from '#shared/ui/blocks'
+import { DEFAULT_CONTENT_LOCALE, preloadContentTranslations, resolveContentTranslation } from './useContentI18n'
 
 export interface CmsPageData {
 	id?: string
@@ -36,38 +37,50 @@ export function useCmsBlocks(pageSlug?: string) {
 			}).catch(() => null)
 
 			if (res?.data) {
+				await preloadContentTranslations(res.data.blocks, DEFAULT_CONTENT_LOCALE, apiBase)
+
 				return res.data as CmsPageData
 			}
 		} catch (err) {
 			console.warn('[useCmsBlocks] Error fetching page:', err)
 		}
+
 		return null
 	})
 
 function interpolateBlockData(val: any, context: Record<string, any> = { city: 'Москва' }): any {
 	if (typeof val === 'string') {
 		let res = val
+
 		if (res.startsWith('$t(') && res.endsWith(')')) {
-			res = res.slice(3, -1).replace(/['"]/g, '')
+			const key = res.slice(3, -1).replace(/['"]/g, '')
+
+			res = resolveContentTranslation(key)
 		}
+
 		return res.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, k) => {
 			if (k === 'year') return String(new Date().getFullYear())
+
 			return context[k] !== undefined ? String(context[k]) : `{{${k}}}`
 		})
 	} else if (Array.isArray(val)) {
 		return val.map((v) => interpolateBlockData(v, context))
 	} else if (val && typeof val === 'object') {
 		const res: Record<string, any> = {}
+
 		for (const k of Object.keys(val)) {
 			res[k] = interpolateBlockData(val[k], context)
 		}
+
 		return res
 	}
+
 	return val
 }
 
 	const normalizeBlocks = (rawBlocks: any[]) => {
 		if (!Array.isArray(rawBlocks)) return []
+
 		return rawBlocks.map((b) => ({
 			...b,
 			data: interpolateBlockData(b.data || {}),
@@ -95,6 +108,7 @@ function interpolateBlockData(val: any, context: Record<string, any> = { city: '
 		if (typeof window === 'undefined') return
 
 		const isIframe = window.parent && window.parent !== window
+
 		if (!isIframe && route.query.preview !== 'true') return
 
 		isPreview.value = true
@@ -117,6 +131,7 @@ function interpolateBlockData(val: any, context: Record<string, any> = { city: '
 
 		if (type === 'CMS_PAGE_PREVIEW_UPDATE' || type === 'CMS_PREVIEW_DATA') {
 			isConnectedToCms.value = true
+
 			isPreview.value = true
 
 			const newBlocks = blocks || payload?.blocks || []
@@ -131,6 +146,7 @@ function interpolateBlockData(val: any, context: Record<string, any> = { city: '
 			}
 		} else if (type === 'PING') {
 			isConnectedToCms.value = true
+
 			sendReadySignal()
 		}
 	}
@@ -138,14 +154,18 @@ function interpolateBlockData(val: any, context: Record<string, any> = { city: '
 	onMounted(() => {
 		if (typeof window !== 'undefined') {
 			const isIframe = window.parent && window.parent !== window
+
 			if (isIframe || route.query.preview === 'true') {
 				isPreview.value = true
 			}
 
 			window.addEventListener('message', handleMessage)
+
 			sendReadySignal()
+
 			// Retry ready signal briefly in case CMS parent loaded after
 			setTimeout(sendReadySignal, 300)
+
 			setTimeout(sendReadySignal, 1000)
 		}
 	})

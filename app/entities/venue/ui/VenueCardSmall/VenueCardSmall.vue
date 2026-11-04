@@ -73,9 +73,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import type { VenuePreviewType } from '../../model/types'
 import { UiIcon } from '#shared/ui'
+import { useFavorites } from '#shared/lib/composables'
 
 interface IProps {
   venue: VenuePreviewType
@@ -89,13 +90,41 @@ interface IEmits {
 const props = defineProps<IProps>()
 const emit = defineEmits<IEmits>()
 
-const isFavoriteState = ref(Boolean(props.venue.isFavorite))
+const { isFavorite, toggleFavorite: doToggleFavorite } = useFavorites()
+const isFavoriteState = computed(() => isFavorite(props.venue.id) || isFavorite(props.venue.slug))
 
-const handleFavoriteToggle = () => {
-  isFavoriteState.value = !isFavoriteState.value
+const handleFavoriteToggle = async () => {
+  const venueLike = {
+    id: props.venue.id,
+    slug: props.venue.slug,
+    title: props.venue.title,
+    location: {
+      address: '',
+      city: 'Москва',
+      metro: props.venue.metro,
+    },
+    rating: props.venue.rating,
+    pricing: {
+      averageCheck: 2500,
+      banquetMenuPriceFrom: 4000,
+      rentPricePerHour: 3000,
+      priceLevel: props.venue.priceLevel,
+    },
+    gallery: {
+      mainPhoto: props.venue.previewImage,
+      photos: [props.venue.previewImage],
+    },
+    capacitySummary: {
+      banquet: props.venue.capacityText,
+    },
+    details: {},
+  } as any
+
+  const newState = await doToggleFavorite(venueLike)
+
   emit('favorite-change', {
     id: props.venue.id,
-    isFavorite: isFavoriteState.value,
+    isFavorite: newState,
   })
 }
 

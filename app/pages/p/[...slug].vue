@@ -221,6 +221,7 @@ try {
 	if (headerRes.status === 'fulfilled' && headerRes.value?.data?.items) {
 		headerItems.value = headerRes.value.data.items
 	}
+
 	if (footerRes.status === 'fulfilled' && footerRes.value?.data?.items) {
 		footerItems.value = footerRes.value.data.items
 	}
@@ -231,6 +232,7 @@ try {
 // Breadcrumb trail (Stage 3.3)
 const slugParam = computed(() => {
 	const s = route.params.slug
+
 	return Array.isArray(s) ? s.join('/') : (s || '')
 })
 
@@ -238,8 +240,10 @@ watch(
 	() => slugParam.value,
 	async (newSlug) => {
 		if (!newSlug) return
+
 		try {
 			const res = await $fetch<{ data?: BreadcrumbItem[] }>(`/api/v1/pages/${encodeURIComponent(newSlug)}/breadcrumbs`)
+
 			if (res?.data && res.data.length > 0) {
 				breadcrumbs.value = res.data
 			}
@@ -254,6 +258,7 @@ const breadcrumbTrail = computed(() => {
 	if (breadcrumbs.value.length > 0) {
 		return breadcrumbs.value
 	}
+
 	return [
 		{
 			id: page.value?.id || 'current',
@@ -281,6 +286,7 @@ watch(
 
 			if (seoDesc) {
 				metaList.push({ name: 'description', content: seoDesc })
+
 				metaList.push({ property: 'og:description', content: seoDesc })
 			}
 
@@ -295,6 +301,7 @@ watch(
 			}
 
 			const linkList: any[] = []
+
 			if (canonical) {
 				linkList.push({ rel: 'canonical', href: canonical })
 			}

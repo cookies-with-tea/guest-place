@@ -1,13 +1,16 @@
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAsyncData } from '#app'
+import { DEFAULT_CONTENT_LOCALE, preloadContentTranslations, resolveContentTranslation } from './useContentI18n'
 
 function interpolateValue(val: any, city = 'Москва'): any {
 	if (typeof val === 'string') {
 		let res = val
 
 		if (res.startsWith('$t(') && res.endsWith(')')) {
-			res = res.slice(3, -1).replace(/['"]/g, '')
+			const key = res.slice(3, -1).replace(/['"]/g, '')
+
+			res = resolveContentTranslation(key)
 		}
 
 		return res.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, k) => {
@@ -105,6 +108,10 @@ export function useCmsPage<T extends Record<string, any>>(schemaSlug: string, de
 				}).catch(() => null);
 
 				const entry = entriesRes?.data?.[0];
+
+				if (entry?.data) {
+					await preloadContentTranslations(entry.data, DEFAULT_CONTENT_LOCALE, apiBase);
+				}
 
 				return entry?.data || null;
 			}

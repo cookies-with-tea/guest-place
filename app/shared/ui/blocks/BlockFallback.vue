@@ -36,13 +36,16 @@ const props = defineProps<{
 
 const isDevOrPreview = computed(() => {
 	if (import.meta.dev) return true
+
 	if (typeof window !== 'undefined') {
 		const isIframe = window.parent && window.parent !== window
 		const urlParams = new URLSearchParams(window.location.search)
+
 		if (isIframe || urlParams.get('preview') === 'true') {
 			return true
 		}
 	}
+
 	return false
 })
 

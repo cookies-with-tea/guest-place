@@ -64,14 +64,19 @@ function toCamelCase(str: string): string {
 
 export function registerCmsBlock(def: CmsBlockDefinition) {
 	canonicalBlocks.push(def)
+
 	registry.set(def.type, def)
+
 	registry.set(normalizeKey(def.type), def)
+
 	registry.set(toSnakeCase(def.type), def)
+
 	registry.set(toCamelCase(def.type), def)
 }
 
 export function getCmsBlock(type: string): CmsBlockDefinition | undefined {
 	if (!type) return undefined
+
 	return (
 		registry.get(type) ||
 		registry.get(normalizeKey(type)) ||

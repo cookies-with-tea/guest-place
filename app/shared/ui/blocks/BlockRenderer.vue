@@ -65,6 +65,7 @@ const normalizedBlocks = computed(() => {
 	if (!props.blocks || !Array.isArray(props.blocks)) {
 		return []
 	}
+
 	return props.blocks
 })
 
@@ -78,33 +79,42 @@ function resolveBlockComponent(type: string) {
 
 function getBlockThemeClass(theme?: string): string {
 	if (!theme || theme === 'light') return 'theme-light'
+
 	return `theme-${theme}`
 }
 
 function getBlockPaddingClass(padding?: string): string {
 	if (!padding || padding === 'md') return 'pad-md'
+
 	return `pad-${padding}`
 }
 
 function getBlockMarginClass(margin?: string): string {
 	if (!margin || margin === 'none') return 'mar-none'
+
 	return `mar-${margin}`
 }
 
 function getBlockStyleObject(style?: BlockStyle): Record<string, string> {
 	if (!style) return {}
 	const res: Record<string, string> = {}
+
 	if (style.backgroundColor) {
 		res['background-color'] = style.backgroundColor
 	}
+
 	if (style.backgroundGradient) {
 		res['background'] = style.backgroundGradient
 	}
+
 	if (style.backgroundImage) {
 		res['background-image'] = `url(${style.backgroundImage})`
+
 		res['background-size'] = 'cover'
+
 		res['background-position'] = 'center'
 	}
+
 	return res
 }
 </script>

@@ -58,18 +58,22 @@ const props = defineProps<{
 const titlePrefix = computed(() => {
 	const raw = props.data.title || 'НАШИ НОВОСТИ'
 	const words = raw.split(' ')
+
 	if (words.length > 1) {
 		return words.slice(0, -1).join(' ')
 	}
+
 	return raw
 })
 
 const titleAccent = computed(() => {
 	const raw = props.data.title || 'НАШИ НОВОСТИ'
 	const words = raw.split(' ')
+
 	if (words.length > 1) {
 		return words[words.length - 1]
 	}
+
 	return ''
 })
 
@@ -77,8 +81,10 @@ const cardsList = computed<CardItem[]>(() => {
 	// If cards JSON or array provided
 	if (props.data.cards) {
 		if (Array.isArray(props.data.cards)) return props.data.cards
+
 		try {
 			const parsed = JSON.parse(props.data.cards)
+
 			if (Array.isArray(parsed)) return parsed
 		} catch {
 			// ignore
@@ -87,6 +93,7 @@ const cardsList = computed<CardItem[]>(() => {
 
 	// If explicit card1/card2/card3 fields provided
 	const list: CardItem[] = []
+
 	if (props.data.card1_title) {
 		list.push({
 			title: props.data.card1_title,
@@ -94,6 +101,7 @@ const cardsList = computed<CardItem[]>(() => {
 			icon: props.data.card1_icon || '🏢',
 		})
 	}
+
 	if (props.data.card2_title) {
 		list.push({
 			title: props.data.card2_title,
@@ -101,6 +109,7 @@ const cardsList = computed<CardItem[]>(() => {
 			icon: props.data.card2_icon || '⚡',
 		})
 	}
+
 	if (props.data.card3_title) {
 		list.push({
 			title: props.data.card3_title,
@@ -121,6 +130,7 @@ const cardsList = computed<CardItem[]>(() => {
 
 function getBadgeClass(idx: number): string {
 	const classes = ['badge-yellow', 'badge-orange', 'badge-coral']
+
 	return classes[idx % classes.length] || 'badge-yellow'
 }
 </script>

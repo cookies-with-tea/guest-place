@@ -180,28 +180,32 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { VenueType } from '../../model/types'
-import { toggleVenueFavorite } from '../../api/venue.api'
+import { useFavorites } from '#shared/lib/composables'
 
 const props = defineProps<{
   venue: VenueType
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'inquiry', venue: VenueType): void
   (e: 'chat', venue: VenueType): void
   (e: 'tour', venue: VenueType): void
+  (e: 'favorite-change', payload: { id: string; isFavorite: boolean }): void
 }>()
 
 const photoIndex = ref(0)
-const isFavoriteState = ref(Boolean(props.venue.isFavorite))
+const { isFavorite, toggleFavorite: doToggleFavorite } = useFavorites()
+const isFavoriteState = computed(() => isFavorite(props.venue.id) || isFavorite(props.venue.slug))
 
 const photos = computed(() => {
   if (props.venue.gallery.photos?.length) {
     return props.venue.gallery.photos
   }
+
   if (props.venue.gallery.mainPhoto) {
     return [props.venue.gallery.mainPhoto]
   }
+
   return ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80']
 })
 
@@ -226,16 +230,14 @@ const nextPhoto = () => {
 }
 
 const toggleFavorite = async () => {
-  isFavoriteState.value = !isFavoriteState.value
-  try {
-    await toggleVenueFavorite(props.venue.id)
-  } catch (e) {
-    console.error('Failed to toggle favorite:', e)
-  }
+  const newState = await doToggleFavorite(props.venue)
+
+  emit('favorite-change', { id: props.venue.id, isFavorite: newState })
 }
 
 const formatPrice = (price?: number) => {
   if (!price) return '0'
+
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 }
 </script>
@@ -357,10 +359,10 @@ const formatPrice = (price?: number) => {
     }
 
     &--active {
-      color: #ef4444;
+      color: #0066cc;
 
       .venue-card-big__heart-icon {
-        fill: #ef4444;
+        fill: #0066cc;
       }
     }
   }

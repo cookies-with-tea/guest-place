@@ -4,6 +4,7 @@
     <p>{{ data.hero_description }}</p>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { watch } from 'vue';
 import { useCmsPage } from '~/shared/lib/composables';

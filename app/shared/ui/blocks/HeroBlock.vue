@@ -54,24 +54,31 @@ const props = defineProps<{
 
 const titlePrefix = computed(() => {
 	const raw = props.data.title || 'О платформе Guest & Place'
+
 	if (raw.toLowerCase().includes('guest')) {
 		return raw.split(/guest/i)[0]
 	}
+
 	return raw
 })
 
 const titleAccent = computed(() => {
 	const raw = props.data.title || 'О платформе Guest & Place'
+
 	if (raw.toLowerCase().includes('guest')) {
 		const match = raw.match(/guest.*/i)
+
 		return match ? match[0] : ''
 	}
+
 	return ''
 })
 
 const subtitleLines = computed(() => {
 	const raw = props.data.subtitle || ''
+
 	if (!raw) return []
+
 	return raw.split('\n').filter(Boolean)
 })
 </script>

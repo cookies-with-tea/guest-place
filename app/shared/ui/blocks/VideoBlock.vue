@@ -62,35 +62,48 @@ const props = defineProps<{
 
 const isEmbed = (url?: string) => {
 	if (!url) return false
+
 	return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')
 }
 
 const getEmbedUrl = (url?: string) => {
 	if (!url) return ''
+
 	if (url.includes('youtube.com/watch?v=')) {
 		const id = url.split('v=')[1]?.split('&')[0]
+
 		return `https://www.youtube.com/embed/${id}`
 	}
+
 	if (url.includes('youtu.be/')) {
 		const id = url.split('youtu.be/')[1]?.split('?')[0]
+
 		return `https://www.youtube.com/embed/${id}`
 	}
+
 	if (url.includes('vimeo.com/')) {
 		const id = url.split('vimeo.com/')[1]?.split('?')[0]
+
 		return `https://player.vimeo.com/video/${id}`
 	}
+
 	return url
 }
 
 const customStyle = computed(() => {
 	const s: Record<string, string> = {}
+
 	if (props.style?.backgroundColor) s.backgroundColor = props.style.backgroundColor
 	if (props.style?.backgroundGradient) s.background = props.style.backgroundGradient
+
 	if (props.style?.backgroundImage) {
 		s.backgroundImage = `url(${props.style.backgroundImage})`
+
 		s.backgroundSize = 'cover'
+
 		s.backgroundPosition = 'center'
 	}
+
 	return s
 })
 </script>
