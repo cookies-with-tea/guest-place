@@ -11,7 +11,7 @@
 				<div class="gauge-container">
 					<el-progress
 						type="dashboard"
-						:percentage="Number(Math.min(100, stats.stats.cpuUsage)).toFixed(1)"
+						:percentage="Math.min(100, stats.stats.cpuUsage)"
 						:color="customColors"
 						:width="180"
 					/>
