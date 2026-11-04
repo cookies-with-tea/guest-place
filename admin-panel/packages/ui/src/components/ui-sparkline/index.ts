@@ -1,3 +1,4 @@
-import UiSparkline from './ui/UiSparkline.vue'
+import { defineAsyncComponent } from 'vue'
 
-export default UiSparkline
+// Lazy — see ui-area-chart/index.ts.
+export default defineAsyncComponent(() => import('./ui/UiSparkline.vue'))

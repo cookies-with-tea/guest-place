@@ -1,3 +1,4 @@
-import UiDonutProgress from './ui/UiDonutProgress.vue'
+import { defineAsyncComponent } from 'vue'
 
-export default UiDonutProgress
+// Lazy — see ui-area-chart/index.ts.
+export default defineAsyncComponent(() => import('./ui/UiDonutProgress.vue'))
