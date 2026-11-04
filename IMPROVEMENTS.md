@@ -355,11 +355,11 @@
 - [x] **Шаренные Module Federation singleton-чанки — главный рычаг**:
       `__federation_shared_element-plus` был **2.2 МБ** (486 КБ gzip) —
       причина подтверждена (см. ниже), исправлено. `__federation_shared_@admin-panel/ui`
-      остаётся **1.66 МБ** (371 КБ gzip) — проверил состав чанка
+      был **1.66 МБ** (371 КБ gzip) — проверил состав чанка
       (`grep -c echarts/zrender` по собранному файлу): вес почти
-      целиком даёт `echarts`/`zrender` (используются в `UiAreaChart`,
-      `UiSparkline`), не Element Plus — отдельная, не связанная с этим
-      пунктом задача, не трогал.
+      целиком давал `echarts`/`zrender` (используются в `UiAreaChart`,
+      `UiSparkline`, `UiDonutProgress`), не Element Plus — тоже исправлено,
+      отдельным проходом (см. ниже).
 
       **Что сделано**: во всех 7 приложениях (`admin-content`,
       `admin-media`, `admin-orchestrator`, `admin-profile`, `admin-shell`,
@@ -424,6 +424,35 @@
         stash`/`git stash pop`): предсуществующий косяк с типом
         `DefaultRow` в обработчиках `el-table`, к этой правке не
         относится, не трогал.
+- [x] **`__federation_shared_@admin-panel/ui` — echarts/zrender, 1.66 МБ
+      (371 КБ gzip)** — причина: `UiAreaChart`/`UiSparkline`/
+      `UiDonutProgress` импортировали `vue-echarts`/`echarts/*` синхронно
+      прямо в `index.ts` своего компонента, а федерация бандлит ВЕСЬ
+      публичный API `@admin-panel/ui` в один шаренный чанк, который
+      грузят все 9 приложений разом — независимо от того, использует ли
+      конкретное приложение графики. Проверил фактическое использование:
+      реальный потребитель во всём admin-panel **только один** —
+      `UiSparkline` в `admin-orchestrator`'s `SparklineMetric.vue`
+      (`UiAreaChart`/`UiDonutProgress` сейчас не используются нигде, но
+      остаются в публичном API design-системы).
+
+      **Фикс**: тот же приём, что уже применён к `RichTextFullEditor.vue`
+      (см. следующий пункт) — `defineAsyncComponent(() => import(...))`
+      на уровне `index.ts` каждого из трёх компонентов вместо прямого
+      синхронного импорта. API для потребителей не меняется (именованный
+      импорт работает как раньше, Vue сам резолвит async-компонент и
+      типизирует пропсы через generic `defineAsyncComponent`).
+
+      Проверено: `vue-tsc --build` на `admin-orchestrator` (реальный
+      потребитель `UiSparkline`) — пропсы корректно выводятся через
+      `defineAsyncComponent`, чисто; `pnpm turbo run type-check` — все
+      15/15; `vitest` `admin-orchestrator` — зелёный; живой dev-сервер
+      `admin-orchestrator` — в консоли нет ошибок резолва компонентов.
+      Сборка: `__federation_shared_@admin-panel/ui` — **~171 КБ**
+      (31 КБ gzip) вместо 1.66 МБ, падение ~90% — одинаково в
+      `admin-content` (графики вообще не использует) и в
+      `admin-orchestrator` (реально рендерит `UiSparkline`, просто теперь
+      lazy-чанком).
 - [x] **`RichTextFullEditor.vue` (Tiptap-редактор) — 1 МБ (237 КБ gzip)
       отдельным чанком** — проверил `useRichTextEditor.ts`: все 7
       `@tiptap/extension-*` + `@tiptap/starter-kit` передаются в
