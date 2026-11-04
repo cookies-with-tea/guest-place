@@ -1,0 +1,25 @@
+@use 'reset';
+@use 'helpers/mixins/color' as *;
+@use 'helpers/variables/colors' as *;
+@use 'helpers/variables/fonts' as *;
+@use 'fonts';
+
+:root {
+	@include generate-css-vars($theme-light);
+
+	--transition-duration-primary: 0.3s;
+	--transition-duration-secondary: 0.22s;
+}
+
+[data-theme='dark'] {
+	@include generate-css-vars($theme-dark);
+}
+
+html {
+	font-family: $font-family-raleway, sans-serif;
+}
+
+body {
+	color: var(--color-text-dark);
+	background-color: var(--color-white);
+}

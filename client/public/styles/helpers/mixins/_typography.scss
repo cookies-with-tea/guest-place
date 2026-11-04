@@ -1,0 +1,8 @@
+@use "sass:map";
+@use '../variables/typography' as *;
+
+@mixin typography($size) {
+  @each $name, $value in map.get($font-size-map, $size) {
+    #{$name}: #{$value};
+  }
+}

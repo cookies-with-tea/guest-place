@@ -1,0 +1,14 @@
+# Ignore artifacts:
+build
+coverage
+
+# Folders
+node_modules/
+public/
+
+# Files
+tsconfig.json
+
+# Extensions
+*.yaml
+*.conf
