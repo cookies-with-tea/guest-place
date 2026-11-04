@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 
 import { initI18n, useI18n } from '@admin-panel/i18n'
 import { i18nPlugin, initUiStyles } from '@admin-panel/ui'
-import ElementPlus from 'element-plus'
 
 import App from './App.vue'
 import { router } from './router'
@@ -15,7 +14,7 @@ const { loadDict } = useI18n()
 
 const app = createApp(App)
 
-app.use(router).use(ElementPlus).use(i18nPlugin)
+app.use(router).use(i18nPlugin)
 
 loadDict('general')
 

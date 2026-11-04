@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
+import type { TabPaneName } from 'element-plus'
 import { ElMessage } from 'element-plus'
 
 import { rightsApi } from '#entities/user/api/rights'
@@ -75,7 +76,7 @@ const loadRolePermissions = async (role: string) => {
 	loadingPermissions.value = false
 }
 
-const handleTabChange = (role: string) => {
+const handleTabChange = (role: TabPaneName) => {
 	loadRolePermissions(role as string)
 }
 

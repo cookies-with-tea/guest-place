@@ -64,15 +64,13 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
-import ElementPlus from 'element-plus'
-
 import App from './App.vue'
 import { initRouter } from './router'
 
 const app = createApp(App)
 const pinia = createPinia()
 
-app.use(pinia).use(ElementPlus).use(VueQueryPlugin).use(i18nPlugin)
+app.use(pinia).use(VueQueryPlugin).use(i18nPlugin)
 
 import { useI18n } from '@admin-panel/i18n'
 const { loadDict } = useI18n()

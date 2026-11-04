@@ -41,7 +41,7 @@
 						placeholder="— Корневая страница (без родителя) —"
 						style="width: 100%"
 					>
-						<el-option label="— Корневая страница (без родителя) —" :value="null" />
+						<el-option label="— Корневая страница (без родителя) —" :value="null as unknown as string" />
 						<el-option
 							v-for="parent in document.availableParentPages"
 							:key="parent.id"

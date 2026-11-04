@@ -30,7 +30,7 @@
 								size="small"
 								type="primary"
 								:icon="Edit"
-								@click="openEditModal(scope.row)"
+								@click="openEditModal(scope.row as Translation)"
 							/>
 						</el-tooltip>
 						<el-tooltip content="View History" placement="top">
@@ -41,7 +41,7 @@
 								size="small"
 								type="warning"
 								:icon="Clock"
-								@click="openHistory(scope.row)"
+								@click="openHistory(scope.row as Translation)"
 							/>
 						</el-tooltip>
 						<el-tooltip content="Где используется" placement="top">
@@ -52,7 +52,7 @@
 								size="small"
 								type="info"
 								:icon="Link"
-								@click="openRefs(scope.row)"
+								@click="openRefs(scope.row as Translation)"
 							/>
 						</el-tooltip>
 						<el-tooltip content="Delete Translation" placement="top">
@@ -83,6 +83,7 @@ import { UiTable, UiTableColumn } from '@admin-panel/ui'
 import { Clock, Delete, Edit, Link } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
+import type { Translation } from '#entities/translation/model'
 import { useTranslations } from '#entities/translation/lib/composables'
 
 import { TranslationsHistoryDialog } from '../../translations-history'

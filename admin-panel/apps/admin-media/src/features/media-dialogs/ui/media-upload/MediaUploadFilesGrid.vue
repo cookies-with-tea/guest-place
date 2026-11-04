@@ -66,7 +66,7 @@
 					<el-input v-model="file.title" placeholder="Custom Title" size="small" />
 					<el-input v-model="file.alt" placeholder="Custom Alt" size="small" />
 					<el-select v-model="file.folderId" clearable placeholder="Target Folder" size="small">
-						<el-option :value="null" label="Root (No folder)">
+						<el-option :value="null as unknown as string" label="Root (No folder)">
 							<el-icon class="folder-option-icon"><Folder /></el-icon>
 							<span>Root (No folder)</span>
 						</el-option>

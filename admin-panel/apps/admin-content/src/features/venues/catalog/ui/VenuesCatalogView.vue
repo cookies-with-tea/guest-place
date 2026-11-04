@@ -189,7 +189,7 @@
 								title="Удалить эту площадку?"
 								confirm-button-text="Удалить"
 								cancel-button-text="Отмена"
-								@confirm="catalog.handleDelete(row)"
+								@confirm="catalog.handleDelete(row as Venue)"
 							>
 								<template #reference>
 									<el-button size="small" type="danger" plain :icon="Delete" />
@@ -235,6 +235,8 @@ import {
 	Switch,
 	WarningFilled,
 } from '@element-plus/icons-vue'
+import type { Venue } from '#entities/venues/api'
+
 import type { VenuesCatalog } from '../composables/useVenuesCatalog'
 import { formatPrice, getLandingUrl, openLanding } from '../../lib/helpers'
 

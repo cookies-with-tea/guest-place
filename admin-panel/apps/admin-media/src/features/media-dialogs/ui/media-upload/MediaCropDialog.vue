@@ -23,7 +23,11 @@
 			<div class="crop-modal-controls">
 				<div class="crop-control-group">
 					<span class="control-label">Aspect Ratio</span>
-					<el-radio-group v-model="crop.cropAspectRatio" size="small" @change="crop.handleCropRatioChange">
+					<el-radio-group
+						v-model="crop.cropAspectRatio"
+						size="small"
+						@change="(val) => crop.handleCropRatioChange(val as string)"
+					>
 						<el-radio-button label="free" value="free">Free</el-radio-button>
 						<el-radio-button label="1:1" value="1:1">1:1</el-radio-button>
 						<el-radio-button label="4:3" value="4:3">4:3</el-radio-button>

@@ -10,7 +10,6 @@ initUiStyles()
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import { i18nPlugin, initI18n, useI18n } from '@admin-panel/i18n'
-import ElementPlus from 'element-plus'
 
 initI18n({ apiBase: '' })
 
@@ -28,6 +27,6 @@ loadDict('menu')
 
 loadDict('users')
 
-app.use(VueQueryPlugin).use(router).use(ElementPlus)
+app.use(VueQueryPlugin).use(router)
 
 export { app }
