@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { IPagination } from '@admin-panel/lib'
+import { usePagination } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
 
 import { userApi } from '../../api'
@@ -27,12 +27,7 @@ const filters = ref<UserFilters>({
 	sortOrder: 'DESC',
 })
 
-const pagination = ref<IPagination>({
-	page: 1,
-	limit: 10,
-	total: 0,
-	totalPages: 0,
-})
+const { pagination, setPage, setLimit, syncFrom } = usePagination()
 
 const editingUserUuid = ref<string>('')
 
@@ -85,14 +80,7 @@ export const useUsers = () => {
 		enabled: !!editingUserUuid.value,
 	})
 
-	watch(
-		() => usersQuery.data?.value?.data.pagination,
-		(newPagination) => {
-			if (newPagination) {
-				pagination.value = { ...newPagination }
-			}
-		}
-	)
+	syncFrom(() => usersQuery.data?.value?.data.pagination)
 
 	// === Modal ===
 	const openAddModal = (email?: string) => {
@@ -197,17 +185,6 @@ export const useUsers = () => {
 
 	const handleDelete = (uuid: string) => {
 		deleteMutation.mutate(uuid)
-	}
-
-	// === Pagination & Filters ===
-	const setPage = (page: number) => {
-		pagination.value.page = page
-	}
-
-	const setLimit = (limit: number) => {
-		pagination.value.limit = limit
-
-		pagination.value.page = 1
 	}
 
 	const isFetching = computed(() => usersQuery.isFetching.value)

@@ -4,6 +4,7 @@
 			<img
 				v-if="mediaUtils.isImage(preview.activePreviewFile.file)"
 				:src="preview.activePreviewFile.preview"
+				:alt="preview.activePreviewFile.file.name"
 				class="upload-preview-img"
 			/>
 			<video

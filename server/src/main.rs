@@ -373,14 +373,14 @@ async fn main() {
         .await
         .unwrap();
 
-    println!("Server is running at http://{}:{}/", app_host, app_port);
-    println!(
+    tracing::info!("Server is running at http://{}:{}/", app_host, app_port);
+    tracing::info!(
         "Swagger is running at http://{}:{}/docs",
         app_host, app_port
     );
 
     if let Err(e) = guest_place::auth::init::init_superadmin(shared_state.clone()).await {
-        eprintln!("[Init] Superadmin initialization failed: {}", e);
+        tracing::error!("[Init] Superadmin initialization failed: {}", e);
     }
 
     // with_connect_info: lets the auth rate limiter (SmartIpKeyExtractor) fall back to the

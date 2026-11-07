@@ -34,7 +34,13 @@
 					<code class="endpoint-url">{{ url }}</code>
 				</div>
 				<el-tooltip :content="copied ? 'Скопировано!' : 'Скопировать URL'" placement="top">
-					<el-button circle :icon="copied ? Check : CopyDocument" size="small" @click="copyUrl" />
+					<el-button
+					circle
+					:icon="copied ? Check : CopyDocument"
+					size="small"
+					:aria-label="copied ? 'Скопировано!' : 'Скопировать URL'"
+					@click="copyUrl"
+				/>
 				</el-tooltip>
 			</div>
 

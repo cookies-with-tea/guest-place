@@ -36,7 +36,7 @@ pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {
             .execute(&state.pool)
             .await?;
         
-        println!("[Init] Superadmin updated: {}", email);
+        tracing::info!("[Init] Superadmin updated: {}", email);
         return Ok(());
     }
 
@@ -62,6 +62,6 @@ pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {
     .execute(&state.pool)
     .await?;
 
-    println!("[Init] Superadmin created: {}", email);
+    tracing::info!("[Init] Superadmin created: {}", email);
     Ok(())
 }

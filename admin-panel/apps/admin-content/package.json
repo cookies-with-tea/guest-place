@@ -17,6 +17,7 @@
 		"@tiptap/pm": "^3.31.3",
 		"@tiptap/starter-kit": "^3.31.3",
 		"@tiptap/vue-3": "^3.31.3",
+		"dompurify": "^3.4.17",
 		"element-plus": "^2.13.0",
 		"vue": "^3.5.22",
 		"vue-router": "^4.5.1"

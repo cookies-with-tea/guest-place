@@ -236,10 +236,26 @@
 		<template #default="{ row }">
 			<div class="action-buttons">
 				<el-tooltip content="Edit Media" placement="top">
-					<el-button circle plain size="small" type="warning" :icon="Edit" @click.stop="openEditModal(row.uuid)" />
+					<el-button
+						circle
+						plain
+						size="small"
+						type="warning"
+						:icon="Edit"
+						aria-label="Edit Media"
+						@click.stop="openEditModal(row.uuid)"
+					/>
 				</el-tooltip>
 				<el-tooltip content="Delete Media" placement="top">
-					<el-button circle plain size="small" type="danger" :icon="Delete" @click.stop="confirmDelete(row.uuid)" />
+					<el-button
+						circle
+						plain
+						size="small"
+						type="danger"
+						:icon="Delete"
+						aria-label="Delete Media"
+						@click.stop="confirmDelete(row.uuid)"
+					/>
 				</el-tooltip>
 			</div>
 		</template>

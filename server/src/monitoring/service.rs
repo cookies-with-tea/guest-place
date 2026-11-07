@@ -1,6 +1,6 @@
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System, ProcessRefreshKind};
 use serde::Serialize;
-use std::sync::Mutex;
+use parking_lot::Mutex;
 use once_cell::sync::Lazy;
 use tracing::Subscriber;
 use tracing_subscriber::Layer;
@@ -39,7 +39,7 @@ static SYSTEM: Lazy<Mutex<System>> = Lazy::new(|| {
 });
 
 pub fn get_system_stats(mfes: Vec<(String, String)>) -> SystemStats {
-    let mut sys = SYSTEM.lock().unwrap();
+    let mut sys = SYSTEM.lock();
     sys.refresh_cpu_all();
     sys.refresh_memory();
     sys.refresh_processes_specifics(

@@ -33,7 +33,7 @@ pub async fn start_session(
     match result {
         Ok(id) => into_api_response(StatusCode::OK, Some(SessionResponseDto { id }), None, None),
         Err(e) => {
-            eprintln!("Failed to start session: {}", e);
+            tracing::error!("Failed to start session: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Failed to start session".to_string()]))
         },
     }
@@ -67,7 +67,7 @@ pub async fn track_event(
     match result {
         Ok(_) => into_api_response(StatusCode::OK, None, None, None),
         Err(e) => {
-            eprintln!("Failed to track event: {}", e);
+            tracing::error!("Failed to track event: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Failed to track event".to_string()]))
         },
     }
@@ -121,7 +121,7 @@ pub async fn get_traffic_stats(
             into_api_response(StatusCode::OK, Some(stats), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch traffic stats: {}", e);
+            tracing::error!("Failed to fetch traffic stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }
@@ -172,7 +172,7 @@ pub async fn get_engagement_stats(
             into_api_response(StatusCode::OK, Some(stats), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch engagement stats: {}", e);
+            tracing::error!("Failed to fetch engagement stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }
@@ -249,7 +249,7 @@ pub async fn get_summary_stats(
             into_api_response(StatusCode::OK, Some(summary), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch summary stats: {}", e);
+            tracing::error!("Failed to fetch summary stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }
@@ -299,7 +299,7 @@ pub async fn get_referral_stats(
             into_api_response(StatusCode::OK, Some(referrals), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch referral stats: {}", e);
+            tracing::error!("Failed to fetch referral stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }
@@ -356,7 +356,7 @@ pub async fn get_funnel_stats(
             into_api_response(StatusCode::OK, Some(funnel), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch funnel stats: {}", e);
+            tracing::error!("Failed to fetch funnel stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }
@@ -436,7 +436,7 @@ pub async fn get_retention_stats(
             into_api_response(StatusCode::OK, Some(cohorts), None, None)
         },
         Err(e) => {
-            eprintln!("Failed to fetch retention stats: {}", e);
+            tracing::error!("Failed to fetch retention stats: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Database error".to_string()]))
         }
     }

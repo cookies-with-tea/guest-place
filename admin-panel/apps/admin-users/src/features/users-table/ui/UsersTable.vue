@@ -177,6 +177,7 @@
 								size="small"
 								type="warning"
 								:icon="Edit"
+								aria-label="Edit User"
 								@click.stop="openEditModal(scope.row.uuid)"
 							/>
 						</el-tooltip>
@@ -188,6 +189,7 @@
 								size="small"
 								type="danger"
 								:icon="Delete"
+								aria-label="Delete User"
 								@click.stop="confirmDelete(scope.row.uuid)"
 							/>
 						</el-tooltip>

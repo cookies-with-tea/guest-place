@@ -60,8 +60,8 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/user", user::handlers::public_router())
         .nest("/api/v1/i18n", i18n::handlers::public_router())
         .nest("/api/v1/mfe", mfe::handlers::public_router())
-        .nest("/api/v1/media", media::handlers::router())
-        .nest("/api/v1/features", features::router())
+        .nest("/api/v1/media", media::handlers::public_router())
+        .nest("/api/v1/features", features::public_router())
         .nest("/api/v1/content", content::public_router())
         .nest("/api/v1/pages", pages::pages_public_router())
         .nest("/api/v1/block-types", pages::block_types_public_router())
@@ -73,6 +73,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .route("/r/{*path}", axum::routing::get(redirects::handlers::handle_redirect_navigation))
         .nest("/api/v1/analytics", analytics::handlers::public_router())
         .nest("/api/v1/locks", core::lock::router())
+        .nest("/api/v1/system", monitoring::public_router())
         .nest(
             "/uploads",
             Router::new()
@@ -86,6 +87,8 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
     let protected_router = Router::new()
         .nest("/api/v1/auth", auth::handlers::protected_router())
         .nest("/api/v1/user", user::handlers::protected_router())
+        .nest("/api/v1/media", media::handlers::protected_router())
+        .nest("/api/v1/features", features::protected_router())
         .nest("/api/v1/i18n", i18n::handlers::protected_router())
         .nest("/api/v1/mfe", mfe::handlers::protected_router())
         .nest("/api/v1/content", content::protected_router())
@@ -95,6 +98,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/redirects", redirects::protected_router())
         .nest("/api/v1/venues", venues::protected_router())
         .nest("/api/v1/analytics", analytics::handlers::protected_router())
+        .nest("/api/v1/system", monitoring::protected_router())
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -102,7 +106,6 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
 
     let app_router = public_router
         .merge(protected_router)
-        .nest("/api/v1/system", monitoring::router())
         .route("/api/v1/events", axum::routing::get(monitoring::handlers::get_events))
         .with_state(state.clone())
         .layer(middleware::from_fn(locale_middleware));

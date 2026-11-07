@@ -23,7 +23,7 @@
 			<el-image v-else class="preview-image" fit="cover" :preview-src-list="[currentMediaUrl]" :src="currentMediaUrl" />
 
 			<div class="media-actions">
-				<el-button circle :icon="Delete" type="danger" @click="handleRemove" />
+				<el-button circle :icon="Delete" type="danger" aria-label="Remove image" @click="handleRemove" />
 				<el-upload
 					:accept="accept"
 					action="#"
@@ -33,7 +33,7 @@
 					:show-file-list="false"
 					:disabled="disabled"
 				>
-					<el-button circle :icon="Refresh" type="primary" :disabled="disabled" />
+					<el-button circle :icon="Refresh" type="primary" :disabled="disabled" aria-label="Replace image" />
 				</el-upload>
 			</div>
 		</div>

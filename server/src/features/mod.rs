@@ -97,7 +97,10 @@ impl FeatureFlagService {
     }
 }
 
-pub fn router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(handlers::get_features).post(handlers::update_features))
+pub fn public_router() -> Router<Arc<AppState>> {
+    Router::new().route("/", get(handlers::get_features))
+}
+
+pub fn protected_router() -> Router<Arc<AppState>> {
+    Router::new().route("/", axum::routing::post(handlers::update_features))
 }

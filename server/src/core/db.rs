@@ -46,7 +46,12 @@ impl DatabaseConfig {
 pub async fn create_pool(config: &AppConfig) -> sqlx::Pool<sqlx::Postgres> {
     let connect_url = config.db_config.connect_url();
 
-    println!("Connecting to database: {}", connect_url);
+    // Deliberately not logging `connect_url` itself — it embeds the DB password,
+    // and tracing::info! output is broadcast live to the admin-panel log viewer.
+    tracing::info!(
+        "Connecting to database at {}:{}/{}",
+        config.db_config.db_host, config.db_config.db_port, config.db_config.db_name
+    );
 
     PgPoolOptions::new()
         .max_connections(5)
@@ -62,7 +67,8 @@ pub fn create_redis_pool(config: &AppConfig) -> deadpool_redis::Pool {
         format!("redis://{}:{}", config.redis_host, config.redis_port)
     };
 
-    println!("Connecting to Redis: {}", redis_url);
+    // Same reasoning as create_pool() above — redis_url embeds the password.
+    tracing::info!("Connecting to Redis at {}:{}", config.redis_host, config.redis_port);
 
     let cfg = deadpool_redis::Config::from_url(redis_url);
     cfg.create_pool(Some(deadpool_redis::Runtime::Tokio1))

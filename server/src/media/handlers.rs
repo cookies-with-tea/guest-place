@@ -10,7 +10,7 @@ use crate::media::dto::{
 };
 use sqlx::{Postgres, QueryBuilder};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
-use crate::core::utils::DEFAULT_PAGE_LIMIT;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use serde_json::json;
 use crate::AppState;
 use axum::{
@@ -312,7 +312,7 @@ pub async fn create(
                 return Err((StatusCode::PAYLOAD_TOO_LARGE, Json(ApiResponse { data: None, errors: Some(error_map("quota", "exceeded")), messages: Some(vec![msg]) })));
             },
             Err(e) => {
-                eprintln!("Quota check error: {:?}", e);
+                tracing::error!("Quota check error: {:?}", e);
                 let msg = state.i18n.t("media.db_error", &locale).await;
                 return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: Some(error_map("database", "quota_check")), messages: Some(vec![msg]) })));
             }
@@ -352,8 +352,8 @@ pub async fn get_all(
     Extension(locale): Extension<String>,
     Query(filter): Query<MediaFilterQuery>,
 ) -> Result<Json<ApiResponseWithPagination<MediaItemDTO>>, (StatusCode, Json<ApiResponseWithPagination<MediaItemDTO>>)> {
-    let page = filter.page.unwrap_or(1);
-    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT);
+    let page = filter.page.unwrap_or(1).max(1);
+    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, MAX_PAGE_LIMIT);
     let offset = (page - 1) * limit;
 
     // 1. Build COUNT query
@@ -367,7 +367,7 @@ pub async fn get_all(
     let total = match total_query {
         Ok(count) => count,
         Err(e) => {
-            eprintln!("DB count error: {:?}", e);
+            tracing::error!("DB count error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -437,7 +437,7 @@ pub async fn get_all(
             )
         }
         Err(e) => {
-            eprintln!("DB fetch error: {:?}", e);
+            tracing::error!("DB fetch error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -621,7 +621,7 @@ pub async fn get_one(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            tracing::error!("DB error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -815,7 +815,7 @@ pub async fn update(
                             )
                         }
                         Err(e) => {
-                            eprintln!("DB error: {:?}", e);
+                            tracing::error!("DB error: {:?}", e);
                             let msg = state.i18n.t("media.db_error", &locale).await;
                             into_api_response(
                                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -827,7 +827,7 @@ pub async fn update(
                     }
                 }
                 Err(e) => {
-                    eprintln!("DB error: {:?}", e);
+                    tracing::error!("DB error: {:?}", e);
                     let msg = state.i18n.t("media.db_error", &locale).await;
                     into_api_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
@@ -848,7 +848,7 @@ pub async fn update(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            tracing::error!("DB error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -905,7 +905,7 @@ pub async fn delete_one(
                     )
                 }
                 Err(e) => {
-                    eprintln!("DB error: {:?}", e);
+                    tracing::error!("DB error: {:?}", e);
                     let msg = state.i18n.t("media.db_error", &locale).await;
                     into_api_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
@@ -926,7 +926,7 @@ pub async fn delete_one(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            tracing::error!("DB error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -968,7 +968,7 @@ pub async fn delete_all(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {:?}", e);
+            tracing::error!("DB error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -1084,7 +1084,7 @@ pub async fn update_bulk(
             into_api_response(StatusCode::OK, Some(json!({"updated": true})), None, Some(vec![msg]))
         }
         Err(e) => {
-            eprintln!("DB bulk update error: {:?}", e);
+            tracing::error!("DB bulk update error: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, Some(error_map("database", "Bulk update failed")), Some(vec![msg]))
         }
@@ -1524,7 +1524,7 @@ pub async fn get_variant(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("DB error fetching media for variant: {:?}", e);
+        tracing::error!("DB error fetching media for variant: {:?}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
             data: None,
             errors: Some(error_map("database", "Database error")),
@@ -1576,7 +1576,17 @@ pub async fn get_variant(
     Ok(axum::response::Redirect::temporary(&item.url))
 }
 
-pub fn router() -> Router<Arc<AppState>> {
+/// Публично доступны только эндпоинты, фактически отдающие уже
+/// опубликованный файл (ту же доверенность, что у статики `/uploads`) —
+/// используются публичными страницами для показа изображений по UUID.
+pub fn public_router() -> Router<Arc<AppState>> {
+    Router::new().route("/{uuid}/variants/{size}", get(get_variant))
+}
+
+/// Всё остальное — чтение/изменение приватной медиа-библиотеки админки
+/// (листинг с метаданными, загрузка, оптимизация, папки, тэги, конфиг,
+/// удаление) — требует auth_middleware.
+pub fn protected_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/upload/chunk/init", post(init_chunk_upload))
         .route("/upload/chunk/{upload_id}/{chunk_index}", post(upload_chunk).layer(DefaultBodyLimit::disable()))
@@ -1591,7 +1601,6 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/tags", get(folders::get_media_tags))
         .route("/config", get(folders::get_media_config))
         .route("/{uuid}/optimize", post(optimize_one))
-        .route("/{uuid}/variants/{size}", get(get_variant))
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
         .route("/", get(get_all))
         .route("/{uuid}", get(get_one))

@@ -74,8 +74,6 @@ export const createApi = (entityName: string) => {
 				if (isBrowser) {
 					localStorage.removeItem('gp_access_token')
 
-					localStorage.removeItem('gp_refresh_token')
-
 					const notCanceled = dispatch(GP_EVENTS.UNAUTHORIZED, {
 						pathname: window.location.pathname,
 						port: window.location.port,

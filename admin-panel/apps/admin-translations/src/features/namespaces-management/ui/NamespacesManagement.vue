@@ -31,11 +31,20 @@
 								size="small"
 								type="primary"
 								:icon="Edit"
+								aria-label="Edit Namespace"
 								@click="openEditDialog(row as Namespace)"
 							/>
 						</el-tooltip>
 						<el-tooltip content="Delete Namespace" placement="top">
-							<el-button circle plain size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)" />
+							<el-button
+								circle
+								plain
+								size="small"
+								type="danger"
+								:icon="Delete"
+								aria-label="Delete Namespace"
+								@click="handleDelete(row.id)"
+							/>
 						</el-tooltip>
 					</div>
 				</template>

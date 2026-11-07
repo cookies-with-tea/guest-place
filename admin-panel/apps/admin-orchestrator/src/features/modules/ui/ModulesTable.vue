@@ -112,6 +112,7 @@
 								:loading="health.healthMap[scope.row.url]?.status === 'checking'"
 								size="small"
 								text
+								aria-label="Проверить доступность прямо сейчас"
 								@click="health.checkHealth(scope.row.url)"
 							/>
 						</el-tooltip>
@@ -192,13 +193,20 @@
 								:disabled="scope.row.name === 'orchestrator'"
 								size="small"
 								type="primary"
+								aria-label="Редактировать"
 								@click="mfe.handleEdit(scope.row)"
 							>
 								<el-icon><EditPen /></el-icon>
 							</el-button>
 						</el-tooltip>
 						<el-tooltip content="Сбросить кэш и перезагрузить" placement="top">
-							<el-button circle size="small" type="warning" @click="health.handleHotReload(scope.row)">
+							<el-button
+								circle
+								size="small"
+								type="warning"
+								aria-label="Сбросить кэш и перезагрузить"
+								@click="health.handleHotReload(scope.row)"
+							>
 								<el-icon><RefreshRight /></el-icon>
 							</el-button>
 						</el-tooltip>
@@ -208,6 +216,7 @@
 								:disabled="scope.row.name === 'orchestrator'"
 								size="small"
 								type="danger"
+								aria-label="Удалить"
 								@click="mfe.handleDelete(scope.row)"
 							>
 								<el-icon><Delete /></el-icon>

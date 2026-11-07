@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { IPagination } from '@admin-panel/lib'
+import { usePagination } from '@admin-panel/lib'
 
 import { mediaApi } from '../../api'
 import { MEDIA_QUERY_KEY, type MediaFilters, type MediaItem } from '../../model'
@@ -21,12 +21,7 @@ const filters = ref<MediaFilters>({
 	tags: [],
 })
 
-const pagination = ref<IPagination>({
-	page: 1,
-	limit: 10,
-	total: 0,
-	totalPages: 0,
-})
+const { pagination, setPage, setLimit, syncFrom } = usePagination()
 
 const currentMediaUuid = ref<string>('')
 
@@ -73,14 +68,7 @@ export const useMedia = () => {
 		enabled: !!currentMediaUuid.value,
 	})
 
-	watch(
-		() => mediaQuery.data?.value?.data.pagination,
-		(newPagination) => {
-			if (newPagination) {
-				pagination.value = { ...newPagination }
-			}
-		}
-	)
+	syncFrom(() => mediaQuery.data?.value?.data.pagination)
 
 	// === Modals / Dialogs ===
 	const openUploadModal = () => {
@@ -172,17 +160,6 @@ export const useMedia = () => {
 		await mediaApi.optimize(uuid)
 
 		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
-	}
-
-	// === Pagination & Filters ===
-	const setPage = (page: number) => {
-		pagination.value.page = page
-	}
-
-	const setLimit = (limit: number) => {
-		pagination.value.limit = limit
-
-		pagination.value.page = 1
 	}
 
 	const setSort = (prop: string, order: 'ASC' | 'DESC' | null) => {

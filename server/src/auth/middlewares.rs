@@ -51,7 +51,7 @@ pub async fn auth_middleware(
     let secret = match std::env::var("JWT_SECRET") {
         Ok(secret) => secret,
         Err(_) => {
-            eprintln!("JWT_SECRET environment variable not set");
+            tracing::error!("JWT_SECRET environment variable not set");
             return Err(
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
             );
@@ -80,7 +80,7 @@ pub async fn auth_middleware(
     {
         Ok(res) => res,
         Err(e) => {
-            eprintln!("Database error in auth_middleware: {}", e);
+            tracing::error!("Database error in auth_middleware: {}", e);
             return Err(
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
             );

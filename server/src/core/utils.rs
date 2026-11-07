@@ -1,4 +1,5 @@
 pub const DEFAULT_PAGE_LIMIT: i32 = 10;
+pub const MAX_PAGE_LIMIT: i32 = 100;
 
 pub fn format_number_with_spaces(input: &str) -> String {
     let digits: Vec<char> = input.chars().filter(|c| c.is_digit(10)).collect();

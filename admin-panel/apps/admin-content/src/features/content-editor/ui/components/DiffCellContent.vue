@@ -20,7 +20,7 @@
 
 		<!-- RichText: render stripped plain text + show word diff badge -->
 		<template v-else-if="fieldType === 'RichText'">
-			<div class="richtext-preview" v-html="value || '<em style=\'opacity:0.4\'>empty</em>'" />
+			<div class="richtext-preview" v-html="sanitizedRichText" />
 		</template>
 
 		<!-- Media -->
@@ -43,7 +43,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import { CircleCheck, CircleClose, Paperclip } from '@element-plus/icons-vue'
+import DOMPurify from 'dompurify'
 
 interface Props {
 	value: any
@@ -51,11 +54,18 @@ interface Props {
 	isOld: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const isImage = (url: string) => /\.(jpg|jpeg|png|gif|webp|avif|svg)(\?.*)?$/i.test(url)
 
 const getFilename = (url: string) => (url || '').split('/').pop() || 'file'
+
+// RichText comes from a saved content version — effectively user-controlled
+// HTML — so it must be sanitized before v-html, same as any other untrusted
+// HTML render.
+const sanitizedRichText = computed(() =>
+	props.value ? DOMPurify.sanitize(props.value) : '<em style="opacity:0.4">empty</em>'
+)
 </script>
 
 <style scoped>

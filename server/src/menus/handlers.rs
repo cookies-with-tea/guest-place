@@ -31,7 +31,7 @@ pub async fn get_menus(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error fetching menus: {}", e);
+        tracing::error!("Database error fetching menus: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -86,7 +86,7 @@ pub async fn get_menu_by_location(
         .await
     }
     .map_err(|e| {
-        eprintln!("Database error fetching menu by location: {}", e);
+        tracing::error!("Database error fetching menu by location: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -146,7 +146,7 @@ pub async fn create_menu(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error creating menu: {}", e);
+        tracing::error!("Database error creating menu: {}", e);
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -208,7 +208,7 @@ pub async fn update_menu(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating menu: {}", e);
+        tracing::error!("Database error updating menu: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -259,7 +259,7 @@ pub async fn delete_menu(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error deleting menu: {}", e);
+            tracing::error!("Database error deleting menu: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {

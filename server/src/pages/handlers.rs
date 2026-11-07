@@ -47,7 +47,7 @@ pub async fn get_pages(
     };
 
     let pages = pages_res.map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -110,7 +110,7 @@ pub async fn get_page(
     };
 
     let page = page_res.map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -214,7 +214,7 @@ pub async fn get_page_breadcrumbs(
     };
 
     let rows = query_res.map_err(|e| {
-        eprintln!("Database error fetching breadcrumbs: {}", e);
+        tracing::error!("Database error fetching breadcrumbs: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -355,7 +355,7 @@ pub async fn create_page(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error creating page: {}", e);
+        tracing::error!("Database error creating page: {}", e);
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -438,7 +438,7 @@ pub async fn update_page(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating page: {}", e);
+        tracing::error!("Database error updating page: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -489,7 +489,7 @@ pub async fn delete_page(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error deleting page: {}", e);
+            tracing::error!("Database error deleting page: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -538,7 +538,7 @@ pub async fn get_block_types(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -591,7 +591,7 @@ pub async fn create_block_type(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error creating block type: {}", e);
+        tracing::error!("Database error creating block type: {}", e);
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -655,7 +655,7 @@ pub async fn update_block_type(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating block type: {}", e);
+        tracing::error!("Database error updating block type: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -706,7 +706,7 @@ pub async fn delete_block_type(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error deleting block type: {}", e);
+            tracing::error!("Database error deleting block type: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -777,7 +777,7 @@ pub async fn sync_block_types(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Error syncing block type: {}", e);
+            tracing::error!("Error syncing block type: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -795,7 +795,7 @@ pub async fn sync_block_types(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error fetching blocks after sync: {}", e);
+        tracing::error!("Database error fetching blocks after sync: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {

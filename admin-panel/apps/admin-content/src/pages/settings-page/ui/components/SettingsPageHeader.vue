@@ -19,7 +19,7 @@
 		<div class="header-actions">
 			<el-button :icon="Operation" plain @click="emit('go-to-schemas')"> Конструктор схем </el-button>
 			<el-button :icon="Reading" plain @click="emit('go-to-docs')"> Документация подхода </el-button>
-			<el-button :icon="Refresh" circle :loading="isLoading" @click="emit('refresh')" />
+			<el-button :icon="Refresh" circle :loading="isLoading" aria-label="Refresh" @click="emit('refresh')" />
 		</div>
 	</div>
 </template>

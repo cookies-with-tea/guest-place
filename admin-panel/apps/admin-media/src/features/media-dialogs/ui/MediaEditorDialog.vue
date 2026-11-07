@@ -61,7 +61,12 @@
 				<div class="preview-title">Preview</div>
 				<div class="preview-box">
 					<div :style="previewStyle" class="preview-inner">
-						<img :src="currentMedia.data.url" :style="previewImgStyle" class="preview-img" />
+						<img
+							:src="currentMedia.data.url"
+							:alt="currentMedia.data.name || 'Предпросмотр файла'"
+							:style="previewImgStyle"
+							class="preview-img"
+						/>
 					</div>
 				</div>
 

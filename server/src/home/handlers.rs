@@ -69,7 +69,7 @@ pub async fn get_home(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error fetching home page: {:?}", e);
+        tracing::error!("Database error fetching home page: {:?}", e);
         into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
             None,
@@ -116,7 +116,7 @@ pub async fn get_home(
             .fetch_one(&state.pool)
             .await
             .map_err(|e| {
-                eprintln!("Failed to insert fallback home_page: {:?}", e);
+                tracing::error!("Failed to insert fallback home_page: {:?}", e);
                 into_api_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
                     None,
@@ -273,7 +273,7 @@ pub async fn update_home(
         .fetch_optional(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {:?}", e);
+            tracing::error!("Database error: {:?}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -328,7 +328,7 @@ pub async fn update_home(
     .execute(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating home_page: {:?}", e);
+        tracing::error!("Database error updating home_page: {:?}", e);
         into_api_response(
             StatusCode::INTERNAL_SERVER_ERROR,
             None,

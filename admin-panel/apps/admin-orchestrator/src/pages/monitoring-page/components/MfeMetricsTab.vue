@@ -19,6 +19,7 @@
 									size="small"
 									type="primary"
 									plain
+									aria-label="Редактировать модуль"
 									@click="$router.push({ name: 'OrchestratorModules', query: { edit: m.id } })"
 								>
 									<el-icon><EditPen /></el-icon>
