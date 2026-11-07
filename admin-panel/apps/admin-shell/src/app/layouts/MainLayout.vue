@@ -18,13 +18,13 @@
 					<UiNotificationBell />
 
 					<el-tooltip content="Theme Settings" placement="bottom">
-						<el-button circle class="header-theme-btn" @click="themeBuilderVisible = true">
+						<el-button circle class="header-theme-btn" aria-label="Theme Settings" @click="themeBuilderVisible = true">
 							<el-icon><Brush /></el-icon>
 						</el-button>
 					</el-tooltip>
 
 					<el-tooltip content="Search (Cmd+K)" placement="bottom">
-						<el-button circle class="header-search-btn" @click="openSearch">
+						<el-button circle class="header-search-btn" aria-label="Search" @click="openSearch">
 							<el-icon><Search /></el-icon>
 						</el-button>
 					</el-tooltip>

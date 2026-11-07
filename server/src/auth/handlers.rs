@@ -343,7 +343,7 @@ pub async fn login(
     let role_str = match serde_json::to_value(&user.role) {
         Ok(v) => v.as_str().unwrap_or("user").to_string(),
         Err(e) => {
-            eprintln!("Serialization error: {}", e);
+            tracing::error!("Serialization error: {}", e);
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 axum::Json(ApiResponse {
@@ -457,7 +457,7 @@ pub async fn refresh(
     let role_str = match serde_json::to_value(&user.role) {
         Ok(v) => v.as_str().unwrap_or("user").to_string(),
         Err(e) => {
-            eprintln!("Serialization error: {}", e);
+            tracing::error!("Serialization error: {}", e);
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 axum::Json(ApiResponse {

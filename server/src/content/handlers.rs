@@ -38,7 +38,7 @@ pub async fn get_schemas(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -95,7 +95,7 @@ pub async fn create_schema(
                 data: None, errors: None, messages: Some(vec![format!("Схема с идентификатором '{}' уже существует", slug)]),
             }));
         }
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
             data: None, errors: None, messages: Some(vec![format!("Database error: {}", e)]),
         }))
@@ -132,7 +132,7 @@ pub async fn get_schema(
         .fetch_optional(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {}", e);
+            tracing::error!("Database error: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -235,7 +235,7 @@ pub async fn update_schema(
     sql_query = sql_query.bind(id);
 
     let schema = sql_query.fetch_optional(&state.pool).await.map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -287,7 +287,7 @@ pub async fn delete_schema(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {}", e);
+            tracing::error!("Database error: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -485,7 +485,7 @@ pub async fn get_entries(
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {}", e);
+            tracing::error!("Database error: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
@@ -613,7 +613,7 @@ pub async fn create_entry(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
             data: None,
             errors: None,
@@ -622,7 +622,7 @@ pub async fn create_entry(
     })?;
 
     if let Err(e) = sync_refs(&state.pool, entry.id, &entry.data).await {
-        eprintln!(
+        tracing::error!(
             "Failed to sync translation refs for entry {}: {}",
             entry.id, e
         );
@@ -708,7 +708,7 @@ pub async fn update_entry(
     Path(id): Path<Uuid>,
     Json(payload): Json<UpdateContentEntryDTO>,
 ) -> Result<Json<ApiResponse<ContentEntry>>, (StatusCode, Json<ApiResponse<()>>)> {
-    println!("[Backend] update_entry payload for {}: {:?}", id, payload);
+    tracing::debug!("update_entry payload for {}: {:?}", id, payload);
     // 1. Get existing entry and schema for validation
     let entry = sqlx::query_as::<_, ContentEntry>("SELECT * FROM content_entries WHERE id = $1")
         .bind(id)
@@ -785,7 +785,7 @@ pub async fn update_entry(
     .execute(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Error saving version: {}", e);
+        tracing::error!("Error saving version: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
             data: None, errors: None, messages: Some(vec!["Failed to save entry version".to_string()]),
         }))
@@ -862,7 +862,7 @@ pub async fn update_entry(
     sql_query = sql_query.bind(id);
 
     let updated_entry = sql_query.fetch_one(&state.pool).await.map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -874,7 +874,7 @@ pub async fn update_entry(
     })?;
 
     if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
-        eprintln!(
+        tracing::error!(
             "Failed to sync translation refs for entry {}: {}",
             updated_entry.id, e
         );
@@ -913,7 +913,7 @@ pub async fn get_entry_versions(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -1028,14 +1028,14 @@ pub async fn rollback_entry_version(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error during rollback: {}", e);
+        tracing::error!("Database error during rollback: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse::<()> {
             data: None, errors: None, messages: Some(vec!["Database error during rollback".to_string()]),
         }))
     })?;
 
     if let Err(e) = sync_refs(&state.pool, updated_entry.id, &updated_entry.data).await {
-        eprintln!(
+        tracing::error!(
             "Failed to sync translation refs for entry {}: {}",
             updated_entry.id, e
         );
@@ -1129,7 +1129,7 @@ pub async fn get_schema_by_identifier(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error: {}", e);
+        tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {

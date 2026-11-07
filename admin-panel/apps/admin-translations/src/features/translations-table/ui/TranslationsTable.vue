@@ -30,6 +30,7 @@
 								size="small"
 								type="primary"
 								:icon="Edit"
+								aria-label="Edit Translation"
 								@click="openEditModal(scope.row as Translation)"
 							/>
 						</el-tooltip>
@@ -41,6 +42,7 @@
 								size="small"
 								type="warning"
 								:icon="Clock"
+								aria-label="View History"
 								@click="openHistory(scope.row as Translation)"
 							/>
 						</el-tooltip>
@@ -52,6 +54,7 @@
 								size="small"
 								type="info"
 								:icon="Link"
+								aria-label="Где используется"
 								@click="openRefs(scope.row as Translation)"
 							/>
 						</el-tooltip>
@@ -63,6 +66,7 @@
 								size="small"
 								type="danger"
 								:icon="Delete"
+								aria-label="Delete Translation"
 								@click="confirmDelete(scope.row.id)"
 							/>
 						</el-tooltip>

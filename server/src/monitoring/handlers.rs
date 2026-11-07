@@ -211,11 +211,11 @@ pub async fn reload_module(
     // We use Redis to store module configurations or data
     let cache_pattern = format!("mfe:cache:{}:*", name);
     if let Err(e) = state.redis.delete_by_pattern(&cache_pattern).await {
-        eprintln!("Failed to clear Redis cache for {}: {}", name, e);
+        tracing::error!("Failed to clear Redis cache for {}: {}", name, e);
     }
 
     // 3. Log the reload action
-    println!("[System] Forced reload for module: {}", name);
+    tracing::info!("Forced reload for module: {}", name);
 
     Ok(Json(ApiResponse {
         data: None,

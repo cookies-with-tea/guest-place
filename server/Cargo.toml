@@ -12,6 +12,7 @@ test-auth = []
 
 [dependencies]
 axum = { version = "0.8.1", features = ["multipart", "macros"] }
+parking_lot = "0.12.3"
 tower = { version = "0.5", features = ["util"] }
 dotenv = "0.15.0"
 tower-http = { version = "0.6.2", features = ["cors", "fs", "set-header"] }

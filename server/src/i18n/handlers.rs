@@ -43,7 +43,7 @@ pub async fn create_or_update(
     }
 
     let mut tx = state.pool.begin().await.map_err(|e| {
-        eprintln!("Failed to start transaction: {}", e);
+        tracing::error!("Failed to start transaction: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             into_api_response_internal("Failed to save translations".to_string()),
@@ -63,7 +63,7 @@ pub async fn create_or_update(
     .fetch_all(&mut *tx)
     .await
     .map_err(|e| {
-        eprintln!("DB error fetching current translations: {}", e);
+        tracing::error!("DB error fetching current translations: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             into_api_response_internal("Failed to save versions".to_string()),
@@ -99,7 +99,7 @@ pub async fn create_or_update(
         .fetch_all(&mut *tx)
         .await
         .map_err(|e| {
-            eprintln!("DB error calculating versions: {}", e);
+            tracing::error!("DB error calculating versions: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 into_api_response_internal("Failed to calculate version".to_string()),
@@ -137,7 +137,7 @@ pub async fn create_or_update(
         .execute(&mut *tx)
         .await
         .map_err(|e| {
-            eprintln!("DB error saving translation versions: {}", e);
+            tracing::error!("DB error saving translation versions: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 into_api_response_internal("Failed to save translation version".to_string()),
@@ -160,7 +160,7 @@ pub async fn create_or_update(
     .execute(&mut *tx)
     .await
     {
-        eprintln!("DB error: {}", e);
+        tracing::error!("DB error: {}", e);
         return Err((
             StatusCode::INTERNAL_SERVER_ERROR,
             into_api_response_internal("Failed to save one or more translations".to_string()),
@@ -168,7 +168,7 @@ pub async fn create_or_update(
     }
 
     if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {}", e);
+        tracing::error!("Failed to commit transaction: {}", e);
         return Err((
             StatusCode::INTERNAL_SERVER_ERROR,
             into_api_response_internal("Failed to save translations".to_string()),
@@ -185,7 +185,7 @@ pub async fn create_or_update(
 }
 
 use crate::core::dto::{ApiPaginationDTO, ApiResponseWithPagination, PaginationDTO};
-use crate::core::utils::DEFAULT_PAGE_LIMIT;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 
 #[utoipa::path(
     get,
@@ -218,11 +218,13 @@ pub async fn get_all(
     let page = params
         .get("page")
         .and_then(|p| p.parse::<i32>().ok())
-        .unwrap_or(1);
+        .unwrap_or(1)
+        .max(1);
     let limit = params
         .get("limit")
         .and_then(|l| l.parse::<i32>().ok())
-        .unwrap_or(DEFAULT_PAGE_LIMIT);
+        .unwrap_or(DEFAULT_PAGE_LIMIT)
+        .clamp(1, MAX_PAGE_LIMIT);
     let offset = ((page - 1) * limit) as i64;
 
     let search = params
@@ -274,7 +276,7 @@ pub async fn get_all(
             messages: None,
         })),
         Err(e) => {
-            eprintln!("DB error: {}", e);
+            tracing::error!("DB error: {}", e);
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponseWithPagination {
@@ -322,7 +324,7 @@ pub async fn delete_one(
             )
         }
         Err(e) => {
-            eprintln!("DB error: {}", e);
+            tracing::error!("DB error: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -366,7 +368,7 @@ pub async fn get_by_dict_key(
             Ok(Json(map))
         }
         Err(e) => {
-            eprintln!("DB error in get_by_dict_key: {}", e);
+            tracing::error!("DB error in get_by_dict_key: {}", e);
             let msg = state.i18n.t("general.db_error", &locale).await;
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -425,7 +427,7 @@ pub async fn get_languages(
             into_api_response(StatusCode::OK, Some(list), None, None)
         }
         Err(e) => {
-            eprintln!("DB error in get_languages: {}", e);
+            tracing::error!("DB error in get_languages: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -455,7 +457,7 @@ pub async fn get_namespaces(
     {
         Ok(namespaces) => into_api_response(StatusCode::OK, Some(namespaces), None, None),
         Err(e) => {
-            eprintln!("DB error in get_namespaces: {}", e);
+            tracing::error!("DB error in get_namespaces: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -493,7 +495,7 @@ pub async fn create_namespace(
     match result {
         Ok(ns) => into_api_response(StatusCode::CREATED, Some(ns), None, None),
         Err(e) => {
-            eprintln!("DB error creating namespace: {}", e);
+            tracing::error!("DB error creating namespace: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -536,7 +538,7 @@ pub async fn update_namespace(
     match result {
         Ok(ns) => into_api_response(StatusCode::OK, Some(ns), None, None),
         Err(e) => {
-            eprintln!("DB error updating namespace: {}", e);
+            tracing::error!("DB error updating namespace: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,
@@ -627,7 +629,7 @@ pub async fn get_versions(
             messages: None,
         })),
         Err(e) => {
-            eprintln!("DB error: {}", e);
+            tracing::error!("DB error: {}", e);
             into_api_response(StatusCode::INTERNAL_SERVER_ERROR, None, None, Some(vec!["Failed to load versions".to_string()]))
         }
     }
@@ -772,7 +774,7 @@ pub async fn get_refs(
     {
         Ok(refs) => into_api_response(StatusCode::OK, Some(refs), None, None),
         Err(e) => {
-            eprintln!("DB error in get_refs: {}", e);
+            tracing::error!("DB error in get_refs: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,

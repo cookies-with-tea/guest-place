@@ -19,7 +19,7 @@
 		<div v-for="(file, index) in filesList.filesToUpload" :key="index" class="compact-file-item">
 			<div class="item-main">
 				<div class="file-thumb" @click="preview.openFilePreview(file)">
-					<img v-if="file.preview && mediaUtils.isImage(file.file)" :src="file.preview" />
+					<img v-if="file.preview && mediaUtils.isImage(file.file)" :src="file.preview" :alt="file.file.name" />
 					<div v-else-if="mediaUtils.isVideo(file.file)" class="thumb-badge video">
 						<el-icon><VideoCamera /></el-icon>
 					</div>
@@ -40,13 +40,22 @@
 				<div class="item-actions">
 					<!-- Crop button for images -->
 					<el-tooltip v-if="mediaUtils.isImage(file.file)" content="Crop & Resize before upload" placement="top">
-						<el-button circle size="small" type="primary" plain :icon="Crop" @click="crop.startCropping(index)" />
+						<el-button
+							circle
+							size="small"
+							type="primary"
+							plain
+							:icon="Crop"
+							aria-label="Crop & Resize before upload"
+							@click="crop.startCropping(index)"
+						/>
 					</el-tooltip>
 					<el-button
 						circle
 						size="small"
 						:type="file.isCustom ? 'warning' : 'default'"
 						:icon="Edit"
+						aria-label="Toggle custom name"
 						@click="filesList.toggleCustom(index)"
 					/>
 				</div>

@@ -23,7 +23,7 @@
 			</el-table-column>
 			<el-table-column label="Actions" width="100">
 				<template #default="{ $index }">
-					<el-button circle :icon="Delete" type="danger" @click="removeFlag($index)" />
+					<el-button circle :icon="Delete" type="danger" aria-label="Delete flag" @click="removeFlag($index)" />
 				</template>
 			</el-table-column>
 		</el-table>

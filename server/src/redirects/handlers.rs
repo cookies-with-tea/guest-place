@@ -34,7 +34,7 @@ pub async fn get_redirects(
     .fetch_all(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error fetching redirects: {}", e);
+        tracing::error!("Database error fetching redirects: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -87,7 +87,7 @@ pub async fn check_redirect(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error checking redirect: {}", e);
+        tracing::error!("Database error checking redirect: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -201,7 +201,7 @@ pub async fn create_redirect(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error creating redirect: {}", e);
+        tracing::error!("Database error creating redirect: {}", e);
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -272,7 +272,7 @@ pub async fn update_redirect(
     .fetch_optional(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating redirect: {}", e);
+        tracing::error!("Database error updating redirect: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -323,7 +323,7 @@ pub async fn delete_redirect(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error deleting redirect: {}", e);
+            tracing::error!("Database error deleting redirect: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {

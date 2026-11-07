@@ -3,6 +3,7 @@ import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { useI18n } from '@admin-panel/i18n'
+import { usePagination } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
 
 import {
@@ -24,11 +25,7 @@ const filters = ref<TranslationFilters>({
 	search: undefined,
 })
 
-const pagination = ref({
-	page: 1,
-	limit: 10,
-	total: 0,
-})
+const { pagination, setPage, setLimit, syncFrom } = usePagination()
 
 const isModalOpen = ref(false)
 const isHistoryOpen = ref(false)
@@ -82,15 +79,7 @@ export const useTranslations = () => {
 	})
 
 	// Sync pagination from response
-	watch(
-		() => translationsQuery.data?.value?.data?.pagination,
-		(newPagination) => {
-			if (newPagination) {
-				pagination.value = { ...newPagination }
-			}
-		},
-		{ immediate: true }
-	)
+	syncFrom(() => translationsQuery.data?.value?.data?.pagination, { immediate: true })
 
 	// === Actions ===
 	const openAddModal = () => {
@@ -215,17 +204,6 @@ export const useTranslations = () => {
 
 	const handleDelete = (id: string) => {
 		deleteMutation.mutate(id)
-	}
-
-	// === Pagination & filters ===
-	const setPage = (page: number) => {
-		pagination.value.page = page
-	}
-
-	const setLimit = (size: number) => {
-		pagination.value.limit = size
-
-		pagination.value.page = 1
 	}
 
 	// Сброс страницы при изменении фильтров

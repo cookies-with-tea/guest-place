@@ -52,7 +52,7 @@ pub async fn get_folders(
             into_api_response(StatusCode::OK, Some(folders), None, Some(vec![msg]))
         }
         Err(e) => {
-            eprintln!("Failed to fetch media folders: {:?}", e);
+            tracing::error!("Failed to fetch media folders: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -113,7 +113,7 @@ pub async fn create_folder(
             into_api_response(StatusCode::CREATED, Some(folder), None, Some(vec![msg]))
         }
         Err(e) => {
-            eprintln!("Failed to create media folder: {:?}", e);
+            tracing::error!("Failed to create media folder: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -182,7 +182,7 @@ pub async fn update_folder(
             Some(vec!["Folder not found".to_string()]),
         ),
         Err(e) => {
-            eprintln!("Failed to update media folder: {:?}", e);
+            tracing::error!("Failed to update media folder: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -227,7 +227,7 @@ pub async fn delete_folder(
             Some(vec!["Folder not found".to_string()]),
         ),
         Err(e) => {
-            eprintln!("Failed to delete folder: {:?}", e);
+            tracing::error!("Failed to delete folder: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -270,7 +270,7 @@ pub async fn batch_move_media(
             into_api_response(StatusCode::OK, Some(affected), None, Some(vec![msg]))
         }
         Err(e) => {
-            eprintln!("Failed to batch move media: {:?}", e);
+            tracing::error!("Failed to batch move media: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -318,7 +318,7 @@ pub async fn get_media_tags(
             into_api_response(StatusCode::OK, Some(items), None, Some(vec![msg]))
         }
         Err(e) => {
-            eprintln!("Failed to fetch media tags: {:?}", e);
+            tracing::error!("Failed to fetch media tags: {:?}", e);
             let msg = state.i18n.t("media.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,

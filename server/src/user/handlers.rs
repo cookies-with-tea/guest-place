@@ -1,6 +1,6 @@
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
-use crate::core::utils::DEFAULT_PAGE_LIMIT;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use crate::user::dto::{
     ChangePasswordDTO, CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
     UserResponseDTO, UserRole, UserStatus,
@@ -193,8 +193,8 @@ pub async fn create(
             let msg = state.i18n.t("user.created", &locale).await;
             into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
         }
-        Err(_e) => {
-            println!("{:?}", _e);
+        Err(e) => {
+            tracing::error!("{:?}", e);
             let msg = state.i18n.t("general.db_error", &locale).await;
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -236,8 +236,8 @@ pub async fn get_all(
     Json<ApiResponseWithPagination<UserResponseDTO>>,
     (StatusCode, Json<ApiResponseWithPagination<UserResponseDTO>>),
 > {
-    let page = filter.page.unwrap_or(1);
-    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT);
+    let page = filter.page.unwrap_or(1).max(1);
+    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, MAX_PAGE_LIMIT);
     let offset = (page - 1) * limit;
 
     // Build WHERE clause
@@ -341,7 +341,7 @@ pub async fn get_all(
     let total = match total_query {
         Ok(count) => count,
         Err(e) => {
-            println!("Count error: {:?}", e);
+            tracing::error!("Count error: {:?}", e);
             let msg = state.i18n.t("general.db_error", &locale).await;
             return into_api_response_with_pagination(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -932,7 +932,7 @@ pub async fn list_permissions(
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {}", e);
+            tracing::error!("Database error: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
         })?;
 
@@ -958,7 +958,7 @@ pub async fn get_role_permissions(
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error: {}", e);
+            tracing::error!("Database error: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
         })?;
 
@@ -1069,17 +1069,20 @@ async fn change_password(
     Extension(claims): Extension<Claims>,
     Json(payload): Json<ChangePasswordDTO>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let user = sqlx::query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
+    let user = match sqlx::query_as::<_, User>("SELECT * FROM guest_user WHERE uuid = $1")
         .bind(claims.sub)
         .fetch_optional(&state.pool)
         .await
-        .map_err(|_| {
-            let msg = state.i18n.t("general.db_error", &locale);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec![futures::executor::block_on(msg)]) }))
-        })?
-        .ok_or_else(|| {
-            (StatusCode::UNAUTHORIZED, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["User not found".to_string()]) }))
-        })?;
+    {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return Err((StatusCode::UNAUTHORIZED, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["User not found".to_string()]) })));
+        }
+        Err(_) => {
+            let msg = state.i18n.t("general.db_error", &locale).await;
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec![msg]) })));
+        }
+    };
 
     if !verify_password(&payload.old_password, &user.password_hash) {
         let msg = state.i18n.t("auth.invalid_credentials", &locale).await;

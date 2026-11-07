@@ -2,9 +2,10 @@ pub mod handlers;
 pub mod middlewares;
 pub mod dto;
 
+use parking_lot::RwLock;
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub struct I18nService {
@@ -23,7 +24,7 @@ impl I18nService {
     pub async fn t(&self, key: &str, locale: &str) -> String {
         let cache_key = (key.to_string(), locale.to_string());
 
-        if let Some(value) = self.cache.read().unwrap().get(&cache_key) {
+        if let Some(value) = self.cache.read().get(&cache_key) {
             return value.clone();
         }
 
@@ -59,11 +60,11 @@ impl I18nService {
             }
         };
 
-        self.cache.write().unwrap().insert(cache_key, value.clone());
+        self.cache.write().insert(cache_key, value.clone());
         value
     }
 
     pub fn clear_cache(&self) {
-        self.cache.write().unwrap().clear();
+        self.cache.write().clear();
     }
 }

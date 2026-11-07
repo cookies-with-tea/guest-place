@@ -62,7 +62,7 @@
 				:on-change="onFilesChange"
 				:show-file-list="false"
 			>
-				<img v-if="avatarUrl" class="avatar" :src="avatarUrl" />
+				<img v-if="avatarUrl" class="avatar" :src="avatarUrl" alt="Аватар пользователя" />
 				<el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
 			</el-upload>
 		</el-form>

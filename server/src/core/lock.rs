@@ -139,7 +139,7 @@ pub async fn acquire_lock(
     };
 
     if let Err(e) = state.redis.set(&key, &new_lock, Some(DEFAULT_LOCK_TTL_SECONDS)).await {
-        eprintln!("Failed to acquire lock in Redis: {}", e);
+        tracing::error!("Failed to acquire lock in Redis: {}", e);
     }
 
     state.bus.publish(SystemEvent::EntityLocked {

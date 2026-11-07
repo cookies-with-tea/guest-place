@@ -47,7 +47,7 @@ pub async fn get_manifest(
                 })))
         }
         Err(e) => {
-            eprintln!("DB error fetching manifest: {}", e);
+            tracing::error!("DB error fetching manifest: {}", e);
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse {
@@ -82,7 +82,7 @@ pub async fn get_all(
     match result {
         Ok(mfes) => into_api_response(StatusCode::OK, Some(mfes), None, None),
         Err(e) => {
-            eprintln!("DB error fetching all mfes: {}", e);
+            tracing::error!("DB error fetching all mfes: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None::<Vec<Mfe>>,
@@ -132,7 +132,7 @@ pub async fn create(
     match result {
         Ok(mfe) => into_api_response(StatusCode::CREATED, Some(mfe), None, Some(vec!["MFE created".to_string()])),
         Err(e) => {
-            eprintln!("DB error creating mfe: {}", e);
+            tracing::error!("DB error creating mfe: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None::<Mfe>,
@@ -168,7 +168,7 @@ pub async fn update(
         .fetch_optional(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("DB error fetching mfe: {}", e);
+            tracing::error!("DB error fetching mfe: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse {
                 data: None,
                 errors: None,
@@ -206,7 +206,7 @@ pub async fn update(
     match result {
         Ok(mfe) => into_api_response(StatusCode::OK, Some(mfe), None, Some(vec!["MFE updated".to_string()])),
         Err(e) => {
-            eprintln!("DB error updating mfe: {}", e);
+            tracing::error!("DB error updating mfe: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None::<Mfe>,
@@ -244,7 +244,7 @@ pub async fn delete_one(
         Ok(res) if res.rows_affected() > 0 => into_api_response(StatusCode::OK, None, None, Some(vec!["MFE deleted".to_string()])),
         Ok(_) => into_api_response(StatusCode::NOT_FOUND, None, None, Some(vec!["MFE not found".to_string()])),
         Err(e) => {
-            eprintln!("DB error deleting mfe: {}", e);
+            tracing::error!("DB error deleting mfe: {}", e);
             into_api_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 None,

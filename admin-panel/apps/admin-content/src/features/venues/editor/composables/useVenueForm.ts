@@ -6,6 +6,7 @@ import {
 	type VenueFaq,
 	type VenueFeedItem,
 	type VenueHall,
+	type VenuePricingTable,
 	type VenueReview,
 	type VenueRoom,
 } from '#entities/venues/api'
@@ -334,7 +335,7 @@ export function useVenueForm(onChange: () => void) {
 			return false
 		}
 
-		const pricingTableData = {
+		const pricingTableData: VenuePricingTable = {
 			categories: [
 				{ label: 'Средний чек', value: `${formatPrice(form.value.average_check)} р.`, type: 'merged' },
 				{
@@ -363,13 +364,13 @@ export function useVenueForm(onChange: () => void) {
 
 		const payload: CreateVenueDTO = {
 			...form.value,
-			halls: formHalls.value as any,
-			rooms: formRooms.value as any,
-			faq: formFaq.value as any,
-			reviews: formReviews.value as any,
-			feed: formFeed.value as any,
+			halls: formHalls.value,
+			rooms: formRooms.value,
+			faq: formFaq.value,
+			reviews: formReviews.value,
+			feed: formFeed.value,
 			menu_photos: formMenuPhotos.value,
-			pricing_table: pricingTableData as any,
+			pricing_table: pricingTableData,
 			venue_types: splitCommaList(typesString.value),
 			features: splitCommaList(featuresString.value),
 			cuisines: splitCommaList(cuisinesString.value),

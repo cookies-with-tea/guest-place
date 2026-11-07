@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
 use crate::core::response::error_map;
-use crate::core::utils::DEFAULT_PAGE_LIMIT;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use crate::AppState;
 
 use super::model::{CreateVenueDTO, UpdateVenueDTO, Venue};
@@ -412,7 +412,7 @@ pub async fn get_venues(
     Query(query): Query<VenuesQuery>,
 ) -> Result<Json<ApiResponseWithPagination<Venue>>, (StatusCode, Json<ApiResponseWithPagination<Venue>>)> {
     let page = query.page.unwrap_or(1).max(1);
-    let limit = query.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, 100);
+    let limit = query.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, MAX_PAGE_LIMIT);
     let offset = query
         .offset
         .unwrap_or_else(|| ((page - 1) as i64) * (limit as i64));
@@ -427,7 +427,7 @@ pub async fn get_venues(
         .fetch_one(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error counting venues: {}", e);
+            tracing::error!("Database error counting venues: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponseWithPagination::<Venue> {
@@ -489,7 +489,7 @@ pub async fn get_venues(
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error fetching venues: {}", e);
+            tracing::error!("Database error fetching venues: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponseWithPagination::<Venue> {
@@ -549,7 +549,7 @@ pub async fn get_venue_by_id_or_slug(
             .await
     }
     .map_err(|e| {
-        eprintln!("Database error fetching venue by identifier: {}", e);
+        tracing::error!("Database error fetching venue by identifier: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -687,7 +687,7 @@ pub async fn create_venue(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error creating venue: {}", e);
+        tracing::error!("Database error creating venue: {}", e);
         (
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::<()> {
@@ -877,7 +877,7 @@ pub async fn update_venue(
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
-        eprintln!("Database error updating venue: {}", e);
+        tracing::error!("Database error updating venue: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::<()> {
@@ -918,7 +918,7 @@ pub async fn delete_venue(
         .execute(&state.pool)
         .await
         .map_err(|e| {
-            eprintln!("Database error deleting venue: {}", e);
+            tracing::error!("Database error deleting venue: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::<()> {
