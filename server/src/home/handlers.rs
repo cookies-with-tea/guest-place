@@ -143,7 +143,10 @@ pub async fn get_home(
     .bind(home_id)
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("Failed to fetch home_categories: {:?}", e);
+        Vec::new()
+    });
 
     let mut categories = Vec::new();
     for c in cat_rows {
@@ -176,7 +179,10 @@ pub async fn get_home(
     .bind(home_id)
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("Failed to fetch home_interactions: {:?}", e);
+        Vec::new()
+    });
 
     let interactions = interaction_rows
         .into_iter()
@@ -204,7 +210,10 @@ pub async fn get_home(
     )
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("Failed to fetch latest venues for home: {:?}", e);
+        Vec::new()
+    });
 
     // 5. Fetch 4 popular published venues (by rating_score DESC, rating_reviews_count DESC)
     let popular_venues = sqlx::query_as::<_, Venue>(
@@ -218,7 +227,10 @@ pub async fn get_home(
     )
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("Failed to fetch popular venues for home: {:?}", e);
+        Vec::new()
+    });
 
     // 6. Media guides
     let hero_guide = get_media_by_uuid(&state, home_record.hero_guide_uuid).await.unwrap_or(None);
@@ -340,14 +352,24 @@ pub async fn update_home(
 
     // 3. Update categories if provided
     if let Some(cats) = payload.categories {
-        let _ = sqlx::query("DELETE FROM home_categories WHERE home_id = $1")
+        sqlx::query("DELETE FROM home_categories WHERE home_id = $1")
             .bind(home_id)
             .execute(&state.pool)
-            .await;
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to clear home_categories: {:?}", e);
+                into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Failed to update categories")),
+                    None,
+                )
+                .expect_err("status")
+            })?;
 
         for (idx, cat) in cats.iter().enumerate() {
             let sort_order = cat.sort_order.unwrap_or(idx as i32 + 1);
-            let _ = sqlx::query(
+            sqlx::query(
                 r#"
                 INSERT INTO home_categories (home_id, title, slug, link, icon_uuid, sort_order)
                 VALUES ($1, $2, $3, $4, $5, $6)
@@ -360,21 +382,41 @@ pub async fn update_home(
             .bind(cat.icon_uuid)
             .bind(sort_order)
             .execute(&state.pool)
-            .await;
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to insert home_category: {:?}", e);
+                into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Failed to update categories")),
+                    None,
+                )
+                .expect_err("status")
+            })?;
         }
     }
 
     // 4. Update interactions if provided
     if let Some(interactions) = payload.interactions {
-        let _ = sqlx::query("DELETE FROM home_interactions WHERE home_id = $1")
+        sqlx::query("DELETE FROM home_interactions WHERE home_id = $1")
             .bind(home_id)
             .execute(&state.pool)
-            .await;
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to clear home_interactions: {:?}", e);
+                into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Failed to update interactions")),
+                    None,
+                )
+                .expect_err("status")
+            })?;
 
         for (idx, item) in interactions.iter().enumerate() {
             let sort_order = item.sort_order.unwrap_or(idx as i32 + 1);
             let is_accent = item.is_accent.unwrap_or(false);
-            let _ = sqlx::query(
+            sqlx::query(
                 r#"
                 INSERT INTO home_interactions (home_id, step_number, title, text, button_text, link, is_accent, sort_order)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -389,7 +431,17 @@ pub async fn update_home(
             .bind(is_accent)
             .bind(sort_order)
             .execute(&state.pool)
-            .await;
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to insert home_interaction: {:?}", e);
+                into_api_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    None,
+                    Some(error_map("database", "Failed to update interactions")),
+                    None,
+                )
+                .expect_err("status")
+            })?;
         }
     }
 

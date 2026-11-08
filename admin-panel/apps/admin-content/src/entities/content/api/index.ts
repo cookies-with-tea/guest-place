@@ -25,14 +25,23 @@ export const deleteSchema = (id: string) =>
 		method: 'DELETE',
 	})
 
-export const getEntries = (schemaId: string, params?: { search?: string }) => {
-	let url = `/schemas/${schemaId}/entries`
+// Сервер теперь пагинирует этот список (защита от неограниченного SELECT на
+// растущих схемах, см. IMPROVEMENTS.md), но страница контента пока не имеет
+// своего пейджера — поэтому запрашиваем максимально допустимый limit (100)
+// и разворачиваем ответ в плоский массив, чтобы все текущие потребители
+// (ContentPage.vue, UiRelationPicker.vue и т.д.) продолжали работать как
+// раньше. Схема с &gt;100 записей потребует отдельного пейджера в UI.
+export const getEntries = async (schemaId: string, params?: { search?: string; page?: number; limit?: number }) => {
+	const query: Record<string, string | number> = { limit: params?.limit ?? 100 }
 
-	if (params?.search) {
-		url += `?search=${encodeURIComponent(params.search)}`
-	}
+	if (params?.search) query.search = params.search
+	if (params?.page) query.page = params.page
 
-	return fetchData<ContentEntry[]>(url)
+	const res = await fetchData<{ items: ContentEntry[]; pagination: unknown }>(`/schemas/${schemaId}/entries`, {
+		params: query,
+	})
+
+	return { ...res, data: res.data?.items }
 }
 
 export const getEntry = (id: string) => fetchData<ContentEntry>(`/entries/${id}`)

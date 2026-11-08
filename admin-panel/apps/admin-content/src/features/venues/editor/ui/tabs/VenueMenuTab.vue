@@ -19,7 +19,13 @@
 			<div v-for="(photo, index) in venueForm.formMenuPhotos" :key="index" class="photo-card">
 				<img :src="photo" alt="Блюдо" class="photo-card__img" />
 				<div class="photo-card__badge">#{{ index + 1 }}</div>
-				<button type="button" class="photo-card__del" title="Удалить фото" @click="venueForm.removeMenuPhoto(index)">
+				<button
+					type="button"
+					class="photo-card__del"
+					title="Удалить фото"
+					aria-label="Удалить фото"
+					@click="venueForm.removeMenuPhoto(index)"
+				>
 					<el-icon><Close /></el-icon>
 				</button>
 			</div>

@@ -39,8 +39,8 @@
 					<div class="control-group">
 						<span class="label">Rotate</span>
 						<el-button-group>
-							<el-button size="small" :icon="RefreshLeft" @click="rotateLeft" />
-							<el-button size="small" :icon="RefreshRight" @click="rotateRight" />
+							<el-button size="small" :icon="RefreshLeft" aria-label="Rotate left" @click="rotateLeft" />
+							<el-button size="small" :icon="RefreshRight" aria-label="Rotate right" @click="rotateRight" />
 						</el-button-group>
 					</div>
 					<div class="control-group">

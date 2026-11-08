@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import { ElMessage } from 'element-plus'
 
 import { LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
@@ -32,12 +33,16 @@ const trafficData = ref<TrafficStats>({ labels: [], dau: [], sessions: [] })
 const loadData = async () => {
 	loading.value = true
 
-	const res = await analyticsApi.getTraffic({ days: props.days })
+	try {
+		const res = await analyticsApi.getTraffic({ days: props.days })
 
-	loading.value = false
-
-	if (res.data) {
-		trafficData.value = res.data
+		if (res.data) {
+			trafficData.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load traffic data')
+	} finally {
+		loading.value = false
 	}
 }
 

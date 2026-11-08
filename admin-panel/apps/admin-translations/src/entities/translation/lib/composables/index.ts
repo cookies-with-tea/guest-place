@@ -200,7 +200,7 @@ export const useTranslations = () => {
 
 	const handleSubmit = (data: Translation | Omit<Translation, 'id'> | Array<Omit<Translation, 'id'>>) => {
 		if (Array.isArray(data)) {
-			createMutation.mutate(data as any) // Backend now supports Array
+			createMutation.mutate(data) // Backend now supports Array
 		} else if ('id' in data) {
 			updateMutation.mutate(data)
 		} else {

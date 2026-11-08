@@ -8,7 +8,9 @@ use sqlx::{Postgres, QueryBuilder};
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::core::dto::ApiResponse;
+use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
+use crate::core::response::error_map;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use crate::AppState;
 
 use super::model::{
@@ -357,7 +359,7 @@ async fn validate_entry_data(
                     FieldType::Relation => {
                         // Validate relation existence
                         if let Some(relation_to) = &field.relation_to {
-                            let uuids = if field.multiple {
+                            let uuid_strs = if field.multiple {
                                 val.as_array()
                                     .ok_or_else(|| {
                                         format!("Field '{}' must be an array of UUIDs", field.label)
@@ -375,33 +377,32 @@ async fn validate_entry_data(
                                 })?]
                             };
 
-                            for uuid_str in uuids {
-                                let uuid = Uuid::parse_str(uuid_str).map_err(|_| {
-                                    format!("Invalid UUID format in field '{}'", field.label)
-                                })?;
+                            let uuids = uuid_strs
+                                .iter()
+                                .map(|s| {
+                                    Uuid::parse_str(s).map_err(|_| {
+                                        format!("Invalid UUID format in field '{}'", field.label)
+                                    })
+                                })
+                                .collect::<Result<Vec<Uuid>, String>>()?;
 
-                                // Check if entry exists in the target schema (using slug)
-                                let exists = sqlx::query_scalar::<_, bool>(
-                                    "SELECT EXISTS(
-                                        SELECT 1 FROM content_entries e 
-                                        JOIN content_schemas s ON e.schema_id = s.id 
-                                        WHERE e.id = $1 AND s.slug = $2
-                                    )",
-                                )
-                                .bind(uuid)
-                                .bind(relation_to)
-                                .fetch_one(pool)
-                                .await
-                                .map_err(|e| {
-                                    format!("Database error validating relation: {}", e)
-                                })?;
+                            // One batched query instead of one SELECT EXISTS per UUID
+                            let existing: Vec<Uuid> = sqlx::query_scalar(
+                                "SELECT e.id FROM content_entries e
+                                 JOIN content_schemas s ON e.schema_id = s.id
+                                 WHERE s.slug = $1 AND e.id = ANY($2)",
+                            )
+                            .bind(relation_to)
+                            .bind(&uuids)
+                            .fetch_all(pool)
+                            .await
+                            .map_err(|e| format!("Database error validating relation: {}", e))?;
 
-                                if !exists {
-                                    return Err(format!(
-                                        "Related entry {} not found in schema '{}'",
-                                        uuid, relation_to
-                                    ));
-                                }
+                            if let Some(missing) = uuids.iter().find(|u| !existing.contains(u)) {
+                                return Err(format!(
+                                    "Related entry {} not found in schema '{}'",
+                                    missing, relation_to
+                                ));
                             }
                         }
                     }
@@ -451,13 +452,15 @@ async fn validate_entry_data(
     get,
     path = "/api/v1/content/schemas/{schema_id}/entries",
     responses(
-        (status = 200, body = ApiResponse<Vec<ContentEntry>>),
+        (status = 200, body = ApiResponseWithPagination<ContentEntry>),
         (status = 401, description = "Unauthorized"),
         (status = 500, description = "Internal Server Error")
     ),
     tag = "Content",
     params(
-        ("schema_id" = Uuid, Path, description = "Schema ID")
+        ("schema_id" = Uuid, Path, description = "Schema ID"),
+        ("page" = Option<i32>, Query, description = "Page number"),
+        ("limit" = Option<i32>, Query, description = "Items per page")
     ),
     security(("bearer_auth" = []))
 )]
@@ -465,39 +468,82 @@ pub async fn get_entries(
     State(state): State<Arc<AppState>>,
     Path(schema_id): Path<Uuid>,
     Query(filter): Query<EntryFilterQuery>,
-) -> Result<Json<ApiResponse<Vec<ContentEntry>>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let mut query_builder: QueryBuilder<Postgres> =
-        QueryBuilder::new("SELECT * FROM content_entries WHERE schema_id = ");
-    query_builder.push_bind(schema_id);
+) -> Result<Json<ApiResponseWithPagination<ContentEntry>>, (StatusCode, Json<ApiResponseWithPagination<ContentEntry>>)> {
+    let page = filter.page.unwrap_or(1).max(1);
+    let limit = filter.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, MAX_PAGE_LIMIT);
+    let offset = ((page - 1) as i64) * (limit as i64);
 
-    if let Some(search) = &filter.search {
-        query_builder.push(" AND (slug ILIKE ");
-        query_builder.push_bind(format!("%{}%", search));
-        query_builder.push(" OR data::text ILIKE ");
-        query_builder.push_bind(format!("%{}%", search));
-        query_builder.push(")");
-    }
+    let apply_filters = |builder: &mut QueryBuilder<Postgres>| {
+        builder.push(" WHERE schema_id = ");
+        builder.push_bind(schema_id);
 
-    query_builder.push(" ORDER BY created_at DESC");
+        if let Some(search) = &filter.search {
+            builder.push(" AND (slug ILIKE ");
+            builder.push_bind(format!("%{}%", search));
+            builder.push(" OR data::text ILIKE ");
+            builder.push_bind(format!("%{}%", search));
+            builder.push(")");
+        }
+    };
 
-    let entries = query_builder
-        .build_query_as::<ContentEntry>()
-        .fetch_all(&state.pool)
+    // 1. Count query
+    let mut count_builder: QueryBuilder<Postgres> = QueryBuilder::new("SELECT COUNT(*) FROM content_entries");
+    apply_filters(&mut count_builder);
+
+    let total: i64 = count_builder
+        .build_query_scalar::<i64>()
+        .fetch_one(&state.pool)
         .await
         .map_err(|e| {
-            tracing::error!("Database error: {}", e);
+            tracing::error!("Database error counting entries: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ApiResponse::<()> {
+                Json(ApiResponseWithPagination::<ContentEntry> {
                     data: None,
-                    errors: None,
-                    messages: Some(vec!["Database error".to_string()]),
+                    errors: Some(error_map("database", "Failed to count entries")),
+                    messages: Some(vec!["Failed to count entries".to_string()]),
                 }),
             )
         })?;
 
-    Ok(Json(ApiResponse {
-        data: Some(entries),
+    let total_pages = (total as f64 / limit as f64).ceil() as i32;
+
+    // 2. Select query with pagination
+    let mut select_builder: QueryBuilder<Postgres> = QueryBuilder::new("SELECT * FROM content_entries");
+    apply_filters(&mut select_builder);
+    select_builder.push(" ORDER BY created_at DESC LIMIT ");
+    select_builder.push_bind(limit as i64);
+    select_builder.push(" OFFSET ");
+    select_builder.push_bind(offset);
+
+    let entries = select_builder
+        .build_query_as::<ContentEntry>()
+        .fetch_all(&state.pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error fetching entries: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponseWithPagination::<ContentEntry> {
+                    data: None,
+                    errors: Some(error_map("database", "Failed to fetch entries")),
+                    messages: Some(vec!["Failed to fetch entries".to_string()]),
+                }),
+            )
+        })?;
+
+    let pagination = PaginationDTO {
+        page,
+        total: Some(total as i32),
+        total_pages: Some(total_pages),
+        limit: Some(limit),
+    };
+
+    Ok(Json(ApiResponseWithPagination {
+        data: Some(ApiPaginationDTO {
+            items: entries,
+            pagination,
+        }),
         errors: None,
         messages: None,
     }))

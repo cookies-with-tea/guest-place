@@ -192,7 +192,7 @@
 								@confirm="catalog.handleDelete(row as Venue)"
 							>
 								<template #reference>
-									<el-button size="small" type="danger" plain :icon="Delete" />
+									<el-button size="small" type="danger" plain :icon="Delete" aria-label="Удалить площадку" />
 								</template>
 							</el-popconfirm>
 						</div>

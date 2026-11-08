@@ -2,6 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { GP_EVENTS, useEvents } from '@admin-panel/lib'
+import { ElMessage } from 'element-plus'
 
 import { mfeApi } from '../../api'
 
@@ -73,9 +74,8 @@ export const useMfe = () => {
 
 			dispatch(GP_EVENTS.UPDATED)
 		},
-		onError: (err) => {
-			// eslint-disable-next-line no-console
-			console.error('[useMfe] create error:', err)
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to create microfrontend')
 		},
 	})
 
@@ -88,9 +88,8 @@ export const useMfe = () => {
 
 			closeDialog()
 		},
-		onError: (err) => {
-			// eslint-disable-next-line no-console
-			console.error('[useMfe] update error:', err)
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update microfrontend')
 		},
 	})
 
@@ -100,6 +99,9 @@ export const useMfe = () => {
 			queryClient.invalidateQueries({ queryKey: ['mfes'] })
 
 			dispatch(GP_EVENTS.UPDATED)
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to delete microfrontend')
 		},
 	})
 

@@ -110,6 +110,8 @@ pub struct UpdatePageDTO {
 #[derive(Debug, Deserialize, utoipa::IntoParams)]
 pub struct GetPagesQuery {
     pub status: Option<String>,
+    pub page: Option<i32>,
+    pub limit: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, utoipa::IntoParams)]

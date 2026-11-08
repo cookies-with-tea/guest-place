@@ -7,7 +7,9 @@ use serde_json::Value;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::core::dto::ApiResponse;
+use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination, PaginationDTO};
+use crate::core::response::error_map;
+use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use crate::AppState;
 
 use super::model::{
@@ -22,7 +24,7 @@ use super::model::{
         GetPagesQuery
     ),
     responses(
-        (status = 200, body = ApiResponse<Vec<Page>>),
+        (status = 200, body = ApiResponseWithPagination<Page>),
         (status = 500, description = "Internal Server Error")
     ),
     tag = "Pages"
@@ -30,18 +32,51 @@ use super::model::{
 pub async fn get_pages(
     State(state): State<Arc<AppState>>,
     Query(query): Query<GetPagesQuery>,
-) -> Result<Json<ApiResponse<Vec<Page>>>, (StatusCode, Json<ApiResponse<()>>)> {
+) -> Result<Json<ApiResponseWithPagination<Page>>, (StatusCode, Json<ApiResponseWithPagination<Page>>)> {
+    let page = query.page.unwrap_or(1).max(1);
+    let limit = query.limit.unwrap_or(DEFAULT_PAGE_LIMIT).clamp(1, MAX_PAGE_LIMIT);
+    let offset = ((page - 1) as i64) * (limit as i64);
+
+    let count_res = if let Some(ref status) = query.status {
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM pages WHERE status = $1")
+            .bind(status)
+            .fetch_one(&state.pool)
+            .await
+    } else {
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM pages")
+            .fetch_one(&state.pool)
+            .await
+    };
+
+    let total = count_res.map_err(|e| {
+        tracing::error!("Database error counting pages: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponseWithPagination::<Page> {
+                data: None,
+                errors: Some(error_map("database", "Failed to count pages")),
+                messages: Some(vec!["Failed to count pages".to_string()]),
+            }),
+        )
+    })?;
+
+    let total_pages = (total as f64 / limit as f64).ceil() as i32;
+
     let pages_res = if let Some(ref status) = query.status {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC LIMIT $2 OFFSET $3",
         )
         .bind(status)
+        .bind(limit as i64)
+        .bind(offset)
         .fetch_all(&state.pool)
         .await
     } else {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages ORDER BY updated_at DESC",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages ORDER BY updated_at DESC LIMIT $1 OFFSET $2",
         )
+        .bind(limit as i64)
+        .bind(offset)
         .fetch_all(&state.pool)
         .await
     };
@@ -50,7 +85,7 @@ pub async fn get_pages(
         tracing::error!("Database error: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ApiResponse::<()> {
+            Json(ApiResponseWithPagination::<Page> {
                 data: None,
                 errors: None,
                 messages: Some(vec!["Failed to fetch pages".to_string()]),
@@ -58,8 +93,18 @@ pub async fn get_pages(
         )
     })?;
 
-    Ok(Json(ApiResponse {
-        data: Some(pages),
+    let pagination = PaginationDTO {
+        page,
+        total: Some(total as i32),
+        total_pages: Some(total_pages),
+        limit: Some(limit),
+    };
+
+    Ok(Json(ApiResponseWithPagination {
+        data: Some(ApiPaginationDTO {
+            items: pages,
+            pagination,
+        }),
         errors: None,
         messages: None,
     }))
@@ -256,6 +301,16 @@ pub async fn get_page_breadcrumbs(
     ),
     tag = "Pages"
 )]
+/// `slug` приходит из админского контента без валидации формата — экранируем
+/// перед вставкой в XML, чтобы `&`/`<`/`>`/`"` в слаге не сломали sitemap.xml.
+fn escape_xml(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&apos;")
+}
+
 pub async fn get_sitemap_xml(
     State(state): State<Arc<AppState>>,
 ) -> impl axum::response::IntoResponse {
@@ -287,7 +342,7 @@ pub async fn get_sitemap_xml(
         };
         xml.push_str(&format!(
             "  <url>\n    <loc>{}</loc>\n    <lastmod>{}</lastmod>\n    <changefreq>{}</changefreq>\n    <priority>{}</priority>\n  </url>\n",
-            loc, now_date, freq, priority
+            escape_xml(&loc), now_date, freq, priority
         ));
     }
 
@@ -297,7 +352,7 @@ pub async fn get_sitemap_xml(
             let loc = format!("{}/p/{}", base_url, slug.trim_start_matches('/'));
             xml.push_str(&format!(
                 "  <url>\n    <loc>{}</loc>\n    <lastmod>{}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n",
-                loc, lastmod
+                escape_xml(&loc), lastmod
             ));
         }
     }

@@ -133,6 +133,7 @@ const onImport = async (event: any) => {
 			}
 
 			let successCount = 0
+			let failedCount = 0
 
 			for (const item of importedData) {
 				try {
@@ -143,12 +144,19 @@ const onImport = async (event: any) => {
 					})
 
 					successCount++
-				} catch {
-					// Error handled per item if needed
+				} catch (itemErr: any) {
+					failedCount++
+
+					// eslint-disable-next-line no-console
+					console.error('[ContentPage] Failed to import entry', item, itemErr)
 				}
 			}
 
-			ElMessage.success(`Successfully imported ${successCount} entries`)
+			if (failedCount > 0) {
+				ElMessage.warning(`Imported ${successCount} of ${importedData.length} entries, ${failedCount} failed`)
+			} else {
+				ElMessage.success(`Successfully imported ${successCount} entries`)
+			}
 
 			fetchData()
 		} catch (err: any) {

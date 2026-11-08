@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 import { analyticsApi, type ReferralStats } from '#entities/analytics'
 
@@ -38,12 +39,16 @@ const loading = ref(true)
 const loadData = async () => {
 	loading.value = true
 
-	const res = await analyticsApi.getReferrals({ days: props.days })
+	try {
+		const res = await analyticsApi.getReferrals({ days: props.days })
 
-	loading.value = false
-
-	if (res.data) {
-		referrals.value = res.data
+		if (res.data) {
+			referrals.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load referral data')
+	} finally {
+		loading.value = false
 	}
 }
 

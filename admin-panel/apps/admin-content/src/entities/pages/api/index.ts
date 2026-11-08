@@ -60,9 +60,19 @@ const { fetchData: fetchPages } = createApi('pages')
 const { fetchData: fetchBlockTypes } = createApi('block-types')
 
 export const pagesApi = {
-	getPages: (params?: { status?: string }) => {
-		const query = params?.status ? `?status=${params.status}` : ''
-		return fetchPages<PageItem[]>(query)
+	// Сервер теперь пагинирует этот список (защита от неограниченного SELECT,
+	// см. IMPROVEMENTS.md), но список страниц пока не имеет своего пейджера —
+	// запрашиваем максимально допустимый limit (100) и разворачиваем ответ в
+	// плоский массив, чтобы текущие потребители продолжали работать как раньше.
+	getPages: async (params?: { status?: string; page?: number; limit?: number }) => {
+		const query: Record<string, string | number> = { limit: params?.limit ?? 100 }
+
+		if (params?.status) query.status = params.status
+		if (params?.page) query.page = params.page
+
+		const res = await fetchPages<{ items: PageItem[]; pagination: unknown }>('', { params: query })
+
+		return { ...res, data: res.data?.items }
 	},
 
 	getPageById: (id: string, params?: { preview?: boolean }) => {

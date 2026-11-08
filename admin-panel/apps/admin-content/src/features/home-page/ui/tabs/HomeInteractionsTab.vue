@@ -23,7 +23,14 @@
 				<div class="item-glass-card__head">
 					<span class="step-badge">Шаг {{ item.stepNumber }}</span>
 					<el-switch v-model="item.isAccent" active-text="Акцент" size="small" @change="onChange" />
-					<el-button type="danger" link size="small" :icon="Delete" @click="homeForm.removeInteraction(idx)" />
+					<el-button
+						type="danger"
+						link
+						size="small"
+						:icon="Delete"
+						aria-label="Удалить вариант взаимодействия"
+						@click="homeForm.removeInteraction(idx)"
+					/>
 				</div>
 
 				<el-form label-position="top" size="small">

@@ -21,7 +21,13 @@
 						style="width: 140px"
 						@input="onChange"
 					/>
-					<el-button type="danger" link :icon="Close" @click="venueForm.removeFeedItem(idx)" />
+					<el-button
+						type="danger"
+						link
+						:icon="Close"
+						aria-label="Удалить публикацию"
+						@click="venueForm.removeFeedItem(idx)"
+					/>
 				</div>
 
 				<UiRichTextField

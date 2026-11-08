@@ -34,6 +34,7 @@
 import { onMounted, ref, watch } from 'vue'
 
 import { ArrowDown } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 import { analyticsApi, type FunnelStats } from '#entities/analytics'
 
@@ -47,12 +48,16 @@ const loading = ref(true)
 const loadData = async () => {
 	loading.value = true
 
-	const res = await analyticsApi.getFunnel({ days: props.days })
+	try {
+		const res = await analyticsApi.getFunnel({ days: props.days })
 
-	loading.value = false
-
-	if (res.data) {
-		steps.value = res.data
+		if (res.data) {
+			steps.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load funnel data')
+	} finally {
+		loading.value = false
 	}
 }
 

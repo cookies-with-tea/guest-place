@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import { ElMessage } from 'element-plus'
 
 import { analyticsApi, type EngagementStats } from '#entities/analytics'
 
@@ -33,12 +34,16 @@ const loading = ref(true)
 const loadData = async () => {
 	loading.value = true
 
-	const res = await analyticsApi.getEngagement({ days: props.days })
+	try {
+		const res = await analyticsApi.getEngagement({ days: props.days })
 
-	loading.value = false
-
-	if (res.data) {
-		engagement.value = res.data
+		if (res.data) {
+			engagement.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load engagement data')
+	} finally {
+		loading.value = false
 	}
 }
 

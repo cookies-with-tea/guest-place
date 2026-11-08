@@ -686,9 +686,23 @@ pub async fn rollback(
         sqlx::query_scalar("SELECT value FROM i18n_translations WHERE key = $1 AND locale = $2")
             .bind(&version.key)
             .bind(&version.locale)
-            .fetch_one(&mut *tx)
+            .fetch_optional(&mut *tx)
             .await
-            .unwrap_or_default();
+            .map_err(|e| {
+                tracing::error!("Rollback: failed to read current translation value: {:?}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    into_api_response_internal("DB error".to_string()),
+                )
+            })?
+            .ok_or_else(|| {
+                (
+                    StatusCode::CONFLICT,
+                    into_api_response_internal(
+                        "Translation no longer exists, cannot roll back".to_string(),
+                    ),
+                )
+            })?;
 
     let next_version: i32 = sqlx::query_scalar(
         "SELECT COALESCE(MAX(version_number), 0) + 1 FROM i18n_translation_versions WHERE key = $1 AND locale = $2"
@@ -697,7 +711,13 @@ pub async fn rollback(
     .bind(&version.locale)
     .fetch_one(&mut *tx)
     .await
-    .unwrap_or(1);
+    .map_err(|e| {
+        tracing::error!("Rollback: failed to compute next version number: {:?}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            into_api_response_internal("DB error".to_string()),
+        )
+    })?;
 
     sqlx::query("INSERT INTO i18n_translation_versions (key, locale, value, version_number, comment) VALUES ($1, $2, $3, $4, $5)")
         .bind(&version.key)

@@ -109,6 +109,7 @@
 					<button
 						class="field-action-btn field-action-btn--delete"
 						title="Delete field"
+						aria-label="Delete field"
 						@click="fieldBuilder.removeField(field._id)"
 					>
 						<svg

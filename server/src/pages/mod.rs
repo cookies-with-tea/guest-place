@@ -23,11 +23,11 @@ pub fn pages_protected_router() -> AxRouter<Arc<AppState>> {
 pub fn block_types_public_router() -> AxRouter<Arc<AppState>> {
     AxRouter::new()
         .route("/", get(handlers::get_block_types))
-        .route("/sync", post(handlers::sync_block_types))
 }
 
 pub fn block_types_protected_router() -> AxRouter<Arc<AppState>> {
     AxRouter::new()
         .route("/", post(handlers::create_block_type))
+        .route("/sync", post(handlers::sync_block_types))
         .route("/{id}", axum::routing::patch(handlers::update_block_type).delete(handlers::delete_block_type))
 }

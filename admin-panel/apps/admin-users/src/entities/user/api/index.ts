@@ -12,7 +12,7 @@ const create = (data: IUserCreateUpdate) => {
 	})
 }
 
-export const update = (uuid: string, data: IUserCreateUpdate) => {
+export const update = (uuid: string, data: Partial<IUserCreateUpdate>) => {
 	return fetchData(`/${uuid}`, {
 		method: 'PATCH',
 		body: data,

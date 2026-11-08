@@ -83,18 +83,7 @@ export async function loadTranslations(dictKey: TranslationNamespace | string): 
 
 	// If we already have any keys for this locale, we assume it's hydrated or loaded
 	if (loadedNamespaces.has(cacheKey)) {
-		if (isBrowser) {
-			console.log(`[i18n] Skipping fetch for ${dictKey}, namespace "${cacheKey}" is already marked as loaded.`)
-		}
-
 		return cache.get(locale) || {}
-	}
-
-	if (isBrowser) {
-		console.log(
-			`[i18n] Fetching ${dictKey} for locale "${locale}". Cache exists: ${cache.has(locale)}, keys:`,
-			Object.keys(cache.get(locale) || {}).length
-		)
 	}
 
 	const loadPromise = (async () => {
@@ -104,10 +93,6 @@ export async function loadTranslations(dictKey: TranslationNamespace | string): 
 				headers: { 'Accept-Language': locale },
 				credentials: 'include',
 			})
-
-			if (!isBrowser) {
-				console.log(`[i18n Server] Loaded "${dictKey}" for "${locale}". Keys found:`, Object.keys(data || {}).length)
-			}
 
 			const current = cache.get(locale) || {}
 			const merged = { ...current, ...data }

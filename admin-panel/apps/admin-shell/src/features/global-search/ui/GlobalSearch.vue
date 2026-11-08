@@ -72,6 +72,7 @@ import { useI18n } from '@admin-panel/i18n'
 import { useSidebar } from '@admin-panel/ui'
 import * as Icons from '@element-plus/icons-vue'
 import { Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 import { systemApi } from '../../../entities/system/api'
 import type { SearchResult } from '../../../entities/system/model'
@@ -168,22 +169,26 @@ const fetchResults = useDebounceFn(async () => {
 	})
 
 	// 2. Search in API (Only for relevant "pages" or entities, filtering out raw content)
-	const res = await systemApi.search(query.value)
+	try {
+		const res = await systemApi.search(query.value)
 
-	if (res.data?.results) {
-		const apiResults = res.data.results
-			.filter((item) => {
-				// Only keep items that look like pages/modules or schemas
-				const allowedCategories = ['Modules', 'Schemas', 'Tools']
+		if (res.data?.results) {
+			const apiResults = res.data.results
+				.filter((item) => {
+					// Only keep items that look like pages/modules or schemas
+					const allowedCategories = ['Modules', 'Schemas', 'Tools']
 
-				return allowedCategories.includes(item.category)
-			})
-			.map((item) => ({
-				...item,
-				id: `api-${item.id}`,
-			}))
+					return allowedCategories.includes(item.category)
+				})
+				.map((item) => ({
+					...item,
+					id: `api-${item.id}`,
+				}))
 
-		searchResults.push(...apiResults)
+			searchResults.push(...apiResults)
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Search failed')
 	}
 
 	// Filter duplicates by path

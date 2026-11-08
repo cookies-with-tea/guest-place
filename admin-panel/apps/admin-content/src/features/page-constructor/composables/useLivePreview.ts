@@ -1,11 +1,12 @@
 import { computed, onUnmounted, reactive, ref } from 'vue'
+import type { PageBlock } from '#entities/pages'
 
 /**
  * Owns the split live-preview panel: the preview iframe, the responsive device toggle,
  * and the postMessage bridge that pushes page edits into the client's preview page in real time.
  */
 export function useLivePreview(
-	pageForm: { title: string; slug: string; seo: Record<string, any> },
+	pageForm: { title: string; slug: string; seo: Record<string, any>; blocks: PageBlock[] },
 	clientManifest: { value: any[] }
 ) {
 	const isPreviewing = ref(false)
@@ -37,7 +38,7 @@ export function useLivePreview(
 				const payload = JSON.parse(
 					JSON.stringify({
 						type: 'CMS_PAGE_PREVIEW_UPDATE',
-						blocks: (pageForm as any).blocks || [],
+						blocks: pageForm.blocks || [],
 						title: pageForm.title || '',
 						seo: pageForm.seo || {},
 					})

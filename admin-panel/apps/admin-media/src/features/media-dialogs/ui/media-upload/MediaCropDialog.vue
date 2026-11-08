@@ -37,8 +37,18 @@
 				<div class="crop-control-group">
 					<span class="control-label">Rotate</span>
 					<el-button-group>
-						<el-button size="small" :icon="RefreshLeft" @click="crop.cropperRef?.rotateLeft()" />
-						<el-button size="small" :icon="RefreshRight" @click="crop.cropperRef?.rotateRight()" />
+						<el-button
+							size="small"
+							:icon="RefreshLeft"
+							aria-label="Rotate left"
+							@click="crop.cropperRef?.rotateLeft()"
+						/>
+						<el-button
+							size="small"
+							:icon="RefreshRight"
+							aria-label="Rotate right"
+							@click="crop.cropperRef?.rotateRight()"
+						/>
 					</el-button-group>
 				</div>
 			</div>

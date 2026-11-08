@@ -147,7 +147,7 @@ export const useUsers = () => {
 	})
 
 	const patchMutation = useMutation({
-		mutationFn: ({ id, data }: { id: string; data: Partial<IUserCreateUpdate> }) => update(id, data as any),
+		mutationFn: ({ id, data }: { id: string; data: Partial<IUserCreateUpdate> }) => update(id, data),
 		onSuccess: (response) => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
 

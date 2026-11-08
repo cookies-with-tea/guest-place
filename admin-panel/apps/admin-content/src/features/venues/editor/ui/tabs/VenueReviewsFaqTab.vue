@@ -17,7 +17,14 @@
 					<el-input v-model="rev.author" placeholder="Имя гостя" style="width: 160px" @input="onChange" />
 					<el-input v-model="rev.date" placeholder="Дата (20.03.2024)" style="width: 130px" @input="onChange" />
 					<el-rate v-model="rev.rating" :max="5" style="margin-left: 8px" @change="onChange" />
-					<el-button type="danger" link :icon="Close" style="margin-left: auto" @click="venueForm.removeReview(idx)" />
+					<el-button
+						type="danger"
+						link
+						:icon="Close"
+						style="margin-left: auto"
+						aria-label="Удалить отзыв"
+						@click="venueForm.removeReview(idx)"
+					/>
 				</div>
 				<el-input v-model="rev.avatar" placeholder="URL аватара гостя" style="margin-bottom: 8px" @input="onChange" />
 				<UiRichTextField
@@ -55,7 +62,7 @@
 						style="flex: 1"
 						@update:model-value="onChange"
 					/>
-					<el-button type="danger" link :icon="Close" @click="venueForm.removeFaq(idx)" />
+					<el-button type="danger" link :icon="Close" aria-label="Удалить вопрос" @click="venueForm.removeFaq(idx)" />
 				</div>
 				<UiRichTextField
 					v-model="item.answer"

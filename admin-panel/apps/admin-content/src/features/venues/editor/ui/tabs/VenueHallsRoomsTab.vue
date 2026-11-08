@@ -65,7 +65,7 @@
 			</el-table-column>
 			<el-table-column label="" width="50" align="center">
 				<template #default="{ $index }">
-					<el-button type="danger" link :icon="Close" @click="venueForm.removeHall($index)" />
+					<el-button type="danger" link :icon="Close" aria-label="Удалить зал" @click="venueForm.removeHall($index)" />
 				</template>
 			</el-table-column>
 		</el-table>
@@ -110,7 +110,13 @@
 			</el-table-column>
 			<el-table-column label="" width="50" align="center">
 				<template #default="{ $index }">
-					<el-button type="danger" link :icon="Close" @click="venueForm.removeRoom($index)" />
+					<el-button
+						type="danger"
+						link
+						:icon="Close"
+						aria-label="Удалить номер"
+						@click="venueForm.removeRoom($index)"
+					/>
 				</template>
 			</el-table-column>
 		</el-table>

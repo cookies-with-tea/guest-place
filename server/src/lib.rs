@@ -68,11 +68,10 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/menus", menus::public_router())
         .nest("/api/v1/redirects", redirects::public_router())
         .nest("/api/v1/venues", venues::public_router())
-        .nest("/api/v1/home", home::router())
+        .nest("/api/v1/home", home::public_router())
         .route("/sitemap.xml", axum::routing::get(pages::handlers::get_sitemap_xml))
         .route("/r/{*path}", axum::routing::get(redirects::handlers::handle_redirect_navigation))
         .nest("/api/v1/analytics", analytics::handlers::public_router())
-        .nest("/api/v1/locks", core::lock::router())
         .nest("/api/v1/system", monitoring::public_router())
         .nest(
             "/uploads",
@@ -98,6 +97,8 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/redirects", redirects::protected_router())
         .nest("/api/v1/venues", venues::protected_router())
         .nest("/api/v1/analytics", analytics::handlers::protected_router())
+        .nest("/api/v1/home", home::protected_router())
+        .nest("/api/v1/locks", core::lock::protected_router())
         .nest("/api/v1/system", monitoring::protected_router(state.clone()))
         .layer(middleware::from_fn_with_state(
             state.clone(),

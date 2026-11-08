@@ -255,14 +255,18 @@ export const initRouter = async (app: any) => {
 	})
 
 	on(GP_EVENTS.UPDATED, async () => {
-		const { routes: updatedRoutes, sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
+		try {
+			const { routes: updatedRoutes, sidebarGroups: updatedGroups } = await loadRemoteRoutes(app)
 
-		// Dynamically register any newly added routes into Layout
-		updatedRoutes.forEach((route: any) => {
-			router.addRoute('Layout', route)
-		})
+			// Dynamically register any newly added routes into Layout
+			updatedRoutes.forEach((route: any) => {
+				router.addRoute('Layout', route)
+			})
 
-		updateSidebar(updatedGroups)
+			updateSidebar(updatedGroups)
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to refresh microfrontend list')
+		}
 	})
 
 	router.beforeEach((to, from, next) => {

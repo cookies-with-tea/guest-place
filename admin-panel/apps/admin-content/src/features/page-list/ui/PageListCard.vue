@@ -74,7 +74,14 @@
 
 					<el-button :icon="View" size="small" plain @click="actions.openClientPreview(item.slug)">Просмотр</el-button>
 					<el-button size="small" type="primary" plain @click="actions.goToEdit(item.id)"> Конструктор </el-button>
-					<el-button :icon="Close" size="small" type="danger" plain @click="pagesAndSchemas.handleDelete(item)" />
+					<el-button
+						:icon="Close"
+						size="small"
+						type="danger"
+						plain
+						aria-label="Удалить страницу"
+						@click="pagesAndSchemas.handleDelete(item)"
+					/>
 				</template>
 
 				<template v-else>

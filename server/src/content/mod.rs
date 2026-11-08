@@ -38,7 +38,3 @@ pub fn protected_router() -> AxRouter<Arc<AppState>> {
             post(handlers::rollback_entry_version),
         )
 }
-
-pub fn router() -> AxRouter<Arc<AppState>> {
-    public_router().merge(protected_router())
-}

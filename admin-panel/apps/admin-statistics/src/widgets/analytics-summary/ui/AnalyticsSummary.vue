@@ -19,7 +19,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 
 import { Pointer, Timer, User, View } from '@element-plus/icons-vue'
-import { ElIcon } from 'element-plus'
+import { ElIcon, ElMessage } from 'element-plus'
 
 import { analyticsApi, type AnalyticsSummary } from '#entities/analytics'
 
@@ -70,10 +70,14 @@ const stats = computed(() => [
 ])
 
 const loadData = async () => {
-	const res = await analyticsApi.getSummary({ days: props.days })
+	try {
+		const res = await analyticsApi.getSummary({ days: props.days })
 
-	if (res.data) {
-		summary.value = res.data
+		if (res.data) {
+			summary.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load summary data')
 	}
 }
 

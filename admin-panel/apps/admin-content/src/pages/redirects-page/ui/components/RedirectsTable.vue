@@ -5,7 +5,13 @@
 				<template #default="{ row }">
 					<div class="path-cell">
 						<code class="source-path">{{ row.sourcePath }}</code>
-						<el-button size="small" text :icon="DocumentCopy" @click="redirects.copyPath(row.sourcePath)" />
+						<el-button
+							size="small"
+							text
+							:icon="DocumentCopy"
+							aria-label="Скопировать исходный путь"
+							@click="redirects.copyPath(row.sourcePath)"
+						/>
 					</div>
 				</template>
 			</el-table-column>
@@ -20,7 +26,13 @@
 				<template #default="{ row }">
 					<div class="path-cell">
 						<code class="target-path">{{ row.targetPath }}</code>
-						<el-button size="small" text :icon="DocumentCopy" @click="redirects.copyPath(row.targetPath)" />
+						<el-button
+							size="small"
+							text
+							:icon="DocumentCopy"
+							aria-label="Скопировать целевой путь"
+							@click="redirects.copyPath(row.targetPath)"
+						/>
 					</div>
 				</template>
 			</el-table-column>

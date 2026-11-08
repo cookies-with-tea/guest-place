@@ -40,25 +40,6 @@ const setShared = (name: string, module: any, version: string) => {
 	}
 }
 
-const [vue, vueRouter, piniaPkg, vueQueryPkg, i18nPkg, libPkg, uiPkg] = await Promise.all([
-	import('vue'),
-	import('vue-router'),
-	import('pinia'),
-	import('@tanstack/vue-query'),
-	import('@admin-panel/i18n'),
-	import('@admin-panel/lib'),
-	import('@admin-panel/ui'),
-])
-
-setShared('vue', vue, '3.5.22')
-setShared('vue-router', vueRouter, '4.5.1')
-setShared('element-plus', elementPlus, '2.13.0')
-setShared('pinia', piniaPkg, '2.1.0')
-setShared('@tanstack/vue-query', vueQueryPkg, '5.92.1')
-setShared('@admin-panel/ui', uiPkg, '1.0.0')
-setShared('@admin-panel/lib', libPkg, '1.0.0')
-setShared('@admin-panel/i18n', i18nPkg, '1.0.0')
-
 import { createApp } from 'vue'
 // Styles handled by initUiStyles
 import { createPinia } from 'pinia'
@@ -66,39 +47,81 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 
 import App from './App.vue'
 import { initRouter } from './router'
-
-const app = createApp(App)
-const pinia = createPinia()
-
-app.use(pinia).use(VueQueryPlugin).use(i18nPlugin)
-
 import { useI18n } from '@admin-panel/i18n'
-const { loadDict } = useI18n()
 
-await loadDict('general')
+// Весь бутстрап ниже раньше был цепочкой top-level await без единого
+// try/catch: любая ошибка (сеть, 401, 500 на любом из dict-запросов или на
+// /mfe/manifest внутри initRouter) превращалась в необработанный reject —
+// админка не инициализировалась, белый экран без единого сообщения.
+const bootstrap = async () => {
+	const [vue, vueRouter, piniaPkg, vueQueryPkg, i18nPkg, libPkg, uiPkg] = await Promise.all([
+		import('vue'),
+		import('vue-router'),
+		import('pinia'),
+		import('@tanstack/vue-query'),
+		import('@admin-panel/i18n'),
+		import('@admin-panel/lib'),
+		import('@admin-panel/ui'),
+	])
 
-await loadDict('shell')
+	setShared('vue', vue, '3.5.22')
+	setShared('vue-router', vueRouter, '4.5.1')
+	setShared('element-plus', elementPlus, '2.13.0')
+	setShared('pinia', piniaPkg, '2.1.0')
+	setShared('@tanstack/vue-query', vueQueryPkg, '5.92.1')
+	setShared('@admin-panel/ui', uiPkg, '1.0.0')
+	setShared('@admin-panel/lib', libPkg, '1.0.0')
+	setShared('@admin-panel/i18n', i18nPkg, '1.0.0')
 
-await loadDict('platforms')
+	const app = createApp(App)
+	const pinia = createPinia()
 
-// Every sidebar item's title comes from a `menu.*` key, and the per-MFE info-button
-// tooltip from `mfeHelp.*` (see IMPROVEMENTS.md sections 1/5) — nothing ever loaded
-// either namespace, so the whole sidebar has been showing raw `menu.users` etc. keys
-// instead of translated text in every environment where the API/DB actually answers.
-await loadDict('menu')
+	app.use(pinia).use(VueQueryPlugin).use(i18nPlugin)
 
-await loadDict('mfeHelp')
+	const { loadDict } = useI18n()
 
-const router = await initRouter(app)
+	await loadDict('general')
 
-on(GP_EVENTS.UNAUTHORIZED, (e: any) => {
-	e.preventDefault()
+	await loadDict('shell')
 
-	if (router.currentRoute.value.path !== '/login') {
-		router.push('/login')
-	}
-})
+	await loadDict('platforms')
 
-app.use(router)
+	// Every sidebar item's title comes from a `menu.*` key, and the per-MFE info-button
+	// tooltip from `mfeHelp.*` (see IMPROVEMENTS.md sections 1/5) — nothing ever loaded
+	// either namespace, so the whole sidebar has been showing raw `menu.users` etc. keys
+	// instead of translated text in every environment where the API/DB actually answers.
+	await loadDict('menu')
+
+	await loadDict('mfeHelp')
+
+	const router = await initRouter(app)
+
+	on(GP_EVENTS.UNAUTHORIZED, (e: any) => {
+		e.preventDefault()
+
+		if (router.currentRoute.value.path !== '/login') {
+			router.push('/login')
+		}
+	})
+
+	app.use(router)
+
+	return app
+}
+
+let app: ReturnType<typeof createApp>
+
+try {
+	app = await bootstrap()
+} catch (err) {
+	// eslint-disable-next-line no-console
+	console.error('[admin-shell] Failed to bootstrap application', err)
+
+	app = createApp({
+		template: `<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888;text-align:center;padding:24px;">
+			Не удалось загрузить админ-панель. Попробуйте обновить страницу.
+		</div>`,
+	})
+}
 
 export { app }

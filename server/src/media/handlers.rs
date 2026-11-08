@@ -71,6 +71,7 @@ pub async fn create(
         }
     };
     let mut uploaded_items: Vec<MediaItemDTO> = Vec::new();
+    let mut failed_files: Vec<String> = Vec::new();
     let mut files: Vec<(String, Vec<u8>)> = Vec::new();
     let mut titles: BTreeMap<u32, String> = BTreeMap::new();
     let mut alts: BTreeMap<u32, String> = BTreeMap::new();
@@ -263,47 +264,59 @@ pub async fn create(
                     state.media_storage.save_cas(&data, extension).await
                 };
 
-                if let Ok((_hash, relative_path)) = save_result {
-                    let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
-                    let title = titles.get(&(i as u32)).cloned();
-                    let alt = alts.get(&(i as u32)).cloned();
-                    let category = categories.get(&(i as u32)).cloned();
-                    let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
+                match save_result {
+                    Ok((_hash, relative_path)) => {
+                        let full_url = format!("{}/uploads/{}", state.config.public_url, relative_path);
+                        let title = titles.get(&(i as u32)).cloned();
+                        let alt = alts.get(&(i as u32)).cloned();
+                        let category = categories.get(&(i as u32)).cloned();
+                        let tags = tags_map.get(&(i as u32)).cloned().unwrap_or_default();
 
-                    let item_folder_id = folder_ids.get(&(i as u32)).cloned().or_else(|| folder_ids.get(&0).cloned());
+                        let item_folder_id = folder_ids.get(&(i as u32)).cloned().or_else(|| folder_ids.get(&0).cloned());
 
-                    let db_result = sqlx::query_as::<_, MediaItemFromDb>(
-                        "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source, folder_id, content_hash) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash",
-                    )
-                    .bind(media_uuid)
-                    .bind(media_type_str)
-                    .bind(&full_url)
-                    .bind(&final_name)
-                    .bind(extension)
-                    .bind(&title)
-                    .bind(&alt)
-                    .bind(file_size)
-                    .bind(&category)
-                    .bind(&tags)
-                    .bind(&upload_source)
-                    .bind(item_folder_id)
-                    .bind(&_hash)
-                    .fetch_one(&state.pool)
-                    .await;
+                        let db_result = sqlx::query_as::<_, MediaItemFromDb>(
+                            "INSERT INTO media (uuid, media_type, url, name, extension, title, alt, size_bytes, category, tags, source, folder_id, content_hash) VALUES ($1, $2::media_type, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING uuid, media_type, url, name, extension, title, alt, size_bytes, created_at, category, tags, source, width, height, blurhash, optimized_path, variants, dominant_color, palette, exif, folder_id, content_hash",
+                        )
+                        .bind(media_uuid)
+                        .bind(media_type_str)
+                        .bind(&full_url)
+                        .bind(&final_name)
+                        .bind(extension)
+                        .bind(&title)
+                        .bind(&alt)
+                        .bind(file_size)
+                        .bind(&category)
+                        .bind(&tags)
+                        .bind(&upload_source)
+                        .bind(item_folder_id)
+                        .bind(&_hash)
+                        .fetch_one(&state.pool)
+                        .await;
 
-                    if let Ok(row) = db_result {
-                        if media_type_str == "image" {
-                            state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
+                        match db_result {
+                            Ok(row) => {
+                                if media_type_str == "image" {
+                                    state.media_optimizer.process_image(row.uuid, relative_path.clone()).await;
+                                }
+
+                                state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
+                                    id: row.uuid.to_string(),
+                                    name: row.name.clone().unwrap_or_else(|| "media".to_string()),
+                                    path: relative_path.clone(),
+                                    user: None,
+                                });
+
+                                uploaded_items.push(to_dto(row, state.config.cdn_url.as_deref(), &state.config.public_url));
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to insert media row for '{}': {:?}", file_name, e);
+                                failed_files.push(file_name.clone());
+                            }
                         }
-
-                        state.bus.publish(crate::core::bus::SystemEvent::MediaUploaded {
-                            id: row.uuid.to_string(),
-                            name: row.name.clone().unwrap_or_else(|| "media".to_string()),
-                            path: relative_path.clone(),
-                            user: None,
-                        });
-
-                        uploaded_items.push(to_dto(row, state.config.cdn_url.as_deref(), &state.config.public_url));
+                    }
+                    Err(e) => {
+                        tracing::error!("Failed to save file '{}' to storage: {:?}", file_name, e);
+                        failed_files.push(file_name.clone());
                     }
                 }
             },
@@ -325,11 +338,16 @@ pub async fn create(
         json!(uploaded_items.first())
     };
 
-    let msg = state.i18n.t("media.upload_success", &locale).await;
+    let mut messages = vec![state.i18n.t("media.upload_success", &locale).await];
+    if !failed_files.is_empty() {
+        let failed_msg = state.i18n.t("media.upload_partial_failure", &locale).await;
+        messages.push(format!("{}: {}", failed_msg, failed_files.join(", ")));
+    }
+
     Ok(Json(ApiResponse {
         data: Some(response_data),
         errors: None,
-        messages: Some(vec![msg]),
+        messages: Some(messages),
     }))
 }
 

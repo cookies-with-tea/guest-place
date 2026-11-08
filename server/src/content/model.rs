@@ -133,4 +133,6 @@ pub struct ContentEntryVersion {
 #[derive(Deserialize, Debug, ToSchema, IntoParams, Clone)]
 pub struct EntryFilterQuery {
     pub search: Option<String>,
+    pub page: Option<i32>,
+    pub limit: Option<i32>,
 }

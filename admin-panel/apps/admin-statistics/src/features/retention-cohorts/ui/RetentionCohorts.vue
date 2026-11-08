@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 import { analyticsApi, type RetentionStats } from '#entities/analytics'
 
@@ -67,12 +68,16 @@ const getBgColor = (rate: number) => {
 const loadData = async () => {
 	loading.value = true
 
-	const res = await analyticsApi.getRetention({ days: props.days })
+	try {
+		const res = await analyticsApi.getRetention({ days: props.days })
 
-	loading.value = false
-
-	if (res.data) {
-		cohorts.value = res.data
+		if (res.data) {
+			cohorts.value = res.data
+		}
+	} catch (err: any) {
+		ElMessage.error(err?.message || 'Failed to load retention data')
+	} finally {
+		loading.value = false
 	}
 }
 
