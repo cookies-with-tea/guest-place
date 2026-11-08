@@ -1,8 +1,8 @@
 import { computed, ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import { usePagination } from '@admin-panel/lib'
+import { useDebouncedFilters, usePagination } from '@admin-panel/lib'
+import { ElMessage } from 'element-plus'
 
 import { mediaApi } from '../../api'
 import { MEDIA_QUERY_KEY, type MediaFilters, type MediaItem } from '../../model'
@@ -30,15 +30,7 @@ export const useMedia = () => {
 
 	const { create, update, getAll, deleteById, getById } = mediaApi
 
-	const debouncedFilters = ref({ ...filters.value })
-
-	watchDebounced(
-		filters,
-		(val) => {
-			debouncedFilters.value = { ...val }
-		},
-		{ debounce: 500, deep: true }
-	)
+	const { debouncedFilters } = useDebouncedFilters(filters)
 
 	// === Query ===
 	const queryKey = computed(() => [
@@ -113,6 +105,9 @@ export const useMedia = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to create media')
+		},
 	})
 
 	const updateMutation = useMutation({
@@ -122,12 +117,18 @@ export const useMedia = () => {
 
 			closeEditModal()
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update media')
+		},
 	})
 
 	const deleteMutation = useMutation({
 		mutationFn: deleteById,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to delete media')
 		},
 	})
 
@@ -136,30 +137,51 @@ export const useMedia = () => {
 	}
 
 	const handleMultipleDelete = async (uuids: string[]) => {
-		// Since there's no bulk delete API yet, we delete sequentially
-		for (const uuid of uuids) {
-			await deleteById(uuid)
-		}
+		try {
+			// Since there's no bulk delete API yet, we delete in parallel instead of
+			// sequentially — one failed file must not block the rest from being removed
+			const results = await Promise.allSettled(uuids.map((uuid) => deleteById(uuid)))
 
-		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			const failedCount = results.filter((r) => r.status === 'rejected').length
+
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+
+			if (failedCount > 0) {
+				ElMessage.error(`Failed to delete ${failedCount} of ${uuids.length} files`)
+			}
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to delete files')
+		}
 	}
 
 	const handleBulkUpdate = async (uuids: string[], data: Partial<MediaItem>) => {
-		await mediaApi.updateBulk(uuids, data)
+		try {
+			await mediaApi.updateBulk(uuids, data)
 
-		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to update files')
+		}
 	}
 
 	const handleBulkOptimize = async (uuids: string[]) => {
-		await mediaApi.optimizeBulk(uuids)
+		try {
+			await mediaApi.optimizeBulk(uuids)
 
-		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to optimize files')
+		}
 	}
 
 	const handleOptimize = async (uuid: string) => {
-		await mediaApi.optimize(uuid)
+		try {
+			await mediaApi.optimize(uuid)
 
-		queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to optimize file')
+		}
 	}
 
 	const setSort = (prop: string, order: 'ASC' | 'DESC' | null) => {
@@ -279,6 +301,9 @@ export const useMedia = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to create folder')
+		},
 	})
 
 	const updateFolderMutation = useMutation({
@@ -286,6 +311,9 @@ export const useMedia = () => {
 			mediaApi.updateFolder(id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update folder')
 		},
 	})
 
@@ -298,6 +326,9 @@ export const useMedia = () => {
 			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
 			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to delete folder')
+		},
 	})
 
 	const batchMoveMutation = useMutation({
@@ -306,6 +337,9 @@ export const useMedia = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [MEDIA_QUERY_KEY] })
 			queryClient.invalidateQueries({ queryKey: ['media-folders'] })
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to move files')
 		},
 	})
 

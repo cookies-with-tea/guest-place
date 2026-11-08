@@ -1585,28 +1585,37 @@ pub fn public_router() -> Router<Arc<AppState>> {
 
 /// Всё остальное — чтение/изменение приватной медиа-библиотеки админки
 /// (листинг с метаданными, загрузка, оптимизация, папки, тэги, конфиг,
-/// удаление) — требует auth_middleware.
-pub fn protected_router() -> Router<Arc<AppState>> {
-    Router::new()
+/// удаление) — требует auth_middleware. Мутирующие операции дополнительно
+/// требуют permission `media:write` (см. IMPROVEMENTS.md, п.1).
+pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    let write_router = Router::new()
         .route("/upload/chunk/init", post(init_chunk_upload))
         .route("/upload/chunk/{upload_id}/{chunk_index}", post(upload_chunk).layer(DefaultBodyLimit::disable()))
-        .route("/upload/chunk/{upload_id}/status", get(get_chunk_status))
         .route("/upload/chunk/{upload_id}/complete", post(complete_chunk_upload))
         .route("/optimize/bulk", post(optimize_bulk))
-        .route("/folders", get(folders::get_folders))
         .route("/folders", post(folders::create_folder))
         .route("/folders/{id}", put(folders::update_folder))
         .route("/folders/{id}", delete(folders::delete_folder))
         .route("/batch/move", post(folders::batch_move_media))
-        .route("/tags", get(folders::get_media_tags))
-        .route("/config", get(folders::get_media_config))
         .route("/{uuid}/optimize", post(optimize_one))
         .route("/", post(create).layer(DefaultBodyLimit::disable()))
-        .route("/", get(get_all))
-        .route("/{uuid}", get(get_one))
         .route("/{uuid}", put(update))
         .route("/{uuid}", delete(delete_one))
         .route("/bulk", patch(update_bulk))
         .route("/", delete(delete_all))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_media_write,
+        ));
+
+    let read_router = Router::new()
+        .route("/upload/chunk/{upload_id}/status", get(get_chunk_status))
+        .route("/folders", get(folders::get_folders))
+        .route("/tags", get(folders::get_media_tags))
+        .route("/config", get(folders::get_media_config))
+        .route("/", get(get_all))
+        .route("/{uuid}", get(get_one));
+
+    write_router.merge(read_router)
 }
 

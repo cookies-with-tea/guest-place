@@ -23,11 +23,11 @@ export const useProfile = () => {
 	})
 
 	const handleUpdate = (data: IUserCreateUpdate) => {
-		updateMutation.mutate(data)
+		return updateMutation.mutateAsync(data)
 	}
 
 	const handleChangePassword = (data: IChangePassword) => {
-		passwordMutation.mutate(data)
+		return passwordMutation.mutateAsync(data)
 	}
 
 	return {

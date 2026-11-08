@@ -1,8 +1,7 @@
 import { computed, ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import { usePagination } from '@admin-panel/lib'
+import { useDebouncedFilters, usePagination } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
 
 import { userApi } from '../../api'
@@ -34,15 +33,7 @@ const editingUserUuid = ref<string>('')
 export const useUsers = () => {
 	const queryClient = useQueryClient()
 
-	const debouncedFilters = ref({ ...filters.value })
-
-	watchDebounced(
-		filters,
-		(val) => {
-			debouncedFilters.value = { ...val }
-		},
-		{ debounce: 500, deep: true }
-	)
+	const { debouncedFilters } = useDebouncedFilters(filters)
 
 	// === Query ===
 	const queryKey = computed(() => [
@@ -138,6 +129,9 @@ export const useUsers = () => {
 
 			closeModal()
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to create user')
+		},
 	})
 
 	const updateMutation = useMutation({
@@ -146,6 +140,9 @@ export const useUsers = () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
 
 			closeModal()
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update user')
 		},
 	})
 
@@ -158,12 +155,18 @@ export const useUsers = () => {
 				ElMessage.success(response.messages[0])
 			}
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update user')
+		},
 	})
 
 	const deleteMutation = useMutation({
 		mutationFn: deleteById,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to delete user')
 		},
 	})
 

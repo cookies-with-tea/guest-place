@@ -259,10 +259,18 @@ pub fn public_router() -> Router<Arc<AppState>> {
     Router::new().route("/manifest", get(get_manifest))
 }
 
-pub fn protected_router() -> Router<Arc<AppState>> {
-    Router::new()
-        .route("/", get(get_all))
+/// Мутирующие операции требуют permission `mfe:write` (см. IMPROVEMENTS.md, п.1).
+pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    let write_router = Router::new()
         .route("/", post(create))
         .route("/{id}", put(update))
         .route("/{id}", delete(delete_one))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_mfe_write,
+        ));
+
+    let read_router = Router::new().route("/", get(get_all));
+
+    write_router.merge(read_router)
 }

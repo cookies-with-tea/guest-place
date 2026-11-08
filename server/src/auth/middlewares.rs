@@ -132,3 +132,38 @@ pub async fn permission_required(
     // For now returning 403 Forbidden
     Ok::<Response, Response>((StatusCode::FORBIDDEN, "Forbidden").into_response())
 }
+
+/// Тонкие обёртки над `permission_required` с захардкоженным кодом permission —
+/// `middleware::from_fn_with_state` принимает только `fn(State<S>, Request, Next)`,
+/// без доп. параметров, поэтому сам permission нельзя передать иначе как замыканием.
+pub async fn require_media_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "media:write").await
+}
+
+pub async fn require_i18n_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "i18n:write").await
+}
+
+pub async fn require_mfe_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "mfe:write").await
+}
+
+pub async fn require_user_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "user:write").await
+}

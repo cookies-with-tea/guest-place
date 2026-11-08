@@ -1,9 +1,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 import { useI18n } from '@admin-panel/i18n'
-import { usePagination } from '@admin-panel/lib'
+import { useDebouncedFilters, usePagination } from '@admin-panel/lib'
 import { ElMessage } from 'element-plus'
 
 import {
@@ -50,15 +49,7 @@ export const useTranslations = () => {
 		fetchedLanguages.value = langs.map((l) => l.code)
 	})
 
-	const debouncedFilters = ref({ ...filters.value })
-
-	watchDebounced(
-		filters,
-		(val) => {
-			debouncedFilters.value = { ...val }
-		},
-		{ debounce: 500, deep: true }
-	)
+	const { debouncedFilters } = useDebouncedFilters(filters)
 
 	// === Query ===
 	const queryKey = computed(() => [
@@ -108,6 +99,9 @@ export const useTranslations = () => {
 
 			closeModal()
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to create translation')
+		},
 	})
 
 	const updateMutation = useMutation({
@@ -117,12 +111,18 @@ export const useTranslations = () => {
 
 			closeModal()
 		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to update translation')
+		},
 	})
 
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => deleteTranslation(id, filters.value.locale),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [TRANSLATIONS_QUERY_KEY] })
+		},
+		onError: (err: any) => {
+			ElMessage.error(err?.message || 'Failed to delete translation')
 		},
 	})
 

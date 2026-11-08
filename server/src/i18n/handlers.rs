@@ -793,14 +793,23 @@ pub fn public_router() -> Router<Arc<AppState>> {
         .route("/", get(get_all))
 }
 
-pub fn protected_router() -> Router<Arc<AppState>> {
-    Router::new()
+/// Мутирующие операции требуют permission `i18n:write` (см. IMPROVEMENTS.md, п.1).
+pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    let write_router = Router::new()
         .route("/", post(create_or_update))
         .route("/{key}/{locale}", delete(delete_one))
-        .route("/{key}/refs", get(get_refs))
-        .route("/versions/{key}/{locale}", get(get_versions))
         .route("/versions/{version_id}/rollback", post(rollback))
         .route("/namespaces", post(create_namespace))
         .route("/namespaces/{id}", patch(update_namespace))
         .route("/namespaces/{id}", delete(delete_namespace))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_i18n_write,
+        ));
+
+    let read_router = Router::new()
+        .route("/{key}/refs", get(get_refs))
+        .route("/versions/{key}/{locale}", get(get_versions));
+
+    write_router.merge(read_router)
 }

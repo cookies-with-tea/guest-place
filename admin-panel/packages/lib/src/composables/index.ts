@@ -1,4 +1,5 @@
 export * from './useAuth'
+export * from './useDebouncedFilters'
 export * from './useEvents'
 export * from './useFeatureFlags'
 export * from './useRealtimeNotifications'

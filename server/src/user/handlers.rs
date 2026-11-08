@@ -14,7 +14,7 @@ use argon2::{
 use axum::{
     extract::{Extension, Path, Query, State},
     http::StatusCode,
-    routing::{get, post},
+    routing::{delete, get, post},
     Json, Router,
 };
 use crate::auth::dto::Claims;
@@ -990,14 +990,15 @@ pub async fn update_role_permissions(
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
 
-    for perm in permissions {
-        sqlx::query("INSERT INTO roles_permissions (role, permission_id) VALUES ($1::user_role, $2)")
-            .bind(&role)
-            .bind(perm)
-            .execute(&mut *tx)
-            .await
-            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
-    }
+    sqlx::query(
+        "INSERT INTO roles_permissions (role, permission_id)
+         SELECT $1::user_role, * FROM unnest($2::text[])",
+    )
+    .bind(&role)
+    .bind(&permissions)
+    .execute(&mut *tx)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
 
     tx.commit().await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
@@ -1111,17 +1112,35 @@ async fn change_password(
     into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
 }
 
+/// Публичный роутер не выдаёт никаких данных пользователей и не создаёт их —
+/// регистрация идёт через `/api/v1/auth/register`. Ранее CRUD пользователей
+/// (`get_all`/`create`/`get_one`/`delete_one`/`update`) был смонтирован здесь
+/// без какой-либо авторизации (любой неавторизованный мог листать всех
+/// пользователей и создать аккаунт с `role: "superadmin"`) — перенесён в
+/// `protected_router` (см. IMPROVEMENTS.md, п.1).
 pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/", get(get_all).post(create))
-        .route("/{id}", get(get_one).delete(delete_one).patch(update))
 }
 
-pub fn protected_router() -> Router<Arc<AppState>> {
-    Router::new()
+/// Мутирующие операции над пользователями требуют permission `user:write`
+/// (см. IMPROVEMENTS.md, п.1).
+pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    let write_router = Router::new()
+        .route("/", post(create))
+        .route("/{id}", delete(delete_one).patch(update))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_user_write,
+        ));
+
+    let read_router = Router::new()
         .route("/me", get(get_me).patch(update_me))
         .route("/me/password", post(change_password))
         .route("/roles", get(list_roles))
         .route("/permissions", get(list_permissions))
         .route("/roles/{role}/permissions", get(get_role_permissions).post(update_role_permissions))
+        .route("/", get(get_all))
+        .route("/{id}", get(get_one));
+
+    write_router.merge(read_router)
 }

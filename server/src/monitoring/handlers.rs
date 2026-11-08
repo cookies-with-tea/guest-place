@@ -249,12 +249,15 @@ pub async fn global_search(
 
     // 1. Search Users
     let users = sqlx::query(
-        "SELECT id, first_name, last_name, email FROM users WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(email) LIKE $1 LIMIT 5"
+        "SELECT uuid, first_name, last_name, email FROM guest_user WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 OR LOWER(email) LIKE $1 LIMIT 5"
     )
     .bind(&q)
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("global_search: user query failed: {}", e);
+        Vec::new()
+    });
 
     use sqlx::Row;
     for u in users {
@@ -262,8 +265,8 @@ pub async fn global_search(
             category: "Users".to_string(),
             title: format!("{} {}", u.get::<Option<String>, _>("first_name").unwrap_or_default(), u.get::<Option<String>, _>("last_name").unwrap_or_default()),
             description: u.get::<String, _>("email"),
-            url: format!("/users?edit={}", u.get::<uuid::Uuid, _>("id")),
-            id: u.get::<uuid::Uuid, _>("id").to_string(),
+            url: format!("/users?edit={}", u.get::<uuid::Uuid, _>("uuid")),
+            id: u.get::<uuid::Uuid, _>("uuid").to_string(),
         });
     }
 
@@ -288,20 +291,23 @@ pub async fn global_search(
 
     // 3. Search Media
     let media = sqlx::query(
-        "SELECT id, name, extension FROM media WHERE LOWER(name) LIKE $1 LIMIT 5"
+        "SELECT uuid, name, extension FROM media WHERE LOWER(name) LIKE $1 LIMIT 5"
     )
     .bind(&q)
     .fetch_all(&state.pool)
     .await
-    .unwrap_or_default();
+    .unwrap_or_else(|e| {
+        tracing::error!("global_search: media query failed: {}", e);
+        Vec::new()
+    });
 
     for m in media {
         results.push(SearchResult {
             category: "Media".to_string(),
             title: m.get::<String, _>("name"),
             description: format!("Type: {}", m.get::<Option<String>, _>("extension").unwrap_or_default()),
-            url: format!("/media?id={}", m.get::<uuid::Uuid, _>("id")),
-            id: m.get::<uuid::Uuid, _>("id").to_string(),
+            url: format!("/media?id={}", m.get::<uuid::Uuid, _>("uuid")),
+            id: m.get::<uuid::Uuid, _>("uuid").to_string(),
         });
     }
 
