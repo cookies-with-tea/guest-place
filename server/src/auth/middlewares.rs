@@ -167,3 +167,27 @@ pub async fn require_user_write(
 ) -> Result<Response, impl IntoResponse> {
     permission_required(state, request, next, "user:write").await
 }
+
+pub async fn require_access_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "access:write").await
+}
+
+pub async fn require_system_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "system:write").await
+}
+
+pub async fn require_features_write(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "features:write").await
+}

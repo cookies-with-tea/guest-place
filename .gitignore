@@ -20,6 +20,9 @@ playwright-report/
 test-results/
 coverage/
 
+# Build caches
+.turbo/
+
 # Subprojects: server/, admin-panel/ и client/ теперь трекаются прямо в этой
 # ветке (см. IMPROVEMENTS.md раздел 0). client/ — стабильная версия (ветка
 # client, НЕ client-update — та осталась отдельной веткой на GitHub по

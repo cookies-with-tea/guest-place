@@ -1122,15 +1122,23 @@ pub fn public_router() -> Router<Arc<AppState>> {
     Router::new()
 }
 
-/// Мутирующие операции над пользователями требуют permission `user:write`
-/// (см. IMPROVEMENTS.md, п.1).
+/// Мутирующие операции над пользователями требуют permission `user:write`;
+/// изменение прав роли — отдельный, более чувствительный permission
+/// `access:write` (см. IMPROVEMENTS.md, п.1).
 pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
     let write_router = Router::new()
         .route("/", post(create))
         .route("/{id}", delete(delete_one).patch(update))
         .route_layer(axum::middleware::from_fn_with_state(
-            state,
+            state.clone(),
             crate::auth::middlewares::require_user_write,
+        ));
+
+    let access_write_router = Router::new()
+        .route("/roles/{role}/permissions", post(update_role_permissions))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_access_write,
         ));
 
     let read_router = Router::new()
@@ -1138,9 +1146,9 @@ pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
         .route("/me/password", post(change_password))
         .route("/roles", get(list_roles))
         .route("/permissions", get(list_permissions))
-        .route("/roles/{role}/permissions", get(get_role_permissions).post(update_role_permissions))
+        .route("/roles/{role}/permissions", get(get_role_permissions))
         .route("/", get(get_all))
         .route("/{id}", get(get_one));
 
-    write_router.merge(read_router)
+    write_router.merge(access_write_router).merge(read_router)
 }

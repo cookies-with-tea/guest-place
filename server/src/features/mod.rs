@@ -101,6 +101,12 @@ pub fn public_router() -> Router<Arc<AppState>> {
     Router::new().route("/", get(handlers::get_features))
 }
 
-pub fn protected_router() -> Router<Arc<AppState>> {
-    Router::new().route("/", axum::routing::post(handlers::update_features))
+/// Требует permission `features:write` (см. IMPROVEMENTS.md).
+pub fn protected_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/", axum::routing::post(handlers::update_features))
+        .route_layer(axum::middleware::from_fn_with_state(
+            state,
+            crate::auth::middlewares::require_features_write,
+        ))
 }

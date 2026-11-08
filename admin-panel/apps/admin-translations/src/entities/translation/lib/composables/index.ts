@@ -181,7 +181,13 @@ export const useTranslations = () => {
 	}
 
 	const handleRollback = async (versionId: string) => {
-		await rollbackTranslation(versionId)
+		try {
+			await rollbackTranslation(versionId)
+		} catch (err: any) {
+			ElMessage.error(err?.message || 'Failed to rollback translation')
+
+			return
+		}
 
 		ElMessage.success('Rollback successful')
 

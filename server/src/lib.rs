@@ -88,7 +88,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/auth", auth::handlers::protected_router())
         .nest("/api/v1/user", user::handlers::protected_router(state.clone()))
         .nest("/api/v1/media", media::handlers::protected_router(state.clone()))
-        .nest("/api/v1/features", features::protected_router())
+        .nest("/api/v1/features", features::protected_router(state.clone()))
         .nest("/api/v1/i18n", i18n::handlers::protected_router(state.clone()))
         .nest("/api/v1/mfe", mfe::handlers::protected_router(state.clone()))
         .nest("/api/v1/content", content::protected_router())
@@ -98,7 +98,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/redirects", redirects::protected_router())
         .nest("/api/v1/venues", venues::protected_router())
         .nest("/api/v1/analytics", analytics::handlers::protected_router())
-        .nest("/api/v1/system", monitoring::protected_router())
+        .nest("/api/v1/system", monitoring::protected_router(state.clone()))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
