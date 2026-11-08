@@ -38,7 +38,7 @@
 							<template #dropdown>
 								<el-dropdown-menu>
 									<el-dropdown-item>{{ $T('shell.profile') }}</el-dropdown-item>
-									<el-dropdown-item divided @click="clearAuth">{{ $T('shell.logout') }}</el-dropdown-item>
+									<el-dropdown-item divided @click="handleLogout">{{ $T('shell.logout') }}</el-dropdown-item>
 								</el-dropdown-menu>
 							</template>
 						</el-dropdown>
@@ -81,7 +81,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from '@admin-panel/i18n'
-import { GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
+import { authApi, GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
 import {
 	UiAuthWidget,
 	UiErrorBoundary,
@@ -111,6 +111,19 @@ const searchRef = ref<any>(null)
 
 const openSearch = () => {
 	searchRef.value?.open()
+}
+
+// clearAuth() только сбрасывает локальное состояние — чтобы реально завершить
+// сессию (снять refresh_token в БД, очистить обе HttpOnly-cookie), сначала
+// нужно дойти до сервера.
+const handleLogout = async () => {
+	try {
+		await authApi.logout()
+	} catch {
+		// best-effort — локальное состояние всё равно сбрасываем ниже
+	} finally {
+		clearAuth()
+	}
 }
 
 const handleUnauthorized = (event: any) => {

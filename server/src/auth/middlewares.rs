@@ -2,7 +2,7 @@ use crate::{AppState, core::response::{error_map, into_api_response}};
 use axum::{
     body::Body,
     extract::{Request, State},
-    http::{self, StatusCode},
+    http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
@@ -19,17 +19,16 @@ pub async fn auth_middleware(
         .cloned()
         .unwrap_or_else(|| "en".to_string());
 
-    let auth_header = request
-        .headers()
-        .get(http::header::AUTHORIZATION)
-        .and_then(|h| h.to_str().ok());
-
-    let token = if let Some(header_value) = auth_header {
-        #[cfg(feature = "test-auth")]
-        if header_value == "TestBearer" {
-            // Bypass for integration tests only — this whole branch is compiled
-            // out unless built with `--features test-auth` (never set in a
-            // normal `cargo build`/`cargo build --release`, see Cargo.toml).
+    #[cfg(feature = "test-auth")]
+    {
+        // Bypass for integration tests only — this whole branch is compiled
+        // out unless built with `--features test-auth` (never set in a
+        // normal `cargo build`/`cargo build --release`, see Cargo.toml).
+        let auth_header = request
+            .headers()
+            .get(axum::http::header::AUTHORIZATION)
+            .and_then(|h| h.to_str().ok());
+        if auth_header == Some("TestBearer") {
             request.extensions_mut().insert(crate::auth::dto::Claims {
                 sub: uuid::Uuid::nil(),
                 exp: 0,
@@ -38,14 +37,13 @@ pub async fn auth_middleware(
             });
             return Ok(next.run(request).await);
         }
+    }
 
-        if header_value.starts_with("Bearer ") {
-            &header_value[7..]
-        } else {
-            return Err(create_unauthorized_response(&state, &locale).await);
-        }
-    } else {
-        return Err(create_unauthorized_response(&state, &locale).await);
+    // access_token живёт только в HttpOnly-cookie (см. auth::cookies) — заголовок
+    // Authorization больше не читается, токен недоступен JS и не ворует XSS.
+    let token = match crate::auth::cookies::extract_access_token(request.headers()) {
+        Some(token) => token,
+        None => return Err(create_unauthorized_response(&state, &locale).await),
     };
 
     let secret = match std::env::var("JWT_SECRET") {
@@ -60,7 +58,7 @@ pub async fn auth_middleware(
 
     use jsonwebtoken::{decode, DecodingKey, Validation};
     let token_data = match decode::<crate::auth::dto::Claims>(
-        token,
+        &token,
         &DecodingKey::from_secret(secret.as_ref()),
         &Validation::default(),
     ) {

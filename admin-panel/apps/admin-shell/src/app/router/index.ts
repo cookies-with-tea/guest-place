@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { GP_EVENTS, ROUTES, useEvents } from '@admin-panel/lib'
+import { GP_EVENTS, ROUTES, useAuth, useEvents } from '@admin-panel/lib'
 import { loadRemoteModule, type RemoteManifest } from '@admin-panel/lib/utils'
 import { UiMfeFallback, useSidebar } from '@admin-panel/ui'
 import { ElMessage } from 'element-plus'
@@ -269,14 +269,13 @@ export const initRouter = async (app: any) => {
 		}
 	})
 
-	router.beforeEach((to, from, next) => {
-		const token = localStorage.getItem('gp_access_token')
-		const isAuthenticated = !!token
+	const { isAuthenticated } = useAuth()
 
-		if (to.path !== '/login' && !isAuthenticated && !to.meta.public) {
+	router.beforeEach((to, from, next) => {
+		if (to.path !== '/login' && !isAuthenticated.value && !to.meta.public) {
 			next('/login')
 			return
-		} else if (to.path === '/login' && isAuthenticated) {
+		} else if (to.path === '/login' && isAuthenticated.value) {
 			next('/')
 			return
 		}

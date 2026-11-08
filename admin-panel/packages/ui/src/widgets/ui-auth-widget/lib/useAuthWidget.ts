@@ -1,6 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 
-import { authApi, useAuth } from '@admin-panel/lib'
+import { authApi } from '@admin-panel/lib'
 
 export type AuthMode = 'login' | 'register' | 'forgot-password' | 'mfa'
 
@@ -8,8 +8,6 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 	const mode = ref<AuthMode>(initialMode)
 	const loading = ref(false)
 	const error = ref<string | null>(null)
-
-	const { setTokens, setUser } = useAuth()
 
 	const authForm = reactive({
 		name: '',
@@ -81,18 +79,9 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 			})
 
 			if (response.data) {
-				setTokens({
-					accessToken: response.data.accessToken,
-				})
-
-				// Optional: fetch user profile here
-				setUser({
-					uuid: 'temp-uuid', // Should come from payload or separate call
-					email: authForm.email,
-					role: 'admin', // Should be reactive based on token/profile
-				})
-
-				// Refresh page to apply new state across all MFEs
+				// access_token/refresh_token приходят только как HttpOnly-cookie (не в теле
+				// ответа) — reload перезапустит бутстрап приложения, который сам определит
+				// isAuthenticated/user через checkAuth() по уже выставленной cookie-сессии.
 				window.location.reload()
 			}
 		} catch (e: any) {

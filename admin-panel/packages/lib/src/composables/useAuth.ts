@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { ofetch } from 'ofetch'
 
 import { GP_EVENTS } from '../constants'
 import { isBrowser } from '../utils'
@@ -15,46 +16,58 @@ export interface IAuthUser {
 	lastName?: string
 }
 
-export interface IAuthTokens {
-	accessToken: string
-}
-
-function getStoredUser(): IAuthUser | null {
-	if (!isBrowser) return null
-	try {
-		const raw = localStorage.getItem('gp_user')
-		return raw ? JSON.parse(raw) : null
-	} catch {
-		return null
-	}
-}
-
-const user = ref<IAuthUser | null>(getStoredUser())
-const accessToken = ref<string | null>(isBrowser ? localStorage.getItem('gp_access_token') : null)
+// access_token/refresh_token живут только в HttpOnly-cookie (server/src/auth/cookies.rs) —
+// JS не может ни прочитать, ни хранить их (см. IMPROVEMENTS.md). isAuthenticated больше не
+// производная от значения токена — это отдельный реактивный флаг, который выставляется
+// явно: `checkAuth()` на старте приложения (единственный способ узнать, есть ли валидная
+// cookie-сессия, раз её саму прочитать нельзя) и на login/logout/401.
+const user = ref<IAuthUser | null>(null)
+const isAuthenticated = ref(false)
+// true once checkAuth() has resolved at least once — отличает "ещё не знаем" от
+// "точно не авторизован", чтобы UiAuthGuard/роут-guard не мигали логин-формой на старте.
+const authChecked = ref(false)
 
 export function useAuth() {
-	const isAuthenticated = computed(() => !!accessToken.value)
-
 	const isAdmin = computed(() => user.value?.role === 'admin')
 
-	// refresh_token больше не проходит через JS: сервер выставляет его как HttpOnly-cookie
-	// (см. server/src/auth/cookies.rs) — читать и хранить его здесь уже нельзя и не нужно.
-	const setTokens = (tokens: IAuthTokens) => {
-		accessToken.value = tokens.accessToken
+	const mapUser = (data: any): IAuthUser => ({
+		uuid: data.uuid,
+		email: data.email,
+		role: data.role,
+		firstName: data.first_name,
+		lastName: data.last_name,
+	})
 
-		if (isBrowser) {
-			localStorage.setItem('gp_access_token', tokens.accessToken)
+	/** Единственный способ узнать, валидна ли cookie-сессия — спросить сервер. */
+	const checkAuth = async (): Promise<boolean> => {
+		if (!isBrowser) return false
+
+		try {
+			const res = await ofetch<{ data: any }>('/api/v1/user/me', { credentials: 'include' })
+
+			if (res?.data) {
+				user.value = mapUser(res.data)
+			}
+
+			isAuthenticated.value = true
+
+			return true
+		} catch {
+			user.value = null
+			isAuthenticated.value = false
+
+			return false
+		} finally {
+			authChecked.value = true
 		}
 	}
 
 	const clearAuth = () => {
 		user.value = null
 
-		accessToken.value = null
+		isAuthenticated.value = false
 
 		if (isBrowser) {
-			localStorage.removeItem('gp_access_token')
-
 			const notCanceled = dispatch(GP_EVENTS.UNAUTHORIZED, {
 				pathname: window.location.pathname,
 				port: window.location.port,
@@ -74,10 +87,10 @@ export function useAuth() {
 
 	return {
 		user,
-		accessToken,
 		isAuthenticated,
+		authChecked,
 		isAdmin,
-		setTokens,
+		checkAuth,
 		clearAuth,
 		setUser,
 	}

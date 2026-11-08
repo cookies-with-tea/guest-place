@@ -21,7 +21,7 @@ if (localStorage.getItem('gp-theme') === 'dark') {
 	document.documentElement.classList.add('light')
 }
 
-import { GP_EVENTS, useEvents } from '@admin-panel/lib'
+import { GP_EVENTS, useAuth, useEvents } from '@admin-panel/lib'
 import * as elementPlus from 'element-plus'
 
 const { on } = useEvents()
@@ -93,6 +93,12 @@ const bootstrap = async () => {
 	await loadDict('menu')
 
 	await loadDict('mfeHelp')
+
+	// access_token живёт в HttpOnly-cookie — единственный способ узнать, есть ли
+	// валидная сессия, это спросить сервер; роут-guard в initRouter читает
+	// isAuthenticated синхронно, поэтому это должно резолвиться раньше него.
+	const { checkAuth } = useAuth()
+	await checkAuth()
 
 	const router = await initRouter(app)
 

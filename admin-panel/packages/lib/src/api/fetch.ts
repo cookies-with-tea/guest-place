@@ -1,12 +1,9 @@
 import { ElMessage } from 'element-plus'
 import { $fetch, type FetchOptions } from 'ofetch'
 
-import { useEvents } from '../composables/useEvents'
-import { GP_EVENTS } from '../constants'
+import { useAuth } from '../composables/useAuth'
 import type { CamelCasedProperties, IResponse, SnakeCasedProperties } from '../model'
 import { camelToSnake, isBrowser, snakeToCamel } from '../utils'
-
-const { dispatch } = useEvents()
 
 type JsonFetchOptions = Omit<FetchOptions<'json', any>, 'body' | 'method'> & {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -22,11 +19,6 @@ export const createApi = (entityName: string) => {
 	const fetchData = async <T>(url: string, options?: JsonFetchOptions): Promise<IResponse<CamelCasedProperties<T>>> => {
 		try {
 			let body = undefined
-			let token = ''
-
-			if (isBrowser) {
-				token = localStorage.getItem('gp_access_token') ?? ''
-			}
 
 			if (options?.body) {
 				if (
@@ -53,16 +45,13 @@ export const createApi = (entityName: string) => {
 				body,
 				params,
 				responseType: 'json',
-				// credentials: 'include' — refresh_token больше не приходит в теле ответа
-				// (server/src/auth/cookies.rs переносит его в HttpOnly-cookie), браузер должен
-				// слать эту cookie и на /refresh, и на /logout даже когда админка и сервер на
-				// разных портах в dev (localhost:4173 -> localhost:8000 — разные origin, но
-				// credentials: 'include' всё равно нужен явно).
+				// access_token/refresh_token живут только в HttpOnly-cookie
+				// (server/src/auth/cookies.rs) — нет токена, который можно было бы положить
+				// в заголовок Authorization, браузер сам шлёт cookie. credentials: 'include'
+				// нужен явно, чтобы это работало и когда админка и сервер на разных портах
+				// в dev (localhost:4173 -> localhost:8000 — разные origin).
 				credentials: 'include',
-				headers: {
-					...options?.headers,
-					Authorization: token ? `Bearer ${token}` : '',
-				},
+				headers: options?.headers,
 			})
 
 			return snakeToCamel(response) as IResponse<CamelCasedProperties<T>>
@@ -72,21 +61,7 @@ export const createApi = (entityName: string) => {
 
 			if (error.statusCode === 401 || error.statusCode === 403) {
 				if (isBrowser) {
-					localStorage.removeItem('gp_access_token')
-
-					const notCanceled = dispatch(GP_EVENTS.UNAUTHORIZED, {
-						pathname: window.location.pathname,
-						port: window.location.port,
-					})
-
-					// Only redirect if not canceled and we are likely in the Shell (port 4173) or on a path that expects /login
-					if (notCanceled && !window.location.pathname.startsWith('/login')) {
-						// In standalone MFEs (like port 4183), we don't want to redirect to a non-existent /login
-						// Instead, we let the UI (UiAuthGuard) handle the state change
-						if (window.location.port === '4173' || window.location.port === '5173') {
-							window.location.href = '/login'
-						}
-					}
+					useAuth().clearAuth()
 				}
 			}
 

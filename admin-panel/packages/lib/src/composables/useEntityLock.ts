@@ -50,15 +50,6 @@ export function useEntityLock(entityType: string, entityId: Ref<string> | string
 		return user.value?.firstName || user.value?.email || 'Администратор'
 	})
 
-	// Эндпоинт требует auth_middleware (JWT сервер использует как личность
-	// владельца лока), а этот composable ходит через голый `ofetch`, а не
-	// через `createApi`/`$fetch` из api/fetch.ts — тот сам добавляет
-	// Authorization. Здесь его нужно проставлять руками.
-	const authHeaders = (): Record<string, string> => {
-		const token = isBrowser ? localStorage.getItem('gp_access_token') : null
-		return token ? { Authorization: `Bearer ${token}` } : {}
-	}
-
 	const checkStatus = async () => {
 		const id = currentEntityId.value
 		if (!id || id === 'new' || id === 'create') return
@@ -66,7 +57,7 @@ export function useEntityLock(entityType: string, entityId: Ref<string> | string
 		try {
 			isLoading.value = true
 			const res = await ofetch<{ data: ILockStatusResponse }>(`/api/v1/locks/${entityType}/${id}`, {
-				headers: authHeaders(),
+				credentials: 'include',
 			})
 
 			const data = res?.data
@@ -92,7 +83,7 @@ export function useEntityLock(entityType: string, entityId: Ref<string> | string
 			isLoading.value = true
 			const res = await ofetch<{ data: ILockStatusResponse }>(`/api/v1/locks/${entityType}/${id}`, {
 				method: 'POST',
-				headers: authHeaders(),
+				credentials: 'include',
 				body: {
 					user_name: currentUserName.value,
 					force,
@@ -137,7 +128,7 @@ export function useEntityLock(entityType: string, entityId: Ref<string> | string
 		try {
 			await ofetch(`/api/v1/locks/${entityType}/${id}`, {
 				method: 'DELETE',
-				headers: authHeaders(),
+				credentials: 'include',
 				query: { force },
 			})
 			isLocked.value = false
@@ -198,15 +189,15 @@ export function useEntityLock(entityType: string, entityId: Ref<string> | string
 
 	const handleBeforeUnload = () => {
 		if (isOwnLock.value && isBrowser) {
-			// `sendBeacon` не умеет проставлять заголовки, а эндпоинт теперь
-			// требует Authorization — используем `fetch` с `keepalive: true`,
-			// он переживает выгрузку страницы так же, как sendBeacon, но может
-			// нести заголовки.
+			// `sendBeacon` всегда шлёт POST — для DELETE-роута release_lock это не
+			// подходит (ушло бы на acquire_lock). `fetch` с `keepalive: true`
+			// переживает выгрузку страницы так же, как sendBeacon, но позволяет
+			// указать метод; cookie (access_token) браузер приложит сам.
 			const id = currentEntityId.value
 			if (id) {
 				fetch(`/api/v1/locks/${entityType}/${id}`, {
 					method: 'DELETE',
-					headers: authHeaders(),
+					credentials: 'include',
 					keepalive: true,
 				}).catch(() => {})
 			}
