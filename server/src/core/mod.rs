@@ -9,5 +9,6 @@ pub mod plugin;
 pub mod bus;
 pub mod redis;
 pub mod lock;
+pub mod scheduler;
 
 pub use db::DatabaseConfig;

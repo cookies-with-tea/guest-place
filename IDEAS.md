@@ -11,19 +11,19 @@
 
 ## Функционал
 
-### 1. Отложенная публикация контента
+### 1. UI для отложенной публикации в admin-content
 
-У `pages`/`content_entries` есть статусы draft/review/published, но
-`published_at` — просто метка факта публикации (`pages/handlers.rs:389-392`,
-ставится в `Utc::now()` в момент создания/публикации), не таймер на будущее.
-Ни одного cron/scheduler-джоба, который переводил бы draft → published по
-дате, не нашёл.
+Бэкенд отложенной публикации (`scheduled_at` + периодический джоб) уже
+реализован и верифицирован — см. `git log -- server/src/core/scheduler.rs`.
+Выставить `status: "scheduled"` + `scheduled_at` сейчас можно только через
+API/Swagger, в `admin-content` (page-constructor, content-editor) статус
+"scheduled" и выбор даты/времени нигде не отображаются.
 
-- [ ] Добавить `scheduled_at` (nullable) + периодический джоб
-      (`tokio::spawn` + `interval`, по аналогии с уже существующими в
-      `redirects/handlers.rs`/`monitoring/handlers.rs`), который раз в
-      минуту ищет записи с `scheduled_at <= NOW()` и `status = 'scheduled'`,
-      переводит в `published`.
+- [ ] Добавить опцию "scheduled" в status-дропдауны
+      `PageConstructorHeader.vue`/`ContentEditorHeader.vue`
+      (`apps/admin-content/src/features/page-constructor`,
+      `.../content-editor`) + datetime-picker для `scheduled_at`, который
+      появляется при выборе этого статуса.
 
 ---
 

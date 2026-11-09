@@ -640,6 +640,18 @@ pub async fn create_entry(
     // 3. Insert entry
     let status = payload.status.unwrap_or(ContentEntryStatus::Draft);
     let i18n = payload.i18n.unwrap_or(serde_json::json!({}));
+
+    if status == ContentEntryStatus::Scheduled && payload.scheduled_at.is_none() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["scheduled_at is required when status is 'scheduled'".to_string()]),
+            }),
+        ));
+    }
+
     let published_at = if status == ContentEntryStatus::Published {
         payload.published_at.or_else(|| Some(chrono::Utc::now()))
     } else {
@@ -647,7 +659,7 @@ pub async fn create_entry(
     };
 
     let entry = sqlx::query_as::<_, ContentEntry>(
-        "INSERT INTO content_entries (schema_id, slug, data, status, i18n, published_at, published_by) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"
+        "INSERT INTO content_entries (schema_id, slug, data, status, i18n, published_at, published_by, scheduled_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
     )
     .bind(payload.schema_id)
     .bind(&payload.slug)
@@ -656,6 +668,7 @@ pub async fn create_entry(
     .bind(sqlx::types::Json(i18n))
     .bind(published_at)
     .bind(payload.published_by)
+    .bind(payload.scheduled_at)
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
@@ -810,6 +823,20 @@ pub async fn update_entry(
             })?;
     }
 
+    if payload.status == Some(ContentEntryStatus::Scheduled)
+        && payload.scheduled_at.is_none()
+        && entry.scheduled_at.is_none()
+    {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["scheduled_at is required when status is 'scheduled'".to_string()]),
+            }),
+        ));
+    }
+
     // 2. Save current version before update
     let next_version_number = sqlx::query_scalar::<_, i32>(
         "SELECT COALESCE(MAX(version_number), 0) + 1 FROM content_entry_versions WHERE entry_id = $1"
@@ -868,6 +895,10 @@ pub async fn update_entry(
         parts.push(format!("published_by = ${}", arg_index));
         arg_index += 1;
     }
+    if payload.scheduled_at.is_some() {
+        parts.push(format!("scheduled_at = ${}", arg_index));
+        arg_index += 1;
+    }
 
     if parts.is_empty() {
         return Err((
@@ -904,6 +935,9 @@ pub async fn update_entry(
     }
     if let Some(published_by) = payload.published_by {
         sql_query = sql_query.bind(published_by);
+    }
+    if let Some(scheduled_at) = payload.scheduled_at {
+        sql_query = sql_query.bind(scheduled_at);
     }
     sql_query = sql_query.bind(id);
 

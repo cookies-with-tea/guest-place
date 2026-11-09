@@ -370,6 +370,7 @@ async fn main() {
         .expect("Failed to run migrations");
 
     guest_place::auth::handlers::spawn_expired_refresh_token_cleanup(pool.clone());
+    guest_place::core::scheduler::spawn_scheduled_publish_job(pool.clone());
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", { app_host }, { app_port }))
         .await

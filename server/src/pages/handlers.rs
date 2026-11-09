@@ -64,7 +64,7 @@ pub async fn get_pages(
 
     let pages_res = if let Some(ref status) = query.status {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC LIMIT $2 OFFSET $3",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at FROM pages WHERE status = $1 ORDER BY updated_at DESC LIMIT $2 OFFSET $3",
         )
         .bind(status)
         .bind(limit as i64)
@@ -73,7 +73,7 @@ pub async fn get_pages(
         .await
     } else {
         sqlx::query_as::<_, Page>(
-            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages ORDER BY updated_at DESC LIMIT $1 OFFSET $2",
+            "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at FROM pages ORDER BY updated_at DESC LIMIT $1 OFFSET $2",
         )
         .bind(limit as i64)
         .bind(offset)
@@ -134,7 +134,7 @@ pub async fn get_page(
     let (page_res, is_slug_lookup) = if let Ok(uuid) = Uuid::parse_str(&clean) {
         (
             sqlx::query_as::<_, Page>(
-                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE id = $1 OR slug = $2",
+                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at FROM pages WHERE id = $1 OR slug = $2",
             )
             .bind(uuid)
             .bind(&clean)
@@ -145,7 +145,7 @@ pub async fn get_page(
     } else {
         (
             sqlx::query_as::<_, Page>(
-                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at FROM pages WHERE slug = $1",
+                "SELECT id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at FROM pages WHERE slug = $1",
             )
             .bind(&clean)
             .fetch_optional(&state.pool)
@@ -386,6 +386,17 @@ pub async fn create_page(
     let status = payload.status.unwrap_or_else(|| "draft".to_string());
     let seo = payload.seo.unwrap_or_else(|| serde_json::json!({}));
 
+    if status == "scheduled" && payload.scheduled_at.is_none() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::<()> {
+                data: None,
+                errors: None,
+                messages: Some(vec!["scheduled_at is required when status is 'scheduled'".to_string()]),
+            }),
+        ));
+    }
+
     let published_at = if status == "published" {
         payload.published_at.or_else(|| Some(chrono::Utc::now()))
     } else {
@@ -394,9 +405,9 @@ pub async fn create_page(
 
     let page = sqlx::query_as::<_, Page>(
         r#"
-        INSERT INTO pages (title, slug, blocks, status, seo, parent_id, published_at, published_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at
+        INSERT INTO pages (title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at
         "#,
     )
     .bind(payload.title)
@@ -407,6 +418,7 @@ pub async fn create_page(
     .bind(payload.parent_id)
     .bind(published_at)
     .bind(payload.published_by)
+    .bind(payload.scheduled_at)
     .fetch_one(&state.pool)
     .await
     .map_err(|e| {
@@ -475,9 +487,10 @@ pub async fn update_page(
                 ELSE published_at
             END,
             published_by = COALESCE($9, published_by),
+            scheduled_at = COALESCE($10, scheduled_at),
             updated_at = NOW()
-        WHERE id = $10
-        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, created_at, updated_at
+        WHERE id = $11
+        RETURNING id, title, slug, blocks, status, seo, parent_id, published_at, published_by, scheduled_at, created_at, updated_at
         "#,
     )
     .bind(payload.title)
@@ -489,6 +502,7 @@ pub async fn update_page(
     .bind(new_parent_id)
     .bind(payload.published_at)
     .bind(payload.published_by)
+    .bind(payload.scheduled_at)
     .bind(id)
     .fetch_optional(&state.pool)
     .await

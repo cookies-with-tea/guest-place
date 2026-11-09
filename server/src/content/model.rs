@@ -74,6 +74,7 @@ pub struct UpdateSchemaDTO {
 pub enum ContentEntryStatus {
     Draft,
     Review,
+    Scheduled,
     Published,
 }
 
@@ -89,6 +90,9 @@ pub struct ContentEntry {
     pub i18n: sqlx::types::Json<serde_json::Value>,
     pub published_at: Option<DateTime<Utc>>,
     pub published_by: Option<Uuid>,
+    /// Момент, когда джоб (`core::scheduler`) должен перевести запись со status
+    /// Scheduled в Published. Игнорируется при любом другом status.
+    pub scheduled_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -104,6 +108,8 @@ pub struct CreateContentEntryDTO {
     pub published_at: Option<DateTime<Utc>>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
     pub published_by: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub scheduled_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -116,6 +122,8 @@ pub struct UpdateContentEntryDTO {
     pub published_at: Option<DateTime<Utc>>,
     #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
     pub published_by: Option<Uuid>,
+    #[serde(default, deserialize_with = "crate::core::utils::empty_string_as_none")]
+    pub scheduled_at: Option<DateTime<Utc>>,
 }
 #[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct ContentEntryVersion {
