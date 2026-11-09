@@ -2,99 +2,70 @@
 	<div class="rights-page glass-card">
 		<div class="header">
 			<h1>Rights Management</h1>
-			<p>Manage permissions for each user role</p>
+			<p>Матрица прав: роли и разрешения, которые им доступны</p>
 		</div>
 
-		<el-tabs v-model="activeRole" class="role-tabs" @tab-change="handleTabChange">
-			<el-tab-pane v-for="role in roles" :key="role" :label="role.toUpperCase()" :name="role">
-				<div v-if="loadingPermissions" class="loading-state">
-					<el-skeleton animated :rows="5" />
-				</div>
-				<div v-else class="permissions-container">
-					<h3>Permissions for {{ role }}</h3>
-					<el-checkbox-group v-model="selectedPermissions" class="permissions-grid">
-						<el-checkbox v-for="perm in allPermissions" :key="perm" border class="perm-checkbox" :label="perm">
-							{{ perm }}
-						</el-checkbox>
-					</el-checkbox-group>
+		<div class="filters-row">
+			<el-input v-model="search" class="search-input" clearable placeholder="Поиск по правам..." />
+		</div>
 
-					<div class="actions">
-						<el-button :loading="saving" type="primary" @click="savePermissions"> Save Changes </el-button>
-						<el-button @click="resetPermissions">Reset</el-button>
-					</div>
-				</div>
-			</el-tab-pane>
-		</el-tabs>
+		<div v-if="loading" class="loading-state">
+			<el-skeleton animated :rows="8" />
+		</div>
+
+		<div v-else class="matrix-wrapper">
+			<table class="matrix">
+				<thead>
+					<tr>
+						<th class="matrix__perm-col">Разрешение</th>
+						<th v-for="role in roles" :key="role" class="matrix__role-col">{{ role.toUpperCase() }}</th>
+					</tr>
+				</thead>
+
+				<template v-for="group in groups" :key="group.module">
+					<tbody>
+						<tr class="matrix__group-row">
+							<td :colspan="roles.length + 1">{{ moduleLabel(group.module) }}</td>
+						</tr>
+
+						<tr v-for="perm in group.permissions" :key="perm.id" class="matrix__perm-row">
+							<td class="matrix__perm-col">
+								<el-tooltip v-if="perm.description" :content="perm.description" placement="right">
+									<div class="perm-label">
+										<span class="perm-label__name">{{ perm.name }}</span>
+										<span class="perm-label__id">{{ perm.id }}</span>
+									</div>
+								</el-tooltip>
+								<div v-else class="perm-label">
+									<span class="perm-label__name">{{ perm.name }}</span>
+									<span class="perm-label__id">{{ perm.id }}</span>
+								</div>
+							</td>
+
+							<td v-for="role in roles" :key="role" class="matrix__role-col">
+								<el-checkbox :model-value="isChecked(role, perm.id)" @update:model-value="toggle(role, perm.id)" />
+							</td>
+						</tr>
+					</tbody>
+				</template>
+			</table>
+
+			<p v-if="!groups.length" class="empty-state">Ничего не найдено</p>
+		</div>
+
+		<div class="actions">
+			<el-button :disabled="!isDirty" :loading="saving" type="primary" @click="save"> Save Changes </el-button>
+			<el-button :disabled="!isDirty" @click="reset">Reset</el-button>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 
-import type { TabPaneName } from 'element-plus'
-import { ElMessage } from 'element-plus'
+import { moduleLabel, useRightsMatrix } from '../lib/useRightsMatrix'
 
-import { rightsApi } from '#entities/user/api/rights'
-
-const roles = ref<string[]>([])
-const allPermissions = ref<string[]>([])
-const activeRole = ref('')
-const selectedPermissions = ref<string[]>([])
-const initialPermissions = ref<string[]>([])
-
-const loading = ref(true)
-const loadingPermissions = ref(false)
-const saving = ref(false)
-
-const loadData = async () => {
-	loading.value = true
-
-	const [rolesRes, permsRes] = await Promise.all([rightsApi.getRoles(), rightsApi.getPermissions()])
-
-	roles.value = rolesRes.data || []
-
-	allPermissions.value = permsRes.data || []
-
-	if (roles.value.length > 0) {
-		activeRole.value = roles.value[0]
-
-		await loadRolePermissions(activeRole.value)
-	}
-
-	loading.value = false
-}
-
-const loadRolePermissions = async (role: string) => {
-	loadingPermissions.value = true
-
-	const res = await rightsApi.getRolePermissions(role)
-
-	selectedPermissions.value = res.data || []
-
-	initialPermissions.value = [...selectedPermissions.value]
-
-	loadingPermissions.value = false
-}
-
-const handleTabChange = (role: TabPaneName) => {
-	loadRolePermissions(role as string)
-}
-
-const savePermissions = async () => {
-	saving.value = true
-
-	await rightsApi.updateRolePermissions(activeRole.value, selectedPermissions.value)
-
-	ElMessage.success('Permissions updated successfully')
-
-	initialPermissions.value = [...selectedPermissions.value]
-
-	saving.value = false
-}
-
-const resetPermissions = () => {
-	selectedPermissions.value = [...initialPermissions.value]
-}
+const { roles, groups, search, loading, saving, isDirty, isChecked, toggle, save, reset, loadData } = useRightsMatrix()
 
 onMounted(loadData)
 </script>
@@ -106,7 +77,7 @@ onMounted(loadData)
 }
 
 .header {
-	margin-bottom: 32px;
+	margin-bottom: 24px;
 }
 
 .header h1 {
@@ -120,38 +91,121 @@ onMounted(loadData)
 	margin: 8px 0 0;
 }
 
-.role-tabs {
-	margin-top: 24px;
-}
-
-.permissions-container {
-	padding: 24px 0;
-}
-
-.permissions-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	margin: 24px 0;
-	gap: 16px;
-}
-
-.perm-checkbox {
-	width: 100%;
-	margin-right: 0 !important;
-}
-
-.actions {
+.filters-row {
 	display: flex;
-	margin-top: 32px;
-	gap: 12px;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-input {
+	width: 320px;
+}
+
+.search-input :deep(.el-input__wrapper) {
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	box-shadow: none;
+	background-color: var(--bg-surface);
+	padding: 8px 16px;
+}
+
+.search-input :deep(.el-input__inner) {
+	height: 40px;
+	color: var(--text-primary);
+}
+
+/* Без темы element-plus svg-иконка suffix (clear-крестик) не имеет собственного
+   размера (нет width/height атрибутов, только viewBox) — без explicit constraint
+   браузер рендерит её в дефолтном replaced-element размере (~300px), раздувая
+   высоту строки инпута. */
+.search-input :deep(.el-input__icon svg) {
+	width: 14px;
+	height: 14px;
 }
 
 .loading-state {
 	padding: 40px 0;
 }
 
-:deep(.el-tabs__item) {
-	font-weight: 600;
-	font-size: 0.9rem;
+.matrix-wrapper {
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	box-shadow: var(--shadow-sm);
+	overflow-x: auto;
+}
+
+.matrix {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.matrix thead th {
+	height: 56px;
+	border-bottom: 1px solid var(--border-color);
+	font-weight: 700;
+	font-size: 0.85rem;
+	text-align: left;
+	color: var(--text-muted);
+	background-color: var(--bg-header);
+	padding: 0 16px;
+}
+
+.matrix__perm-col {
+	min-width: 260px;
+}
+
+.matrix__role-col {
+	min-width: 110px;
+	text-align: center;
+}
+
+.matrix__group-row td {
+	font-weight: 700;
+	font-size: 0.75rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	background-color: var(--bg-header);
+	padding: 10px 16px;
+}
+
+.matrix__perm-row {
+	border-bottom: 1px solid var(--border-color);
+}
+
+.matrix__perm-row td {
+	padding: 12px 16px;
+}
+
+.matrix__perm-row:hover {
+	background-color: var(--bg-surface);
+}
+
+.perm-label {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.perm-label__name {
+	color: var(--text-primary);
+}
+
+.perm-label__id {
+	font-family: monospace;
+	font-size: 0.75rem;
+	color: var(--gp-text-secondary);
+}
+
+.empty-state {
+	text-align: center;
+	color: var(--gp-text-secondary);
+	padding: 32px;
+}
+
+.actions {
+	display: flex;
+	margin-top: 24px;
+	gap: 12px;
 }
 </style>

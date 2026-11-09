@@ -2,7 +2,7 @@ use crate::core::dto::{ApiPaginationDTO, ApiResponse, ApiResponseWithPagination,
 use crate::core::response::{error_map, into_api_response, into_api_response_with_pagination};
 use crate::core::utils::{DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT};
 use crate::user::dto::{
-    ChangePasswordDTO, CreateUserDTO, UpdateUserDTO, User, UserFilterQuery,
+    ChangePasswordDTO, CreateUserDTO, PermissionDTO, UpdateUserDTO, User, UserFilterQuery,
     UserResponseDTO, UserRole, UserStatus,
 };
 use crate::user::utils::{validate_email, validate_phone};
@@ -966,15 +966,15 @@ pub async fn list_roles() -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode,
     get,
     path = "/api/v1/user/permissions",
     responses(
-        (status = 200, description = "Список всех разрешений", body = ApiResponse<Vec<String>>)
+        (status = 200, description = "Список всех разрешений", body = ApiResponse<Vec<PermissionDTO>>)
     ),
     tag = "User",
     operation_id = "list_permissions",
 )]
 pub async fn list_permissions(
     State(state): State<Arc<AppState>>,
-) -> Result<Json<ApiResponse<Vec<String>>>, (StatusCode, Json<ApiResponse<Vec<String>>>)> {
-    let permissions = sqlx::query("SELECT id FROM permissions")
+) -> Result<Json<ApiResponse<Vec<PermissionDTO>>>, (StatusCode, Json<ApiResponse<Vec<PermissionDTO>>>)> {
+    let permissions = sqlx::query_as::<_, PermissionDTO>("SELECT id, name, description FROM permissions ORDER BY id")
         .fetch_all(&state.pool)
         .await
         .map_err(|e| {
@@ -982,8 +982,7 @@ pub async fn list_permissions(
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) }))
         })?;
 
-    let ids = permissions.iter().map(|r| sqlx::Row::get::<String, _>(r, 0)).collect();
-    into_api_response(StatusCode::OK, Some(ids), None, None)
+    into_api_response(StatusCode::OK, Some(permissions), None, None)
 }
 
 #[utoipa::path(

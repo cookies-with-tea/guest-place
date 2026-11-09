@@ -195,6 +195,7 @@ use utoipa::{
         guest_place::features::FeatureFlag,
         guest_place::features::FeatureFlagsUpdate,
         guest_place::user::dto::ChangePasswordDTO,
+        guest_place::user::dto::PermissionDTO,
         guest_place::core::dto::PaginationDTO,
         guest_place::monitoring::handlers::HealthStatus,
         guest_place::analytics::dto::TrackEventDto,

@@ -121,9 +121,11 @@ pub struct RolePermissionsDTO {
     pub permissions: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone, FromRow)]
 pub struct PermissionDTO {
     pub id: String,
+    pub name: String,
+    pub description: Option<String>,
 }
 
 #[derive(Deserialize, Debug, ToSchema)]
