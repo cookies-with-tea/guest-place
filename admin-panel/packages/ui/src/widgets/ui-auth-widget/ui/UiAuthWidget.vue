@@ -13,7 +13,7 @@
 					<ElInput v-model="authForm.email" placeholder="example@mail.com" />
 				</ElFormItem>
 
-				<ElFormItem v-if="mode !== 'forgot-password'" label="Пароль">
+				<ElFormItem label="Пароль">
 					<ElInput v-model="authForm.password" placeholder="••••••••" show-password type="password" />
 				</ElFormItem>
 
@@ -28,11 +28,8 @@
 				<template v-if="mode === 'login'">
 					Нет аккаунта? <ElLink type="primary" @click="setMode('register')">Зарегистрироваться</ElLink>
 				</template>
-				<template v-else-if="mode === 'register'">
-					Уже есть аккаунт? <ElLink type="primary" @click="setMode('login')">Войти</ElLink>
-				</template>
 				<template v-else>
-					<ElLink type="primary" @click="setMode('login')">Вернуться к логину</ElLink>
+					Уже есть аккаунт? <ElLink type="primary" @click="setMode('login')">Войти</ElLink>
 				</template>
 			</div>
 		</div>

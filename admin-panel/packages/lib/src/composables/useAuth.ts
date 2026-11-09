@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { ofetch } from 'ofetch'
 
+import { tryRefresh } from '../api/refresh'
 import { GP_EVENTS } from '../constants'
 import { isBrowser } from '../utils'
 
@@ -38,12 +39,20 @@ export function useAuth() {
 		lastName: data.last_name,
 	})
 
-	/** Единственный способ узнать, валидна ли cookie-сессия — спросить сервер. */
+	const fetchMe = () => ofetch<{ data: any }>('/api/v1/user/me', { credentials: 'include' })
+
+	/**
+	 * Единственный способ узнать, валидна ли cookie-сессия — спросить сервер. На старте
+	 * приложения (перезагрузка страницы после >10 минут простоя — TTL access_token) это
+	 * почти всегда первый запрос, который видит истёкший токен: без попытки обновиться
+	 * через ещё живой refresh_token (24ч) пользователь терял бы сессию на каждом reload,
+	 * хотя силент-рефреш в fetch.ts для остальных запросов это уже не допускает.
+	 */
 	const checkAuth = async (): Promise<boolean> => {
 		if (!isBrowser) return false
 
 		try {
-			const res = await ofetch<{ data: any }>('/api/v1/user/me', { credentials: 'include' })
+			const res = await fetchMe()
 
 			if (res?.data) {
 				user.value = mapUser(res.data)
@@ -52,7 +61,27 @@ export function useAuth() {
 			isAuthenticated.value = true
 
 			return true
-		} catch {
+		} catch (err: any) {
+			if (err?.statusCode === 401) {
+				const refreshed = await tryRefresh()
+
+				if (refreshed) {
+					try {
+						const res = await fetchMe()
+
+						if (res?.data) {
+							user.value = mapUser(res.data)
+						}
+
+						isAuthenticated.value = true
+
+						return true
+					} catch {
+						// falls through to the unauthenticated branch below
+					}
+				}
+			}
+
 			user.value = null
 			isAuthenticated.value = false
 

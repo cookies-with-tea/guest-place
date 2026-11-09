@@ -947,28 +947,3 @@ pub async fn delete_venue(
     }))
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v1/venues/{id}/favorite",
-    params(
-        ("id" = String, Path, description = "Venue ID or slug")
-    ),
-    responses(
-        (status = 200, description = "Favorite state toggled successfully")
-    ),
-    tag = "Venues"
-)]
-pub async fn toggle_favorite(
-    State(_state): State<Arc<AppState>>,
-    Path(id): Path<String>,
-) -> (StatusCode, Json<serde_json::Value>) {
-    (
-        StatusCode::OK,
-        Json(serde_json::json!({
-            "success": true,
-            "id": id,
-            "is_favorite": true
-        })),
-    )
-}
-

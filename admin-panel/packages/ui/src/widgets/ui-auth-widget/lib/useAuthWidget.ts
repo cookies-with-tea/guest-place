@@ -2,7 +2,11 @@ import { computed, reactive, ref } from 'vue'
 
 import { authApi } from '@admin-panel/lib'
 
-export type AuthMode = 'login' | 'register' | 'forgot-password' | 'mfa'
+// 'forgot-password'/'mfa' убраны (см. IDEAS.md) — ни на фронте, ни на сервере не было
+// реализации: переключение режима просто меняло текст формы, ничего не отправляя,
+// и ни одна кнопка в UI не вела сюда вообще (только через внешний initialMode/setMode,
+// которые никто не вызывал с этими значениями).
+export type AuthMode = 'login' | 'register'
 
 export function useAuthWidget(initialMode: AuthMode = 'login') {
 	const mode = ref<AuthMode>(initialMode)
@@ -22,10 +26,6 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 				return 'С возвращением'
 			case 'register':
 				return 'Создать аккаунт'
-			case 'forgot-password':
-				return 'Восстановление доступа'
-			case 'mfa':
-				return 'Второй этап проверки'
 			default:
 				return ''
 		}
@@ -37,10 +37,6 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 				return 'Введите свои данные для входа'
 			case 'register':
 				return 'Присоединяйтесь к Guest Place сегодня'
-			case 'forgot-password':
-				return 'Мы отправим инструкции на ваш email'
-			case 'mfa':
-				return 'Введите код из приложения'
 			default:
 				return ''
 		}
@@ -52,10 +48,6 @@ export function useAuthWidget(initialMode: AuthMode = 'login') {
 				return 'Войти'
 			case 'register':
 				return 'Зарегистрироваться'
-			case 'forgot-password':
-				return 'Сбросить пароль'
-			case 'mfa':
-				return 'Подтвердить'
 			default:
 				return 'Отправить'
 		}
