@@ -45,6 +45,7 @@ fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error>
 pub async fn create(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
     Json(payload): Json<CreateUserDTO>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let is_email_valid = validate_email(&payload.email.clone());
@@ -159,10 +160,11 @@ pub async fn create(
     let first_name_str = payload.first_name.unwrap_or_default();
     let last_name_str = payload.last_name.unwrap_or_default();
 
-    let result = sqlx::query(
+    let result = sqlx::query_scalar::<_, Uuid>(
         "INSERT INTO guest_user (
             first_name, second_name, last_name, phone, birth_date, password_hash, role, status, email, avatar, avatar_uuid, street, gender, city
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        RETURNING uuid",
     )
     .bind(&first_name_str)
     .bind(&payload.second_name.unwrap_or_else(|| "".to_string()))
@@ -178,11 +180,11 @@ pub async fn create(
     .bind(&payload.street.unwrap_or_else(|| "".to_string()))
     .bind(&payload.gender.unwrap_or_else(|| "".to_string()))
     .bind(&payload.city.unwrap_or_else(|| "".to_string()))
-    .execute(&state.pool)
+    .fetch_one(&state.pool)
     .await;
 
     match result {
-        Ok(_) => {
+        Ok(new_user_uuid) => {
             let full_name = format!("{} {}", first_name_str, last_name_str).trim().to_string();
             state.bus.publish(crate::core::bus::SystemEvent::GuestRegistered {
                 id: payload.email.clone(),
@@ -190,6 +192,17 @@ pub async fn create(
                 email: payload.email.clone(),
                 created_at: chrono::Utc::now().to_rfc3339(),
             });
+
+            crate::audit::log_action(
+                &state.pool,
+                Some(claims.sub),
+                "user.create",
+                Some("user"),
+                Some(&new_user_uuid.to_string()),
+                Some(serde_json::json!({ "email": payload.email, "role": role })),
+            )
+            .await;
+
             let msg = state.i18n.t("user.created", &locale).await;
             into_api_response(StatusCode::CREATED, None, None, Some(vec![msg]))
         }
@@ -587,22 +600,32 @@ async fn get_one(
 async fn delete_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let exists =
-        sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM guest_user WHERE uuid = $1)")
-            .bind(uuid)
-            .fetch_one(&state.pool)
-            .await;
+    let existing_email = sqlx::query_scalar::<_, String>("SELECT email FROM guest_user WHERE uuid = $1")
+        .bind(uuid)
+        .fetch_optional(&state.pool)
+        .await;
 
-    match exists {
-        Ok(true) => {
+    match existing_email {
+        Ok(Some(email)) => {
             let result = sqlx::query("DELETE FROM guest_user WHERE uuid = $1")
                 .bind(uuid)
                 .execute(&state.pool)
                 .await;
             match result {
                 Ok(_) => {
+                    crate::audit::log_action(
+                        &state.pool,
+                        Some(claims.sub),
+                        "user.delete",
+                        Some("user"),
+                        Some(&uuid.to_string()),
+                        Some(serde_json::json!({ "email": email })),
+                    )
+                    .await;
+
                     let msg = state.i18n.t("user.deleted", &locale).await;
                     into_api_response(StatusCode::OK, None, None, Some(vec![msg]))
                 }
@@ -617,7 +640,7 @@ async fn delete_one(
                 }
             }
         }
-        Ok(false) => {
+        Ok(None) => {
             let msg = state.i18n.t("user.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
@@ -654,6 +677,7 @@ async fn delete_one(
 async fn update(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
     Path(uuid): Path<Uuid>,
     Json(payload): Json<UpdateUserDTO>,
 ) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
@@ -663,7 +687,7 @@ async fn update(
         .await;
 
     match existing_user {
-        Ok(Some(_)) => {
+        Ok(Some(previous_user)) => {
             let mut update_query = "UPDATE guest_user SET ".to_string();
             let mut query_param_index = 1;
 
@@ -825,6 +849,28 @@ async fn update(
 
                     match updated_user {
                         Ok(user) => {
+                            let mut audit_payload = serde_json::json!({ "email": user.email });
+
+                            if let Some(new_role) = &payload.role {
+                                audit_payload["role"] =
+                                    serde_json::json!({ "from": previous_user.role, "to": new_role });
+                            }
+
+                            if let Some(new_status) = &payload.status {
+                                audit_payload["status"] =
+                                    serde_json::json!({ "from": previous_user.status, "to": new_status });
+                            }
+
+                            crate::audit::log_action(
+                                &state.pool,
+                                Some(claims.sub),
+                                "user.update",
+                                Some("user"),
+                                Some(&uuid.to_string()),
+                                Some(audit_payload),
+                            )
+                            .await;
+
                             let user_response = UserResponseDTO {
                                 uuid: user.uuid,
                                 first_name: user.first_name,
@@ -978,11 +1024,20 @@ pub async fn get_role_permissions(
 )]
 pub async fn update_role_permissions(
     State(state): State<Arc<AppState>>,
+    Extension(claims): Extension<Claims>,
     Path(role): Path<String>,
     Json(permissions): Json<Vec<String>>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let mut tx = state.pool.begin().await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+
+    let previous_permissions: Vec<String> = sqlx::query_scalar(
+        "SELECT permission_id FROM roles_permissions WHERE role = $1::user_role",
+    )
+    .bind(&role)
+    .fetch_all(&mut *tx)
+    .await
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
 
     sqlx::query("DELETE FROM roles_permissions WHERE role = $1::user_role")
         .bind(&role)
@@ -1002,6 +1057,16 @@ pub async fn update_role_permissions(
 
     tx.commit().await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, Json(ApiResponse { data: None, errors: None, messages: Some(vec!["Database error".into()]) })))?;
+
+    crate::audit::log_action(
+        &state.pool,
+        Some(claims.sub),
+        "role.permissions_update",
+        Some("role"),
+        Some(&role),
+        Some(serde_json::json!({ "from": previous_permissions, "to": permissions })),
+    )
+    .await;
 
     into_api_response(StatusCode::OK, None, None, None)
 }
@@ -1045,9 +1110,17 @@ async fn update_me(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
     Extension(claims): Extension<Claims>,
-    Json(payload): Json<UpdateUserDTO>,
+    Json(mut payload): Json<UpdateUserDTO>,
 ) -> Result<Json<ApiResponse<UserResponseDTO>>, (StatusCode, Json<ApiResponse<UserResponseDTO>>)> {
-    update(State(state), Extension(locale), Path(claims.sub), Json(payload)).await
+    // Самостоятельное редактирование профиля не должно уметь менять role/status —
+    // это admin-only привилегии. `/me` сидит только за auth_middleware (без
+    // user:write), а update() ниже применяет payload как есть — без этой зачистки
+    // любой залогиненный пользователь мог бы повысить себе роль до superadmin
+    // одним PATCH-запросом на собственный профиль.
+    payload.role = None;
+    payload.status = None;
+
+    update(State(state), Extension(locale), Extension(claims.clone()), Path(claims.sub), Json(payload)).await
 }
 
 #[utoipa::path(

@@ -4,6 +4,11 @@ use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand_core::OsRng;
 use std::sync::Arc;
 
+/// Сидит break-glass аккаунт из `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD`. Раньше
+/// присваивал `UserRole::Admin` в обеих ветках (create и update), несмотря на имя
+/// функции/лог/env-переменные — т.е. этот аккаунт никогда не был настоящим superadmin
+/// и не мог использовать ни одну из superadmin-only фич (access:write/system:write/
+/// features:write/audit:read).
 pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {
     let email = match std::env::var("SUPERADMIN_EMAIL") {
         Ok(e) => e,
@@ -31,7 +36,7 @@ pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {
 
         sqlx::query("UPDATE guest_user SET password_hash = $1, role = $2 WHERE email = $3")
             .bind(password_hash)
-            .bind(UserRole::Admin)
+            .bind(UserRole::Superadmin)
             .bind(&email)
             .execute(&state.pool)
             .await?;
@@ -57,7 +62,7 @@ pub async fn init_superadmin(state: Arc<AppState>) -> anyhow::Result<()> {
     .bind("System")
     .bind(&email)
     .bind(password_hash)
-    .bind(UserRole::Admin)
+    .bind(UserRole::Superadmin)
     .bind(UserStatus::Active)
     .execute(&state.pool)
     .await?;

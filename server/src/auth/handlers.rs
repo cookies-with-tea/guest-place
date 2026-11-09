@@ -377,6 +377,16 @@ pub async fn login(
     .execute(&state.pool)
     .await;
 
+    crate::audit::log_action(
+        &state.pool,
+        Some(user.uuid),
+        "auth.login",
+        Some("session"),
+        None,
+        None,
+    )
+    .await;
+
     into_api_response(
         StatusCode::OK,
         Some(AuthResponseDTO {
@@ -518,18 +528,26 @@ async fn logout(
     Extension(locale): Extension<String>,
     Json(payload): Json<AuthRefreshTokenDTO>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let result = sqlx::query("DELETE FROM refresh_token WHERE token = $1")
+    // RETURNING user_id — /logout сидит в public_router (читает refresh_token из
+    // HttpOnly-cookie, см. auth::cookies), Claims тут взять неоткуда, но личность
+    // разлогинивающегося нужна для audit_log — вытаскиваем её прямо из удаляемой
+    // строки, без лишнего SELECT до DELETE.
+    let result = sqlx::query_scalar::<_, Uuid>("DELETE FROM refresh_token WHERE token = $1 RETURNING user_id")
         .bind(&payload.refresh_token)
-        .execute(&state.pool)
+        .fetch_optional(&state.pool)
         .await;
 
     match result {
-        Ok(_) => into_api_response(
-            StatusCode::OK,
-            None,
-            None,
-            Some(vec![state.i18n.t("auth.logout_success", &locale).await]),
-        ),
+        Ok(user_id) => {
+            crate::audit::log_action(&state.pool, user_id, "auth.logout", Some("session"), None, None).await;
+
+            into_api_response(
+                StatusCode::OK,
+                None,
+                None,
+                Some(vec![state.i18n.t("auth.logout_success", &locale).await]),
+            )
+        }
         Err(_) => {
             let msg = state.i18n.t("auth.logout_db_error", &locale).await;
             into_api_response(

@@ -80,6 +80,7 @@ use utoipa::{
     guest_place::content::handlers::rollback_entry_version,
     guest_place::monitoring::handlers::get_health,
     guest_place::monitoring::handlers::get_stats_stream,
+    guest_place::audit::handlers::list_audit_log,
     guest_place::analytics::handlers::start_session,
     guest_place::analytics::handlers::track_event,
     guest_place::analytics::handlers::get_traffic_stats,

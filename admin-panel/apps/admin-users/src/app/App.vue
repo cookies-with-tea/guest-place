@@ -25,6 +25,7 @@ onMounted(() => {
 			children: [
 				{ title: 'Пользователи', path: '/' },
 				{ title: 'Права доступа', path: '/rights' },
+				{ title: 'Журнал действий', path: '/audit' },
 			],
 		},
 	])

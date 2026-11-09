@@ -189,3 +189,11 @@ pub async fn require_features_write(
 ) -> Result<Response, impl IntoResponse> {
     permission_required(state, request, next, "features:write").await
 }
+
+pub async fn require_audit_read(
+    state: State<Arc<AppState>>,
+    request: Request<Body>,
+    next: Next,
+) -> Result<Response, impl IntoResponse> {
+    permission_required(state, request, next, "audit:read").await
+}

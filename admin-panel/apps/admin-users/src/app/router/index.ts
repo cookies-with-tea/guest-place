@@ -19,6 +19,14 @@ export const routes: RouteRecordRaw[] = [
 			title: ROUTES.users.rights.title,
 		},
 	},
+	{
+		path: '/audit',
+		name: ROUTES.users.audit.name,
+		component: () => import('#pages/audit-page'),
+		meta: {
+			title: ROUTES.users.audit.title,
+		},
+	},
 ]
 
 export const router = createRouter({

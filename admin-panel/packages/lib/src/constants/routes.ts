@@ -16,6 +16,10 @@ export const ROUTES = {
 			name: 'RightsPage',
 			title: 'general.access_control',
 		},
+		audit: {
+			name: 'AuditPage',
+			title: 'general.audit_log',
+		},
 	},
 	translations: {
 		name: 'TranslationsPage',

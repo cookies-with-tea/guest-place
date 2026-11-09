@@ -27,6 +27,7 @@ use crate::media::chunk::{
     ChunkManager, ChunkStatusResponse, ChunkUploadResultDTO, InitChunkUploadDTO, InitChunkUploadResponse,
 };
 use crate::media::folders;
+use crate::auth::dto::Claims;
 
 pub(crate) fn to_dto(row: MediaItemFromDb, cdn_url: Option<&str>, public_url: &str) -> MediaItemDTO {
     let mut dto = MediaItemDTO::from(row);
@@ -896,15 +897,16 @@ pub async fn update(
 pub async fn delete_one(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
     Path(uuid): Path<Uuid>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
-    let exists = sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM media WHERE uuid = $1)")
+    let existing_name = sqlx::query_scalar::<_, Option<String>>("SELECT name FROM media WHERE uuid = $1")
         .bind(uuid)
-        .fetch_one(&state.pool)
+        .fetch_optional(&state.pool)
         .await;
 
-    match exists {
-        Ok(true) => {
+    match existing_name {
+        Ok(Some(name)) => {
             let result = sqlx::query("DELETE FROM media WHERE uuid = $1")
                 .bind(uuid)
                 .execute(&state.pool)
@@ -913,6 +915,16 @@ pub async fn delete_one(
                 Ok(_) => {
                     let variants_dir = std::path::Path::new(&state.config.upload_dir).join("variants").join(uuid.to_string());
                     let _ = tokio::fs::remove_dir_all(&variants_dir).await;
+
+                    crate::audit::log_action(
+                        &state.pool,
+                        Some(claims.sub),
+                        "media.delete",
+                        Some("media"),
+                        Some(&uuid.to_string()),
+                        Some(serde_json::json!({ "name": name })),
+                    )
+                    .await;
 
                     let msg = state.i18n.t("media.delete_success", &locale).await;
                     into_api_response(
@@ -934,7 +946,7 @@ pub async fn delete_one(
                 }
             }
         }
-        Ok(false) => {
+        Ok(None) => {
             let msg = state.i18n.t("media.not_found", &locale).await;
             into_api_response(
                 StatusCode::NOT_FOUND,
@@ -970,13 +982,24 @@ pub async fn delete_one(
 pub async fn delete_all(
     State(state): State<Arc<AppState>>,
     Extension(locale): Extension<String>,
+    Extension(claims): Extension<Claims>,
 ) -> Result<Json<ApiResponse<()>>, (StatusCode, Json<ApiResponse<()>>)> {
     let result = sqlx::query("DELETE FROM media")
         .execute(&state.pool)
         .await;
 
     match result {
-        Ok(_) => {
+        Ok(query_result) => {
+            crate::audit::log_action(
+                &state.pool,
+                Some(claims.sub),
+                "media.delete_all",
+                Some("media"),
+                None,
+                Some(serde_json::json!({ "deleted_count": query_result.rows_affected() })),
+            )
+            .await;
+
             let msg = state.i18n.t("media.delete_success", &locale).await;
             into_api_response(
                 StatusCode::OK,

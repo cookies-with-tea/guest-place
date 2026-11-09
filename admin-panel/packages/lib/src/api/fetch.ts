@@ -76,13 +76,19 @@ export const createApi = (entityName: string) => {
 			const errors = error.data?.errors ? snakeToCamel(error.data.errors) : {}
 			const messages = error.data?.messages ? (snakeToCamel(error.data.messages) as string[]) : []
 
-			if (error.statusCode === 401 || error.statusCode === 403) {
+			// 401 = сессия невалидна/истекла (и refresh её не спас) — разлогинить. 403 = сессия
+			// валидна, просто не хватает permission на этот конкретный эндпоинт — это не повод
+			// выкидывать из приложения; раньше оба кода вызывали одинаковый clearAuth(), что
+			// обоснованно для 401, но для 403 означало полный логаут на любое "нет доступа"
+			// (например обычный админ открыл /users/audit — видит сайдбар-пункт для всех
+			// ролей, сервер его режет только по permission `audit:read`).
+			if (error.statusCode === 401) {
 				if (isBrowser) {
 					useAuth().clearAuth()
 				}
 			}
 
-			if (!options?.silent && error.statusCode !== 401 && error.statusCode !== 403) {
+			if (!options?.silent && error.statusCode !== 401) {
 				const message = messages[0] || error.message || 'Network error'
 
 				ElMessage.error(message)

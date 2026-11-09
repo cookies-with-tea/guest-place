@@ -1,3 +1,4 @@
+pub mod audit;
 pub mod auth;
 pub mod content;
 pub mod core;
@@ -98,6 +99,7 @@ pub fn create_router(state: Arc<AppState>, openapi: utoipa::openapi::OpenApi, co
         .nest("/api/v1/venues", venues::protected_router())
         .nest("/api/v1/analytics", analytics::handlers::protected_router())
         .nest("/api/v1/home", home::protected_router())
+        .nest("/api/v1/audit", audit::protected_router(state.clone()))
         .nest("/api/v1/locks", core::lock::protected_router())
         .nest("/api/v1/system", monitoring::protected_router(state.clone()))
         .layer(middleware::from_fn_with_state(
