@@ -19,6 +19,8 @@ import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 
+import { useTheme } from '@admin-panel/ui'
+
 import { analyticsApi, type TrafficStats } from '#entities/analytics'
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent])
@@ -27,8 +29,16 @@ const props = defineProps<{
 	days: number
 }>()
 
+const { isDark } = useTheme()
+
 const loading = ref(true)
 const trafficData = ref<TrafficStats>({ labels: [], dau: [], sessions: [] })
+
+// ECharts рендерит в canvas, var(--gp-*) там не резолвится — держим light/dark
+// в паре с токенами из _tokens.scss (gp-text-secondary / gp-border-color).
+const axisTextColor = computed(() => (isDark.value ? '#94a3b8' : '#656d76'))
+const axisLineColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'))
+const splitLineColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'))
 
 const loadData = async () => {
 	loading.value = true
@@ -60,7 +70,7 @@ const option = computed(() => ({
 	},
 	legend: {
 		data: ['Sessions', 'Unique Visitors'],
-		textStyle: { color: '#94a3b8' },
+		textStyle: { color: axisTextColor.value },
 		bottom: 0,
 	},
 	grid: {
@@ -74,13 +84,13 @@ const option = computed(() => ({
 		type: 'category',
 		boundaryGap: false,
 		data: trafficData.value.labels,
-		axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
-		axisLabel: { color: '#94a3b8' },
+		axisLine: { lineStyle: { color: axisLineColor.value } },
+		axisLabel: { color: axisTextColor.value },
 	},
 	yAxis: {
 		type: 'value',
-		splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.05)' } },
-		axisLabel: { color: '#94a3b8' },
+		splitLine: { lineStyle: { color: splitLineColor.value } },
+		axisLabel: { color: axisTextColor.value },
 	},
 	series: [
 		{

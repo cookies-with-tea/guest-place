@@ -15,6 +15,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { ElMessage } from 'element-plus'
 
+import { useTheme } from '@admin-panel/ui'
+
 import { analyticsApi, type EngagementStats } from '#entities/analytics'
 
 const props = defineProps<{
@@ -28,8 +30,16 @@ import { CanvasRenderer } from 'echarts/renderers'
 
 use([CanvasRenderer, BarChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent])
 
+const { isDark } = useTheme()
+
 const engagement = ref<EngagementStats>([])
 const loading = ref(true)
+
+// ECharts рендерит в canvas, var(--gp-*) там не резолвится — держим light/dark
+// в паре с токенами из _tokens.scss (gp-text-secondary / gp-border-color).
+const axisTextColor = computed(() => (isDark.value ? '#94a3b8' : '#656d76'))
+const axisLineColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'))
+const splitLineColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'))
 
 const loadData = async () => {
 	loading.value = true
@@ -59,7 +69,7 @@ const option = computed(() => ({
 	},
 	legend: {
 		data: ['Views', 'Clicks'],
-		textStyle: { color: '#94a3b8' },
+		textStyle: { color: axisTextColor.value },
 		bottom: 0,
 	},
 	grid: {
@@ -71,14 +81,14 @@ const option = computed(() => ({
 	},
 	xAxis: {
 		type: 'value',
-		splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.05)' } },
-		axisLabel: { color: '#94a3b8' },
+		splitLine: { lineStyle: { color: splitLineColor.value } },
+		axisLabel: { color: axisTextColor.value },
 	},
 	yAxis: {
 		type: 'category',
 		data: engagement.value.map((v) => v.entityId || 'Unknown'),
-		axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
-		axisLabel: { color: '#94a3b8' },
+		axisLine: { lineStyle: { color: axisLineColor.value } },
+		axisLabel: { color: axisTextColor.value },
 	},
 	series: [
 		{
