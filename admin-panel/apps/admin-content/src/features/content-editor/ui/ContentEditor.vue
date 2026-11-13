@@ -2,6 +2,7 @@
 	<div class="content-editor-feature glass-panel" :class="{ 'is-dark': isDark }">
 		<ContentEditorHeader
 			v-model:status="status"
+			v-model:scheduled-at="scheduledAt"
 			v-model:is-translation-mode="translation.isTranslationMode"
 			v-model:is-previewing="isPreviewing"
 			:is-edit="isEdit"
@@ -60,6 +61,7 @@ const props = defineProps<Props>()
 
 const modelValue = defineModel<Record<string, any>>({ required: true })
 const status = defineModel<string>('status', { default: 'draft' })
+const scheduledAt = defineModel<string>('scheduledAt', { default: '' })
 const i18n = defineModel<Record<string, any>>('i18n', { default: () => ({}) })
 const isPreviewing = defineModel<boolean>('isPreviewing', { default: false })
 

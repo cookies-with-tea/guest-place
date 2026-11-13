@@ -17,7 +17,19 @@
 				<el-option label="Published" value="published">
 					<div class="status-option"><el-tag size="small" type="success">PUBLISHED</el-tag></div>
 				</el-option>
+				<el-option label="Scheduled" value="scheduled">
+					<div class="status-option"><el-tag size="small" type="warning">SCHEDULED</el-tag></div>
+				</el-option>
 			</el-select>
+			<el-date-picker
+				v-if="status === 'scheduled'"
+				v-model="scheduledAt"
+				type="datetime"
+				placeholder="Дата и время публикации"
+				format="DD.MM.YYYY HH:mm"
+				value-format="YYYY-MM-DDTHH:mm:ssZ"
+				style="width: 200px; vertical-align: middle; margin-right: 8px"
+			/>
 			<el-button-group style="vertical-align: middle; margin-right: 8px">
 				<el-button v-if="status === 'draft'" size="default" plain type="warning" @click="status = 'review'">
 					На ревью →
@@ -82,6 +94,7 @@ const emit = defineEmits<{
 }>()
 
 const status = defineModel<string>('status', { default: 'draft' })
+const scheduledAt = defineModel<string>('scheduledAt', { default: '' })
 const isTranslationMode = defineModel<boolean>('isTranslationMode', { default: false })
 const isPreviewing = defineModel<boolean>('isPreviewing', { default: false })
 </script>

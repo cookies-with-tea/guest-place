@@ -40,7 +40,7 @@ export interface PageItem {
 	title: string
 	slug: string
 	blocks: PageBlock[]
-	status: 'draft' | 'review' | 'published' | string
+	status: 'draft' | 'review' | 'published' | 'scheduled' | string
 	seo?: {
 		title?: string
 		description?: string
@@ -52,6 +52,7 @@ export interface PageItem {
 	parent_id?: string | null
 	published_at?: string
 	published_by?: string
+	scheduled_at?: string
 	created_at?: string
 	updated_at?: string
 }
@@ -96,6 +97,7 @@ export const pagesApi = {
 		parent_id?: string | null
 		published_at?: string
 		published_by?: string
+		scheduled_at?: string
 	}) =>
 		fetchPages<PageItem>('', {
 			method: 'POST',
@@ -114,6 +116,7 @@ export const pagesApi = {
 			clear_parent?: boolean
 			published_at?: string
 			published_by?: string
+			scheduled_at?: string
 		}
 	) =>
 		fetchPages<PageItem>(`/${id}`, {

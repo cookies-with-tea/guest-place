@@ -22,6 +22,7 @@ export const useContentEntry = (schemaIdentifier: string, initialEntryId?: strin
 	const errors = ref<Record<string, string[]>>({})
 	const isSaving = ref(false)
 	const entryStatus = ref('draft')
+	const entryScheduledAt = ref('')
 	const i18nData = reactive<Record<string, any>>({})
 
 	const lockEntityId = computed(() => (isEdit.value && entryId.value ? String(entryId.value) : ''))
@@ -50,6 +51,7 @@ export const useContentEntry = (schemaIdentifier: string, initialEntryId?: strin
 						Object.assign(formData, entryRes.data.data)
 
 						entryStatus.value = entryRes.data.status
+						entryScheduledAt.value = entryRes.data.scheduledAt || ''
 
 						if (entryRes.data.i18n) {
 							Object.keys(i18nData).forEach((k) => delete i18nData[k])
@@ -73,6 +75,12 @@ export const useContentEntry = (schemaIdentifier: string, initialEntryId?: strin
 			return
 		}
 
+		if (entryStatus.value === 'scheduled' && !entryScheduledAt.value) {
+			ElMessage.warning('Укажите дату и время публикации')
+
+			return
+		}
+
 		isSaving.value = true
 		errors.value = {}
 
@@ -86,6 +94,7 @@ export const useContentEntry = (schemaIdentifier: string, initialEntryId?: strin
 			const payload = {
 				data: finalData,
 				status: entryStatus.value,
+				scheduled_at: entryStatus.value === 'scheduled' ? entryScheduledAt.value : undefined,
 				i18n: i18nData,
 			}
 
@@ -135,6 +144,7 @@ export const useContentEntry = (schemaIdentifier: string, initialEntryId?: strin
 		errors,
 		isSaving,
 		entryStatus,
+		entryScheduledAt,
 		i18nData,
 		isLocked,
 		isLockedByOther,

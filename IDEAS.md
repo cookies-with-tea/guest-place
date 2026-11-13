@@ -4,26 +4,9 @@
 закрываются сразу) — здесь предложения на обсуждение и будущую реализацию.
 Ничего отсюда не делать без отдельного решения по каждому пункту.
 
-Закрытые пункты (silent refresh, MFA/forgot-password заглушки, избранное) не
-хранятся здесь — история в `git log -- IDEAS.md`.
-
----
-
-## Функционал
-
-### 1. UI для отложенной публикации в admin-content
-
-Бэкенд отложенной публикации (`scheduled_at` + периодический джоб) уже
-реализован и верифицирован — см. `git log -- server/src/core/scheduler.rs`.
-Выставить `status: "scheduled"` + `scheduled_at` сейчас можно только через
-API/Swagger, в `admin-content` (page-constructor, content-editor) статус
-"scheduled" и выбор даты/времени нигде не отображаются.
-
-- [ ] Добавить опцию "scheduled" в status-дропдауны
-      `PageConstructorHeader.vue`/`ContentEditorHeader.vue`
-      (`apps/admin-content/src/features/page-constructor`,
-      `.../content-editor`) + datetime-picker для `scheduled_at`, который
-      появляется при выборе этого статуса.
+Закрытые пункты (silent refresh, MFA/forgot-password заглушки, избранное,
+UI для отложенной публикации) не хранятся здесь — история в
+`git log -- IDEAS.md`.
 
 ---
 

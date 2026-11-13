@@ -28,10 +28,20 @@
 						<el-option label="Черновик (DRAFT)" value="draft" />
 						<el-option label="На проверке (REVIEW)" value="review" />
 						<el-option label="Опубликовано (PUBLISHED)" value="published" />
+						<el-option label="Запланировано (SCHEDULED)" value="scheduled" />
 					</el-select>
 					<div v-if="document.pageForm.published_at" class="published-time-hint">
 						<el-icon><Promotion /></el-icon>Опубликовано: {{ formatDate(document.pageForm.published_at) }}
 					</div>
+					<el-date-picker
+						v-if="document.pageForm.status === 'scheduled'"
+						v-model="document.pageForm.scheduled_at"
+						type="datetime"
+						placeholder="Дата и время публикации"
+						format="DD.MM.YYYY HH:mm"
+						value-format="YYYY-MM-DDTHH:mm:ssZ"
+						style="width: 100%; margin-top: 8px"
+					/>
 				</el-form-item>
 
 				<el-form-item label="Родительская страница (Иерархия & Хлебные крошки)">

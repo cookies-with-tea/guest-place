@@ -9,6 +9,7 @@
 					v-if="entry.schema"
 					v-model="entry.formData"
 					v-model:status="entry.entryStatus"
+					v-model:scheduled-at="entry.entryScheduledAt"
 					v-model:i18n="entry.i18nData"
 					v-model:is-previewing="preview.isSplitPreview"
 					:entry-id="entry.entryId"

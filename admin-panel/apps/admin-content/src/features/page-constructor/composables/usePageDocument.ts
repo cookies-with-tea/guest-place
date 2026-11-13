@@ -21,6 +21,7 @@ export function usePageDocument(route: { params: Record<string, any> }, router: 
 		status: 'draft',
 		published_at: '',
 		published_by: '',
+		scheduled_at: '',
 		parent_id: null as string | null,
 		blocks: [] as PageBlock[],
 		seo: {
@@ -45,6 +46,7 @@ export function usePageDocument(route: { params: Record<string, any> }, router: 
 				pageForm.status = data.status || 'draft'
 				pageForm.published_at = data.publishedAt || ''
 				pageForm.published_by = data.publishedBy || ''
+				pageForm.scheduled_at = data.scheduledAt || ''
 				pageForm.parent_id = data.parentId || null
 				pageForm.blocks = Array.isArray(data.blocks) ? data.blocks : []
 				pageForm.seo = {
@@ -80,6 +82,10 @@ export function usePageDocument(route: { params: Record<string, any> }, router: 
 			ElMessage.warning('Введите slug страницы')
 			return
 		}
+		if (pageForm.status === 'scheduled' && !pageForm.scheduled_at) {
+			ElMessage.warning('Укажите дату и время публикации')
+			return
+		}
 
 		saving.value = true
 		try {
@@ -94,6 +100,7 @@ export function usePageDocument(route: { params: Record<string, any> }, router: 
 						? pageForm.published_at || new Date().toISOString()
 						: pageForm.published_at || undefined,
 				published_by: pageForm.published_by || undefined,
+				scheduled_at: pageForm.status === 'scheduled' ? pageForm.scheduled_at : undefined,
 				blocks: pageForm.blocks,
 				seo: pageForm.seo,
 			}

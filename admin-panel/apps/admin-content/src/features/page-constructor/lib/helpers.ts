@@ -1,6 +1,7 @@
 export function getStatusLabel(status: string): string {
 	if (status === 'published') return 'Опубликовано'
 	if (status === 'review') return 'На проверке'
+	if (status === 'scheduled') return 'Запланировано'
 	return 'Черновик'
 }
 

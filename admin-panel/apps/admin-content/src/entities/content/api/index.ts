@@ -46,13 +46,22 @@ export const getEntries = async (schemaId: string, params?: { search?: string; p
 
 export const getEntry = (id: string) => fetchData<ContentEntry>(`/entries/${id}`)
 
-export const createEntry = (payload: { schema_id: string; slug: string; data: Record<string, any>; status?: string }) =>
+export const createEntry = (payload: {
+	schema_id: string
+	slug: string
+	data: Record<string, any>
+	status?: string
+	scheduled_at?: string
+}) =>
 	fetchData<ContentEntry>('/entries', {
 		method: 'POST',
 		body: payload,
 	})
 
-export const updateEntry = (id: string, payload: { data?: Record<string, any>; status?: string }) =>
+export const updateEntry = (
+	id: string,
+	payload: { data?: Record<string, any>; status?: string; scheduled_at?: string }
+) =>
 	fetchData<ContentEntry>(`/entries/${id}`, {
 		method: 'PATCH',
 		body: payload,

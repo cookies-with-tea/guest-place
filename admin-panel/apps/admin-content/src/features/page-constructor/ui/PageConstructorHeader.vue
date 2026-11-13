@@ -33,7 +33,9 @@
 							? 'success'
 							: document.pageForm.status === 'review'
 								? 'warning'
-								: 'info'
+								: document.pageForm.status === 'scheduled'
+									? 'warning'
+									: 'info'
 					"
 					size="large"
 					effect="dark"
@@ -41,6 +43,7 @@
 				>
 					<span v-if="document.pageForm.status === 'published'">● ОПУБЛИКОВАНО</span>
 					<span v-else-if="document.pageForm.status === 'review'">● НА ПРОВЕРКЕ</span>
+					<span v-else-if="document.pageForm.status === 'scheduled'">● ЗАПЛАНИРОВАНО</span>
 					<span v-else>● ЧЕРНОВИК</span>
 				</el-tag>
 
@@ -61,9 +64,22 @@
 							>
 								Опубликовать (Publish)
 							</el-dropdown-item>
+							<el-dropdown-item command="scheduled" :disabled="document.pageForm.status === 'scheduled'" :icon="Timer">
+								Запланировать (Schedule)
+							</el-dropdown-item>
 						</el-dropdown-menu>
 					</template>
 				</el-dropdown>
+
+				<el-date-picker
+					v-if="document.pageForm.status === 'scheduled'"
+					v-model="document.pageForm.scheduled_at"
+					type="datetime"
+					placeholder="Дата и время публикации"
+					format="DD.MM.YYYY HH:mm"
+					value-format="YYYY-MM-DDTHH:mm:ssZ"
+					style="width: 200px"
+				/>
 			</div>
 
 			<el-button :type="livePreview.isPreviewing ? 'primary' : 'default'" @click="livePreview.togglePreview">
@@ -105,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { EditPen, Promotion, Search } from '@element-plus/icons-vue'
+import { EditPen, Promotion, Search, Timer } from '@element-plus/icons-vue'
 import type { PageDocument } from '../composables/usePageDocument'
 import type { LivePreview } from '../composables/useLivePreview'
 import { getStatusLabel } from '../lib/helpers'

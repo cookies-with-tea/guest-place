@@ -40,10 +40,11 @@ export interface ContentEntry {
 	schemaId: string // UUID
 	slug: string // Entry slug
 	data: Record<string, any>
-	status: 'draft' | 'review' | 'published'
+	status: 'draft' | 'review' | 'published' | 'scheduled'
 	i18n?: Record<string, any>
 	publishedAt?: string
 	publishedBy?: string
+	scheduledAt?: string
 	createdAt: string
 	updatedAt: string
 }
